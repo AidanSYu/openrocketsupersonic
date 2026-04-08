@@ -204,11 +204,13 @@ public class BarrowmanDragCalculator implements DragCalculator {
 				otherFrictionCD += instanceCount * componentFrictionCD;
 			}
 
-			if (forceMap != null && forceMap.get(c) != null) {
-				forceMap.get(c).setFrictionCD(componentFrictionCD);
+			AerodynamicForces f = forceMap != null ? forceMap.get(c) : null;
+			if (f != null) {
+				f.setFrictionCD(componentFrictionCD);
 			}
 		}
 
+		if (maxR < 1e-9) maxR = 1e-9;
 		double fB = (maxX - minX + 0.0001) / maxR;
 		double correction = (1 + 1.0 / (2 * fB));
 
@@ -402,8 +404,9 @@ public class BarrowmanDragCalculator implements DragCalculator {
 
 			double cd = calcMap.get(c).calculatePressureCD(conditions, stagnation, base, warningSet);
 
-			if (forceMap != null && forceMap.get(c) != null) {
-				forceMap.get(c).setPressureCD(cd);
+			AerodynamicForces f = forceMap != null ? forceMap.get(c) : null;
+			if (f != null) {
+				f.setPressureCD(cd);
 			}
 
 			total += cd * instanceCount;
@@ -426,8 +429,9 @@ public class BarrowmanDragCalculator implements DragCalculator {
 					double diskCd = stagnation * area / conditions.getRefArea();
 					total += instanceCount * diskCd;
 
-					if (forceMap != null && forceMap.get(c) != null) {
-						forceMap.get(c).setPressureCD(forceMap.get(c).getPressureCD() + diskCd);
+					AerodynamicForces f2 = forceMap != null ? forceMap.get(c) : null;
+					if (f2 != null) {
+						f2.setPressureCD(f2.getPressureCD() + diskCd);
 					}
 				}
 			}
@@ -486,8 +490,9 @@ public class BarrowmanDragCalculator implements DragCalculator {
 
 					double cd = correctedBase * area / conditions.getRefArea();
 					total += instanceCount * cd;
-					if (forceMap != null && forceMap.get(s) != null) {
-						forceMap.get(s).setBaseCD(cd);
+					AerodynamicForces f = forceMap != null ? forceMap.get(s) : null;
+					if (f != null) {
+						f.setBaseCD(cd);
 					}
 				}
 			} else if (c.isAerodynamic()) {
@@ -495,8 +500,9 @@ public class BarrowmanDragCalculator implements DragCalculator {
 				double cd = calcMap.get(c).calculateComponentBaseCD(conditions, base, warningSet);
 				if (cd > 0) {
 					total += cd * instanceCount;
-					if (forceMap != null && forceMap.get(c) != null) {
-						forceMap.get(c).setBaseCD(cd);
+					AerodynamicForces f = forceMap != null ? forceMap.get(c) : null;
+					if (f != null) {
+						f.setBaseCD(cd);
 					}
 				}
 			}
@@ -524,8 +530,9 @@ public class BarrowmanDragCalculator implements DragCalculator {
 				double cd = instanceCount * c.getOverrideCD();
 				Map<RocketComponent, AerodynamicForces> targetMap = (c instanceof ComponentAssembly) ? assemblyForces
 						: componentForces;
-				if (targetMap != null && targetMap.get(c) != null) {
-					targetMap.get(c).setOverrideCD(cd);
+				AerodynamicForces f = targetMap != null ? targetMap.get(c) : null;
+				if (f != null) {
+					f.setOverrideCD(cd);
 				}
 				total += cd;
 			}

@@ -58,6 +58,10 @@ public class WaveDragPhase2ATest {
 	/**
 	 * Verify that cone nose pressure drag matches Taylor-Maccoll Cp directly.
 	 * For a cone at zero AoA, Cd_wave (based on base area) equals Cp.
+	 * <p>
+	 * At M >= 4, Phase 4a's Modified Newtonian theory begins blending in,
+	 * so the result may differ from pure Taylor-Maccoll. Use wider tolerance
+	 * at high Mach to account for this intentional blending.
 	 */
 	@ParameterizedTest(name = "Cone wave drag at M{0}")
 	@CsvSource({
@@ -72,7 +76,9 @@ public class WaveDragPhase2ATest {
 		double pressureCd = getNosePressureCD(
 				makeConeRocket(noseLength, radius), mach);
 
-		assertEquals(expectedCp, pressureCd, expectedCp * 0.05,
+		// At M >= 4, Newtonian blending alters the result — allow wider tolerance
+		double tolerance = mach >= 4.0 ? expectedCp * 0.20 : expectedCp * 0.05;
+		assertEquals(expectedCp, pressureCd, tolerance,
 				String.format("Cone pressure Cd at M%.1f should match Taylor-Maccoll Cp (%.6f vs %.6f)",
 						mach, expectedCp, pressureCd));
 	}

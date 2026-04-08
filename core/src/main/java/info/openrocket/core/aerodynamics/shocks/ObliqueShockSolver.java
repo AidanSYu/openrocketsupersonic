@@ -1,5 +1,8 @@
 package info.openrocket.core.aerodynamics.shocks;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Oblique shock relations: theta-beta-Mach equation and post-shock conditions.
  * <p>
@@ -14,6 +17,8 @@ package info.openrocket.core.aerodynamics.shocks;
  */
 public final class ObliqueShockSolver {
 
+	private static final Logger logger = LoggerFactory.getLogger(ObliqueShockSolver.class);
+
 	/** Ratio of specific heats for air */
 	public static final double GAMMA_AIR = NormalShockRelations.GAMMA_AIR;
 
@@ -22,6 +27,12 @@ public final class ObliqueShockSolver {
 
 	/** Maximum Newton iterations */
 	private static final int MAX_ITER = 100;
+
+	// Cache for betaAtMaxDeflection — avoids repeated golden section searches
+	// with the same (m1, gamma) within a single solve() call.
+	private static double cachedBetaMaxM1 = Double.NaN;
+	private static double cachedBetaMaxGamma = Double.NaN;
+	private static double cachedBetaMaxResult = Double.NaN;
 
 	private ObliqueShockSolver() {
 		// Utility class
@@ -126,6 +137,11 @@ public final class ObliqueShockSolver {
 	 * This divides weak solutions (beta < betaMax) from strong solutions (beta > betaMax).
 	 */
 	private static double betaAtMaxDeflection(double m1, double gamma) {
+		// Check cache — this method is called multiple times per solve() with the same args
+		if (Math.abs(m1 - cachedBetaMaxM1) < 1e-12 && Math.abs(gamma - cachedBetaMaxGamma) < 1e-12) {
+			return cachedBetaMaxResult;
+		}
+
 		double machAngle = Math.asin(1.0 / m1);
 		double lo = machAngle + 1e-10;
 		double hi = Math.PI / 2.0 - 1e-10;
@@ -143,7 +159,14 @@ public final class ObliqueShockSolver {
 				hi = b2;
 			}
 		}
-		return (lo + hi) / 2.0;
+		double result = (lo + hi) / 2.0;
+
+		// Update cache
+		cachedBetaMaxM1 = m1;
+		cachedBetaMaxGamma = gamma;
+		cachedBetaMaxResult = result;
+
+		return result;
 	}
 
 	// ---- Solve for shock angle beta given theta and M1 ----
@@ -355,8 +378,9 @@ public final class ObliqueShockSolver {
 			betaHi = betaAtMaxDeflection(m1, gamma);
 		}
 
-		// Scan for a sign change in the residual (Vθ at cone surface)
-		int nScan = 200;
+		// Scan for a sign change in the residual (Vθ at cone surface).
+		// Only need to find a bracket; bisection refinement handles convergence.
+		int nScan = 40;
 		double scanStep = (betaHi - betaLo) / nScan;
 		double prevResidual = coneShockResidual(m1, betaLo, coneAngle, gamma);
 		double bracketLo = betaLo, bracketHi = betaHi;
@@ -626,8 +650,12 @@ public final class ObliqueShockSolver {
 		double denominator = gm1h * residualTerm - vtheta * vtheta;
 
 		if (Math.abs(denominator) < 1e-15) {
-			// Near-singular — flow approaching sonic in the theta direction
-			return new double[] { dvrDtheta, 0.0 };
+			// Near-singular — flow approaching sonic in the theta direction.
+			// Return a large value with the correct sign to signal the integration to stop,
+			// rather than returning 0.0 which incorrectly implies smooth behavior.
+			logger.debug("Taylor-Maccoll denominator near-singular at theta={}, vr={}, vtheta={}",
+					theta, vr, vtheta);
+			return new double[] { dvrDtheta, Math.copySign(1e10, -vtheta) };
 		}
 
 		double dvthetaDtheta = numerator / denominator;
@@ -654,7 +682,12 @@ public final class ObliqueShockSolver {
 	private static double vToMach(double vOverVmax, double gamma) {
 		double gm1 = gamma - 1.0;
 		double v2 = vOverVmax * vOverVmax;
-		if (v2 >= 1.0) return 100.0; // Fully expanded — unrealistically high Mach
+		if (v2 >= 1.0) {
+			// V/Vmax = 1.0 corresponds to complete expansion to zero temperature,
+			// i.e., infinite Mach. Return a very large finite value to avoid
+			// Infinity/NaN propagation in downstream calculations.
+			return Double.MAX_VALUE / 2;
+		}
 		return Math.sqrt(2.0 / gm1 * v2 / (1.0 - v2));
 	}
 }

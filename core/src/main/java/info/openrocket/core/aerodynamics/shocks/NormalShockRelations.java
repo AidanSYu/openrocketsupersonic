@@ -152,7 +152,8 @@ public final class NormalShockRelations {
 	 */
 	public static double machFromPressureRatio(double pressRatio, double gamma) {
 		if (pressRatio < 1.0) {
-			throw new IllegalArgumentException("Pressure ratio must be >= 1, got " + pressRatio);
+			throw new IllegalArgumentException(
+					"Pressure ratio must be >= 1.0 for a normal shock (got " + pressRatio + ")");
 		}
 		double gp1 = gamma + 1.0;
 		double m1sq = (pressRatio - 1.0) * gp1 / (2.0 * gamma) + 1.0;

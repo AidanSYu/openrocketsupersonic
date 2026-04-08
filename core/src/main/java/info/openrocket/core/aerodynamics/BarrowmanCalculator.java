@@ -3,6 +3,9 @@ package info.openrocket.core.aerodynamics;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.rocketcomponent.ComponentAssembly;
 import info.openrocket.core.rocketcomponent.FlightConfiguration;
@@ -17,6 +20,8 @@ import info.openrocket.core.util.ModID;
  * stability and drag calculations to dedicated calculators.
  */
 public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
+	private static final Logger logger = LoggerFactory.getLogger(BarrowmanCalculator.class);
+
 	private final StabilityCalculator stabilityCalculator;
 	private final DragCalculator dragCalculator;
 
@@ -85,18 +90,23 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 			}
 
 			if (forces.getCP().isNaN()) {
+				logger.warn("NaN CP detected for component {}, defaulting to zero", comp);
 				forces.setCP(Coordinate.ZERO);
 			}
 			if (Double.isNaN(forces.getBaseCD())) {
+				logger.warn("NaN baseCD detected for component {}, defaulting to zero", comp);
 				forces.setBaseCD(0);
 			}
 			if (Double.isNaN(forces.getPressureCD())) {
+				logger.warn("NaN pressureCD detected for component {}, defaulting to zero", comp);
 				forces.setPressureCD(0);
 			}
 			if (Double.isNaN(forces.getFrictionCD())) {
+				logger.warn("NaN frictionCD detected for component {}, defaulting to zero", comp);
 				forces.setFrictionCD(0);
 			}
 			if (Double.isNaN(forces.getOverrideCD())) {
+				logger.warn("NaN overrideCD detected for component {}, defaulting to zero", comp);
 				forces.setOverrideCD(0);
 			}
 

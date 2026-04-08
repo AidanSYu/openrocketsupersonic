@@ -14,6 +14,7 @@ import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.startup.Application;
 import info.openrocket.core.util.Coordinate;
 import info.openrocket.core.util.CoordinateIF;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,14 +27,16 @@ class FlightConditionsTest {
 
 	private Rocket rocket;
 
-	@BeforeEach
-	void setUp() {
-		com.google.inject.Module applicationModule = new ServicesForTesting();
+	@BeforeAll
+	static void setupInjector() {
+		Module applicationModule = new ServicesForTesting();
 		Module pluginModule = new PluginModule();
-
 		Injector injector = Guice.createInjector(applicationModule, pluginModule);
 		Application.setInjector(injector);
+	}
 
+	@BeforeEach
+	void setUp() {
 		OpenRocketDocument document = OpenRocketDocumentFactory.createNewRocket();
 		this.rocket = document.getRocket();
 		BodyTube bodyTube = new BodyTube();
