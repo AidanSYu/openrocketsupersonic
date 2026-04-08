@@ -41,14 +41,14 @@ public class AtmosphericConditionsTest {
 
 	@ParameterizedTest
 	@CsvSource({
-			"273.15, 331.3",  // 0 degC
-			"293.15, 343.2",  // 20 degC (standard)
-			"313.15, 355.1"   // 40 degC
+			"273.15, 331.30",  // 0 degC — sqrt(1.4 * 287.053 * 273.15)
+			"293.15, 343.24",  // 20 degC (standard)
+			"313.15, 354.73"   // 40 degC
 	})
-	@DisplayName("Mach speed calculation should be accurate")
+	@DisplayName("Mach speed calculation should be accurate (exact sqrt(gamma*R*T))")
 	void testMachSpeed(double tempK, double expectedSpeed) {
 		conditions.setTemperature(tempK);
-		assertEquals(expectedSpeed, conditions.getMachSpeed(), 1.0);
+		assertEquals(expectedSpeed, conditions.getMachSpeed(), 0.1);
 	}
 
 	@Test

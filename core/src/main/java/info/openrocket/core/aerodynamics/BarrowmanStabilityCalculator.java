@@ -46,6 +46,9 @@ public class BarrowmanStabilityCalculator implements StabilityCalculator {
 	private double cacheDiameter = -1;
 	private double cacheLength = -1;
 
+	/** Current shock geometry for the calculation pass (Phase 3b). */
+	private ShockGeometry shockGeometry = null;
+
 	@Override
 	public StabilityCalculator newInstance() {
 		return new BarrowmanStabilityCalculator();
@@ -79,6 +82,9 @@ public class BarrowmanStabilityCalculator implements StabilityCalculator {
 			if (calcObj == null) {
 				continue;
 			}
+
+			// Pass shock geometry to component calc (Phase 3b)
+			calcObj.setShockGeometry(shockGeometry);
 
 			AerodynamicForces componentForces = calculateComponentNonAxialForces(conditions, comp, calcObj,
 					contextList, actualWarnings);
@@ -231,11 +237,22 @@ public class BarrowmanStabilityCalculator implements StabilityCalculator {
 		}
 	}
 
+	/**
+	 * Set the shock geometry for the current calculation pass.
+	 * Called by BarrowmanCalculator before each aero computation.
+	 *
+	 * @param shockGeometry pre-computed shock geometry, or null for subsonic
+	 */
+	public void setShockGeometry(ShockGeometry shockGeometry) {
+		this.shockGeometry = shockGeometry;
+	}
+
 	@Override
 	public void voidAerodynamicCache() {
 		calcMap = null;
 		cacheDiameter = -1;
 		cacheLength = -1;
+		shockGeometry = null;
 	}
 
 	private AerodynamicForces calculateComponentNonAxialForces(FlightConditions conditions, RocketComponent comp,
@@ -277,6 +294,9 @@ public class BarrowmanStabilityCalculator implements StabilityCalculator {
 				throw new NullPointerException("Could not find a CalculationObject for aerodynamic Component!: "
 						+ comp.getComponentName());
 			} else {
+				// Pass shock geometry to component calc (Phase 3b)
+				calcObj.setShockGeometry(shockGeometry);
+
 				List<InstanceContext> contextList = instances.get(comp);
 				AerodynamicForces compForces = calculateComponentNonAxialForces(conds, comp, calcObj, contextList,
 						warnings);

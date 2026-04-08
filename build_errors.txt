@@ -1,0 +1,113 @@
+﻿To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.2.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+Project : => no module-info.java found
+Project :core => 'info.openrocket.core' Java module
+Project :swing => 'info.openrocket.swing' Java module
+Validating external components at C:\Code\OpenRocket Plus\core\resources-src\datafiles\openrocket-database\orc...
+Found external components
+
+> Task :core:externalComponentsDelete UP-TO-DATE
+> Task :core:clean
+
+> Task :core:compileJava
+.\gradlew.bat : 
+C:\Code\OpenRocket Plus\c
+ore\src\main\java\info\op
+enrocket\core\simulation\
+extension\example\Damping
+Moment.java:20: error: 
+unmappable character 
+(0x9D) for encoding 
+windows-1252
+At line:1 char:1
++ .\gradlew.bat 
+core:clean 
+core:compileTestJava 
+--no-daemon 2>&1 | Out- 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+    + CategoryInfo       
+       : NotSpecified:   
+  (C:\Code\OpenRoc...n   
+ g windows-1252:Strin    
+g) [], RemoteExcepti    
+on
+    + FullyQualifiedErro 
+   rId : NativeCommandE  
+  rror
+ 
+		// Report the type so 
+older documents that 
+enable this extension 
+still ΓÇ£seeΓÇ? the same 
+output.
+		                       
+                         
+                         
+      ^
+Note: Some input files 
+use or override a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+Note: Some input files 
+use unchecked or unsafe 
+operations.
+Note: Recompile with 
+-Xlint:unchecked for 
+details.
+1 error
+
+> Task :core:copyReadmeMain UP-TO-DATE
+> Task :core:externalComponentsValidate UP-TO-DATE
+
+> Task :core:externalComponentsCopy
+Copying apogee.orc to apogee.orc ...
+Copying bluetube.orc to bluetube.orc ...
+Copying BMS.ORC to BMS.ORC ...
+Copying competition_chutes.orc to competition_chutes.orc ...
+Copying estes_classic.orc to estes_classic.orc ...
+Copying estes_ps2.orc to estes_ps2.orc ...
+Copying generic_materials.orc to generic_materials.orc ...
+Copying giantleaprocketry.orc to giantleaprocketry.orc ...
+Copying loc_precision.orc to loc_precision.orc ...
+Copying madcow.orc to madcow.orc ...
+Copying mpc.orc to mpc.orc ...
+Copying publicmissiles.orc to publicmissiles.orc ...
+Copying quest.orc to quest.orc ...
+Copying ROCKETARIUM.ORC to ROCKETARIUM.ORC ...
+Copying semroc.orc to semroc.orc ...
+Copying top_flight.orc to top_flight.orc ...
+Copying LICENSE to LICENSE ...
+Copying README.md to README.md ...
+
+> Task :core:processResources
+> Task :core:classes
+> Task :core:mergeClasses SKIPPED
+
+> Task :core:compileTestJava
+Note: C:\Code\OpenRocket 
+Plus\core\src\test\java\i
+nfo\openrocket\core\start
+up\OpenRocketCoreTest.jav
+a uses or overrides a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+Note: Some input files 
+use unchecked or unsafe 
+operations.
+Note: Recompile with 
+-Xlint:unchecked for 
+details.
+
+[Incubating] Problems report is available at: file:///C:/Code/OpenRocket%20Plus/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 57s
+7 actionable tasks: 5 executed, 2 up-to-date

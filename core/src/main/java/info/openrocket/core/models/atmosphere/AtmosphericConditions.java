@@ -158,35 +158,131 @@ public class AtmosphericConditions implements Cloneable, Monitorable {
 	}
 
 	/**
-	 * Return the current speed of sound for dry air.
+	 * Return the current speed of sound.
 	 * <p>
-	 * The speed of sound is calculated using the expansion around the temperature 0
-	 * C
-	 * <code> c = 331.3 + 0.606*T </code> where T is in Celsius. The result is
-	 * accurate
-	 * to about 0.5 m/s for temperatures between -30 and 30 C, and within 2 m/s
-	 * for temperatures between -55 and 30 C.
+	 * Computed from the exact thermodynamic relation:
+	 * <code>a = sqrt(gamma * R * T)</code>
+	 * where gamma is the ratio of specific heats (1.4 for air), R is the specific
+	 * gas constant of air (287.053 J/(kg·K)), and T is the temperature in Kelvin.
+	 * <p>
+	 * This replaces the previous linear approximation <code>c = 331.3 + 0.606*(T-273.15)</code>
+	 * which was only accurate within ~30°C of 0°C. The exact formula is valid at
+	 * all temperatures where air behaves as an ideal gas (up to ~2000K before
+	 * dissociation effects become significant).
+	 * <p>
+	 * Reference: US Standard Atmosphere, 1976.
 	 * 
-	 * @return the current speed of sound.
+	 * @return the current speed of sound in m/s.
 	 */
 	public double getMachSpeed() {
-		return 165.77 + 0.606 * getTemperature();
+		return Math.sqrt(GAMMA * getGasConstant() * getTemperature());
+	}
+
+	/** Sutherland's law reference dynamic viscosity (Pa·s) at T_ref. */
+	private static final double MU_REF = 1.716e-5;
+
+	/** Sutherland's law reference temperature (K). */
+	private static final double T_REF = 273.15;
+
+	/** Sutherland's law constant for air (K). */
+	private static final double S_SUTHERLAND = 110.4;
+
+	/**
+	 * Return the dynamic viscosity of air using Sutherland's law.
+	 * <p>
+	 * <code>mu = mu_ref * (T/T_ref)^(3/2) * (T_ref + S) / (T + S)</code>
+	 * <p>
+	 * where mu_ref = 1.716e-5 Pa·s at T_ref = 273.15 K, and S = 110.4 K.
+	 * This is accurate from approximately 100 K to 1900 K.
+	 * <p>
+	 * This replaces the previous linear approximation which was only valid
+	 * between -40°C and 40°C.
+	 * <p>
+	 * Reference: NIST; Sutherland, W. (1893). "The viscosity of gases and
+	 * molecular force". Philosophical Magazine. 5 (36): 507–531.
+	 *
+	 * @return the dynamic viscosity in Pa·s (kg/(m·s)).
+	 */
+	public double getDynamicViscosity() {
+		double T = getTemperature();
+		return MU_REF * Math.pow(T / T_REF, 1.5) * (T_REF + S_SUTHERLAND) / (T + S_SUTHERLAND);
 	}
 
 	/**
 	 * Return the current kinematic viscosity of the air.
 	 * <p>
-	 * The effect of temperature on the viscosity of a gas can be computed using
-	 * Sutherland's formula. In the region of -40 ... 40 degrees Celsius the effect
-	 * is highly linear, and thus a linear approximation is used in its stead.
-	 * This is divided by the result of {@link #getDensity()} to achieve the
-	 * kinematic viscosity.
+	 * Computed as dynamic viscosity divided by density: <code>nu = mu / rho</code>.
+	 * The dynamic viscosity is calculated using Sutherland's law
+	 * (see {@link #getDynamicViscosity()}).
 	 * 
-	 * @return the current kinematic viscosity.
+	 * @return the current kinematic viscosity in m²/s.
 	 */
 	public double getKinematicViscosity() {
-		double v = 3.7291e-06 + 4.9944e-08 * getTemperature();
-		return v / getDensity();
+		return getDynamicViscosity() / getDensity();
+	}
+
+	/**
+	 * Compute the effective ratio of specific heats accounting for
+	 * vibrational excitation at high temperatures (Phase 4c).
+	 * <p>
+	 * At temperatures below ~800 K, air behaves as a diatomic ideal gas
+	 * with gamma = 1.4 (5 degrees of freedom: 3 translational + 2 rotational).
+	 * Above ~800 K, vibrational modes of N2 and O2 become excited, adding
+	 * energy storage capacity and reducing gamma toward ~1.3.
+	 * <p>
+	 * This uses a simplified model based on the characteristic vibrational
+	 * temperatures of N2 (3371 K) and O2 (2256 K), weighted by their
+	 * atmospheric fractions (0.79 N2, 0.21 O2).
+	 * <p>
+	 * Note: This does NOT account for dissociation (O2 above ~2500 K,
+	 * N2 above ~4000 K) or ionization. Those effects require a full
+	 * equilibrium chemistry solver and are beyond current scope.
+	 *
+	 * @param stagnationTemp the stagnation (total) temperature in Kelvin
+	 * @return effective gamma, in range [1.3, 1.4]
+	 */
+	public static double effectiveGamma(double stagnationTemp) {
+		if (stagnationTemp <= 800.0) {
+			return GAMMA;
+		}
+
+		// Characteristic vibrational temperatures
+		double thetaN2 = 3371.0; // K
+		double thetaO2 = 2256.0; // K
+
+		// Vibrational contribution to Cv (dimensionless, per molecule)
+		// cv_vib = (theta/T)^2 * exp(theta/T) / (exp(theta/T) - 1)^2
+		double cvVibN2 = vibrationalCv(stagnationTemp, thetaN2);
+		double cvVibO2 = vibrationalCv(stagnationTemp, thetaO2);
+
+		// Weighted average (79% N2, 21% O2)
+		double cvVib = 0.79 * cvVibN2 + 0.21 * cvVibO2;
+
+		// Base Cv for diatomic gas: 5/2 R (translational + rotational)
+		// gamma = (Cv + R) / Cv = 1 + R/Cv
+		// With vibrational: Cv_total = 5/2 + cvVib (in units of R)
+		double cvTotal = 2.5 + cvVib;
+		double gamma = (cvTotal + 1.0) / cvTotal;
+
+		// Clamp to physically reasonable range
+		return Math.max(1.3, Math.min(GAMMA, gamma));
+	}
+
+	/**
+	 * Dimensionless vibrational specific heat contribution using the
+	 * Einstein model for a harmonic oscillator.
+	 *
+	 * @param T     temperature (K)
+	 * @param theta characteristic vibrational temperature (K)
+	 * @return vibrational Cv / R (dimensionless)
+	 */
+	private static double vibrationalCv(double T, double theta) {
+		if (T < 100.0) return 0;
+		double x = theta / T;
+		if (x > 50.0) return 0; // exp overflow guard
+		double ex = Math.exp(x);
+		double denom = (ex - 1.0);
+		return x * x * ex / (denom * denom);
 	}
 
 	/**

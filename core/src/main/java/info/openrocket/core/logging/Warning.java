@@ -474,6 +474,15 @@ public abstract class Warning extends Message {
 	/** Body calculations may not be entirely accurate at supersonic speeds. */
 	public static final Warning SUPERSONIC = new Other(trans.get("Warning.SUPERSONIC"), MessagePriority.NORMAL);
 
+	/** Aerodynamic models use Modified Newtonian approximation above Mach 5. */
+	public static final Warning HYPERSONIC = new Other(trans.get("Warning.HYPERSONIC"), MessagePriority.NORMAL);
+
+	/** Aerodynamic models have very limited validity above Mach 10. */
+	public static final Warning HYPERSONIC_EXTREME = new Other(trans.get("Warning.HYPERSONIC_EXTREME"), MessagePriority.HIGH);
+
+	/** Body lift and CP calculations are less accurate at high angles of attack (> 15 deg). */
+	public static final Warning HIGH_AOA = new Other(trans.get("Warning.HIGH_AOA"), MessagePriority.LOW);
+
 	/** Recovery device deployed while on the launch guide. */
 	public static final Warning RECOVERY_LAUNCH_ROD = new Other(trans.get("Warning.RECOVERY_LAUNCH_ROD"), MessagePriority.HIGH);
 

@@ -17,7 +17,7 @@ public class DampingMoment extends AbstractSimulationExtension {
 
 	@Override
 	public List<FlightDataType> getFlightDataTypes() {
-		// Report the type so older documents that enable this extension still “see” the same output.
+		// Report the type so older documents that enable this extension still "see" the same output.
 		return List.of(FlightDataType.TYPE_DAMPING_MOMENT_COEFF);
 	}
 

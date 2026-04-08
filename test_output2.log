@@ -1,0 +1,206 @@
+﻿To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.2.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+Project : => no module-info.java found
+Project :core => 'info.openrocket.core' Java module
+Project :swing => 'info.openrocket.swing' Java module
+Validating external components at C:\Code\OpenRocket Plus\core\resources-src\datafiles\openrocket-database\orc...
+Found external components
+
+> Task :core:externalComponentsDelete
+> Task :core:clean
+> Task :core:compileJava
+.\gradlew.bat : Note: 
+Some input files use 
+or override a 
+deprecated API.
+At line:1 char:63
++ ... lyContinue; 
+.\gradlew.bat 
+core:clean core:test 
+--tests "info.openrock 
+...
++                 ~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo     
+         : 
+NotSpecified:     
+(Note: Some inpu...d   
+ eprecated API.:Strin  
+  g) [], RemoteExcepti 
+   on
+    + 
+FullyQualifiedErro    
+rId : NativeCommandE   
+ rror
+ 
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+Note: Some input files 
+use unchecked or 
+unsafe operations.
+Note: Recompile with 
+-Xlint:unchecked for 
+details.
+
+> Task :core:copyReadmeMain UP-TO-DATE
+> Task :core:externalComponentsValidate UP-TO-DATE
+
+> Task :core:externalComponentsCopy
+Copying apogee.orc to apogee.orc ...
+Copying bluetube.orc to bluetube.orc ...
+Copying BMS.ORC to BMS.ORC ...
+Copying competition_chutes.orc to competition_chutes.orc ...
+Copying estes_classic.orc to estes_classic.orc ...
+Copying estes_ps2.orc to estes_ps2.orc ...
+Copying generic_materials.orc to generic_materials.orc ...
+Copying giantleaprocketry.orc to giantleaprocketry.orc ...
+Copying loc_precision.orc to loc_precision.orc ...
+Copying madcow.orc to madcow.orc ...
+Copying mpc.orc to mpc.orc ...
+Copying publicmissiles.orc to publicmissiles.orc ...
+Copying quest.orc to quest.orc ...
+Copying ROCKETARIUM.ORC to ROCKETARIUM.ORC ...
+Copying semroc.orc to semroc.orc ...
+Copying top_flight.orc to top_flight.orc ...
+Copying LICENSE to LICENSE ...
+Copying README.md to README.md ...
+
+> Task :core:processResources
+> Task :core:classes
+> Task :core:mergeClasses SKIPPED
+
+> Task :core:compileTestJava
+Note: 
+C:\Code\OpenRocket Plus
+\core\src\test\java\inf
+o\openrocket\core\start
+up\OpenRocketCoreTest.j
+ava uses or overrides 
+a deprecated API.
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+Note: Some input files 
+use unchecked or 
+unsafe operations.
+Note: Recompile with 
+-Xlint:unchecked for 
+details.
+
+> Task :core:processTestResources
+> Task :core:testClasses
+
+> Task :core:test
+
+WARNING: package org.ju
+nit.platform.engine.sup
+port.filter not in org.
+junit.platform.engine
+14:27:45.659 [main] DEBUG org.gradle.internal.remote.internal.inet.TcpOutgoingConnector -- Attempting to connect to [0f8d5275-434f-4ead-bf43-bd2db2ce8ce5 port:59943, addresses:[/127.0.0.1]].
+14:27:45.681 [main] DEBUG org.gradle.internal.remote.internal.inet.TcpOutgoingConnector -- Trying to connect to address /127.0.0.1.
+14:27:45.706 [main] DEBUG org.gradle.internal.remote.internal.inet.TcpOutgoingConnector -- Connected to address /127.0.0.1:59943.
+
+14:27:45.784 [main] DEBUG org.gradle.process.internal.worker.child.ActionExecutionWorker -- Starting Gradle Test Executor 1.
+14:27:45.801 [Test worker] INFO org.gradle.api.internal.tasks.testing.worker.TestWorker -- Gradle Test Executor 1 started executing tests.
+
+> Task :core:test
+[0K[1minfo.openrocket.core.aerodynamics.FinWaveDragTest[m
+
+[0K[1m  Test [22mAckeret formula: Cdw * beta = constant (4*tau^2) at M>=1.2[32m PASSED[33m (1s)[m
+[0K[1m  Test [22mWave drag slope is near-zero at M=0.9 blend start (C1 continuity)[32m PASSED[m
+
+[0K[1m  AIRFOIL pressureCD at M <= 0.9 equals subsonic bluntness value (no wave drag)[m
+
+[0K[1m    Test [22m[1] 0.3[32m PASSED[m
+[0K[1m    Test [22m[2] 0.5[32m PASSED[m
+[0K[1m    Test [22m[3] 0.8[32m PASSED[m
+[0K[1m    Test [22m[4] 0.89[32m PASSED[m
+[0K[1m    Test [22m[5] 0.9[32m PASSED[m
+
+[0K[1m  AIRFOIL fin pressureCD is higher at supersonic than at M=0.85 (wave drag added)[m
+
+[0K[1m    Test [22m[1] 1.2[32m PASSED[m
+[0K[1m    Test [22m[2] 1.5[32m PASSED[m
+[0K[1m    Test [22m[3] 2.0[32m PASSED[m
+[0K[1m    Test [22m[4] 3.0[32m PASSED[m
+
+[0K[1m  AIRFOIL fin wave drag matches Ackeret formula at supersonic Mach[m
+
+[0K[1m    Test [22m[1] 1.2[32m PASSED[m
+[0K[1m    Test [22m[2] 1.5[32m PASSED[m
+[0K[1m    Test [22m[3] 2.0[32m PASSED[m
+[0K[1m    Test [22m[4] 3.0[32m PASSED[m
+[0K[1m    Test [22m[5] 5.0[32m PASSED[m
+
+[0K[1m  Test [22mRegression: SQUARE pressureCD at M=0.3 scales with stagnationCD only[32m PASSED[m
+[0K[1m  Test [22mZero-thickness airfoil fin has zero wave drag at M=2[32m PASSED[m
+[0K[1m  Test [22mRegression: AIRFOIL pressureCD at M=0.3 unchanged from original formula[32m PASSED[m
+[0K[1m  Test [22mROUNDED fin also has Ackeret wave drag at M=2.0[32m PASSED[m
+
+[0K[1m  No NaN or Infinity from pressureCD at any Mach number[m
+
+[0K[1m    Test [22m[1] "0.001"[32m PASSED[m
+[0K[1m    Test [22m[2] "0.3"[32m PASSED[m
+[0K[1m    Test [22m[3] "0.9"[32m PASSED[m
+[0K[1m    Test [22m[4] "0.95"[32m PASSED[m
+[0K[1m    Test [22m[5] "1.0"[32m PASSED[m
+[0K[1m    Test [22m[6] "1.05"[32m PASSED[m
+[0K[1m    Test [22m[7] "1.2"[32m PASSED[m
+[0K[1m    Test [22m[8] "1.5"[32m PASSED[m
+[0K[1m    Test [22m[9] "2.0"[32m PASSED[m
+[0K[1m    Test [22m[10] "5.0"[32m PASSED[m
+[0K[1m    Test [22m[11] "10.0"[32m PASSED[m
+
+[0K[1m  Test [22mSQUARE fin pressureCD at M=2.0 equals stagnationCD * cos2(gamma) * span*t/refArea[32m PASSED[m
+[0K[1m  Test [22mWave drag scales as tau^2 (doubling thickness ΓåÆ 4x wave drag)[32m PASSED[m
+
+14:27:58.022 [Test worker] INFO org.gradle.api.internal.tasks.testing.worker.TestWorker -- Gradle Test Executor 1 finished executing tests.
+14:27:58.022 [Test worker] DEBUG org.gradle.process.internal.worker.child.ActionExecutionWorker -- Completed Gradle Test Executor 1.
+
+> Task :core:test FAILED
+[0K[1m  Test [22mpressureCD is C0-continuous at M=0.9 (wave drag blend start)[31m FAILED[31m
+
+  org.opentest4j.AssertionFailedError: pressureCD should be continuous at M=0.9: below=0.30451279, above=0.30489398 ==> expected: <0.304512785762532> but was: <0.3048939827652151>
+      at app/org.junit.jupiter.api@6.0.1/org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+      at app/org.junit.jupiter.api@6.0.1/org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+      at app/org.junit.jupiter.api@6.0.1/org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+      at app/org.junit.jupiter.api@6.0.1/org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:88)
+      at app/org.junit.jupiter.api@6.0.1/org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1062)
+      at app/info.openrocket.core@26.xx.SNAPSHOT/info.openrocket.core.aerodynamics.FinWaveDragTest.testContinuityAtWaveDragLow(FinWaveDragTest.java:291)
+[m
+[0K[1m  Test [22mpressureCD is C0-continuous at M=1.2 (wave drag blend end)[32m PASSED[m
+
+[0K[1;31mFAILURE: [39mExecuted 35 tests in 14.8s (1 failed)[m
+
+
+35 tests completed, 1 
+failed
+
+[Incubating] Problems report is available at: file:///C:/Code/OpenRocket%20Plus/build/reports/problems/problems-report.html
+
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+Execution failed for 
+task ':core:test'.
+> There were failing 
+tests. See the report 
+at: file:///C:/Code/Ope
+nRocket%20Plus/core/bui
+ld/reports/tests/test/i
+ndex.html
+
+* Try:
+> Run with --scan to 
+generate a Build Scan 
+(powered by 
+Develocity).
+
+BUILD FAILED in 1m 44s
+9 actionable tasks: 8 executed, 1 up-to-date

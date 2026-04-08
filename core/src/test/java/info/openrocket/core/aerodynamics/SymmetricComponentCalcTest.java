@@ -123,17 +123,19 @@ public class SymmetricComponentCalcTest {
 
 		double frontalArea = Math.PI * nose.getAftRadius() * nose.getAftRadius();
 		// vvv TEST vvv
-		// these values from a reimplementation of the pressure cd calculation in python
-		// values at M = 0, 0.05, ... , 1.15
+		// Expected values at M = 0, 0.05, ... , 1.15
+		// Phase 2E: wave drag is zero below drag divergence Mach (~0.82 for this
+		// ellipsoid), then rises through the transonic regime via a C1-continuous
+		// polynomial to the TR-R-100 empirical data.
 		double cd[] = {
-				8.000392024269301e-07, 2.422001414621988e-06, 2.0098855921838474e-05,
-				8.295843903984836e-05, 0.000230425812213129, 0.0005104254351619708,
-				0.0009783566607446353, 0.0016963974152150677, 0.0027329880483111142,
-				0.004162427611715722, 0.006064546184601524, 0.008524431611715306,
-				0.011632196831399358, 0.01548277847481293, 0.020175760185344116,
-				0.02581521589534269, 0.032509569500239276, 0.04037146820686186,
-				0.04951766743137877, 0.06006892556095394, 0.07214990722137526,
-				0.08588909394291767, 0.10141870131021756, 0.11887460183385967 };
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 3.6893857035647654e-03,
+				1.3892501631781690e-02, 2.9297156472277500e-02, 4.8590565804568430e-02,
+				7.0459945208174030e-02, 9.3592510262608240e-02, 1.1667547654738976e-01 };
 
 		for (int i = 0; i < cd.length; i++) {
 			double m = i / 20.0;
