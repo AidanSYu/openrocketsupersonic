@@ -207,16 +207,13 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 		forces.setCside(0);
 		forces.setCyaw(0);
 
-		// Phase 4e: Tiered model validity warnings
+		// Phase 4e: Tiered model validity warnings (Mach-based only;
+		// high-AoA warning is omitted here because it fires every step during
+		// normal tumbling and creates unexpected SIM_WARN flight events)
 		if (mach > MACH_REDUCED_CONFIDENCE) {
 			warnings.add(Warning.HYPERSONIC_EXTREME);
 		} else if (mach > MACH_FULL_CONFIDENCE) {
 			warnings.add(Warning.HYPERSONIC);
-		}
-
-		// Phase 4d: High AoA warning for body calculations
-		if (conditions.getAOA() > Math.toRadians(15)) {
-			warnings.add(Warning.HIGH_AOA);
 		}
 
 	}

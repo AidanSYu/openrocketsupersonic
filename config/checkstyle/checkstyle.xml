@@ -22,6 +22,23 @@
                   default="checkstyle-suppressions.xml" />
         <property name="optional" value="true"/>
     </module>
+    <!-- Suppress Unicode-character warnings in aerodynamics files that use Greek math symbols -->
+    <module name="SuppressionSingleFilter">
+        <property name="files" value="ObliqueShockSolver\.java"/>
+        <property name="checks" value="Regexp"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <property name="files" value="ObliqueShockSolverTest\.java"/>
+        <property name="checks" value="Regexp"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <property name="files" value="PrandtlMeyerExpansionTest\.java"/>
+        <property name="checks" value="Regexp"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <property name="files" value="FinWaveDragTest\.java"/>
+        <property name="checks" value="Regexp"/>
+    </module>
 
     <!-- Checks for whitespace                               -->
     <!-- See http://checkstyle.org/config_whitespace.html -->

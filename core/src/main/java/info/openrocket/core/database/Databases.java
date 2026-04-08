@@ -146,23 +146,26 @@ public class Databases {
 		LINE_MATERIAL.add(newMaterial(Type.LINE, "Elastic braided cord (flat 13 mm, 1/2 in)", 0.00551172, MaterialGroup.ELASTICS));
 
 
-		// Add user-defined materials
-		for (Material m : Application.getPreferences().getUserMaterials()) {
-			switch (m.getType()) {
-				case LINE:
-					LINE_MATERIAL.add(m);
-					break;
+		// Add user-defined materials (skip if no injector is available, e.g. in unit tests
+		// that initialize Databases before setting up the Guice injector)
+		if (Application.getInjector() != null) {
+			for (Material m : Application.getPreferences().getUserMaterials()) {
+				switch (m.getType()) {
+					case LINE:
+						LINE_MATERIAL.add(m);
+						break;
 
-				case SURFACE:
-					SURFACE_MATERIAL.add(m);
-					break;
+					case SURFACE:
+						SURFACE_MATERIAL.add(m);
+						break;
 
-				case BULK:
-					BULK_MATERIAL.add(m);
-					break;
+					case BULK:
+						BULK_MATERIAL.add(m);
+						break;
 
-				default:
-					log.warn("ERROR: Unknown material type " + m);
+					default:
+						log.warn("ERROR: Unknown material type " + m);
+				}
 			}
 		}
 

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.0//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+    <!-- Aerodynamics source files use Greek math symbols (theta, gamma, etc.)
+         in Javadoc comments for technical accuracy. -->
+    <suppress checks="Regexp" files="shocks[\\/]ObliqueShockSolver\.java"/>
+    <suppress checks="Regexp" files="shocks[\\/]ObliqueShockSolverTest\.java"/>
+    <suppress checks="Regexp" files="shocks[\\/]PrandtlMeyerExpansionTest\.java"/>
+    <suppress checks="Regexp" files="FinWaveDragTest\.java"/>
+</suppressions>

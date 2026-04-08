@@ -50,7 +50,11 @@ public class PluginModule extends AbstractModule {
 			}
 		}
 
-		// TODO: Unused plugin interfaces should be bound to an empty set - how?
+		// Bind unused plugin interfaces to empty sets so injection of Set<Interface>
+		// succeeds even when no implementations are found on the classpath.
+		for (Class<?> intf : unusedInterfaces) {
+			findBinder(intf);
+		}
 	}
 
 	private Multibinder<?> findBinder(Class<?> intf) {

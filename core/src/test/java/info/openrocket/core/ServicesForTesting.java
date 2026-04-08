@@ -19,15 +19,20 @@ import info.openrocket.core.preset.ComponentPreset.Type;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
+import com.google.inject.multibindings.Multibinder;
+import info.openrocket.core.formatting.RocketSubstitutor;
 import info.openrocket.core.simulation.DefaultSimulationOptionFactory;
 
 public class ServicesForTesting extends AbstractModule {
-	
+
 	@Override
 	protected void configure() {
 		bind(ApplicationPreferences.class).to(PreferencesForTesting.class);
 		bind(Translator.class).toProvider(TranslatorProviderForTesting.class);
 		bind(RocketDescriptor.class).to(RocketDescriptorImpl.class);
+		// Ensure Set<RocketSubstitutor> is always bound (even if PluginModule scan
+		// fails to discover it in some JPMS test forks — creates an empty set fallback).
+		Multibinder.newSetBinder(binder(), RocketSubstitutor.class);
 	}
 	
 	public static class TranslatorProviderForTesting implements Provider<Translator> {
