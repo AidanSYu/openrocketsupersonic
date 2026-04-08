@@ -23,7 +23,10 @@ import info.openrocket.core.util.ModID;
  * @author Sampo Niskanen <sampo.niskanen@iki.fi>
  */
 public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
-	private static final double MIN_BETA = 0.25;
+	/** Lower edge of transonic smoothing band (Mach). */
+	private static final double TRANSONIC_LOW = 0.95;
+	/** Upper edge of transonic smoothing band (Mach). */
+	private static final double TRANSONIC_HIGH = 1.05;
 
 	private List<EventListener> listenerList = new ArrayList<>();
 	private EventObject event = new EventObject(this);
@@ -288,15 +291,45 @@ public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 	}
 
 	/**
-	 * Calculate the beta value (compressibility factor/Prandtl-Glauert correction factor) for the given Mach number.
-	 * @param mach the Mach number.
-	 * @return the beta value.
+	 * Calculate the Prandtl-Glauert compressibility factor beta.
+	 * <p>
+	 * Subsonic: beta = sqrt(1 - M²)  (Prandtl-Glauert)
+	 * Supersonic: beta = sqrt(M² - 1) (Ackeret)
+	 * Transonic (M 0.95–1.05): cubic Hermite spline giving C1-continuous
+	 * blending with a positive floor (no zero crossing).
+	 *
+	 * @param mach the Mach number
+	 * @return the beta value (always > 0)
 	 */
 	private static double calculateBeta(double mach) {
-		if (mach < 1) {
-			return MathUtil.max(MIN_BETA, MathUtil.safeSqrt(1 - mach * mach));
+		if (mach < TRANSONIC_LOW) {
+			// Subsonic: exact Prandtl-Glauert
+			return Math.sqrt(1.0 - mach * mach);
+		} else if (mach > TRANSONIC_HIGH) {
+			// Supersonic: exact Ackeret
+			return Math.sqrt(mach * mach - 1.0);
 		} else {
-			return MathUtil.max(MIN_BETA, MathUtil.safeSqrt(mach * mach - 1));
+			// Transonic smoothing via cubic Hermite spline.
+			// Endpoint values and slopes from the exact formulas:
+			//   f(ML) = sqrt(1 - ML²),  f'(ML) = -ML / sqrt(1 - ML²)
+			//   f(MH) = sqrt(MH² - 1),  f'(MH) =  MH / sqrt(MH² - 1)
+			double fLo = Math.sqrt(1.0 - TRANSONIC_LOW * TRANSONIC_LOW);
+			double fHi = Math.sqrt(TRANSONIC_HIGH * TRANSONIC_HIGH - 1.0);
+			double dfLo = -TRANSONIC_LOW / fLo;   // negative slope (beta decreasing)
+			double dfHi = TRANSONIC_HIGH / fHi;    // positive slope (beta increasing)
+
+			double dm = TRANSONIC_HIGH - TRANSONIC_LOW;
+			double t = (mach - TRANSONIC_LOW) / dm;
+			double t2 = t * t;
+			double t3 = t2 * t;
+
+			// Hermite basis functions
+			double h00 = 2 * t3 - 3 * t2 + 1;
+			double h10 = t3 - 2 * t2 + t;
+			double h01 = -2 * t3 + 3 * t2;
+			double h11 = t3 - t2;
+
+			return h00 * fLo + h10 * dm * dfLo + h01 * fHi + h11 * dm * dfHi;
 		}
 	}
 

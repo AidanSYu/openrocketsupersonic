@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import info.openrocket.core.aerodynamics.AerodynamicForces;
 import info.openrocket.core.aerodynamics.FlightConditions;
+import info.openrocket.core.aerodynamics.ShockGeometry;
 import info.openrocket.core.logging.Warning;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.rocketcomponent.FinSet;
@@ -83,9 +84,9 @@ public class FinSetCalc extends RocketComponentCalc {
 	@Override
 	public void calculateNonaxialForces(FlightConditions conditions, Transformation transform,
 			AerodynamicForces forces, WarningSet warnings) {
-		
+
 		warnings.addAll(geometryWarnings);
-		
+
 		if (finArea < MathUtil.EPSILON || macSpan < MathUtil.EPSILON) {
 			forces.setCm(0);
 			forces.setCN(0);
@@ -97,12 +98,18 @@ public class FinSetCalc extends RocketComponentCalc {
 			forces.setCyaw(0);
 			return;
 		}
-		
+
+		// Phase 3c: Use local post-shock flow conditions at the fin station
+		// instead of freestream conditions for CNa and CP calculations.
+		// At supersonic speeds, the body shock reduces the local Mach and
+		// increases the local pressure at the fin station.
+		FlightConditions localConditions = getLocalFlowConditions(conditions);
+
 		//////// Calculate CNa.  /////////
-		
+
 		// One fin without interference (both sub- and supersonic):
-		double cna1 = calculateFinCNa1(conditions);
-			
+		double cna1 = calculateFinCNa1(localConditions);
+
 		// Multiple fins with fin-fin interference
 		double cna;
 		double theta = conditions.getTheta();
@@ -110,11 +117,7 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		// Compute basic CNa without interference effects
 		cna = cna1 * MathUtil.pow2(Math.sin(theta - angle));
-//		final double cna_x = cna1 * MathUtil.pow2(Math.sin(theta - angle));
-//		final double cna_y = cna1 * MathUtil.pow2(Math.sin(theta - angle));
-		
-		//		logger.debug("Component cna = {}", cna);
-		
+
 		// Take into account fin-fin interference effects
 		switch (interferenceFinCount) {
 		case 1:
@@ -123,45 +126,50 @@ public class FinSetCalc extends RocketComponentCalc {
 		case 4:
 			// No interference effect
 			break;
-		
+
 		case 5:
 			cna *= 0.948;
 			break;
-		
+
 		case 6:
 			cna *= 0.913;
 			break;
-		
+
 		case 7:
 			cna *= 0.854;
 			break;
-		
+
 		case 8:
 			cna *= 0.81;
 			break;
-		
+
 		default:
 			// Assume 75% efficiency
 			cna *= 0.75;
 			warnings.add(Warning.PARALLEL_FINS);
 			break;
 		}
-				
+
 		// Body-fin interference effect
 		double r = bodyRadius;
 		double tau = r / (span + r);
 		if (Double.isNaN(tau) || Double.isInfinite(tau))
 			tau = 0;
 		cna *= 1 + tau; // Classical Barrowman
-		//		cna *= pow2(1 + tau);	// Barrowman thesis (too optimistic??)
-		//		logger.debug("Component cna = {}", cna);
-		
-		// TODO: LOW: check for fin tip mach cone interference
-		// (Barrowman thesis pdf-page 40)
-		
-		// TODO: LOW: fin-fin mach cone effect, MIL-HDBK page 5-25
-		// Calculate CP position
-		double x = macLead + calculateCPPos(conditions) * macLength;
+
+		// Phase 3c: Scale normal force by local dynamic pressure ratio.
+		// Behind the body shock, the dynamic pressure differs from freestream.
+		// The fin normal force is proportional to local q, so we scale CNa
+		// by (q_local / q_freestream) to get the correct total force.
+		if (shockGeometry != null && shockGeometry.isSupersonic()) {
+			ShockGeometry.LocalConditions local = getLocalConditions(shockGeometry);
+			if (local != null) {
+				cna *= local.dynamicPressureRatio;
+			}
+		}
+
+		// Calculate CP position using local conditions
+		double x = macLead + calculateCPPos(localConditions) * macLength;
 		
 		
 		// Calculate roll forces, reduce forcing above stall angle
@@ -214,6 +222,36 @@ public class FinSetCalc extends RocketComponentCalc {
 	
 	public double getMidchordPos() {
 		return macLead + 0.5 * macLength;
+	}
+
+	/**
+	 * Get flight conditions adjusted for local post-shock flow at the fin station.
+	 * <p>
+	 * Phase 3c: When a shock geometry pre-pass has computed the local Mach behind
+	 * the body shock at this fin's axial position, create a modified copy of the
+	 * flight conditions with the local Mach number. This feeds the corrected Mach
+	 * into the existing K1/K2/K3 supersonic fin CNa computation.
+	 * <p>
+	 * At subsonic speeds or when no shock geometry is available, returns the
+	 * original conditions unchanged.
+	 *
+	 * @param conditions freestream flight conditions
+	 * @return local flight conditions (may be same object if no correction needed)
+	 */
+	private FlightConditions getLocalFlowConditions(FlightConditions conditions) {
+		if (shockGeometry == null || !shockGeometry.isSupersonic()) {
+			return conditions;
+		}
+
+		ShockGeometry.LocalConditions local = getLocalConditions(shockGeometry);
+		if (local == null || Math.abs(local.localMach - conditions.getMach()) < 0.01) {
+			return conditions;
+		}
+
+		// Create modified conditions with local post-shock Mach
+		FlightConditions localCond = conditions.clone();
+		localCond.setMach(local.localMach);
+		return localCond;
 	}
 	
 	/**
@@ -384,6 +422,11 @@ public class FinSetCalc extends RocketComponentCalc {
 	
 	private static final double CNA_SUBSONIC = 0.9;
 	private static final double CNA_SUPERSONIC = 1.5;
+
+	/** Lower Mach boundary of transonic wave drag blend region. */
+	private static final double WAVE_DRAG_LOW  = 0.9;
+	/** Upper Mach boundary of transonic wave drag blend region. */
+	private static final double WAVE_DRAG_HIGH = 1.2;
 	private static final double CNA_SUPERSONIC_B = pow(pow2(CNA_SUPERSONIC) - 1, 1.5);
 	private static final double GAMMA = 1.4;
 	private static final LinearInterpolator K1, K2, K3;
@@ -631,7 +674,10 @@ public class FinSetCalc extends RocketComponentCalc {
 		double mach = conditions.getMach();
 		double cd = 0;
 
-		// Pressure fore-drag
+		// ---- Leading-edge bluntness / pressure fore-drag ----
+		// For AIRFOIL/ROUNDED: empirical round-LE formula (Prandtl-Glauert subsonic,
+		// empirical supersonic correlation). Referenced to span * thickness area.
+		// For SQUARE: stagnation coefficient (normal shock at blunt leading edge).
 		if (crossSection == FinSet.CrossSection.AIRFOIL ||
 				crossSection == FinSet.CrossSection.ROUNDED) {
 
@@ -650,13 +696,104 @@ public class FinSetCalc extends RocketComponentCalc {
 			throw new UnsupportedOperationException("Unsupported fin profile: " + crossSection);
 		}
 
-		// Slanted leading edge
+		// Slanted leading-edge sweep correction
 		cd *= pow2(cosGammaLead);
 
-		// Scale to correct reference area
+		// Scale to correct reference area (leading-edge area: span * thickness)
 		cd *= span * thickness / conditions.getRefArea();
 
+		// ---- Phase 2c: Ackeret supersonic thin-airfoil wave drag ----
+		// Wave drag from fin thickness via Ackeret (1925) linear supersonic theory:
+		//   Cdw = 4 * tau^2 / beta
+		// where tau = t/c (thickness ratio) and beta = sqrt(M^2 - 1).
+		// Referenced to fin planform area (one-sided).
+		//
+		// Applies to AIRFOIL and ROUNDED cross-sections whose thickness profiles
+		// generate oblique-shock wave drag. SQUARE fins are excluded because their
+		// flat surfaces produce zero Ackeret wave drag; the stagnation term above
+		// already captures the SQUARE leading-edge normal-shock drag.
+		//
+		// Blended C1-continuously from zero at M = WAVE_DRAG_LOW to the exact
+		// Ackeret value at M = WAVE_DRAG_HIGH via a cubic Hermite spline, matching
+		// both value and slope at the supersonic boundary.
+		//
+		// See: Anderson, "Fundamentals of Aerodynamics", Ch. 15; NACA TN-1428.
+		if ((crossSection == FinSet.CrossSection.AIRFOIL ||
+				 crossSection == FinSet.CrossSection.ROUNDED) &&
+				macLength > MathUtil.EPSILON && thickness > 0) {
+
+			double tau = thickness / macLength; // fin thickness ratio t/c
+			double waveCdPlanform;              // Ackeret Cdw, referenced to planform area
+
+			if (mach >= WAVE_DRAG_HIGH) {
+				// Fully supersonic: exact Ackeret formula
+				waveCdPlanform = ackeretWaveDragCD(mach, tau);
+
+			} else if (mach > WAVE_DRAG_LOW) {
+				// Transonic blend: cubic Hermite from (WAVE_LOW, 0, 0) to (WAVE_HIGH, f, f')
+				double fHigh  = ackeretWaveDragCD(WAVE_DRAG_HIGH, tau);
+				double dfHigh = ackeretWaveDragSlope(WAVE_DRAG_HIGH, tau);
+
+				double dm = WAVE_DRAG_HIGH - WAVE_DRAG_LOW;
+				double t  = (mach - WAVE_DRAG_LOW) / dm;
+				double t2 = t * t;
+				double t3 = t2 * t;
+
+				// Cubic Hermite basis: h01*fHigh + h11*dm*dfHigh  (f0=0, df0=0)
+				double h01 = -2 * t3 + 3 * t2;
+				double h11 =      t3 -     t2;
+				waveCdPlanform = h01 * fHigh + h11 * dm * dfHigh;
+
+			} else {
+				waveCdPlanform = 0.0;
+			}
+
+			// Apply leading-edge sweep correction: cos^2(Lambda_LE)
+			waveCdPlanform *= pow2(cosGammaLead);
+
+			// Scale planform-area Cdw to body reference area
+			cd += waveCdPlanform * finArea / conditions.getRefArea();
+		}
+
 		return cd;
+	}
+
+	/**
+	 * Ackeret wave drag coefficient for a thin fin cross-section at supersonic speeds.
+	 * <p>
+	 * {@code Cdw = 4 * tau^2 / beta}
+	 * <p>
+	 * where {@code tau = t/c} (thickness ratio) and {@code beta = sqrt(M^2 - 1)}.
+	 * The result is referenced to the fin planform area (one side) and represents
+	 * the integrated wave drag from both the upper and lower surface pressure
+	 * distributions for a symmetric profile at zero angle of attack.
+	 * <p>
+	 * Reference: Ackeret (1925); Anderson, "Fundamentals of Aerodynamics", Ch. 15.
+	 *
+	 * @param mach the Mach number (must satisfy M >= WAVE_DRAG_HIGH > 1)
+	 * @param tau  the fin thickness ratio (thickness / MAC length)
+	 * @return Ackeret wave drag coefficient referenced to planform area
+	 */
+	private static double ackeretWaveDragCD(double mach, double tau) {
+		double beta = Math.sqrt(mach * mach - 1.0);
+		return 4.0 * tau * tau / beta;
+	}
+
+	/**
+	 * Derivative of the Ackeret wave drag coefficient with respect to Mach number.
+	 * <p>
+	 * {@code d/dM [4*tau^2 / sqrt(M^2-1)] = -4*tau^2 * M / (M^2-1)^(3/2)}
+	 * <p>
+	 * Used to compute the slope boundary condition for the transonic Hermite blend.
+	 *
+	 * @param mach the Mach number
+	 * @param tau  the fin thickness ratio
+	 * @return d(Cdw)/dM
+	 */
+	private static double ackeretWaveDragSlope(double mach, double tau) {
+		double betaSq = mach * mach - 1.0;
+		double beta   = Math.sqrt(betaSq);
+		return -4.0 * tau * tau * mach / (beta * betaSq);
 	}
 
 	@Override

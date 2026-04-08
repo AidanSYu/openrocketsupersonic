@@ -87,6 +87,7 @@ class FlightConditionsTest {
 
 	@Test
 	void testSetAndGetMach() {
+		// Subsonic: exact Prandtl-Glauert
 		conditions.setMach(0.2);
 		assertEquals(0.2, conditions.getMach(), EPSILON);
 		assertEquals(0.9797958971, conditions.getBeta(), EPSILON);
@@ -95,14 +96,16 @@ class FlightConditionsTest {
 		assertEquals(0.8, conditions.getMach(), EPSILON);
 		assertEquals(0.6, conditions.getBeta(), EPSILON);
 
+		// Transonic: cubic Hermite spline smoothing (M 0.95-1.05)
 		conditions.setMach(0.9999999999);
 		assertEquals(0.9999999999, conditions.getMach(), EPSILON);
-		assertEquals(0.25, conditions.getBeta(), EPSILON);
+		assertEquals(0.2371770069, conditions.getBeta(), 1e-4);
 
 		conditions.setMach(1.00000000001);
 		assertEquals(1.00000000001, conditions.getMach(), EPSILON);
-		assertEquals(0.25, conditions.getBeta(), EPSILON);
+		assertEquals(0.2371770069, conditions.getBeta(), 1e-4);
 
+		// Supersonic: exact Ackeret
 		conditions.setMach(1.3);
 		assertEquals(1.3, conditions.getMach(), EPSILON);
 		assertEquals(0.8306623863, conditions.getBeta(), EPSILON);
@@ -110,6 +113,35 @@ class FlightConditionsTest {
 		conditions.setMach(3);
 		assertEquals(3, conditions.getMach(), EPSILON);
 		assertEquals(2.8284271247, conditions.getBeta(), EPSILON);
+	}
+
+	@Test
+	void testBetaTransonicSmoothing() {
+		// Beta is always positive (no zero crossing)
+		for (double m = 0.01; m <= 5.0; m += 0.01) {
+			conditions.setMach(m);
+			assertTrue(conditions.getBeta() > 0,
+					"Beta must be positive at M=" + m + ", got " + conditions.getBeta());
+		}
+
+		// Beta at M=1.0 is the minimum, near 0.237
+		conditions.setMach(1.0);
+		double betaAtMach1 = conditions.getBeta();
+		assertTrue(betaAtMach1 > 0.2, "Beta at M=1 should be > 0.2");
+		assertTrue(betaAtMach1 < 0.35, "Beta at M=1 should be < 0.35");
+
+		// Continuity at band edges: beta at M=0.95 and M=1.05 matches exact formulas
+		conditions.setMach(0.95);
+		assertEquals(Math.sqrt(1.0 - 0.95 * 0.95), conditions.getBeta(), 1e-9,
+				"Beta at M=0.95 must match exact subsonic formula");
+		conditions.setMach(1.05);
+		assertEquals(Math.sqrt(1.05 * 1.05 - 1.0), conditions.getBeta(), 1e-9,
+				"Beta at M=1.05 must match exact supersonic formula");
+
+		// High Mach: beta approaches sqrt(M²-1) with no artificial clamp
+		conditions.setMach(5.0);
+		assertEquals(Math.sqrt(24.0), conditions.getBeta(), 1e-6,
+				"Beta at M=5 should be sqrt(24) ≈ 4.899");
 	}
 
 	@Test

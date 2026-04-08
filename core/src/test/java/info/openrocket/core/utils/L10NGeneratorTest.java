@@ -38,7 +38,7 @@ class L10NGeneratorTest {
 
 	@Test
 	void outputRemovesDiacriticsAndPrintsMapping() throws Exception {
-		invokeOutput('é');
+		invokeOutput('\u00e9');
 		String generated = captured.toString(StandardCharsets.UTF_8);
 		assertEquals("m.put('\\u00e9', \"e\");" + "\n", generated);
 	}
@@ -52,7 +52,7 @@ class L10NGeneratorTest {
 
 	@Test
 	void outputProducesNoMappingForUnsupportedCharacters() throws Exception {
-		invokeOutput('€');
+		invokeOutput('\u20ac');
 		String generated = captured.toString(StandardCharsets.UTF_8);
 		assertTrue(generated.isEmpty());
 	}

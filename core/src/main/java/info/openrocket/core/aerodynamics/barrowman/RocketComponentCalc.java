@@ -2,14 +2,39 @@ package info.openrocket.core.aerodynamics.barrowman;
 
 import info.openrocket.core.aerodynamics.AerodynamicForces;
 import info.openrocket.core.aerodynamics.FlightConditions;
+import info.openrocket.core.aerodynamics.ShockGeometry;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.util.Transformation;
 
 public abstract class RocketComponentCalc {
 
-	public RocketComponentCalc(RocketComponent component) {
+	/** Axial position of this component from the rocket nose (meters). */
+	protected double componentAbsoluteX = 0;
 
+	/** Pre-computed shock geometry for the current calculation pass. */
+	protected ShockGeometry shockGeometry = null;
+
+	public RocketComponentCalc(RocketComponent component) {
+		// Store absolute position for shock geometry lookups
+		if (component != null) {
+			try {
+				this.componentAbsoluteX = component.toAbsolute(
+						new info.openrocket.core.util.Coordinate(0, 0, 0))[0].getX();
+			} catch (Exception e) {
+				this.componentAbsoluteX = 0;
+			}
+		}
+	}
+
+	/**
+	 * Set the shock geometry for the current calculation pass.
+	 * Called by the stability calculator before invoking force/drag methods.
+	 *
+	 * @param shockGeometry pre-computed shock geometry, or null for subsonic
+	 */
+	public void setShockGeometry(ShockGeometry shockGeometry) {
+		this.shockGeometry = shockGeometry;
 	}
 
 	/**
@@ -73,7 +98,7 @@ public abstract class RocketComponentCalc {
 
 	/**
 	 * Calculation of Reynolds Number
-	 * 
+	 *
 	 * @param length     characteristic length
 	 * @param conditions Flight conditions taken into account
 	 * @return Reynolds Number
@@ -81,6 +106,28 @@ public abstract class RocketComponentCalc {
 	public double calculateReynoldsNumber(double length, FlightConditions conditions) {
 		return conditions.getVelocity() * length /
 				conditions.getAtmosphericConditions().getKinematicViscosity();
+	}
+
+	/**
+	 * Get the local flow conditions at this component's position from the
+	 * shock geometry pre-pass. Returns freestream conditions if shockGeometry
+	 * is null (subsonic case).
+	 *
+	 * @param shockGeometry the pre-computed shock geometry (may be null)
+	 * @return local conditions at this component
+	 */
+	protected ShockGeometry.LocalConditions getLocalConditions(ShockGeometry shockGeometry) {
+		if (shockGeometry == null || !shockGeometry.isSupersonic()) {
+			return null;
+		}
+		return shockGeometry.getConditionsAt(componentAbsoluteX);
+	}
+
+	/**
+	 * @return the absolute axial position of this component from the rocket nose
+	 */
+	public double getComponentAbsoluteX() {
+		return componentAbsoluteX;
 	}
 
 }

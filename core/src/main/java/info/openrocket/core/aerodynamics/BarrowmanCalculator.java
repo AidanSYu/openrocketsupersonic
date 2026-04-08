@@ -56,6 +56,13 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 		checkCache(configuration);
 
 		WarningSet actualWarnings = (warnings != null) ? warnings : ignoreWarningSet;
+
+		// Compute shock geometry once per aero calculation (Phase 3b)
+		ShockGeometry shockGeometry = ShockGeometry.compute(configuration, conditions);
+		if (stabilityCalculator instanceof BarrowmanStabilityCalculator) {
+			((BarrowmanStabilityCalculator) stabilityCalculator).setShockGeometry(shockGeometry);
+		}
+
 		StabilityForceBreakdown breakdown = stabilityCalculator.getForceAnalysis(configuration, conditions,
 				actualWarnings);
 
@@ -109,6 +116,12 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 		checkCache(configuration);
 
 		WarningSet actualWarnings = (warnings != null) ? warnings : ignoreWarningSet;
+
+		// Compute shock geometry once per aero calculation (Phase 3b)
+		ShockGeometry shockGeometry = ShockGeometry.compute(configuration, conditions);
+		if (stabilityCalculator instanceof BarrowmanStabilityCalculator) {
+			((BarrowmanStabilityCalculator) stabilityCalculator).setShockGeometry(shockGeometry);
+		}
 
 		AerodynamicForces total = stabilityCalculator.calculateNonAxialForces(configuration, conditions, actualWarnings);
 
