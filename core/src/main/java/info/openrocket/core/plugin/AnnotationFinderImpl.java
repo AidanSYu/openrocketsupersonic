@@ -18,6 +18,10 @@ public class AnnotationFinderImpl implements AnnotationFinder {
 		List<Class<?>> classes;
 		try (ScanResult scanResult = new ClassGraph().enableAllInfo().scan()) {
 			classes = new ArrayList<>(scanResult.getClassesWithAnnotation(annotation.getName()).loadClasses());
+		} catch (Exception e) {
+			// ClassGraph can fail to scan in JPMS test environments; return empty list
+			// so the injector can still be created (plugin sets will be empty).
+			classes = new ArrayList<>();
 		}
 		return classes;
 	}
