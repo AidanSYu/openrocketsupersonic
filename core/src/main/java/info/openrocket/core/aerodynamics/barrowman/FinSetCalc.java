@@ -496,10 +496,13 @@ public class FinSetCalc extends RocketComponentCalc {
 	
 	private double calculateDampingMoment(FlightConditions conditions) {
 		double rollRate = conditions.getRollRate();
-		
+
 		if (Math.abs(rollRate) < 0.1)
 			return 0;
-		
+
+		if (conditions.getVelocity() < 1e-6)
+			return 0.0;
+
 		double mach = conditions.getMach();
 		double absRate = Math.abs(rollRate);
 		
@@ -534,23 +537,25 @@ public class FinSetCalc extends RocketComponentCalc {
 			
 			double sum = 0;
 			
+			double dy = span / (DIVISIONS - 1);
+
 			for (int i = 0; i < DIVISIONS; i++) {
-				double y = i * span / (DIVISIONS - 1);
+				double y = i * dy;
 				double angle = rollRate * (bodyRadius + y) / vel;
-				
+
 				sum += (k1 * angle + k2 * angle * angle + k3 * angle * angle * angle)
 						* chordLength[i] * (bodyRadius + y);
 			}
-			
-			return sum * span / (DIVISIONS - 1) /
+
+			return sum * dy /
 					(conditions.getRefArea() * conditions.getRefLength());
 		}
 		
 		// Transonic, do linear interpolation
 		FlightConditions cond = conditions.clone();
-		cond.setMach(CNA_SUBSONIC - 0.01);
+		cond.setMach(CNA_SUBSONIC - 0.05);
 		double subsonic = calculateDampingMoment(cond);
-		cond.setMach(CNA_SUPERSONIC + 0.01);
+		cond.setMach(CNA_SUPERSONIC + 0.05);
 		double supersonic = calculateDampingMoment(cond);
 		
 		return subsonic * (CNA_SUPERSONIC - mach) / (CNA_SUPERSONIC - CNA_SUBSONIC) +
@@ -618,39 +623,6 @@ public class FinSetCalc extends RocketComponentCalc {
 	}
 	
 	
-	//	@SuppressWarnings("null")
-	//	public static void main(String arg[]) {
-	//		Rocket rocket = TestRocket.makeRocket();
-	//		FinSet finset = null;
-	//		
-	//		Iterator<RocketComponent> iter = rocket.deepIterator();
-	//		while (iter.hasNext()) {
-	//			RocketComponent c = iter.next();
-	//			if (c instanceof FinSet) {
-	//				finset = (FinSet)c;
-	//				break;
-	//			}
-	//		}
-	//		
-	//		((TrapezoidFinSet)finset).setHeight(0.10);
-	//		((TrapezoidFinSet)finset).setRootChord(0.10);
-	//		((TrapezoidFinSet)finset).setTipChord(0.10);
-	//		((TrapezoidFinSet)finset).setSweep(0.0);
-	//
-	//		
-	//		FinSetCalc calc = new FinSetCalc(finset);
-	//		
-	//		calc.calculateFinGeometry();
-	//		FlightConditions cond = new FlightConditions(new Configuration(rocket));
-	//		for (double m=0; m < 3; m+=0.05) {
-	//			cond.setMach(m);
-	//			cond.setAOA(0.0*Math.PI/180);
-	//			double cna = calc.calculateFinCNa1(cond);
-	//			System.out.printf("%5.2f "+cna+"\n", m);
-	//		}
-	//		
-	//	}
-
 	@Override
 	public double calculateFrictionCD(FlightConditions conditions, double componentCf, WarningSet warnings) {
 		// a fin with 0 area contributes no drag
@@ -775,6 +747,7 @@ public class FinSetCalc extends RocketComponentCalc {
 	 * @return Ackeret wave drag coefficient referenced to planform area
 	 */
 	private static double ackeretWaveDragCD(double mach, double tau) {
+		if (mach <= 1.0001) return 0.0;
 		double beta = Math.sqrt(mach * mach - 1.0);
 		return 4.0 * tau * tau / beta;
 	}
@@ -791,6 +764,7 @@ public class FinSetCalc extends RocketComponentCalc {
 	 * @return d(Cdw)/dM
 	 */
 	private static double ackeretWaveDragSlope(double mach, double tau) {
+		if (mach <= 1.0001) return 0.0;
 		double betaSq = mach * mach - 1.0;
 		double beta   = Math.sqrt(betaSq);
 		return -4.0 * tau * tau * mach / (beta * betaSq);

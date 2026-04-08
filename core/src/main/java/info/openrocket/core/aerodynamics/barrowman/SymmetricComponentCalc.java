@@ -91,7 +91,13 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 			foreRadius = aftRadius = componentMaxR;
 		}
 
-		fineness = length / (2 * Math.abs(aftRadius - foreRadius));
+		if (Math.abs(aftRadius - foreRadius) < 1e-9) {
+			// Cylindrical body tube or degenerate geometry — use standard L/D definition
+			double maxR = Math.max(aftRadius, foreRadius);
+			fineness = (maxR > 1e-9) ? length / (2 * maxR) : 5.0;
+		} else {
+			fineness = length / (2 * Math.abs(aftRadius - foreRadius));
+		}
 		fullVolume = component.getFullVolume();
 		planformArea = component.getComponentPlanformArea();
 		planformCenter = component.getComponentPlanformCenter();
@@ -690,7 +696,7 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 		}
 
 		double areaFactor = aftRadius * aftRadius - foreRadius * foreRadius;
-		if (areaFactor < 1e-12) {
+		if (Math.max(aftRadius, foreRadius) < 1e-9) {
 			return 0;
 		}
 		return 2.0 * cdIntegral / areaFactor;
@@ -726,7 +732,7 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 	 * @return Cd referenced to frontalArea
 	 */
 	private double calculateNewtonianCd(double mach) {
-		if (mach <= 1.0 || length < 0.001 || foreRadius >= aftRadius) {
+		if (mach <= 1.0 || tipHalfAngle <= 1e-6 || length < 0.001 || foreRadius >= aftRadius) {
 			return 0;
 		}
 
@@ -770,7 +776,7 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 		}
 
 		double areaFactor = aftRadius * aftRadius - foreRadius * foreRadius;
-		if (areaFactor < 1e-12) {
+		if (Math.max(aftRadius, foreRadius) < 1e-9) {
 			return 0;
 		}
 		return 2.0 * cdIntegral / areaFactor;
@@ -806,6 +812,7 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 
 		// Guard against edge cases
 		if (denominator <= 0) {
+			log.warn("Cp_max denominator non-positive at M={}, using simplified formula", mach);
 			return 2.0 / (gamma * M2);
 		}
 
@@ -1011,7 +1018,12 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 			interpolator.addPoint(m, mul * PolyInterpolator.eval(m, poly));
 		}
 
-		for (double m = 1.32; m < 4; m += 0.02) {
+		// Bridge the gap between the transonic polynomial (last point ~M1.30) and
+		// the supersonic analytical formula (first point M1.32) by adding the
+		// supersonic formula value at M1.32 explicitly.
+		interpolator.addPoint(1.32, mul * (2.1 * pow2(sinphi) + 0.5 * sinphi / MathUtil.safeSqrt(1.32 * 1.32 - 1)));
+
+		for (double m = 1.34; m < 4; m += 0.02) {
 			interpolator.addPoint(m, mul * (2.1 * pow2(sinphi) + 0.5 * sinphi / MathUtil.safeSqrt(m * m - 1)));
 		}
 

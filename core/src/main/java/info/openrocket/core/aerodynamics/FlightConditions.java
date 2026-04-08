@@ -279,7 +279,11 @@ public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 	 * @param velocity the current velocity.
 	 */
 	public void setVelocity(double velocity) {
-		setMach(velocity / atmosphericConditions.getMachSpeed());
+		if (atmosphericConditions.getMachSpeed() < 1e-6) {
+			setMach(0);
+		} else {
+			setMach(velocity / atmosphericConditions.getMachSpeed());
+		}
 	}
 
 	/**

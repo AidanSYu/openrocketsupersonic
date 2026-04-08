@@ -15,6 +15,7 @@ import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.rocketcomponent.SymmetricComponent;
 import info.openrocket.core.rocketcomponent.Transition;
 import info.openrocket.core.util.Coordinate;
+import info.openrocket.core.util.CoordinateIF;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,24 +150,33 @@ public class ShockGeometry {
 					last.temperatureRatio, last.dynamicPressureRatio);
 		}
 
-		// Interpolate between stations
-		for (int i = 0; i < stations.size() - 1; i++) {
-			LocalConditions s1 = stations.get(i);
-			LocalConditions s2 = stations.get(i + 1);
-			if (x >= s1.x && x <= s2.x) {
-				double t = (x - s1.x) / (s2.x - s1.x);
-				return new LocalConditions(x,
-						s1.localMach + t * (s2.localMach - s1.localMach),
-						s1.pressureRatio + t * (s2.pressureRatio - s1.pressureRatio),
-						s1.temperatureRatio + t * (s2.temperatureRatio - s1.temperatureRatio),
-						s1.dynamicPressureRatio + t * (s2.dynamicPressureRatio - s1.dynamicPressureRatio));
+		// Binary search for the enclosing interval (stations sorted by x)
+		int lo = 0, hi = stations.size() - 1;
+		while (hi - lo > 1) {
+			int mid = (lo + hi) >>> 1;
+			if (stations.get(mid).x <= x) {
+				lo = mid;
+			} else {
+				hi = mid;
 			}
 		}
 
-		// Fallback (shouldn't reach here)
-		LocalConditions last = stations.get(stations.size() - 1);
-		return new LocalConditions(x, last.localMach, last.pressureRatio,
-				last.temperatureRatio, last.dynamicPressureRatio);
+		LocalConditions s1 = stations.get(lo);
+		LocalConditions s2 = stations.get(hi);
+		double dx = s2.x - s1.x;
+
+		// Guard against division by zero when two stations share the same x
+		if (dx < 1e-12) {
+			return new LocalConditions(x, s1.localMach, s1.pressureRatio,
+					s1.temperatureRatio, s1.dynamicPressureRatio);
+		}
+
+		double t = (x - s1.x) / dx;
+		return new LocalConditions(x,
+				s1.localMach + t * (s2.localMach - s1.localMach),
+				s1.pressureRatio + t * (s2.pressureRatio - s1.pressureRatio),
+				s1.temperatureRatio + t * (s2.temperatureRatio - s1.temperatureRatio),
+				s1.dynamicPressureRatio + t * (s2.dynamicPressureRatio - s1.dynamicPressureRatio));
 	}
 
 	/**
@@ -261,7 +271,11 @@ public class ShockGeometry {
 		boolean hadInitialShock = false;
 
 		for (SymmetricComponent comp : bodyChain) {
-			double compX = comp.toAbsolute(Coordinate.NUL)[0].getX();
+			CoordinateIF[] absCoords = comp.toAbsolute(Coordinate.NUL);
+			if (absCoords == null || absCoords.length == 0) {
+				continue;
+			}
+			double compX = absCoords[0].getX();
 			double compLength = comp.getLength();
 
 			if (compLength < 1e-6) {
@@ -283,19 +297,36 @@ public class ShockGeometry {
 						try {
 							ObliqueShockSolver.ObliqueShockResult result =
 									ObliqueShockSolver.solveCone(mach, tipAngle, GAMMA);
-							localMach = result.m2;
-							pRatio = result.pressureRatio;
-							tRatio = result.temperatureRatio;
-							hadInitialShock = true;
+							if (Double.isFinite(result.m2) && result.m2 > 0
+									&& Double.isFinite(result.pressureRatio)
+									&& Double.isFinite(result.temperatureRatio)) {
+								localMach = result.m2;
+								pRatio = result.pressureRatio;
+								tRatio = result.temperatureRatio;
+								hadInitialShock = true;
+							} else {
+								log.warn("Non-finite nose cone shock result: m2={}, pRatio={}, tRatio={} — skipping",
+										result.m2, result.pressureRatio, result.temperatureRatio);
+							}
 						} catch (IllegalArgumentException e) {
 							// Detached shock — use normal shock approximation
+							log.debug("Detached nose shock at M={}, tipAngle={}: {}", mach, tipAngle, e.getMessage());
 							try {
-								localMach = NormalShockRelations.downstreamMach(mach, GAMMA);
-								pRatio = NormalShockRelations.pressureRatio(mach, GAMMA);
-								tRatio = NormalShockRelations.temperatureRatio(mach, GAMMA);
-								hadInitialShock = true;
+								double nsMach = NormalShockRelations.downstreamMach(mach, GAMMA);
+								double nsP = NormalShockRelations.pressureRatio(mach, GAMMA);
+								double nsT = NormalShockRelations.temperatureRatio(mach, GAMMA);
+								if (Double.isFinite(nsMach) && nsMach > 0
+										&& Double.isFinite(nsP) && Double.isFinite(nsT)) {
+									localMach = nsMach;
+									pRatio = nsP;
+									tRatio = nsT;
+									hadInitialShock = true;
+								} else {
+									log.warn("Non-finite normal shock fallback: m2={}, pRatio={}, tRatio={} — keeping freestream",
+											nsMach, nsP, nsT);
+								}
 							} catch (Exception e2) {
-								// Keep freestream
+								log.warn("Normal shock fallback failed at M={}: {}", mach, e2.getMessage());
 							}
 						}
 					}
@@ -325,11 +356,18 @@ public class ShockGeometry {
 										localMach, newMach, GAMMA);
 								double tExpRatio = PrandtlMeyerExpansion.temperatureRatio(
 										localMach, newMach, GAMMA);
-								pRatio *= pExpRatio;
-								tRatio *= tExpRatio;
-								localMach = newMach;
+								// FIX 1: Guard NaN/Inf BEFORE accumulating into pRatio/tRatio
+								if (Double.isFinite(newMach) && newMach > 0
+										&& Double.isFinite(pExpRatio) && Double.isFinite(tExpRatio)) {
+									pRatio *= pExpRatio;
+									tRatio *= tExpRatio;
+									localMach = newMach;
+								} else {
+									log.warn("Non-finite expansion result at x={}: newMach={}, pExpRatio={}, tExpRatio={} — skipping",
+											xAbs, newMach, pExpRatio, tExpRatio);
+								}
 							} catch (IllegalArgumentException e) {
-								// Exceeded max PM angle — keep current
+								log.warn("PM expansion failed at x={}: {}", xAbs, e.getMessage());
 							}
 						} else {
 							// Surface turns into flow → compression (oblique shock)
@@ -337,20 +375,21 @@ public class ShockGeometry {
 								ObliqueShockSolver.ObliqueShockResult result =
 										ObliqueShockSolver.solve(localMach,
 												Math.abs(turnAngle), GAMMA, true);
-								pRatio *= result.pressureRatio;
-								tRatio *= result.temperatureRatio;
-								localMach = result.m2;
+								// FIX 1: Guard NaN/Inf BEFORE accumulating into pRatio/tRatio
+								if (Double.isFinite(result.m2) && result.m2 > 0
+										&& Double.isFinite(result.pressureRatio)
+										&& Double.isFinite(result.temperatureRatio)) {
+									pRatio *= result.pressureRatio;
+									tRatio *= result.temperatureRatio;
+									localMach = result.m2;
+								} else {
+									log.warn("Non-finite oblique shock result at x={}: m2={}, pRatio={}, tRatio={} — skipping",
+											xAbs, result.m2, result.pressureRatio, result.temperatureRatio);
+								}
 							} catch (IllegalArgumentException e) {
-								// Shock fails — keep current
+								log.warn("Oblique shock failed at x={}: {}", xAbs, e.getMessage());
 							}
 						}
-					}
-
-					// Phase 4d: Guard against NaN/Inf from extreme conditions
-					if (!Double.isFinite(localMach) || localMach <= 0) {
-						localMach = mach;
-						pRatio = 1.0;
-						tRatio = 1.0;
 					}
 
 					double qRatio = computeDynamicPressureRatio(localMach, mach, pRatio);
@@ -373,11 +412,17 @@ public class ShockGeometry {
 								localMach, newMach, GAMMA);
 						double tExpRatio = PrandtlMeyerExpansion.temperatureRatio(
 								localMach, newMach, GAMMA);
-						pRatio *= pExpRatio;
-						tRatio *= tExpRatio;
-						localMach = newMach;
+						if (Double.isFinite(newMach) && newMach > 0
+								&& Double.isFinite(pExpRatio) && Double.isFinite(tExpRatio)) {
+							pRatio *= pExpRatio;
+							tRatio *= tExpRatio;
+							localMach = newMach;
+						} else {
+							log.warn("Non-finite shoulder expansion result at compX={}: newMach={}, pExpRatio={}, tExpRatio={} — skipping",
+									compX, newMach, pExpRatio, tExpRatio);
+						}
 					} catch (IllegalArgumentException e) {
-						// Keep current
+						log.warn("Shoulder PM expansion failed at compX={}: {}", compX, e.getMessage());
 					}
 				} else if (localMach >= 1.0 && turnAngle < -MIN_TURN_ANGLE) {
 					// Compression at junction
@@ -385,11 +430,18 @@ public class ShockGeometry {
 						ObliqueShockSolver.ObliqueShockResult result =
 								ObliqueShockSolver.solve(localMach,
 										Math.abs(turnAngle), GAMMA, true);
-						pRatio *= result.pressureRatio;
-						tRatio *= result.temperatureRatio;
-						localMach = result.m2;
+						if (Double.isFinite(result.m2) && result.m2 > 0
+								&& Double.isFinite(result.pressureRatio)
+								&& Double.isFinite(result.temperatureRatio)) {
+							pRatio *= result.pressureRatio;
+							tRatio *= result.temperatureRatio;
+							localMach = result.m2;
+						} else {
+							log.warn("Non-finite junction shock result at compX={}: m2={}, pRatio={}, tRatio={} — skipping",
+									compX, result.m2, result.pressureRatio, result.temperatureRatio);
+						}
 					} catch (IllegalArgumentException e) {
-						// Keep current
+						log.warn("Junction oblique shock failed at compX={}: {}", compX, e.getMessage());
 					}
 				}
 

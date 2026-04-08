@@ -102,6 +102,9 @@ fabric.properties
 
 openrocket.log
 **/hs_err_pid*.log
+*.log
+build_errors.txt
+gradle_help_output.txt
 
 *.snap
 
