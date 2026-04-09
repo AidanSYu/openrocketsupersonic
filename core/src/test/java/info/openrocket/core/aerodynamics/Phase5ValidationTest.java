@@ -725,9 +725,17 @@ public class Phase5ValidationTest {
             assertTrue(pressure >= 0, "Pressure Cd should be >= 0 at M=" + mach);
             assertTrue(base >= 0, "Base Cd should be >= 0 at M=" + mach);
 
-            // Total should equal sum of components (allowing override=0)
-            assertEquals(friction + pressure + base, total, 0.001,
-                    "Component Cd sum != total at M=" + mach);
+            // Phase 6: lift-induced drag (CDi = CN * sin(alpha)) is added to total but
+            // is not tracked as a separate breakdown field (friction/pressure/base).
+            // At AoA=2 deg, CDi is non-zero, so total >= sum of named components.
+            double namedSum = friction + pressure + base;
+            assertTrue(total >= namedSum - 0.001,
+                    "Total Cd should be >= component sum at M=" + mach +
+                    " (friction=" + friction + " pressure=" + pressure + " base=" + base + " total=" + total + ")");
+            // The excess (CDi) should be small at 2 deg AoA (typically < 0.05)
+            double cdi = total - namedSum;
+            assertTrue(cdi < 0.15,
+                    "CDi (total - named sum) seems too large at M=" + mach + ": " + cdi);
         }
 
         /**

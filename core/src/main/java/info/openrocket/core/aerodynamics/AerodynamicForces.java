@@ -62,6 +62,17 @@ public class AerodynamicForces implements Cloneable, Monitorable {
 	private double pitchDampingMoment = Double.NaN;
 	private double yawDampingMoment = Double.NaN;
 
+	/** Phase 8a: Pitch damping derivative Cmq */
+	private double cmq = 0;
+	/** Phase 8a: Pitch moment due to alpha-dot */
+	private double cmAlphaDot = 0;
+
+	/** Phase 11a: Magnus side force slope (per radian AoA, per unit non-dim roll rate). */
+	private double cyPa = Double.NaN;
+
+	/** Phase 11a: Magnus yaw moment slope (per radian AoA, per unit non-dim roll rate). */
+	private double cnPa = Double.NaN;
+
 	private ModID modID = ModID.INVALID;
 
 	private boolean axisymmetric = true;
@@ -346,6 +357,38 @@ public class AerodynamicForces implements Cloneable, Monitorable {
 		return yawDampingMoment;
 	}
 
+	public void setCmq(double cmq) {
+		if (this.cmq == cmq) return;
+		this.cmq = cmq;
+		modID = new ModID();
+	}
+
+	public double getCmq() { return cmq; }
+
+	public void setCmAlphaDot(double cmAlphaDot) {
+		if (this.cmAlphaDot == cmAlphaDot) return;
+		this.cmAlphaDot = cmAlphaDot;
+		modID = new ModID();
+	}
+
+	public double getCmAlphaDot() { return cmAlphaDot; }
+
+	public void setCyPa(double cyPa) {
+		if (this.cyPa == cyPa) return;
+		this.cyPa = cyPa;
+		modID = new ModID();
+	}
+
+	public double getCyPa() { return cyPa; }
+
+	public void setCnPa(double cnPa) {
+		if (this.cnPa == cnPa) return;
+		this.cnPa = cnPa;
+		modID = new ModID();
+	}
+
+	public double getCnPa() { return cnPa; }
+
 	/**
 	 * Reset all values to null/NaN.
 	 */
@@ -364,6 +407,10 @@ public class AerodynamicForces implements Cloneable, Monitorable {
 		setCD(Double.NaN);
 		setPitchDampingMoment(Double.NaN);
 		setYawDampingMoment(Double.NaN);
+		setCmq(Double.NaN);
+		setCmAlphaDot(Double.NaN);
+		setCyPa(Double.NaN);
+		setCnPa(Double.NaN);
 	}
 
 	/**
@@ -385,6 +432,10 @@ public class AerodynamicForces implements Cloneable, Monitorable {
 		setCD(0);
 		setPitchDampingMoment(0);
 		setYawDampingMoment(0);
+		setCmq(0);
+		setCmAlphaDot(0);
+		setCyPa(0);
+		setCnPa(0);
 
 		return this;
 	}

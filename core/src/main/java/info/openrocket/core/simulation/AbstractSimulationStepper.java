@@ -432,6 +432,13 @@ public abstract class AbstractSimulationStepper implements SimulationStepper {
 						flightConditions.getAtmosphericConditions().getDensity());
 				dataBranch.setValue(FlightDataType.TYPE_SPEED_OF_SOUND,
 						flightConditions.getAtmosphericConditions().getMachSpeed());
+
+				// Stagnation temperature: T0 = T * (1 + (gamma-1)/2 * M^2)
+				// Using gamma = 1.4 for air: (gamma-1)/2 = 0.2
+				double mach = flightConditions.getMach();
+				double T = flightConditions.getAtmosphericConditions().getTemperature();
+				double T0 = T * (1.0 + 0.2 * mach * mach);
+				dataBranch.setValue(FlightDataType.TYPE_STAGNATION_TEMPERATURE, T0);
 			}
 
 			DampingMomentComponents dampingMoment = computeDampingMomentCoefficientComponents(status, dataBranch);
@@ -444,8 +451,11 @@ public abstract class AbstractSimulationStepper implements SimulationStepper {
 
 			dataBranch.setValue(FlightDataType.TYPE_DAMPING_RATIO,
 					computeDampingRatio(status, dampingMoment.total, correctiveMomentCoefficient));
-			dataBranch.setValue(FlightDataType.TYPE_NATURAL_FREQUENCY,
-					computeNaturalFrequency(status, correctiveMomentCoefficient));
+			double naturalFrequencyRadPerSec = computeNaturalFrequency(status, correctiveMomentCoefficient);
+			dataBranch.setValue(FlightDataType.TYPE_NATURAL_FREQUENCY, naturalFrequencyRadPerSec);
+			// Natural pitch frequency in Hz (cycles per second)
+			dataBranch.setValue(FlightDataType.TYPE_NATURAL_PITCH_FREQUENCY,
+					Double.isNaN(naturalFrequencyRadPerSec) ? Double.NaN : naturalFrequencyRadPerSec / (2.0 * Math.PI));
 
 			if (null != forces) {
 				dataBranch.setValue(FlightDataType.TYPE_DRAG_COEFF, forces.getCD());
@@ -466,6 +476,7 @@ public abstract class AbstractSimulationStepper implements SimulationStepper {
 				dataBranch.setValue(FlightDataType.TYPE_ROLL_FORCING_COEFF, forces.getCrollForce());
 				dataBranch.setValue(FlightDataType.TYPE_ROLL_DAMPING_COEFF, forces.getCrollDamp());
 				dataBranch.setValue(FlightDataType.TYPE_PITCH_DAMPING_MOMENT_COEFF, forces.getPitchDampingMoment());
+				dataBranch.setValue(FlightDataType.TYPE_PITCH_DAMPING_DERIVATIVE, forces.getPitchDampingMoment());
 
 				if (null != rocketMass && null != flightConditions) {
 					if (null != forces.getCP()) {

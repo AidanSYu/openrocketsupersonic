@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import info.openrocket.core.logging.Warning;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.rocketcomponent.ComponentAssembly;
 import info.openrocket.core.rocketcomponent.FlightConfiguration;
@@ -141,6 +142,14 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 		total.setCm(total.getCm() - total.getPitchDampingMoment());
 		total.setCyaw(total.getCyaw() - total.getYawDampingMoment());
 
+		// Phase 8d: Asymmetric vortex shedding at high AoA
+		applyAsymmetricVortexShedding(conditions, total, actualWarnings);
+
+		// Phase 4e: High-AoA warning (issued once per calculation, not per component step)
+		if (conditions.getAOA() > Math.toRadians(15)) {
+			actualWarnings.add(Warning.HIGH_AOA);
+		}
+
 		return total;
 	}
 
@@ -167,5 +176,40 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 
 	public static double calculateBaseCD(double m) {
 		return BarrowmanDragCalculator.calculateBaseCD(m);
+	}
+
+	/** AoA threshold for asymmetric vortex shedding onset (20 degrees). */
+	private static final double VORTEX_AOA_ONSET = Math.toRadians(20.0);
+	/** AoA at which vortex side force saturates (40 degrees). */
+	private static final double VORTEX_AOA_SATURATE = Math.toRadians(40.0);
+	/** Vortex asymmetry coefficient (Champigny-Lacau empirical). */
+	private static final double VORTEX_KV = 0.20;
+
+	/**
+	 * Apply asymmetric vortex shedding side force at high angle of attack.
+	 * At AoA > 20 deg, body vortex shedding becomes asymmetric, generating
+	 * a side force proportional to the body normal force.
+	 * Reference: Champigny & Lacau (1994), "Lateral Aerodynamics of a Missile
+	 * at High Angles of Attack", AGARD CP-536.
+	 */
+	static void applyAsymmetricVortexShedding(FlightConditions conditions,
+			AerodynamicForces total, WarningSet warnings) {
+		double alpha = conditions.getAOA();
+		if (alpha <= VORTEX_AOA_ONSET) {
+			return;
+		}
+
+		double cnBody = total.getCN();
+		double cy;
+		if (alpha < VORTEX_AOA_SATURATE) {
+			// Linear ramp from 0 to k_v * CN_body
+			double f = (alpha - VORTEX_AOA_ONSET) / (VORTEX_AOA_SATURATE - VORTEX_AOA_ONSET);
+			cy = VORTEX_KV * cnBody * f;
+		} else {
+			cy = VORTEX_KV * cnBody;
+		}
+
+		total.setCside(total.getCside() + cy);
+		warnings.add(Warning.HIGH_AOA_VORTEX);
 	}
 }

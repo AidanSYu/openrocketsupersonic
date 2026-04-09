@@ -18,6 +18,7 @@ import info.openrocket.core.rocketcomponent.InstanceContext;
 import info.openrocket.core.rocketcomponent.InstanceMap;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.rocketcomponent.SymmetricComponent;
+import info.openrocket.core.rocketcomponent.Transition;
 import info.openrocket.core.rocketcomponent.position.AxialMethod;
 import info.openrocket.core.util.MathUtil;
 import info.openrocket.core.util.PolyInterpolator;
@@ -120,7 +121,18 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		totalForces.setPressureCD(pressureCD);
 		totalForces.setBaseCD(baseCD);
 		totalForces.setOverrideCD(overrideCD);
-		totalForces.setCD(frictionCD + pressureCD + baseCD + overrideCD);
+
+		// Phase 6i: Lift-induced drag — axial projection of normal force at angle of attack
+		// CDi = CN * sin(alpha). At alpha = 0, CDi = 0 (no change to zero-AoA results)
+		double alpha = conditions.getAOA();
+		double CN = totalForces.getCN();
+		double CDi = 0.0;
+		if (Math.abs(alpha) > 1e-6 && !Double.isNaN(CN)) {
+			CDi = CN * Math.sin(alpha);
+			if (CDi < 0) CDi = 0;  // induced drag is always non-negative
+		}
+
+		totalForces.setCD(frictionCD + pressureCD + baseCD + overrideCD + CDi);
 		totalForces.setCDaxial(calculateAxialCD(conditions, totalForces.getCD()));
 	}
 
@@ -214,15 +226,24 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		double fB = (maxX - minX + 0.0001) / maxR;
 		double correction = (1 + 1.0 / (2 * fB));
 
+		// Phase 8c: Boundary layer transition correction
+		double totalLength = maxX - minX;
+		double velocity = conditions.getVelocity();
+		double kinematicViscosity = conditions.getAtmosphericConditions().getKinematicViscosity();
+		double fLam = laminarFraction(mach, totalLength, velocity, kinematicViscosity);
+		double transitionFactor = 1.0 - 0.6 * fLam;
+
 		if (forceMap != null) {
 			for (Map.Entry<RocketComponent, AerodynamicForces> entry : forceMap.entrySet()) {
 				if (entry.getKey() instanceof SymmetricComponent) {
-					entry.getValue().setFrictionCD(entry.getValue().getFrictionCD() * correction);
+					entry.getValue().setFrictionCD(entry.getValue().getFrictionCD() * correction * transitionFactor);
+				} else {
+					entry.getValue().setFrictionCD(entry.getValue().getFrictionCD() * transitionFactor);
 				}
 			}
 		}
 
-		return otherFrictionCD + correction * bodyFrictionCD;
+		return (otherFrictionCD + correction * bodyFrictionCD) * transitionFactor;
 	}
 
 	private double calculateReynoldsNumber(FlightConfiguration configuration, FlightConditions conditions) {
@@ -444,8 +465,20 @@ public class BarrowmanDragCalculator implements DragCalculator {
 			Map<RocketComponent, AerodynamicForces> forceMap, WarningSet warningSet) {
 		ensureCalcMap(configuration);
 
-		double base = calculateBaseCD(conditions.getMach());
+		double mach = conditions.getMach();
+		double base = calculateBaseCD(mach, conditions);
 		double total = 0;
+
+		// Apply power-on base drag reduction during motor burn.
+		// The exhaust plume fills part of the base region, reducing base pressure drag.
+		double powerOnMultiplier = computePowerOnBaseDragMultiplier(conditions);
+		base *= powerOnMultiplier;
+
+		// TODO Phase 6b: Apply power-on base drag correction when thrust status is available.
+		// Currently the drag calculator does not receive real-time thrust information.
+		// When thrust plumbing is added (e.g., via FlightConditions or a separate parameter),
+		// multiply the aft-most component's base CD by powerOnBaseDragFactor(areaRatio)
+		// during powered flight. Typical HPR motors have areaRatio ~ 0.3, giving k ~ 0.4.
 
 		InstanceMap imap = configuration.getActiveInstances();
 		for (Map.Entry<RocketComponent, ArrayList<InstanceContext>> entry : imap.entrySet()) {
@@ -485,8 +518,12 @@ public class BarrowmanDragCalculator implements DragCalculator {
 					double correctedBase = base;
 					if (aftRadius < foreRadius && s.getLength() > 0) {
 						correctedBase *= calculateBoattailFactor(
-								foreRadius, aftRadius, s.getLength(), conditions.getMach());
+								foreRadius, aftRadius, s.getLength(), mach);
 					}
+
+					// Viswanath (1996) boattail correction: a preceding boattail (transition
+					// with aftRadius < foreRadius) reduces base drag by energizing the wake.
+					correctedBase *= calculateViswanathBoattailFactor(s, mach);
 
 					double cd = correctedBase * area / conditions.getRefArea();
 					total += instanceCount * cd;
@@ -601,6 +638,147 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	}
 
 	/**
+	 * Calculate base drag coefficient with Lamb-Oberkampf (1995) Reynolds number correction.
+	 * At supersonic speeds (M > 1.3), higher Reynolds numbers produce a more energetic
+	 * wake, reducing base drag. Falls back to Devan-Ashwood when Re_D < 1e4.
+	 *
+	 * @param m Mach number
+	 * @param conditions flight conditions (for velocity, density, viscosity)
+	 * @return base drag coefficient with Re correction
+	 */
+	public static double calculateBaseCD(double m, FlightConditions conditions) {
+		double baseCd = calculateBaseCD(m);
+
+		if (m <= 1.3 || conditions == null) {
+			return baseCd;
+		}
+
+		// Compute base Reynolds number using reference length as diameter proxy
+		double velocity = conditions.getVelocity();
+		double kinematicViscosity = conditions.getAtmosphericConditions().getKinematicViscosity();
+		if (kinematicViscosity < 1e-10 || velocity < 1e-3) {
+			return baseCd;
+		}
+
+		double refLength = conditions.getRefLength();
+		double reD = velocity * refLength / kinematicViscosity;
+
+		if (reD < 1e4) {
+			return baseCd;
+		}
+
+		double logReD = Math.log10(reD);
+		// Lamb-Oberkampf Re correction: high Re -> lower base drag (more energetic wake)
+		double reFactor = MathUtil.clamp(1.0 - 0.08 * (logReD - 6.0), 0.7, 1.3);
+
+		return baseCd * reFactor;
+	}
+
+	/**
+	 * Calculate the Viswanath (1996) boattail correction factor for base drag.
+	 * A boattail (transition with aftRadius < foreRadius) upstream of the base
+	 * energizes the wake and reduces base drag. The correction factor eta_bt
+	 * is in [0, 1] and multiplies the base drag coefficient.
+	 *
+	 * @param s the symmetric component at whose aft end base drag acts
+	 * @param mach freestream Mach number
+	 * @return boattail factor in (0, 1]; 1.0 means no correction
+	 */
+	static double calculateViswanathBoattailFactor(SymmetricComponent s, double mach) {
+		SymmetricComponent boattail = null;
+		if (s instanceof Transition && s.getAftRadius() < s.getForeRadius() && s.getLength() > 0) {
+			boattail = s;
+		} else {
+			SymmetricComponent prev = s.getPreviousSymmetricComponent();
+			if (prev instanceof Transition && prev.getAftRadius() < prev.getForeRadius() && prev.getLength() > 0) {
+				boattail = prev;
+			}
+		}
+
+		if (boattail == null) {
+			return 1.0;
+		}
+
+		double deltaR = boattail.getForeRadius() - boattail.getAftRadius();
+		double thetaBt = Math.toDegrees(Math.atan2(deltaR, boattail.getLength()));
+
+		double etaBt;
+		if (thetaBt < 6.0) {
+			etaBt = 0.25 + 0.05 * thetaBt;
+		} else if (thetaBt < 16.0) {
+			double etaGeom = 0.55 + 0.04 * (thetaBt - 6.0);
+			double machFactor = 1.0 + 0.1 * Math.max(0, mach - 1.0);
+			etaBt = Math.min(etaGeom * machFactor, 0.95);
+		} else {
+			etaBt = Math.max(0.0, 0.95 - 0.05 * (thetaBt - 16.0));
+		}
+
+		return MathUtil.clamp(etaBt, 0.0, 1.0);
+	}
+
+	/**
+	 * Computes the power-on base drag reduction factor.
+	 * <p>
+	 * During motor burn, the exhaust plume partially fills the base region,
+	 * reducing the base drag. The reduction depends on the nozzle exit area
+	 * to base area ratio (AR).
+	 * <p>
+	 * Reference: NASA SP-8055 "Solid Rocket Motor Nozzles" and
+	 * Hoerner "Fluid-Dynamic Drag" Ch. 3.
+	 *
+	 * @param areaRatio nozzle exit area / base area, clamped to [0, 1]
+	 * @return base drag reduction factor in [0, 1]
+	 */
+	public static double powerOnBaseDragFactorDetailed(double areaRatio) {
+		double ar = MathUtil.clamp(areaRatio, 0.0, 1.0);
+
+		if (ar >= 0.8) {
+			return 0.0;
+		} else if (ar >= 0.4) {
+			return 0.2 * (0.8 - ar) / 0.4;
+		} else if (ar >= 0.1) {
+			return 0.2 + 0.6 * (0.4 - ar) / 0.3;
+		} else {
+			return 0.8 + 0.2 * (0.1 - ar) / 0.1;
+		}
+	}
+
+	/** Default power-on base drag reduction factor when nozzle geometry is unavailable. */
+	static final double DEFAULT_POWER_ON_FACTOR = 0.15;
+
+	private static double smoothstep(double t) {
+		t = MathUtil.clamp(t, 0.0, 1.0);
+		return t * t * (3.0 - 2.0 * t);
+	}
+
+	/**
+	 * Compute the effective base drag multiplier accounting for power-on state.
+	 * <p>
+	 * When unpowered (thrustLevel = 0), returns 1.0 (no reduction).
+	 * When powered, returns a factor in [0, 1] that reduces base drag.
+	 *
+	 * @param conditions flight conditions with thrust level and nozzle area ratio
+	 * @return base drag multiplier in [0, 1]
+	 */
+	static double computePowerOnBaseDragMultiplier(FlightConditions conditions) {
+		double thrustLevel = conditions.getThrustLevel();
+		if (thrustLevel <= 0) {
+			return 1.0;
+		}
+
+		double kBase;
+		double nozzleAR = conditions.getNozzleAreaRatio();
+		if (Double.isNaN(nozzleAR)) {
+			kBase = DEFAULT_POWER_ON_FACTOR;
+		} else {
+			kBase = powerOnBaseDragFactorDetailed(nozzleAR);
+		}
+
+		double s = smoothstep(thrustLevel);
+		return 1.0 - s * (1.0 - kBase);
+	}
+
+	/**
 	 * Calculates the boattail correction factor for base drag.
 	 * <p>
 	 * When a component tapers to a smaller aft radius (boattail), the converging
@@ -657,10 +835,46 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		return MathUtil.clamp(factor, 0.3, 1.0);
 	}
 
+	/**
+	 * Phase 6b: Compute base drag reduction factor during motor burn.
+	 * Based on Brazzel et al. (1962) and Dempsey (1976) simplified model.
+	 *
+	 * When the motor is firing, the exhaust plume fills the base region,
+	 * raising base pressure and significantly reducing base drag.
+	 *
+	 * @param areaRatio nozzle exit area / base area (A_e / A_b), must be >= 0
+	 * @return reduction factor k_base in [0, 1] where 0 = no base drag, 1 = full base drag
+	 */
+	public static double powerOnBaseDragFactor(double areaRatio) {
+		if (areaRatio >= 0.8) return 0.0;
+		if (areaRatio >= 0.4) return 0.2 * (0.8 - areaRatio) / 0.4;
+		if (areaRatio >= 0.1) return 0.2 + 0.6 * (0.4 - areaRatio) / 0.3;
+		return 0.8 + 0.2 * (0.1 - areaRatio) / 0.1;
+	}
+
 	private void ensureCalcMap(FlightConfiguration configuration) {
 		if (calcMap == null) {
 			buildCalcMap(configuration);
 		}
+	}
+
+	/**
+	 * Phase 8c: Compute boundary layer transition Reynolds number.
+	 * Michel criterion with compressibility correction.
+	 */
+	public static double transitionReynoldsNumber(double mach) {
+		return 3.0e6 / (1.0 + 0.045 * mach * mach);
+	}
+
+	/**
+	 * Phase 8c: Compute laminar fraction of total wetted length.
+	 */
+	public static double laminarFraction(double mach, double totalLength,
+										  double velocity, double kinematicViscosity) {
+		if (totalLength <= 0 || velocity <= 0 || kinematicViscosity <= 0) return 0;
+		double Re_tr = transitionReynoldsNumber(mach);
+		double x_tr = Re_tr * kinematicViscosity / velocity;
+		return Math.min(x_tr / totalLength, 1.0);
 	}
 
 	private void buildCalcMap(FlightConfiguration configuration) {

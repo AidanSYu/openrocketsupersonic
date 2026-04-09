@@ -62,8 +62,8 @@ public class SupersonicBaselineTest {
 	 */
 	@ParameterizedTest(name = "Cone-Cylinder CD at M{0}")
 	@CsvSource({
-			"0.3,  0.395988",
-			"0.5,  0.412521",
+			"0.3,  0.303597",
+			"0.5,  0.358370",
 			"0.9,  0.482754",
 			"1.1,  0.696012",
 			"1.5,  0.450111",
@@ -78,8 +78,8 @@ public class SupersonicBaselineTest {
 
 	@ParameterizedTest(name = "Ogive-Cylinder CD at M{0}")
 	@CsvSource({
-			"0.3,  0.406004",
-			"0.5,  0.422375",
+			"0.3,  0.310111",
+			"0.5,  0.366172",
 			"0.9,  0.481411",
 			"1.1,  0.544110",
 			"1.5,  0.352605",
@@ -94,7 +94,7 @@ public class SupersonicBaselineTest {
 
 	@ParameterizedTest(name = "Cone-Cylinder-Fins CD at M{0}")
 	@CsvSource({
-			"0.3,  0.632094",
+			"0.3,  0.545927",
 			"0.5,  0.660039",
 			"0.9,  0.772317",
 			"1.1,  1.007036",
@@ -110,14 +110,14 @@ public class SupersonicBaselineTest {
 
 	@ParameterizedTest(name = "Ogive-Boattail-Fins CD at M{0}")
 	@CsvSource({
-			"0.3,  0.558547",
-			"0.5,  0.575807",
-			"0.9,  0.639155",
-			"1.1,  0.716167",
-			"1.5,  0.579907",
-			"2.0,  0.586957",
-			"3.0,  0.542442",
-			"5.0,  0.481664",
+			"0.3,  0.450690",
+			"0.5,  0.508586",
+			"0.9,  0.588382",
+			"1.1,  0.679698",
+			"1.5,  0.561085",
+			"2.0,  0.577892",
+			"3.0,  0.540661",
+			"5.0,  0.478152",
 	})
 	public void testOgiveBoattailFinsCd(double mach, double expectedCD) {
 		double cd = computeTotalCD(SupersonicTestRockets.makeOgiveBoattailFins(), mach);
@@ -126,8 +126,8 @@ public class SupersonicBaselineTest {
 
 	@ParameterizedTest(name = "VonKarman-Fins CD at M{0}")
 	@CsvSource({
-			"0.3,  0.434460",
-			"0.5,  0.464241",
+			"0.3,  0.328014",
+			"0.5,  0.401862",
 			"0.9,  0.659554",
 			"1.1,  0.729573",
 			"1.5,  0.627805",
@@ -158,14 +158,16 @@ public class SupersonicBaselineTest {
 
 	// Phase 3a: CP baselines updated for supersonic body CP aft-shift correction.
 	// CP moves aft at M>1.3 due to crossflow effects (Allen & Perkins).
+	// Phase 6: PNK fin-body interference and Jorgensen crossflow correction shifted
+	// CP values; baselines updated to reflect new model outputs.
 	@ParameterizedTest(name = "Ogive-Boattail-Fins CP at M{0}")
 	@CsvSource({
 			"0.3,  0.443436",
-			"1.0,  0.471133",
-			"1.5,  0.388144",
-			"2.0,  0.309646",
-			"3.0,  0.222959",
-			"5.0,  0.135017",
+			"1.0,  0.478038",
+			"1.5,  0.380653",
+			"2.0,  0.285446",
+			"3.0,  0.174652",
+			"5.0,  0.076827",
 	})
 	public void testOgiveBoattailFinsCPx(double mach, double expectedCPx) {
 		double cpx = computeTotalCPx(SupersonicTestRockets.makeOgiveBoattailFins(), mach);

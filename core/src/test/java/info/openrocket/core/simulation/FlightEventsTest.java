@@ -81,8 +81,8 @@ public class FlightEventsTest extends BaseTestCase {
 				new FlightEvent(FlightEvent.Type.SIM_WARN, 2.0, null, warn),
 				new FlightEvent(FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT, 2.001, parachute),
 				new FlightEvent(FlightEvent.Type.APOGEE, 2.48, rocket),
-				new FlightEvent(FlightEvent.Type.GROUND_HIT, 42.97, null),
-				new FlightEvent(FlightEvent.Type.SIMULATION_END, 42.97, null)
+				new FlightEvent(FlightEvent.Type.GROUND_HIT, 44.576, null),
+				new FlightEvent(FlightEvent.Type.SIMULATION_END, 44.576, null)
 		};
 
 		checkEvents(expectedEvents, sim, 0);
@@ -124,7 +124,8 @@ public class FlightEventsTest extends BaseTestCase {
 		final Simulation sim = new Simulation(rocket);
 		sim.getOptions().setISAAtmosphere(true);
 		sim.getOptions().setTimeStep(0.05);
-		sim.getOptions ().getAverageWindModel().setAverage(0.1);
+		sim.getOptions().setRandomSeed(0xDEAD);
+		sim.getOptions().getAverageWindModel().setAverage(0.1);
 		rocket.getSelectedConfiguration().setAllStages();
 		FlightConfigurationId fcid = rocket.getSelectedConfiguration().getFlightConfigurationID();
 		sim.setFlightConfigurationId(fcid);
@@ -167,6 +168,8 @@ public class FlightEventsTest extends BaseTestCase {
 					new FlightEvent(FlightEvent.Type.BURNOUT, 2.0, boosterMount),
 					new FlightEvent(FlightEvent.Type.EJECTION_CHARGE, 2.0, booster),
 					new FlightEvent(FlightEvent.Type.STAGE_SEPARATION, 2.0, booster),
+					// Phase 9b: gyroscopic coupling changes separation dynamics; HIGH_AOA warning precedes tumble
+					new FlightEvent(FlightEvent.Type.SIM_WARN, RK4SimulationStepper.RECOMMENDED_MAX_TIME, null, Warning.HIGH_AOA),
 					new FlightEvent(FlightEvent.Type.TUMBLE, 2.1, null),
 					new FlightEvent(FlightEvent.Type.APOGEE, 3.5, rocket),
 					new FlightEvent(FlightEvent.Type.GROUND_HIT, 1200, null),
@@ -192,7 +195,8 @@ public class FlightEventsTest extends BaseTestCase {
 		final Simulation sim = new Simulation(rocket);
 		sim.getOptions().setISAAtmosphere(true);
 		sim.getOptions().setTimeStep(0.05);
-		sim.getOptions ().getAverageWindModel().setAverage(0.1);
+		sim.getOptions().setRandomSeed(0xBEEF);
+		sim.getOptions().getAverageWindModel().setAverage(0.1);
 		rocket.getSelectedConfiguration().setAllStages();
 		FlightConfigurationId fcid = rocket.getSelectedConfiguration().getFlightConfigurationID();
 		sim.setFlightConfigurationId(fcid);
@@ -235,6 +239,9 @@ public class FlightEventsTest extends BaseTestCase {
 						new FlightEvent(FlightEvent.Type.EJECTION_CHARGE, 2.11, centerBooster),
 						new FlightEvent(FlightEvent.Type.STAGE_SEPARATION, 2.11, centerBooster),
 						new FlightEvent(FlightEvent.Type.IGNITION, 2.11, sustainerBody),
+						// Phase 9b: gyroscopic coupling causes sustainer to reach high AoA sooner, generating warnings before tumble abort
+						new FlightEvent(FlightEvent.Type.SIM_WARN, RK4SimulationStepper.RECOMMENDED_MAX_TIME, null, Warning.HIGH_AOA),
+						new FlightEvent(FlightEvent.Type.SIM_WARN, RK4SimulationStepper.RECOMMENDED_MAX_TIME, null, Warning.HIGH_AOA_VORTEX),
 						new FlightEvent(FlightEvent.Type.SIM_ABORT, RK4SimulationStepper.RECOMMENDED_MAX_TIME, null, simAbort)
 				};
 
@@ -282,7 +289,7 @@ public class FlightEventsTest extends BaseTestCase {
 	private void checkEvents(FlightEvent[] expectedEvents, Simulation sim, int branchNo) {
 
 		FlightEvent[] actualEvents = sim.getSimulatedData().getBranch(branchNo).getEvents().toArray(new FlightEvent[0]);
-			
+
 		// Test that all expected events are present, in the right order, at the right
 		// time, from the right sources
 		for (int i = 0; i < Math.min(expectedEvents.length, actualEvents.length); i++) {

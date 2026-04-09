@@ -643,6 +643,7 @@ public class Rocket extends ComponentAssembly {
 			return;
 		}
 
+		long perfT0 = System.nanoTime();
 		mutex.lock("fireComponentChangeEvent");
 		try {
 			checkState();
@@ -669,15 +670,22 @@ public class Rocket extends ComponentAssembly {
 				return;
 			}
 
+			long perfT1 = System.nanoTime();
 			// Notify all components first
 			Iterator<RocketComponent> iterator = this.iterator(true);
 			while (iterator.hasNext()) {
 				RocketComponent next = iterator.next();
 				next.componentChanged(cce);
 			}
+			long perfT2 = System.nanoTime();
 			updateConfigurations(ids);
+			long perfT3 = System.nanoTime();
 
 			notifyAllListeners(cce);
+			long perfT4 = System.nanoTime();
+			log.info("[PERF] fireComponentChangeEvent: componentNotify={}ms, updateConfigs={}ms, listeners={}ms, total={}ms",
+					(perfT2 - perfT1) / 1_000_000.0, (perfT3 - perfT2) / 1_000_000.0,
+					(perfT4 - perfT3) / 1_000_000.0, (perfT4 - perfT0) / 1_000_000.0);
 
 		} finally {
 			mutex.unlock("fireComponentChangeEvent");

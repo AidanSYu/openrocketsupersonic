@@ -43,6 +43,16 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 
 	public static final double BODY_LIFT_K = 1.1;
 
+	/**
+	 * Crossflow drag coefficient Cd_c as a function of crossflow Mach number,
+	 * based on Jorgensen (NASA TR R-474, 1977). At low crossflow Mach, Cd_c = 1.2
+	 * (circular cylinder). At supersonic crossflow Mach, Cd_c rises to ~2.0.
+	 */
+	private static final double SUBSONIC_CDC = 1.20;
+	private static final LinearInterpolator crossflowCdcInterpolator = new LinearInterpolator(
+			new double[] { 0.0, 0.2, 0.4, 0.6, 0.8, 0.9, 1.0, 1.2, 1.5, 2.0, 3.0, 5.0 },
+			new double[] { 1.20, 1.20, 1.20, 1.25, 1.35, 1.50, 1.65, 1.80, 1.85, 1.95, 2.00, 2.00 });
+
 	private static final double SUPERSONIC_BLEND_LOW = 1.3;
 	private static final double SUPERSONIC_BLEND_HIGH = 1.5;
 	private static final double MAX_SUPERSONIC_MACH = 10.0;
@@ -73,6 +83,9 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 	private final double wetArea;
 	private final double sinphi;
 	private final double tipHalfAngle;
+
+	// Phase 7d: upstream aft radius for forward-facing step drag (ESDU 66011)
+	private final double upstreamAftRadius;
 
 	public SymmetricComponentCalc(RocketComponent c) {
 		super(c);
@@ -131,6 +144,14 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 			tipHalfAngle = Math.atan2(rAtDx - foreRadius, dx);
 		} else {
 			tipHalfAngle = 0;
+		}
+
+		// Phase 7d: Store the upstream component's aft radius for step drag
+		SymmetricComponent prev = component.getPreviousSymmetricComponent();
+		if (prev != null) {
+			upstreamAftRadius = prev.getAftRadius();
+		} else {
+			upstreamAftRadius = 0;
 		}
 	}
 
@@ -258,13 +279,31 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 	}
 
 	/**
-	 * Calculate the body lift effect according to Galejs, with Mach-dependent
-	 * correction (Phase 3a).
+	 * Returns the crossflow drag coefficient Cd_c for a circular cylinder at the
+	 * given crossflow Mach number, based on Jorgensen (NASA TR R-474, 1977).
 	 * <p>
-	 * At supersonic speeds, the crossflow drag coefficient changes with Mach.
-	 * The effective body lift coefficient is adjusted using the Allen &amp; Perkins
-	 * crossflow analogy: at high crossflow Mach numbers (supercritical crossflow),
-	 * the crossflow Cd decreases, reducing body lift effectiveness.
+	 * Crossflow Mach is defined as M_crossflow = M * sin(alpha), where alpha is
+	 * the angle of attack. At low M_crossflow, Cd_c = 1.2. At supersonic
+	 * crossflow Mach, Cd_c rises to 2.0 due to shock-induced pressure drag on
+	 * the cylindrical cross-section.
+	 *
+	 * @param crossflowMach the crossflow Mach number (M * sin(alpha))
+	 * @return the crossflow drag coefficient Cd_c
+	 */
+	public static double getCrossflowDragCoefficient(double crossflowMach) {
+		if (crossflowMach <= 0.0) {
+			return SUBSONIC_CDC;
+		}
+		if (crossflowMach >= 5.0) {
+			return 2.0;
+		}
+		return crossflowCdcInterpolator.getValue(crossflowMach);
+	}
+
+	/**
+	 * Calculate the body lift effect according to Galejs, with Jorgensen
+	 * crossflow drag coefficient correction at supersonic crossflow Mach
+	 * and Mach-dependent K correction (Phase 3a, Phase 6a).
 	 */
 	protected CoordinateIF getLiftCP(FlightConditions conditions, WarningSet warnings) {
 
@@ -285,7 +324,12 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 		// Phase 3a: Mach-dependent body lift coefficient
 		double effectiveK = getEffectiveBodyLiftK(conditions.getMach());
 
-		return new Coordinate(planformCenter, 0, 0, mul * effectiveK * planformArea / conditions.getRefArea() *
+		// Phase 6a: Jorgensen crossflow drag coefficient correction
+		// At supersonic crossflow Mach (M * sin(alpha)), Cd_c rises from 1.2 to 2.0
+		double crossflowMach = conditions.getMach() * conditions.getSinAOA();
+		double crossflowScale = getCrossflowDragCoefficient(crossflowMach) / SUBSONIC_CDC;
+
+		return new Coordinate(planformCenter, 0, 0, mul * crossflowScale * effectiveK * planformArea / conditions.getRefArea() *
 				conditions.getSinAOA() * conditions.getSincAOA()); // sin(aoa)^2 / aoa
 	}
 
@@ -339,34 +383,140 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 	public double calculatePressureCD(FlightConditions conditions,
 			double stagnationCD, double baseCD, WarningSet warnings) {
 
-		// Check for simple cases first
-		if (MathUtil.equals(foreRadius, aftRadius))
-			return 0;
+		double cd = 0;
 
-		if (length < 0.001) {
+		// Check for simple cases first
+		if (MathUtil.equals(foreRadius, aftRadius)) {
+			cd = 0;
+		} else if (length < 0.001) {
 			if (foreRadius < aftRadius) {
-				return stagnationCD * frontalArea / conditions.getRefArea();
+				cd = stagnationCD * frontalArea / conditions.getRefArea();
 			} else {
-				return baseCD * frontalArea / conditions.getRefArea();
+				cd = baseCD * frontalArea / conditions.getRefArea();
+			}
+		} else if (aftRadius < foreRadius) {
+			// Boattail drag computed directly from base drag
+			if (fineness >= 3) {
+				cd = 0;
+			} else {
+				cd = baseCD * frontalArea / conditions.getRefArea();
+				if (fineness > 1) {
+					cd = cd * (3 - fineness) / 2;
+				}
+			}
+		} else {
+			// All nose cones and shoulders from pre-calculated and interpolating
+			if (interpolator == null) {
+				calculateNoseInterpolator();
+			}
+			cd = interpolator.getValue(conditions.getMach()) * frontalArea / conditions.getRefArea();
+		}
+
+		// Phase 7d: Add ESDU 66011 forward-facing step drag at supersonic speeds
+		cd += calculateStepDrag(conditions);
+
+		return cd;
+	}
+
+	// ---- Phase 7d: ESDU 66011 forward-facing step drag ----
+
+	/** Blend range for step drag activation around M=1. */
+	private static final double STEP_DRAG_BLEND_LOW = 0.95;
+	private static final double STEP_DRAG_BLEND_HIGH = 1.1;
+
+	/**
+	 * Compute the forward-facing step drag for an interstage diameter mismatch
+	 * using the ESDU 66011 model.
+	 *
+	 * @param conditions flight conditions
+	 * @return step drag coefficient (referenced to vehicle S_ref)
+	 */
+	private double calculateStepDrag(FlightConditions conditions) {
+		double mach = conditions.getMach();
+
+		if (mach < STEP_DRAG_BLEND_LOW || foreRadius <= upstreamAftRadius + 1e-6) {
+			return 0;
+		}
+
+		double stepHeight = foreRadius - upstreamAftRadius;
+		if (stepHeight < 1e-6) {
+			return 0;
+		}
+
+		double refArea = conditions.getRefArea();
+		if (refArea < 1e-12) {
+			return 0;
+		}
+
+		// Step face area (annular ring)
+		double aStep = Math.PI * (foreRadius * foreRadius - upstreamAftRadius * upstreamAftRadius);
+
+		// Stagnation pressure coefficient on the step face
+		double cpStag = calculateStepStagnationCp(mach);
+
+		// Step face drag
+		double cdStep = cpStag * aStep / refArea;
+
+		// Reattachment recovery drag
+		double thetaBL = info.openrocket.core.aerodynamics.ShockGeometry.getMomentumThicknessAt(
+				componentAbsoluteX, conditions);
+
+		double cdRecovery = 0;
+		if (mach > 1.0 && thetaBL > 1e-12) {
+			double cf = estimateLocalCf(conditions);
+
+			if (cf > 1e-12) {
+				double m2 = mach * mach;
+				double betaSq = m2 - 1.0;
+				if (betaSq > 0.01) {
+					double cpPlateau = 4.2 * Math.sqrt(2.0 * cf / Math.sqrt(betaSq));
+
+					double recoveryLength = 3.0 * stepHeight;
+					double recoveryArea = 2.0 * Math.PI * foreRadius * recoveryLength;
+					cdRecovery = 0.6 * cpPlateau * recoveryArea / refArea;
+				}
 			}
 		}
 
-		// Boattail drag computed directly from base drag
-		if (aftRadius < foreRadius) {
-			if (fineness >= 3)
-				return 0;
-			double cd = baseCD * frontalArea / conditions.getRefArea();
-			if (fineness <= 1)
-				return cd;
-			return cd * (3 - fineness) / 2;
+		double totalStepDrag = cdStep + cdRecovery;
+
+		// Blend from zero at STEP_DRAG_BLEND_LOW to full at STEP_DRAG_BLEND_HIGH
+		if (mach < STEP_DRAG_BLEND_HIGH) {
+			double t = (mach - STEP_DRAG_BLEND_LOW) / (STEP_DRAG_BLEND_HIGH - STEP_DRAG_BLEND_LOW);
+			double w = t * t * (3 - 2 * t);  // C1-continuous smoothstep
+			totalStepDrag *= w;
 		}
 
-		// All nose cones and shoulders from pre-calculated and interpolating
-		if (interpolator == null) {
-			calculateNoseInterpolator();
-		}
+		return Math.max(0, totalStepDrag);
+	}
 
-		return interpolator.getValue(conditions.getMach()) * frontalArea / conditions.getRefArea();
+	/**
+	 * Compute the stagnation pressure coefficient on a forward-facing step.
+	 */
+	private static double calculateStepStagnationCp(double mach) {
+		if (mach <= 1.0) {
+			return 0;
+		}
+		double pRatio = info.openrocket.core.aerodynamics.shocks.NormalShockRelations.pressureRatio(mach, GAMMA);
+		return (pRatio - 1.0) / (0.5 * GAMMA * mach * mach);
+	}
+
+	/**
+	 * Estimate the local skin friction coefficient at this component's position.
+	 */
+	private double estimateLocalCf(FlightConditions conditions) {
+		if (componentAbsoluteX < 1e-6 || conditions.getVelocity() < 1e-6) {
+			return 0.003;
+		}
+		double nu = conditions.getAtmosphericConditions().getKinematicViscosity();
+		if (nu <= 0) {
+			return 0.003;
+		}
+		double reX = conditions.getVelocity() * componentAbsoluteX / nu;
+		if (reX < 1e4) {
+			return 0.003;
+		}
+		return 1.0 / MathUtil.pow2(1.50 * Math.log(reX) - 5.6);
 	}
 
 	/*
@@ -521,6 +671,34 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 			}
 
 			extendWithShockExpansion();
+		}
+
+		// Phase 6c: Dahlem-Buck override for POWER, PARABOLIC, HAACK at supersonic Mach.
+		// The TR-R-100 tables have limited Mach range and fineness ratio coverage.
+		// Dahlem-Buck extends the cone analytical solution to arbitrary shapes using
+		// semi-empirical shape correction factors, providing better coverage at high Mach.
+		if (shape == Transition.Shape.POWER || shape == Transition.Shape.PARABOLIC
+				|| shape == Transition.Shape.HAACK) {
+			double equivSinPhi = aftRadius / MathUtil.safeSqrt(aftRadius * aftRadius + length * length);
+			LinearInterpolator coneRef = calculateTransonicInterpolator(0, equivSinPhi);
+
+			double blendStart = 1.3;
+			double blendEnd = 1.5;
+
+			for (double m = blendStart; m <= 5.0; m += 0.02) {
+				double kShape = DahlemBuckShapeFactors.getShapeFactor(shape, param, m);
+				double fCorr = DahlemBuckShapeFactors.finenessRatioCorrection(fineness);
+				double cdDahlemBuck = coneRef.getValue(m) * kShape * fCorr;
+
+				if (m <= blendEnd) {
+					double t = (m - blendStart) / (blendEnd - blendStart);
+					double w = 3 * t * t - 2 * t * t * t;  // Hermite smoothstep
+					double cdTRR100 = interpolator.getValue(m);
+					interpolator.addPoint(m, (1 - w) * cdTRR100 + w * cdDahlemBuck);
+				} else {
+					interpolator.addPoint(m, cdDahlemBuck);
+				}
+			}
 		}
 
 		// Phase 2E: proper transonic drag rise from Mdd to first data point
@@ -931,20 +1109,46 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 				new double[] { mdd, firstMach });
 		double[] risePoly = riseInterp.interpolator(0, firstValue, 0, firstDeriv);
 
-		// Sample the rise polynomial at fine intervals for smooth piecewise-linear
-		// approximation. Use 0.01 steps with additional close-approach points at
-		// both boundaries to minimize discretization error in value and derivative.
+		// Lock's 4th-power onset: applied near M_crit for a steeper onset
+		// The critical Mach (onset of local supersonic flow) is slightly below mdd.
+		double mCrit = Math.max(0, mdd - 0.05);
+		double cdAtMcrit = Math.max(0, PolyInterpolator.eval(Math.max(mCrit, mdd), risePoly));
+		double kLock = firstValue - cdAtMcrit;
+
+		// Sample the rise region with Lock's 4th-power near onset
 		interpolator.addPoint(mdd, 0);
 		interpolator.addPoint(mdd + 0.005,
 				Math.max(0, PolyInterpolator.eval(mdd + 0.005, risePoly)));
 		for (double m = mdd + 0.01; m < firstMach - 0.008; m += 0.01) {
-			interpolator.addPoint(m, Math.max(0, PolyInterpolator.eval(m, risePoly)));
+			if (m <= mCrit) {
+				// Below M_crit: use original cubic rise
+				interpolator.addPoint(m, Math.max(0, PolyInterpolator.eval(m, risePoly)));
+			} else if (kLock > 0.001) {
+				// Between M_crit and onset: Lock's 4th-power for steeper rise
+				double xr = (m - mCrit) / (firstMach - mCrit);
+				double deltaCd = kLock * xr * xr * xr * xr;
+				interpolator.addPoint(m, cdAtMcrit + deltaCd);
+			} else {
+				// Fallback: continue cubic rise
+				interpolator.addPoint(m, Math.max(0, PolyInterpolator.eval(m, risePoly)));
+			}
 		}
-		// Close-approach point near the join for smooth transition
-		double nearJoin = firstMach - 0.005;
-		if (nearJoin > mdd + 0.01) {
-			interpolator.addPoint(nearJoin,
-					Math.max(0, PolyInterpolator.eval(nearJoin, risePoly)));
+		// Close-approach points near the join for smooth transition.
+		// Use two points to avoid a large linear-interpolation gap at firstMach.
+		double nearJoin1 = firstMach - 0.005;
+		double nearJoin2 = firstMach - 0.001;
+		if (nearJoin1 > mdd + 0.01) {
+			if (kLock > 0.001) {
+				double xr1 = (nearJoin1 - mCrit) / (firstMach - mCrit);
+				interpolator.addPoint(nearJoin1, cdAtMcrit + kLock * xr1 * xr1 * xr1 * xr1);
+				double xr2 = (nearJoin2 - mCrit) / (firstMach - mCrit);
+				interpolator.addPoint(nearJoin2, cdAtMcrit + kLock * xr2 * xr2 * xr2 * xr2);
+			} else {
+				interpolator.addPoint(nearJoin1,
+						Math.max(0, PolyInterpolator.eval(nearJoin1, risePoly)));
+				interpolator.addPoint(nearJoin2,
+						Math.max(0, PolyInterpolator.eval(nearJoin2, risePoly)));
+			}
 		}
 
 		// Zero below Mdd (LinearInterpolator constant-extrapolates below first point)

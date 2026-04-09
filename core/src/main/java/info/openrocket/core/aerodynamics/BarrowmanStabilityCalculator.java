@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Queue;
 
 import info.openrocket.core.aerodynamics.barrowman.FinSetCalc;
+import info.openrocket.core.masscalc.MassCalculator;
 import info.openrocket.core.aerodynamics.barrowman.RocketComponentCalc;
 import info.openrocket.core.logging.Warning;
 import info.openrocket.core.logging.WarningSet;
@@ -129,6 +130,46 @@ public class BarrowmanStabilityCalculator implements StabilityCalculator {
 		total.setPitchDampingMoment(MathUtil.sign(pitchRate) * pitchDampingMomentMagnitude);
 		total.setYawDampingMoment(MathUtil.sign(yawRate) * yawDampingMomentMagnitude);
 
+		// Phase 11a: Magnus force & moment derivatives
+		// Slender body approximation: Cy_pa = -(2/3) * CNa_body
+		double cnaTotal = total.getCP().getWeight();
+		double xCP = total.getCP().getX();
+		double xCG = conditions.getPitchCenter().getX();
+		double refLen = conditions.getRefLength();
+
+		// Use total CNa as approximation for body CNa contribution
+		// (conservative: body typically contributes 20-40% of total)
+		double cnaBody = cnaTotal * 0.3; // approximate body fraction
+		double cyPa = -(2.0 / 3.0) * cnaBody;
+		double cnPa = cyPa * (xCP - xCG) / refLen;
+
+		total.setCyPa(cyPa);
+		total.setCnPa(cnPa);
+
+		// Phase 8a: Pitch damping derivative Cmq
+		double cmqTotal = 0;
+
+		InstanceMap imap = configuration.getActiveInstances();
+		for (Map.Entry<RocketComponent, ArrayList<InstanceContext>> entry : imap.entrySet()) {
+			RocketComponent comp = entry.getKey();
+			RocketComponentCalc calcObj = calcMap.get(comp);
+			if (calcObj == null) continue;
+
+			AerodynamicForces compForces = calculateComponentNonAxialForces(conditions, comp, calcObj,
+					entry.getValue(), ignoreWarningSet);
+			CoordinateIF cp = compForces.getCP();
+			if (cp != null && !Double.isNaN(cp.getX()) && cp.getWeight() > 0) {
+				double arm = cp.getX() - xCG;
+				cmqTotal += -2.0 * cp.getWeight() * arm * arm / (refLen * refLen);
+			}
+		}
+
+		double mach = conditions.getMach();
+		double k_transonic = 1.0 + 2.5 * Math.exp(-Math.pow((mach - 1.0) / 0.15, 2));
+		cmqTotal *= k_transonic;
+
+		total.setCmq(cmqTotal);
+		total.setCmAlphaDot(0.4 * cmqTotal);
 	}
 
 	@Override

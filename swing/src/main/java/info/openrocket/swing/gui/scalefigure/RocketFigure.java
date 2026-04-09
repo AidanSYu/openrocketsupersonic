@@ -109,6 +109,9 @@ public class RocketFigure extends AbstractScaleFigure {
 	/** Elements painted last, on top of everything (including absoluteExtra), using the rocket transform. */
 	private final ArrayList<FigureElement> relativeTopExtra = new ArrayList<>();
 
+	/** Flag indicating shapes need to be rebuilt on the next paint */
+	private volatile boolean shapesNeedRebuild = true;
+
 	private static Color motorFillColor;
 	private static Color motorBorderColor;
 
@@ -128,6 +131,12 @@ public class RocketFigure extends AbstractScaleFigure {
 		this.axialRotation = Transformation.rotate_x(0.0);
 
 		updateFigure();
+	}
+
+	@Override
+	public void updateFigure() {
+		shapesNeedRebuild = true;
+		super.updateFigure();
 	}
 
 	private static void initColors() {
@@ -276,8 +285,11 @@ public class RocketFigure extends AbstractScaleFigure {
 		updateCanvasOrigin();
         updateCanvasSize();
         updateTransform();
-        
-        updateShapes(figureShapes);
+
+        if (shapesNeedRebuild) {
+            shapesNeedRebuild = false;
+            updateShapes(figureShapes);
+        }
 
 		g2.transform(projection);
 		AffineTransform rocketTransform = g2.getTransform();

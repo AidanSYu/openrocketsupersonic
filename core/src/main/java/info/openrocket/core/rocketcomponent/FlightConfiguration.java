@@ -758,9 +758,9 @@ public class FlightConfiguration implements FlightConfigurableParameter<FlightCo
 	 * @return the rocket's bounding box (under the selected configuration)
 	 */
 	public BoundingBox getBoundingBoxAerodynamic() {
-		// if (rocket.getModID() != boundsModID) {
-		calculateBounds();
-		// }
+		if (rocket.getModID() != boundsModID) {
+			calculateBounds();
+		}
 
 		if (cachedBoundsAerodynamic.isEmpty())
 			cachedBoundsAerodynamic = new BoundingBox(Coordinate.ZERO, Coordinate.X_UNIT);
@@ -774,9 +774,9 @@ public class FlightConfiguration implements FlightConfigurableParameter<FlightCo
 	 * @return the rocket's bounding box (under the selected configuration)
 	 */
 	public BoundingBox getBoundingBox() {
-		// if (rocket.getModID() != boundsModID) {
-		calculateBounds();
-		// }
+		if (rocket.getModID() != boundsModID) {
+			calculateBounds();
+		}
 
 		if (cachedBounds.isEmpty())
 			cachedBounds = new BoundingBox(Coordinate.ZERO, Coordinate.X_UNIT);
