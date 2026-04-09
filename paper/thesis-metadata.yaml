@@ -1,6 +1,6 @@
 ---
-title: "Physics-Based Aerodynamic Modeling for Supersonic and Hypersonic Flight Simulation in OpenRocket Plus"
-subtitle: "Dissertation-style monograph (Technical Report ORP-2026-01)"
+title: "OpenRocket Plus: Physics-Based Supersonic and Hypersonic Aerodynamics as an Open-Source Extension of OpenRocket"
+subtitle: "Technical Report ORP-2026-01"
 author:
   - "Aidan Yu"
 date: "April 2026"
@@ -47,7 +47,7 @@ header-includes: |
   \usepackage{etoolbox}
   \usepackage{graphicx}
   \usepackage{tikz}
-  \usetikzlibrary{arrows.meta,positioning,calc}
+  \usetikzlibrary{arrows.meta,positioning,calc,patterns,decorations.pathreplacing}
   \usepackage{pgfplots}
   \pgfplotsset{compat=1.18}
   \allowdisplaybreaks

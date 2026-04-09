@@ -1,4 +1,4 @@
-# Physics-Based Aerodynamic Modeling for Supersonic and Hypersonic Flight Simulation in OpenRocket Plus
+# OpenRocket Plus: Physics-Based Supersonic and Hypersonic Aerodynamics as an Open-Source Extension of OpenRocket
 
 **Technical Report ORP-2026-01**
 
@@ -6,7 +6,6 @@
 
 **Date:** April 2026
 
----
 
 ## Abstract
 
@@ -16,9 +15,8 @@ The extensions described herein replace these approximations with physics-based 
 
 A complete oblique shock solver implements theta-beta-Mach relations, Taylor-Maccoll cone flow, normal shock jump conditions, and Prandtl-Meyer isentropic expansion, validated against NACA Report 1135 to better than 0.1%. The transonic compressibility factor uses a cubic Hermite spline through Mach 0.95 to 1.05, replacing the catastrophic $\beta_{\min}$ clamp with a C1-continuous function that preserves correct asymptotic behavior.
 
-Drag modeling employs Taylor-Maccoll exact solutions for cone wave drag, second-order shock-expansion theory for ogive bodies, Devan-Ashwood correlations for supersonic base drag, Eckert reference temperature method for compressible skin friction, and Ackeret thin-airfoil theory for fin wave drag. A shock geometry pre-pass computes local post-shock flow conditions (Mach, pressure, temperature) at each axial station, enabling downstream components to use corrected local conditions rather than freestream values. Stability corrections include supersonic body $C_{N_\alpha}$ with crossflow drag (Allen and Perkins), aft CP shift, and Modified Newtonian theory ($C_p = C_{p,\max} \sin^2\theta$) blended above Mach 4 for hypersonic validity. The test suite comprises 524 aerodynamic test methods covering Mach 0.3 to 10+, angles of attack 0 to 15 degrees, and five standard rocket geometries, with zero failures.
+Drag modeling employs Taylor-Maccoll exact solutions for cone wave drag, second-order shock-expansion theory for ogive bodies, Devan-Ashwood correlations for supersonic base drag, Eckert reference temperature method for compressible skin friction, and Ackeret thin-airfoil theory for fin wave drag. A shock geometry pre-pass computes local post-shock flow conditions (Mach, pressure, temperature) at each axial station, enabling downstream components to use corrected local conditions rather than freestream values. Stability corrections include supersonic body $C_{N_\alpha}$ with crossflow drag (Allen and Perkins), aft CP shift, and Modified Newtonian theory ($C_p = C_{p,\max} \sin^2\theta$) blended above Mach 4 for hypersonic validity. The test suite comprises 833 aerodynamic test methods covering Mach 0.3 to 10+, angles of attack 0 to 15 degrees, and five standard rocket geometries, with zero failures.
 
----
 
 ## 1. Introduction
 
@@ -91,7 +89,7 @@ The Barrowman method computes center of pressure assuming incompressible flow. A
 
 The extensions described in this report were guided by three architectural principles.
 
-**Incremental integration with regression gates.** Each new model was implemented, tested, and validated independently before being integrated into the main calculation pipeline. A comprehensive regression test suite (524 test methods as of April 2026) ensured that no previously correct behavior was degraded. Each capability increment was validated against analytical solutions, published experimental data, or both before proceeding to the next.
+**Incremental integration with regression gates.** Each new model was implemented, tested, and validated independently before being integrated into the main calculation pipeline. A comprehensive regression test suite (833 test methods as of April 2026) ensured that no previously correct behavior was degraded. Each capability increment was validated against analytical solutions, published experimental data, or both before proceeding to the next.
 
 **C1-continuous regime blending.** Every transition between aerodynamic regimes (subsonic to transonic, transonic to supersonic, supersonic to hypersonic) uses smooth polynomial interpolation that is continuous in both value and first derivative. Discontinuities in aerodynamic coefficients cause the trajectory integrator to oscillate or diverge near Mach 1, as the simulation repeatedly crosses the discontinuity. The cubic Hermite spline used for the compressibility factor (Section 4) is the canonical example, but the same principle applies to all blending regions:
 
@@ -136,58 +134,41 @@ The following 19 distinct physical phenomena are modeled in the current implemen
 
 ### 1.5 Software Architecture
 
-The aerodynamic calculation pipeline in OpenRocket Plus follows a layered architecture in which a single orchestrator delegates to specialized calculators. The following diagram shows the data flow for a single aerodynamic evaluation at a given Mach number and angle of attack:
+The aerodynamic calculation pipeline in OpenRocket Plus follows a layered architecture in which a single orchestrator delegates to specialized calculators. The following figure shows the data flow for a single aerodynamic evaluation at a given Mach number and angle of attack:
 
-```
- FlightConditions (M, alpha, atm)
-         |
-         v
- +---------------------------+
- |   BarrowmanCalculator     |  <-- orchestrator
- |   (getAerodynamicForces)  |
- +---------------------------+
-         |
-         |  1. Shock pre-pass (once per call)
-         v
- +---------------------------+
- |   ShockGeometry.compute() |  M > 1: oblique shock at nose,
- |                           |  surface marching with PM expansion
- |   Returns: LocalConditions|  and oblique shocks at each station
- |   at each axial station   |  M <= 1: no-op passthrough
- +---------------------------+
-         |
-         |  ShockGeometry passed to both sub-calculators
-         |
-    +----+----+
-    |         |
-    v         v
- +--------+ +--------+
- |Stability| | Drag   |
- |Calc     | | Calc   |
- +--------+ +--------+
-    |         |
-    |         +-- BarrowmanDragCalculator
-    |              |-- Friction drag (Eckert reference temperature)
-    |              |-- Pressure/wave drag (Taylor-Maccoll, shock-expansion)
-    |              |-- Base drag (Devan-Ashwood)
-    |              |-- Override drag (user-specified)
-    |
-    +-- BarrowmanStabilityCalculator
-         |
-         +-- Per-component calculators:
-              |
-              +-- SymmetricComponentCalc (nose cones, transitions)
-              |    - Body CNa with supersonic crossflow correction
-              |    - Body CP with Mach-dependent aft shift
-              |    - Wave drag (Taylor-Maccoll cone, shock-expansion ogive)
-              |    - Modified Newtonian blended above M=4
-              |
-              +-- FinSetCalc (fin sets)
-              |    - K1/K2/K3 fin CNa with local Mach from ShockGeometry
-              |    - Ackeret wave drag with sweep correction
-              |    - Local dynamic pressure correction for fin normal force
-              |
-              +-- RailButtonCalc, LaunchLugCalc, TubeFinCalc, ...
+```{=latex}
+\begin{figure}[!htbp]
+\centering
+\resizebox{0.9\linewidth}{!}{%
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=0.5cm,
+  box/.style={rectangle, draw=black!75, thick, align=center, inner sep=4pt, minimum width=3.0cm},
+  lbl/.style={font=\scriptsize, align=left},
+  arr/.style={-{Latex[length=1.8mm]}, thick, black!80}
+]
+\node[box] (FC) {FlightConditions\\[-0.08em]{\scriptsize ($M$, $\alpha$, atm)}};
+\node[box, below=of FC] (BC) {BarrowmanCalculator\\[-0.08em]{\scriptsize \texttt{getAerodynamicForces} (orchestrator)}};
+\draw[arr] (FC) -- (BC);
+\node[box, below=of BC, text width=8.6cm, inner sep=5pt] (SG) {ShockGeometry.\texttt{compute()}\\[0.12em]
+  {\scriptsize \textbf{Returns} local $M$, $p/p_\infty$, $T/T_\infty$, $q/q_\infty$ at each axial station.
+  $M\le 1$: no-op passthrough.}};
+\draw[arr] (BC) -- node[lbl, right, xshift=0.12cm] {1.~Shock pre-pass (once per call)} (SG);
+\node[box, below left=1.05cm and 0.2cm of SG] (ST) {StabilityCalc};
+\node[box, below right=1.05cm and 0.2cm of SG] (DR) {DragCalc};
+\draw[arr] (SG.south) -- ++(0,-0.42) -| (ST.north);
+\draw[arr] (SG.south) -- ++(0,-0.42) -| (DR.north);
+\node[lbl, text width=4.6cm, below=0.25cm of ST, anchor=north, align=left]
+  {\textbf{BarrowmanStabilityCalculator}\\[0.15em]
+  SymmetricComponentCalc, FinSetCalc, rail/lug/tube fins, \ldots};
+\node[lbl, text width=5.4cm, below=0.25cm of DR, anchor=north, align=left]
+  {\textbf{BarrowmanDragCalculator}\\[0.15em]
+  Eckert friction; Taylor-Maccoll / shock-expansion wave drag; Devan--Ashwood base; overrides.};
+\end{tikzpicture}%
+}
+\caption{Aerodynamic evaluation pipeline: \texttt{ShockGeometry} is computed once per call and shared with stability and drag sub-calculators.}
+\label{fig:barrowman-pipeline-parta}
+\end{figure}
 ```
 
 The key architectural element is `ShockGeometry`, computed once per aerodynamic evaluation. At subsonic Mach numbers it is a no-op passthrough: all local conditions equal freestream, and no computational overhead is incurred. At supersonic Mach numbers, it walks the body chain from nose to tail:
@@ -204,7 +185,6 @@ Between Mach 1.0 and 1.1, the shock geometry corrections are linearly blended to
 
 All shock and expansion computations use validated solvers in the `info.openrocket.core.aerodynamics.shocks` package: `ObliqueShockSolver` (theta-beta-Mach, Taylor-Maccoll), `NormalShockRelations` (Rankine-Hugoniot jump conditions), and `PrandtlMeyerExpansion` (isentropic expansion fan). These are pure mathematical utilities with no dependencies on the rest of the codebase and are independently validated against NACA Report 1135 tables to better than 0.1%.
 
----
 
 ## 2. Nomenclature
 
@@ -303,7 +283,6 @@ All shock and expansion computations use validated solvers in the `info.openrock
 | PM | Prandtl-Meyer (expansion) |
 | TR-R-100 | NASA Technical Report R-100 (Stoney, 1958) |
 
----
 
 ## 3. Atmospheric Model
 
@@ -650,32 +629,36 @@ At 800 K, $\gamma_{\text{eff}}$ has dropped to 1.381, a 1.4% reduction from the 
 
 #### 3.3.5 Behavior of $\gamma$ vs. Temperature
 
-The following ASCII diagram shows the qualitative behavior of $\gamma_{\text{eff}}$ as a function of stagnation temperature:
+The following figure shows the qualitative behavior of $\gamma_{\text{eff}}$ as a function of stagnation temperature:
 
-```
- gamma_eff
-  1.40 |============================+
-       |                            :\
-       |                            : \
-  1.38 |                            :  \
-       |                            :   \
-       |                            :    \
-  1.36 |                            :     \
-       |                            :      \
-       |                            :       \
-  1.34 |                            :        \
-       |                            :         \.
-  1.32 |                            :          '..
-       |                            :             ''...
-  1.30 |----------------------------:--------------------'''''------
-       |                            :
-       +---+----+----+----+----+----+----+----+----+----+----+--->
-       0  500  800 1000 1500 2000 2500 3000 3500 4000 4500 5000
-                          T_stag (K)
-                            ^
-                            |
-                     vibrational excitation
-                        threshold (~800 K)
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.9\linewidth,
+  height=6cm,
+  xmin=0, xmax=5000,
+  ymin=1.29, ymax=1.405,
+  xlabel={$T_{\mathrm{stag}}$ (K)},
+  ylabel={$\gamma_{\mathrm{eff}}$},
+  grid=major,
+  grid style={gray!35},
+  tick label style={font=\small},
+  label style={font=\small},
+]
+\addplot[very thick, black] coordinates {
+  (0,1.400) (500,1.397) (800,1.381) (1000,1.371) (1500,1.349) (2000,1.330)
+  (2500,1.323) (3000,1.316) (4000,1.308) (5000,1.300)
+};
+\draw[dashed, gray] (axis cs:800,1.29) -- (axis cs:800,1.405);
+\node[font=\scriptsize, align=left, anchor=north west] at (axis description cs:0.52,0.22)
+  {vibrational excitation\\threshold ($\sim 800\,\mathrm{K}$)};
+\end{axis}
+\end{tikzpicture}
+\caption{Qualitative decay of effective $\gamma$ with stagnation temperature (behavior of the tabulated vibrational model).}
+\label{fig:gamma-tstag-parta}
+\end{figure}
 ```
 
 Below 800 K, $\gamma = 1.4$ (frozen vibrational modes). Above 800 K, $\gamma$ decreases as vibrational modes progressively absorb energy. The curve flattens above ~3000 K as the vibrational modes approach saturation. The model is clamped at $\gamma = 1.3$ because beyond this point, molecular dissociation (which requires a full chemical equilibrium solver) becomes the dominant effect.
@@ -716,7 +699,6 @@ $$\gamma_{\text{eff}} = \frac{3.003 + 1}{3.003} = \frac{4.003}{3.003} = 1.333$$
 
 Rounding differences from the table (which uses higher precision intermediate values) give the tabulated value of 1.330. At this stagnation temperature (corresponding to roughly Mach 5 flight at sea level), the 5% reduction in $\gamma$ from 1.4 to 1.33 has measurable effects on shock angles, post-shock pressure, and wave drag coefficients.
 
----
 
 ## 4. Compressibility Factor
 
@@ -952,42 +934,44 @@ Both value and first derivative match at both endpoints. The function is therefo
 
 #### 4.3.6 Comparison Diagram
 
-The following ASCII diagram shows $\beta(M)$ for the old clamped model and the new Hermite spline:
+The following figure compares $\beta(M)$ for the old clamped model and the new Hermite spline (with the analytic branches outside the transonic band).
 
-```
- beta
-  1.0 |
-      |\
-      | \
-  0.8 |  \
-      |   \
-      |    \                                                   /
-  0.6 |     \                                                 /
-      |      \                                               /
-      |       \                                             /
-  0.4 |        \                                           /
-      |         \  old clamp: beta = 0.25                 /
-      |          +=============================+         /
-  0.3 |         /  :<-- clamped flat region -->:  \     /
-      |       /    :                           :    \  /
-      |     /      :                           :     \/
-  0.2 |   /        :                           :
-      |  /         :                           :
-      | /  new     :     new spline: smooth    :
-  0.1 |/   spline  :         V-shape           :  new spline
-      |    dips    :        .    .             :   rises
-  0.05|    here    :      .        .           :
-      |            :    .            .         :
-    0 +---+---+---+---+---+---+---+---+---+---+---+---+---+--->
-      0.5 0.6 0.7 0.8 0.9 0.95 1.0 1.05 1.1 1.2 1.3 1.5  M
-                          ^         ^
-                          M_L       M_H
-                        (0.95)    (1.05)
-
-  Key:
-  ===  Old model (clamped at 0.25)
-  ...  New model (Hermite spline, minimum ~ 0.045 near M=1.02)
-  ---  Both models agree (outside transonic band)
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\linewidth,
+  height=6.5cm,
+  xmin=0.45, xmax=1.55,
+  ymin=0, ymax=1.05,
+  xlabel={$M$},
+  ylabel={$\beta$},
+  grid=major,
+  grid style={gray!30},
+  tick label style={font=\small},
+  label style={font=\small},
+  legend style={font=\scriptsize, at={(0.5,0.97)}, anchor=north, legend columns=2},
+]
+\addplot[very thick, blue!70!black, domain=0.5:0.949, samples=80] {sqrt(1-x*x)};
+\addplot[very thick, blue!70!black, domain=1.051:1.55, samples=80] {sqrt(x*x-1)};
+\addlegendentry{Analytic $\sqrt{|1-M^2|}$ (outside spline)}
+\addplot[thick, red, dashed, domain=0.5:1.5, samples=300] {max(0.25,sqrt(abs(1-x*x)))};
+\addlegendentry{Old clamp ($\beta_{\min}=0.25$)}
+\addplot[very thick, black, mark=none] coordinates {
+  (0.95,0.3123)(0.96,0.2821)(0.97,0.2395)(0.98,0.1885)(0.99,0.1353)(1.00,0.0873)
+  (1.01,0.0533)(1.02,0.0448)(1.03,0.0740)(1.04,0.1499)(1.05,0.3202)
+};
+\addlegendentry{Hermite spline $[M_L,M_H]$}
+\draw[dashed, gray] (axis cs:0.95,0) -- (axis cs:0.95,1.05);
+\draw[dashed, gray] (axis cs:1.05,0) -- (axis cs:1.05,1.05);
+\node[font=\scriptsize] at (axis cs:0.95,0.08) {$M_L$};
+\node[font=\scriptsize] at (axis cs:1.05,0.08) {$M_H$};
+\end{axis}
+\end{tikzpicture}
+\caption{$\beta(M)$: analytic Prandtl--Glauert / Ackeret branches, legacy minimum clamp, and cubic Hermite spline in the transonic band (Table~4.3.4 values).}
+\label{fig:beta-comparison}
+\end{figure}
 ```
 
 The old model (dashed line with flat region) produces a plateau from approximately Mach 0.97 to 1.03 where $\beta$ is frozen at 0.25. The new model (smooth curve through the transonic band) dips to a minimum of approximately 0.045 near Mach 1.02 (slightly above Mach 1 due to the asymmetry of the boundary conditions), then rises smoothly into the supersonic formula. The factor $1/\beta$ reaches approximately 22 at the minimum, compared to a maximum of 4 under the old clamp; this factor-of-five increase correctly captures the transonic peak in aerodynamic coefficients.
@@ -1002,6 +986,3 @@ The replacement of the $\beta_{\min} = 0.25$ clamp with the Hermite spline has t
 
 3. **Correct high-Mach behavior preserved.** Above Mach 1.05, the exact supersonic formula $\beta = \sqrt{M^2-1}$ is used directly. At Mach 5, $\beta = 4.899$; the old clamp did not affect this value, and neither does the new spline, confirming that the high-Mach behavior is unchanged.
 
----
-
-*[End of Sections 1-4. Sections 5-10 continue in PART_B.md.]*

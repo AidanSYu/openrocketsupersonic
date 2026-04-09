@@ -1,6 +1,6 @@
-# Section 5: Shock Relations
+## 5. Shock Relations
 
-## 5.1 Overview
+### 5.1 Overview
 
 The aerodynamic analysis of vehicles at supersonic and hypersonic speeds requires
 the computation of shock waves and expansion fans as a prerequisite to determining
@@ -41,24 +41,33 @@ significant digits of accuracy in the computed quantities. This exceeds the
 precision of published tabular data by several orders of magnitude.
 
 
-## 5.2 Normal Shock Relations
+### 5.2 Normal Shock Relations
 
-### 5.2.1 Derivation from Conservation Laws
+#### 5.2.1 Derivation from Conservation Laws
 
 Consider a stationary normal shock wave in a one-dimensional flow. The upstream
 (pre-shock) state is denoted by subscript 1 and the downstream (post-shock) state
 by subscript 2. The shock is a thin, effectively discontinuous region across which
 the flow properties change abruptly.
 
-```
-     Upstream (1)             Downstream (2)
-                   |
-   M1 > 1         |         M2 < 1
-   p1, rho1, T1   |  SHOCK  p2, rho2, T2
-   V1              |         V2
-                   |
-   --------------->|<---------
-     (supersonic)  |  (subsonic)
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex, thick]
+\node[draw, minimum width=3cm, minimum height=2.4cm, align=center] (L) at (-2.5,0)
+  {\textbf{Upstream (1)}\\[0.35em]$M_1>1$\\$p_1,\rho_1,T_1$\\$V_1$};
+\node[draw, minimum width=3cm, minimum height=2.4cm, align=center] (R) at (2.5,0)
+  {\textbf{Downstream (2)}\\[0.35em]$M_2<1$\\$p_2,\rho_2,T_2$\\$V_2$};
+\fill[gray!40] (-0.07,-1.15) rectangle (0.07,1.15);
+\node[above, font=\scriptsize\bfseries] at (0,1.2) {SHOCK};
+\draw[->] (L.east) -- (-0.09,0);
+\draw[->] (0.09,0) -- (R.west);
+\node[font=\scriptsize] at (-2.5,-1.45) {(supersonic)};
+\node[font=\scriptsize] at (2.5,-1.45) {(subsonic)};
+\end{tikzpicture}
+\caption{Stationary normal shock: control volume spanning the thin shock region.}
+\label{fig:normal-shock-schematic-partb}
+\end{figure}
 ```
 
 We apply the three fundamental conservation laws to a control volume enclosing the
@@ -105,12 +114,12 @@ of the shock. This immediately gives:
 
 $$T_{01} = T_{02}, \qquad a_{01} = a_{02} \tag{5.7}$$
 
-### 5.2.2 The Rankine-Hugoniot Relations
+#### 5.2.2 The Rankine-Hugoniot Relations
 
 We now derive each of the five standard normal shock relations in terms of the
 upstream Mach number $M_1$ and the specific heat ratio $\gamma$.
 
-#### Relation 1: Static Pressure Ratio $p_2/p_1$
+##### Relation 1: Static Pressure Ratio $p_2/p_1$
 
 From the momentum equation (5.2), substitute $\rho V^2 = \rho a^2 M^2 = \gamma p M^2$:
 
@@ -144,7 +153,7 @@ Note that at $M_1 = 1$, the pressure ratio is unity (infinitely weak shock, i.e.
 a Mach wave). As $M_1 \to \infty$, $p_2/p_1 \to \frac{2\gamma}{\gamma+1} M_1^2$,
 growing without bound.
 
-#### Relation 2: Density Ratio $\rho_2/\rho_1$
+##### Relation 2: Density Ratio $\rho_2/\rho_1$
 
 From continuity and momentum, combined with the energy equation, one derives the
 density ratio (equivalently, the velocity ratio $V_1/V_2$ by continuity):
@@ -174,7 +183,7 @@ density ratio across a normal shock is bounded. This is a fundamental consequenc
 of the energy equation and has profound implications for hypersonic aerodynamics
 (the shock layer becomes very thin but the density jump is finite).
 
-#### Relation 3: Temperature Ratio $T_2/T_1$
+##### Relation 3: Temperature Ratio $T_2/T_1$
 
 From the ideal gas law $p = \rho R T$:
 
@@ -200,7 +209,7 @@ public static double temperatureRatio(double m1, double gamma) {
 This approach avoids duplicating the algebraic expressions and ensures consistency
 between the three thermodynamic ratios.
 
-#### Relation 4: Downstream Mach Number $M_2$
+##### Relation 4: Downstream Mach Number $M_2$
 
 This is the most consequential relation physically: a normal shock always produces
 subsonic downstream flow ($M_2 < 1$ for $M_1 > 1$). The derivation proceeds from
@@ -252,7 +261,7 @@ $$M_2^2 \to \frac{\gamma - 1}{2\gamma} \tag{5.16}$$
 
 For $\gamma = 1.4$, $M_{2,\min} = \sqrt{1/7} \approx 0.3780$.
 
-#### Relation 5: Total Pressure Ratio $p_{02}/p_{01}$ (Rayleigh Pitot Formula)
+##### Relation 5: Total Pressure Ratio $p_{02}/p_{01}$ (Rayleigh Pitot Formula)
 
 While the stagnation temperature is preserved across the shock ($T_{01} = T_{02}$),
 the stagnation pressure is not. The entropy increase across the shock manifests as
@@ -288,7 +297,7 @@ $M_1 > 1$, $p_{02}/p_{01} < 1$ always, and the ratio decreases monotonically wit
 increasing $M_1$. In the strong-shock limit, the total pressure loss becomes very
 severe; at $M_1 = 10$ for air, $p_{02}/p_{01} \approx 0.00304$.
 
-### 5.2.3 Inverse Relation: Mach from Pressure Ratio
+#### 5.2.3 Inverse Relation: Mach from Pressure Ratio
 
 Equation (5.9) can be inverted analytically to recover the upstream Mach number
 from a measured static pressure ratio:
@@ -305,7 +314,7 @@ public static double machFromPressureRatio(double pressRatio, double gamma) {
 }
 ```
 
-### 5.2.4 Worked Example: $M_1 = 2.0$, $\gamma = 1.4$
+#### 5.2.4 Worked Example: $M_1 = 2.0$, $\gamma = 1.4$
 
 We compute all five normal shock ratios step by step.
 
@@ -351,7 +360,7 @@ $$(4.500)^{2.5} = e^{2.5 \ln 4.500} = e^{2.5 \times 1.50408} = e^{3.76019} = 43.
 
 $$\frac{p_{02}}{p_{01}} = \frac{30.9731}{43.0127} = 0.72088$$
 
-### 5.2.5 Validation Table: Normal Shock Relations vs NACA 1135
+#### 5.2.5 Validation Table: Normal Shock Relations vs NACA 1135
 
 All values computed with $\gamma = 1.4$. NACA 1135 tabulated values are shown
 alongside computed values. Discrepancies, where they exist, are in the last
@@ -396,32 +405,30 @@ $p_{02}/p_{01}$) is due to rounding of the tabulated value; the computed result
 0.003045 rounds to 0.00304 or 0.00305 depending on the last digit.
 
 
-## 5.3 Oblique Shock Relations
+### 5.3 Oblique Shock Relations
 
-### 5.3.1 Geometry and Velocity Decomposition
+#### 5.3.1 Geometry and Velocity Decomposition
 
 When a supersonic flow encounters a planar compression surface (a wedge), the
 flow turns through the deflection angle $\theta$ and an oblique shock wave forms
 at the wave angle $\beta$ measured from the upstream flow direction.
 
-```
-                          * Shock wave (angle beta from flow direction)
-                        *  |
-                      *    |  beta
-                    *      |
-                  * -------+-----------> Upstream flow (M1)
-                *          |
-              *            |
-     -------*   theta      |
-            |\             |
-            | \            |
-            |  \           |
-            |   \  Wedge   |
-            |    \  surface|
-            |     \        |
-   ---------+------\-------+---------
-            |       \
-                     \  (half-angle theta)
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Latex, font=\small]
+\coordinate (O) at (0,0);
+\draw[->, thick] (-0.2,0) -- (5.2,0) node[below] {upstream flow ($M_1$)};
+\draw[thick] (O) -- (52:3.8) node[above, sloped, pos=0.5] {shock ($\beta$)};
+\draw[thick] (O) -- (-18:4.0) node[below, sloped] {wedge surface};
+\draw (0.55,0) arc (0:52:0.55);
+\node at (26:0.85) {\small $\beta$};
+\draw (0.4,0) arc (0:-18:0.4);
+\node at (-9:0.58) {\small $\theta$};
+\end{tikzpicture}
+\caption{Oblique shock at angle $\beta$ and wedge half-angle $\theta$ (planar compression corner).}
+\label{fig:oblique-wedge-geometry}
+\end{figure}
 ```
 
 The key insight for analyzing oblique shocks is velocity decomposition. The
@@ -445,7 +452,7 @@ $$M_{n1} = M_1 \sin\beta, \qquad M_{n2} = f(M_{n1}) \tag{5.23}$$
 where $f$ denotes the normal shock downstream Mach relation (Eq. 5.15) applied to
 $M_{n1}$.
 
-### 5.3.2 The Theta-Beta-Mach Relation
+#### 5.3.2 The Theta-Beta-Mach Relation
 
 The deflection angle $\theta$ is related to the shock angle $\beta$ and upstream
 Mach number $M_1$ by a geometric constraint. Downstream of the shock, the flow
@@ -520,7 +527,7 @@ $$\tan\theta = \frac{2\sin\beta\cos\beta(M_1^2\sin^2\beta - 1)}{\sin^2\beta[M_1^
 
 which is Eq. (5.27).
 
-### 5.3.3 Weak and Strong Shock Solutions
+#### 5.3.3 Weak and Strong Shock Solutions
 
 For a given $M_1$ and $\theta$, Eq. (5.27) is transcendental in $\beta$ and
 generally admits two solutions:
@@ -546,7 +553,7 @@ where $\mu = \arcsin(1/M_1)$ is the Mach angle. At $\beta = \mu$, the shock
 degenerates to a Mach wave ($\theta = 0$, infinitesimal disturbance). At
 $\beta = \pi/2$, the shock is normal.
 
-### 5.3.4 Maximum Deflection Angle and Golden-Section Search
+#### 5.3.4 Maximum Deflection Angle and Golden-Section Search
 
 The maximum deflection angle for a given $M_1$ occurs at a specific $\beta$
 between the Mach angle and $90°$. This $\beta_{\max}$ is found by maximizing
@@ -585,7 +592,7 @@ private static double betaAtMaxDeflection(double m1, double gamma) {
 The result is cached (keyed on $M_1$ and $\gamma$) because `betaAtMaxDeflection`
 is called multiple times during a single `solve()` invocation.
 
-### 5.3.5 Bisection for $\beta(\theta)$: Why Not Newton-Raphson
+#### 5.3.5 Bisection for $\beta(\theta)$: Why Not Newton-Raphson
 
 The implementation solves $\beta$ from $\theta$ using bisection rather than
 Newton-Raphson. This design choice merits explanation.
@@ -644,7 +651,7 @@ public static double betaFromTheta(double m1, double theta, double gamma, boolea
 }
 ```
 
-### 5.3.6 Post-Shock Property Computation
+#### 5.3.6 Post-Shock Property Computation
 
 Once $\beta$ is known, all downstream properties are computed by applying the
 normal shock relations to the normal Mach component $M_{n1} = M_1 \sin\beta$:
@@ -689,7 +696,7 @@ The clamp $M_{n1} \geq 1.0$ is a defensive measure for cases where numerical
 imprecision in $\beta$ could yield $M_1 \sin\beta < 1$ when the shock angle is
 very close to the Mach angle.
 
-### 5.3.7 Worked Example: $M_1 = 2.0$, $\theta = 10°$
+#### 5.3.7 Worked Example: $M_1 = 2.0$, $\theta = 10°$
 
 **Given**: $M_1 = 2.0$, $\theta = 10° = 0.17453$ rad, $\gamma = 1.4$.
 
@@ -729,7 +736,7 @@ $$\frac{p_{02}}{p_{01}} \approx 0.9842$$
 
 Only about 1.6% total pressure loss, indicating a relatively weak shock.
 
-### 5.3.8 Validation Table: $\beta$ (degrees) vs NACA 1135
+#### 5.3.8 Validation Table: $\beta$ (degrees) vs NACA 1135
 
 Weak shock solutions for $\gamma = 1.4$:
 
@@ -747,9 +754,9 @@ Weak shock solutions for $\gamma = 1.4$:
 All oblique shock angles agree with NACA 1135 to within the tabulation precision.
 
 
-## 5.4 Taylor-Maccoll Cone Flow
+### 5.4 Taylor-Maccoll Cone Flow
 
-### 5.4.1 Physical Motivation: Three-Dimensional Relief
+#### 5.4.1 Physical Motivation: Three-Dimensional Relief
 
 When a supersonic flow encounters a cone (rather than a wedge), the shock wave is
 weaker than the corresponding 2D wedge shock for the same half-angle. The physical
@@ -758,29 +765,20 @@ the circumferential direction, reducing the required compression. The flow
 downstream of a conical shock is not uniform (unlike the wedge case) but varies
 along rays from the apex of the cone.
 
-```
-                      Conical shock surface
-                    * * *
-                  *       *
-                *    M2     *
-              *    varies    *
-            * ------->        *
-          * M1      beta_cone  *
-        * --------+             *
-      *     \     |              *
-    *        \    |               *
-   *     theta_c\ |                *
-  *               \|                 *
-  * * * * * * * * *+  Cone apex       *
-                   |\                  *
-                   | \                  *
-                   |  \  Cone surface    *
-                   |   \                  *
-                   |    \                  *
-
-    Axis of symmetry (horizontal)
-
-    Key: beta_cone < beta_wedge for same theta_c and M1
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex]
+\coordinate (A) at (0,0);
+\draw[->, thick] (-0.3,0) -- (5.5,0) node[below] {axis of symmetry};
+\draw[thick] (A) -- (18:4.2) node[right] {cone surface ($\theta_c$)};
+\draw[thick, dashed] (A) -- (42:3.6) node[above, sloped, pos=0.6] {conical shock ($\beta_{\mathrm{cone}}$)};
+\node[align=left, anchor=west] at (0.15,1.65) {$M_1$ freestream\\post-shock $M_2$ varies\\along rays};
+\node[align=center, font=\scriptsize] at (2.85,-1.05) {3D relief: $\beta_{\mathrm{cone}} < \beta_{\mathrm{wedge}}$ for same $\theta_c$, $M_1$};
+\end{tikzpicture}
+\caption{Schematic conical shock and axisymmetric ``3D relief'' relative to a wedge at the same half-angle.}
+\label{fig:conical-shock-relief}
+\end{figure}
 ```
 
 For a wedge at half-angle $\theta$, the post-shock flow is uniform and parallel to
@@ -790,7 +788,7 @@ angle measured from the axis. The surface conditions on the cone are reached onl
 at the innermost ray ($\theta = \theta_c$) after the flow has turned smoothly
 through the conical flow field.
 
-### 5.4.2 The Taylor-Maccoll Ordinary Differential Equation
+#### 5.4.2 The Taylor-Maccoll Ordinary Differential Equation
 
 The Taylor-Maccoll equation governs steady, inviscid, irrotational, conically
 symmetric supersonic flow. "Conical symmetry" means that all flow properties
@@ -865,7 +863,7 @@ The implementation detects near-singularity ($|\text{denominator}| < 10^{-15}$) 
 returns a large value with the physically correct sign to prevent the integrator
 from crossing through the sonic line improperly.
 
-### 5.4.3 Boundary Conditions
+#### 5.4.3 Boundary Conditions
 
 **At the shock** ($\theta = \beta_{\text{cone}}$): The conditions immediately
 behind the conical shock are computed using the oblique shock relations. The Mach
@@ -888,7 +886,7 @@ Note that $V_\theta$ is negative because the flow is turning toward the axis
 which means $V_\theta = 0$ at $\theta = \theta_c$. This is the condition that
 determines the correct shock angle $\beta_{\text{cone}}$.
 
-### 5.4.4 Shooting Method and Adaptive RK4 Integration
+#### 5.4.4 Shooting Method and Adaptive RK4 Integration
 
 Since the cone shock angle $\beta_{\text{cone}}$ is unknown, the problem is solved
 as a boundary value problem using a shooting method:
@@ -954,7 +952,7 @@ for (int step = 0; step < maxSteps; step++) {
 }
 ```
 
-### 5.4.5 Surface Conditions via Isentropic Path
+#### 5.4.5 Surface Conditions via Isentropic Path
 
 Once the cone shock angle $\beta_{\text{cone}}$ is determined and the integration
 reaches $\theta = \theta_c$, the surface conditions are recovered. The
@@ -975,7 +973,7 @@ The density ratio follows from the ideal gas law:
 
 $$\frac{\rho_s}{\rho_1} = \frac{p_s/p_1}{T_s/T_1} \tag{5.45}$$
 
-### 5.4.6 Cone Pressure Coefficient
+#### 5.4.6 Cone Pressure Coefficient
 
 The pressure coefficient on the cone surface is defined in the standard way:
 
@@ -991,7 +989,7 @@ public static double conePressureCoefficient(double m1, double coneAngle, double
 }
 ```
 
-### 5.4.7 Validation Table: Cone Shock vs Wedge Shock
+#### 5.4.7 Validation Table: Cone Shock vs Wedge Shock
 
 All angles in degrees. $\gamma = 1.4$. The cone shock angle is consistently
 smaller than the wedge shock angle for the same half-angle and Mach number,
@@ -1018,33 +1016,29 @@ Report 1135) agree with the computed cone shock angles to within $0.1°$ across 
 full range of conditions tested.
 
 
-## 5.5 Prandtl-Meyer Expansion
+### 5.5 Prandtl-Meyer Expansion
 
-### 5.5.1 Physical Description
+#### 5.5.1 Physical Description
 
 A Prandtl-Meyer expansion fan occurs when supersonic flow encounters a convex
 corner (the surface turns away from the flow). Unlike a shock wave, the expansion
 is a continuous, isentropic process: entropy is conserved, and the flow accelerates
 smoothly through a fan of Mach waves (characteristics) emanating from the corner.
 
-```
-                     Expansion fan
-         Upstream     | / / / / |   Downstream
-         M1 > 1       |/ / / /  |   M2 > M1
-    ===================/= = = ==|==================
-    \\\\\\\\\\\\\\\\\ /         |\\\\\\\\\\\\\\\\\\
-     \\\\\\\\\\\\\\\\/   delta  |\\\\\\\\\\\\\\\\\\
-      \\\\\\\\\\\\\\/ <-------->|\\\\\\\\\\\\\\\\\\
-       \\\\\\\\\\\\/            |\\\\\\\\\\\\\\\\\\\
-        \\\\\\\\\\\/            | \\\\\\\\\\\\\\\\\\
-         \\\\\\\\\\/            |  \\\\\\\\\\\\\\\\\
-          \\\\\\\\\/   Convex   |   \\\\\\\\\\\\\\\\
-                       corner
-
-    The fan spans from the upstream Mach angle mu1 = arcsin(1/M1)
-    to the downstream Mach angle mu2 = arcsin(1/M2).
-    The flow turns through angle delta between them.
-    All properties change continuously (no discontinuity).
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex]
+\draw[thick] (-3,0) -- (-0.5,0) node[midway, above] {$M_1>1$};
+\draw[thick] (1.2,0) -- (3.5,0) node[midway, above] {$M_2>M_1$};
+\foreach \a in {15,22,29,36,43,50} {\draw[densely dashed] (-0.5,0) -- ({-0.5+2.5*cos(\a)},{2.5*sin(\a)}); }
+\fill (-0.5,0) circle (1.5pt) node[below=2pt] {convex corner};
+\node[align=left, anchor=west, font=\scriptsize] at (-3.1,-1.35)
+  {Fan from $\mu_1=\arcsin(1/M_1)$ to $\mu_2=\arcsin(1/M_2)$;\\turn $\delta$; isentropic, continuous.};
+\end{tikzpicture}
+\caption{Prandtl--Meyer expansion fan at a convex corner (schematic Mach waves).}
+\label{fig:pm-expansion-fan}
+\end{figure}
 ```
 
 The key properties of a Prandtl-Meyer expansion:
@@ -1055,7 +1049,7 @@ The key properties of a Prandtl-Meyer expansion:
 - **Continuous**: Properties change smoothly through the fan (contrast with the
   discontinuous jump across a shock).
 
-### 5.5.2 Derivation of the Prandtl-Meyer Function $\nu(M)$
+#### 5.5.2 Derivation of the Prandtl-Meyer Function $\nu(M)$
 
 The Prandtl-Meyer function $\nu(M)$ gives the total turning angle required to
 accelerate a flow from $M = 1$ (sonic) to a given Mach number $M$ through a
@@ -1128,7 +1122,7 @@ public static double nu(double mach, double gamma) {
 }
 ```
 
-### 5.5.3 Maximum Prandtl-Meyer Angle
+#### 5.5.3 Maximum Prandtl-Meyer Angle
 
 As $M \to \infty$, $\sqrt{M^2-1} \to \infty$, and both arctangent terms approach
 $\pi/2$:
@@ -1149,7 +1143,7 @@ public static double nuMax(double gamma) {
 }
 ```
 
-### 5.5.4 Derivative of the Prandtl-Meyer Function
+#### 5.5.4 Derivative of the Prandtl-Meyer Function
 
 The derivative $d\nu/dM$ is needed for the Newton-Raphson inversion. From Eq. (5.49):
 
@@ -1166,7 +1160,7 @@ public static double dnuDm(double mach, double gamma) {
 }
 ```
 
-### 5.5.5 Newton-Raphson Inversion with Stanyukovich Initial Guess
+#### 5.5.5 Newton-Raphson Inversion with Stanyukovich Initial Guess
 
 The inverse problem, finding $M$ given $\nu$, requires solving the transcendental
 equation $\nu(M) = \nu_{\text{target}}$. Newton-Raphson iteration is well-suited
@@ -1210,7 +1204,7 @@ public static double machFromNu(double nuTarget, double gamma) {
 }
 ```
 
-### 5.5.6 Convergence Example
+#### 5.5.6 Convergence Example
 
 Target: $\nu_{\text{target}} = 26.38° = 0.46043$ rad. ($\gamma = 1.4$)
 
@@ -1235,7 +1229,7 @@ within 5.3% of the true value, providing an excellent starting point.
 
 The true answer is $M = 1.65295$ for $\nu = 26.38°$.
 
-### 5.5.7 Isentropic Pressure and Temperature Ratios
+#### 5.5.7 Isentropic Pressure and Temperature Ratios
 
 Since the expansion is isentropic, the total conditions ($p_0$, $T_0$) are
 preserved. The static property ratios across the expansion are:
@@ -1262,7 +1256,7 @@ public static double temperatureRatio(double m1, double m2, double gamma) {
 }
 ```
 
-### 5.5.8 Validation Table: $\nu(M)$ vs NACA 1135
+#### 5.5.8 Validation Table: $\nu(M)$ vs NACA 1135
 
 All values for $\gamma = 1.4$.
 
@@ -1281,7 +1275,7 @@ tabulated $(M, \nu)$ pair, computing `machFromNu(nu(M))` recovers $M$ to within
 $10^{-11}$ (limited only by the convergence tolerance $10^{-12}$).
 
 
-## 5.6 Summary of Numerical Parameters
+### 5.6 Summary of Numerical Parameters
 
 The following table summarizes all numerical tolerances, iteration limits, and
 algorithmic constants used in the shock relations package.
@@ -1313,3 +1307,4 @@ iteration limits (100 for bisection/Newton, 50,000 for the ODE integrator) are
 conservative upper bounds; typical convergence occurs well within these limits
 (bisection in approximately 40 iterations, Newton in 3-5 iterations, ODE
 integration in a few hundred steps).
+

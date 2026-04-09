@@ -6,9 +6,8 @@ The extensions described herein replace these approximations with physics-based 
 
 A complete oblique shock solver implements theta-beta-Mach relations, Taylor-Maccoll cone flow, normal shock jump conditions, and Prandtl-Meyer isentropic expansion, validated against NACA Report 1135 to better than 0.1%. The transonic compressibility factor uses a cubic Hermite spline through Mach 0.95 to 1.05, replacing the catastrophic $\beta_{\min}$ clamp with a C1-continuous function that preserves correct asymptotic behavior.
 
-Drag modeling employs Taylor-Maccoll exact solutions for cone wave drag, second-order shock-expansion theory for ogive bodies, Devan-Ashwood correlations for supersonic base drag, Eckert reference temperature method for compressible skin friction, and Ackeret thin-airfoil theory for fin wave drag. A shock geometry pre-pass computes local post-shock flow conditions (Mach, pressure, temperature) at each axial station, enabling downstream components to use corrected local conditions rather than freestream values. Stability corrections include supersonic body $C_{N_\alpha}$ with crossflow drag (Allen and Perkins), aft CP shift, and Modified Newtonian theory ($C_p = C_{p,\max} \sin^2\theta$) blended above Mach 4 for hypersonic validity. The test suite comprises 524 aerodynamic test methods covering Mach 0.3 to 10+, angles of attack 0 to 15 degrees, and five standard rocket geometries, with zero failures.
+Drag modeling employs Taylor-Maccoll exact solutions for cone wave drag, second-order shock-expansion theory for ogive bodies, Devan-Ashwood correlations for supersonic base drag, Eckert reference temperature method for compressible skin friction, and Ackeret thin-airfoil theory for fin wave drag. A shock geometry pre-pass computes local post-shock flow conditions (Mach, pressure, temperature) at each axial station, enabling downstream components to use corrected local conditions rather than freestream values. Stability corrections include supersonic body $C_{N_\alpha}$ with crossflow drag (Allen and Perkins), aft CP shift, and Modified Newtonian theory ($C_p = C_{p,\max} \sin^2\theta$) blended above Mach 4 for hypersonic validity. The test suite comprises 833 aerodynamic test methods covering Mach 0.3 to 10+, angles of attack 0 to 15 degrees, and five standard rocket geometries, with zero failures.
 
----
 
 ## 1. Introduction
 
@@ -81,7 +80,7 @@ The Barrowman method computes center of pressure assuming incompressible flow. A
 
 The extensions described in this report were guided by three architectural principles.
 
-**Incremental integration with regression gates.** Each new model was implemented, tested, and validated independently before being integrated into the main calculation pipeline. A comprehensive regression test suite (524 test methods as of April 2026) ensured that no previously correct behavior was degraded. Each capability increment was validated against analytical solutions, published experimental data, or both before proceeding to the next.
+**Incremental integration with regression gates.** Each new model was implemented, tested, and validated independently before being integrated into the main calculation pipeline. A comprehensive regression test suite (833 test methods as of April 2026) ensured that no previously correct behavior was degraded. Each capability increment was validated against analytical solutions, published experimental data, or both before proceeding to the next.
 
 **C1-continuous regime blending.** Every transition between aerodynamic regimes (subsonic to transonic, transonic to supersonic, supersonic to hypersonic) uses smooth polynomial interpolation that is continuous in both value and first derivative. Discontinuities in aerodynamic coefficients cause the trajectory integrator to oscillate or diverge near Mach 1, as the simulation repeatedly crosses the discontinuity. The cubic Hermite spline used for the compressibility factor (Section 4) is the canonical example, but the same principle applies to all blending regions:
 
@@ -129,9 +128,9 @@ The following 19 distinct physical phenomena are modeled in the current implemen
 The aerodynamic calculation pipeline in OpenRocket Plus follows a layered architecture in which a single orchestrator delegates to specialized calculators. The following diagram shows the data flow for a single aerodynamic evaluation at a given Mach number and angle of attack:
 
 ```{=latex}
-\begin{figure}[htbp]
+\begin{figure}[!htbp]
 \centering
-\resizebox{\linewidth}{!}{%
+\resizebox{0.9\linewidth}{!}{%
 \begin{tikzpicture}[
   font=\footnotesize,
   node distance=0.5cm,
@@ -142,15 +141,14 @@ The aerodynamic calculation pipeline in OpenRocket Plus follows a layered archit
 \node[box] (FC) {FlightConditions\\[-0.08em]{\scriptsize ($M$, $\alpha$, atm)}};
 \node[box, below=of FC] (BC) {BarrowmanCalculator\\[-0.08em]{\scriptsize \texttt{getAerodynamicForces} (orchestrator)}};
 \draw[arr] (FC) -- (BC);
-\node[box, below=of BC] (SG) {ShockGeometry.\texttt{compute()}};
+\node[box, below=of BC, text width=8.6cm, inner sep=5pt] (SG) {ShockGeometry.\texttt{compute()}\\[0.12em]
+  {\scriptsize \textbf{Returns} local $M$, $p/p_\infty$, $T/T_\infty$, $q/q_\infty$ at each axial station.
+  $M\le 1$: no-op passthrough.}};
 \draw[arr] (BC) -- node[lbl, right, xshift=0.12cm] {1.~Shock pre-pass (once per call)} (SG);
-\node[lbl, below=0.12cm of SG, anchor=north, text width=8.8cm, align=center]
-  {\textbf{Returns} local $M$, $p/p_\infty$, $T/T_\infty$, $q/q_\infty$ at each axial station.
-  $M\le 1$: no-op passthrough.};
-\node[box, below left=1.15cm and 0.2cm of SG] (ST) {StabilityCalc};
-\node[box, below right=1.15cm and 0.2cm of SG] (DR) {DragCalc};
-\draw[arr] (SG.south) -- ++(0,-0.35) -| (ST.north);
-\draw[arr] (SG.south) -- ++(0,-0.35) -| (DR.north);
+\node[box, below left=1.05cm and 0.2cm of SG] (ST) {StabilityCalc};
+\node[box, below right=1.05cm and 0.2cm of SG] (DR) {DragCalc};
+\draw[arr] (SG.south) -- ++(0,-0.42) -| (ST.north);
+\draw[arr] (SG.south) -- ++(0,-0.42) -| (DR.north);
 \node[lbl, text width=4.6cm, below=0.25cm of ST, anchor=north, align=left]
   {\textbf{BarrowmanStabilityCalculator}\\[0.15em]
   SymmetricComponentCalc, FinSetCalc, rail/lug/tube fins, \ldots};
@@ -178,7 +176,6 @@ Between Mach 1.0 and 1.1, the shock geometry corrections are linearly blended to
 
 All shock and expansion computations use validated solvers in the `info.openrocket.core.aerodynamics.shocks` package: `ObliqueShockSolver` (theta-beta-Mach, Taylor-Maccoll), `NormalShockRelations` (Rankine-Hugoniot jump conditions), and `PrandtlMeyerExpansion` (isentropic expansion fan). These are pure mathematical utilities with no dependencies on the rest of the codebase and are independently validated against NACA Report 1135 tables to better than 0.1%.
 
----
 
 ## 2. Nomenclature
 
@@ -277,7 +274,6 @@ All shock and expansion computations use validated solvers in the `info.openrock
 | PM | Prandtl-Meyer (expansion) |
 | TR-R-100 | NASA Technical Report R-100 (Stoney, 1958) |
 
----
 
 ## 3. Atmospheric Model
 
@@ -694,7 +690,6 @@ $$\gamma_{\text{eff}} = \frac{3.003 + 1}{3.003} = \frac{4.003}{3.003} = 1.333$$
 
 Rounding differences from the table (which uses higher precision intermediate values) give the tabulated value of 1.330. At this stagnation temperature (corresponding to roughly Mach 5 flight at sea level), the 5% reduction in $\gamma$ from 1.4 to 1.33 has measurable effects on shock angles, post-shock pressure, and wave drag coefficients.
 
----
 
 ## 4. Compressibility Factor
 
@@ -930,42 +925,44 @@ Both value and first derivative match at both endpoints. The function is therefo
 
 #### 4.3.6 Comparison Diagram
 
-The following ASCII diagram shows $\beta(M)$ for the old clamped model and the new Hermite spline:
+The following figure compares $\beta(M)$ for the old clamped model and the new Hermite spline (with the analytic branches outside the transonic band).
 
-```
- beta
-  1.0 |
-      |\
-      | \
-  0.8 |  \
-      |   \
-      |    \                                                   /
-  0.6 |     \                                                 /
-      |      \                                               /
-      |       \                                             /
-  0.4 |        \                                           /
-      |         \  old clamp: beta = 0.25                 /
-      |          +=============================+         /
-  0.3 |         /  :<-- clamped flat region -->:  \     /
-      |       /    :                           :    \  /
-      |     /      :                           :     \/
-  0.2 |   /        :                           :
-      |  /         :                           :
-      | /  new     :     new spline: smooth    :
-  0.1 |/   spline  :         V-shape           :  new spline
-      |    dips    :        .    .             :   rises
-  0.05|    here    :      .        .           :
-      |            :    .            .         :
-    0 +---+---+---+---+---+---+---+---+---+---+---+---+---+--->
-      0.5 0.6 0.7 0.8 0.9 0.95 1.0 1.05 1.1 1.2 1.3 1.5  M
-                          ^         ^
-                          M_L       M_H
-                        (0.95)    (1.05)
-
-  Key:
-  ===  Old model (clamped at 0.25)
-  ...  New model (Hermite spline, minimum ~ 0.045 near M=1.02)
-  ---  Both models agree (outside transonic band)
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\linewidth,
+  height=6.5cm,
+  xmin=0.45, xmax=1.55,
+  ymin=0, ymax=1.05,
+  xlabel={$M$},
+  ylabel={$\beta$},
+  grid=major,
+  grid style={gray!30},
+  tick label style={font=\small},
+  label style={font=\small},
+  legend style={font=\scriptsize, at={(0.5,0.97)}, anchor=north, legend columns=2},
+]
+\addplot[very thick, blue!70!black, domain=0.5:0.949, samples=80] {sqrt(1-x*x)};
+\addplot[very thick, blue!70!black, domain=1.051:1.55, samples=80] {sqrt(x*x-1)};
+\addlegendentry{Analytic $\sqrt{|1-M^2|}$ (outside spline)}
+\addplot[thick, red, dashed, domain=0.5:1.5, samples=300] {max(0.25,sqrt(abs(1-x*x)))};
+\addlegendentry{Old clamp ($\beta_{\min}=0.25$)}
+\addplot[very thick, black, mark=none] coordinates {
+  (0.95,0.3123)(0.96,0.2821)(0.97,0.2395)(0.98,0.1885)(0.99,0.1353)(1.00,0.0873)
+  (1.01,0.0533)(1.02,0.0448)(1.03,0.0740)(1.04,0.1499)(1.05,0.3202)
+};
+\addlegendentry{Hermite spline $[M_L,M_H]$}
+\draw[dashed, gray] (axis cs:0.95,0) -- (axis cs:0.95,1.05);
+\draw[dashed, gray] (axis cs:1.05,0) -- (axis cs:1.05,1.05);
+\node[font=\scriptsize] at (axis cs:0.95,0.08) {$M_L$};
+\node[font=\scriptsize] at (axis cs:1.05,0.08) {$M_H$};
+\end{axis}
+\end{tikzpicture}
+\caption{$\beta(M)$: analytic Prandtl--Glauert / Ackeret branches, legacy minimum clamp, and cubic Hermite spline in the transonic band (Table~4.3.4 values).}
+\label{fig:beta-comparison}
+\end{figure}
 ```
 
 The old model (dashed line with flat region) produces a plateau from approximately Mach 0.97 to 1.03 where $\beta$ is frozen at 0.25. The new model (smooth curve through the transonic band) dips to a minimum of approximately 0.045 near Mach 1.02 (slightly above Mach 1 due to the asymmetry of the boundary conditions), then rises smoothly into the supersonic formula. The factor $1/\beta$ reaches approximately 22 at the minimum, compared to a maximum of 4 under the old clamp; this factor-of-five increase correctly captures the transonic peak in aerodynamic coefficients.
@@ -980,12 +977,10 @@ The replacement of the $\beta_{\min} = 0.25$ clamp with the Hermite spline has t
 
 3. **Correct high-Mach behavior preserved.** Above Mach 1.05, the exact supersonic formula $\beta = \sqrt{M^2-1}$ is used directly. At Mach 5, $\beta = 4.899$; the old clamp did not affect this value, and neither does the new spline, confirming that the high-Mach behavior is unchanged.
 
----
 
-*[End of Sections 1-4. Sections 5-10 continue in PART_B.md.]*
-# Section 5: Shock Relations
+## 5. Shock Relations
 
-## 5.1 Overview
+### 5.1 Overview
 
 The aerodynamic analysis of vehicles at supersonic and hypersonic speeds requires
 the computation of shock waves and expansion fans as a prerequisite to determining
@@ -1026,9 +1021,9 @@ significant digits of accuracy in the computed quantities. This exceeds the
 precision of published tabular data by several orders of magnitude.
 
 
-## 5.2 Normal Shock Relations
+### 5.2 Normal Shock Relations
 
-### 5.2.1 Derivation from Conservation Laws
+#### 5.2.1 Derivation from Conservation Laws
 
 Consider a stationary normal shock wave in a one-dimensional flow. The upstream
 (pre-shock) state is denoted by subscript 1 and the downstream (post-shock) state
@@ -1099,12 +1094,12 @@ of the shock. This immediately gives:
 
 $$T_{01} = T_{02}, \qquad a_{01} = a_{02} \tag{5.7}$$
 
-### 5.2.2 The Rankine-Hugoniot Relations
+#### 5.2.2 The Rankine-Hugoniot Relations
 
 We now derive each of the five standard normal shock relations in terms of the
 upstream Mach number $M_1$ and the specific heat ratio $\gamma$.
 
-#### Relation 1: Static Pressure Ratio $p_2/p_1$
+##### Relation 1: Static Pressure Ratio $p_2/p_1$
 
 From the momentum equation (5.2), substitute $\rho V^2 = \rho a^2 M^2 = \gamma p M^2$:
 
@@ -1138,7 +1133,7 @@ Note that at $M_1 = 1$, the pressure ratio is unity (infinitely weak shock, i.e.
 a Mach wave). As $M_1 \to \infty$, $p_2/p_1 \to \frac{2\gamma}{\gamma+1} M_1^2$,
 growing without bound.
 
-#### Relation 2: Density Ratio $\rho_2/\rho_1$
+##### Relation 2: Density Ratio $\rho_2/\rho_1$
 
 From continuity and momentum, combined with the energy equation, one derives the
 density ratio (equivalently, the velocity ratio $V_1/V_2$ by continuity):
@@ -1168,7 +1163,7 @@ density ratio across a normal shock is bounded. This is a fundamental consequenc
 of the energy equation and has profound implications for hypersonic aerodynamics
 (the shock layer becomes very thin but the density jump is finite).
 
-#### Relation 3: Temperature Ratio $T_2/T_1$
+##### Relation 3: Temperature Ratio $T_2/T_1$
 
 From the ideal gas law $p = \rho R T$:
 
@@ -1194,7 +1189,7 @@ public static double temperatureRatio(double m1, double gamma) {
 This approach avoids duplicating the algebraic expressions and ensures consistency
 between the three thermodynamic ratios.
 
-#### Relation 4: Downstream Mach Number $M_2$
+##### Relation 4: Downstream Mach Number $M_2$
 
 This is the most consequential relation physically: a normal shock always produces
 subsonic downstream flow ($M_2 < 1$ for $M_1 > 1$). The derivation proceeds from
@@ -1246,7 +1241,7 @@ $$M_2^2 \to \frac{\gamma - 1}{2\gamma} \tag{5.16}$$
 
 For $\gamma = 1.4$, $M_{2,\min} = \sqrt{1/7} \approx 0.3780$.
 
-#### Relation 5: Total Pressure Ratio $p_{02}/p_{01}$ (Rayleigh Pitot Formula)
+##### Relation 5: Total Pressure Ratio $p_{02}/p_{01}$ (Rayleigh Pitot Formula)
 
 While the stagnation temperature is preserved across the shock ($T_{01} = T_{02}$),
 the stagnation pressure is not. The entropy increase across the shock manifests as
@@ -1282,7 +1277,7 @@ $M_1 > 1$, $p_{02}/p_{01} < 1$ always, and the ratio decreases monotonically wit
 increasing $M_1$. In the strong-shock limit, the total pressure loss becomes very
 severe; at $M_1 = 10$ for air, $p_{02}/p_{01} \approx 0.00304$.
 
-### 5.2.3 Inverse Relation: Mach from Pressure Ratio
+#### 5.2.3 Inverse Relation: Mach from Pressure Ratio
 
 Equation (5.9) can be inverted analytically to recover the upstream Mach number
 from a measured static pressure ratio:
@@ -1299,7 +1294,7 @@ public static double machFromPressureRatio(double pressRatio, double gamma) {
 }
 ```
 
-### 5.2.4 Worked Example: $M_1 = 2.0$, $\gamma = 1.4$
+#### 5.2.4 Worked Example: $M_1 = 2.0$, $\gamma = 1.4$
 
 We compute all five normal shock ratios step by step.
 
@@ -1345,7 +1340,7 @@ $$(4.500)^{2.5} = e^{2.5 \ln 4.500} = e^{2.5 \times 1.50408} = e^{3.76019} = 43.
 
 $$\frac{p_{02}}{p_{01}} = \frac{30.9731}{43.0127} = 0.72088$$
 
-### 5.2.5 Validation Table: Normal Shock Relations vs NACA 1135
+#### 5.2.5 Validation Table: Normal Shock Relations vs NACA 1135
 
 All values computed with $\gamma = 1.4$. NACA 1135 tabulated values are shown
 alongside computed values. Discrepancies, where they exist, are in the last
@@ -1390,32 +1385,30 @@ $p_{02}/p_{01}$) is due to rounding of the tabulated value; the computed result
 0.003045 rounds to 0.00304 or 0.00305 depending on the last digit.
 
 
-## 5.3 Oblique Shock Relations
+### 5.3 Oblique Shock Relations
 
-### 5.3.1 Geometry and Velocity Decomposition
+#### 5.3.1 Geometry and Velocity Decomposition
 
 When a supersonic flow encounters a planar compression surface (a wedge), the
 flow turns through the deflection angle $\theta$ and an oblique shock wave forms
 at the wave angle $\beta$ measured from the upstream flow direction.
 
-```
-                          * Shock wave (angle beta from flow direction)
-                        *  |
-                      *    |  beta
-                    *      |
-                  * -------+-----------> Upstream flow (M1)
-                *          |
-              *            |
-     -------*   theta      |
-            |\             |
-            | \            |
-            |  \           |
-            |   \  Wedge   |
-            |    \  surface|
-            |     \        |
-   ---------+------\-------+---------
-            |       \
-                     \  (half-angle theta)
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Latex, font=\small]
+\coordinate (O) at (0,0);
+\draw[->, thick] (-0.2,0) -- (5.2,0) node[below] {upstream flow ($M_1$)};
+\draw[thick] (O) -- (52:3.8) node[above, sloped, pos=0.5] {shock ($\beta$)};
+\draw[thick] (O) -- (-18:4.0) node[below, sloped] {wedge surface};
+\draw (0.55,0) arc (0:52:0.55);
+\node at (26:0.85) {\small $\beta$};
+\draw (0.4,0) arc (0:-18:0.4);
+\node at (-9:0.58) {\small $\theta$};
+\end{tikzpicture}
+\caption{Oblique shock at angle $\beta$ and wedge half-angle $\theta$ (planar compression corner).}
+\label{fig:oblique-wedge-geometry}
+\end{figure}
 ```
 
 The key insight for analyzing oblique shocks is velocity decomposition. The
@@ -1439,7 +1432,7 @@ $$M_{n1} = M_1 \sin\beta, \qquad M_{n2} = f(M_{n1}) \tag{5.23}$$
 where $f$ denotes the normal shock downstream Mach relation (Eq. 5.15) applied to
 $M_{n1}$.
 
-### 5.3.2 The Theta-Beta-Mach Relation
+#### 5.3.2 The Theta-Beta-Mach Relation
 
 The deflection angle $\theta$ is related to the shock angle $\beta$ and upstream
 Mach number $M_1$ by a geometric constraint. Downstream of the shock, the flow
@@ -1514,7 +1507,7 @@ $$\tan\theta = \frac{2\sin\beta\cos\beta(M_1^2\sin^2\beta - 1)}{\sin^2\beta[M_1^
 
 which is Eq. (5.27).
 
-### 5.3.3 Weak and Strong Shock Solutions
+#### 5.3.3 Weak and Strong Shock Solutions
 
 For a given $M_1$ and $\theta$, Eq. (5.27) is transcendental in $\beta$ and
 generally admits two solutions:
@@ -1540,7 +1533,7 @@ where $\mu = \arcsin(1/M_1)$ is the Mach angle. At $\beta = \mu$, the shock
 degenerates to a Mach wave ($\theta = 0$, infinitesimal disturbance). At
 $\beta = \pi/2$, the shock is normal.
 
-### 5.3.4 Maximum Deflection Angle and Golden-Section Search
+#### 5.3.4 Maximum Deflection Angle and Golden-Section Search
 
 The maximum deflection angle for a given $M_1$ occurs at a specific $\beta$
 between the Mach angle and $90°$. This $\beta_{\max}$ is found by maximizing
@@ -1579,7 +1572,7 @@ private static double betaAtMaxDeflection(double m1, double gamma) {
 The result is cached (keyed on $M_1$ and $\gamma$) because `betaAtMaxDeflection`
 is called multiple times during a single `solve()` invocation.
 
-### 5.3.5 Bisection for $\beta(\theta)$: Why Not Newton-Raphson
+#### 5.3.5 Bisection for $\beta(\theta)$: Why Not Newton-Raphson
 
 The implementation solves $\beta$ from $\theta$ using bisection rather than
 Newton-Raphson. This design choice merits explanation.
@@ -1638,7 +1631,7 @@ public static double betaFromTheta(double m1, double theta, double gamma, boolea
 }
 ```
 
-### 5.3.6 Post-Shock Property Computation
+#### 5.3.6 Post-Shock Property Computation
 
 Once $\beta$ is known, all downstream properties are computed by applying the
 normal shock relations to the normal Mach component $M_{n1} = M_1 \sin\beta$:
@@ -1683,7 +1676,7 @@ The clamp $M_{n1} \geq 1.0$ is a defensive measure for cases where numerical
 imprecision in $\beta$ could yield $M_1 \sin\beta < 1$ when the shock angle is
 very close to the Mach angle.
 
-### 5.3.7 Worked Example: $M_1 = 2.0$, $\theta = 10°$
+#### 5.3.7 Worked Example: $M_1 = 2.0$, $\theta = 10°$
 
 **Given**: $M_1 = 2.0$, $\theta = 10° = 0.17453$ rad, $\gamma = 1.4$.
 
@@ -1723,7 +1716,7 @@ $$\frac{p_{02}}{p_{01}} \approx 0.9842$$
 
 Only about 1.6% total pressure loss, indicating a relatively weak shock.
 
-### 5.3.8 Validation Table: $\beta$ (degrees) vs NACA 1135
+#### 5.3.8 Validation Table: $\beta$ (degrees) vs NACA 1135
 
 Weak shock solutions for $\gamma = 1.4$:
 
@@ -1741,9 +1734,9 @@ Weak shock solutions for $\gamma = 1.4$:
 All oblique shock angles agree with NACA 1135 to within the tabulation precision.
 
 
-## 5.4 Taylor-Maccoll Cone Flow
+### 5.4 Taylor-Maccoll Cone Flow
 
-### 5.4.1 Physical Motivation: Three-Dimensional Relief
+#### 5.4.1 Physical Motivation: Three-Dimensional Relief
 
 When a supersonic flow encounters a cone (rather than a wedge), the shock wave is
 weaker than the corresponding 2D wedge shock for the same half-angle. The physical
@@ -1752,29 +1745,20 @@ the circumferential direction, reducing the required compression. The flow
 downstream of a conical shock is not uniform (unlike the wedge case) but varies
 along rays from the apex of the cone.
 
-```
-                      Conical shock surface
-                    * * *
-                  *       *
-                *    M2     *
-              *    varies    *
-            * ------->        *
-          * M1      beta_cone  *
-        * --------+             *
-      *     \     |              *
-    *        \    |               *
-   *     theta_c\ |                *
-  *               \|                 *
-  * * * * * * * * *+  Cone apex       *
-                   |\                  *
-                   | \                  *
-                   |  \  Cone surface    *
-                   |   \                  *
-                   |    \                  *
-
-    Axis of symmetry (horizontal)
-
-    Key: beta_cone < beta_wedge for same theta_c and M1
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex]
+\coordinate (A) at (0,0);
+\draw[->, thick] (-0.3,0) -- (5.5,0) node[below] {axis of symmetry};
+\draw[thick] (A) -- (18:4.2) node[right] {cone surface ($\theta_c$)};
+\draw[thick, dashed] (A) -- (42:3.6) node[above, sloped, pos=0.6] {conical shock ($\beta_{\mathrm{cone}}$)};
+\node[align=left, anchor=west] at (0.15,1.65) {$M_1$ freestream\\post-shock $M_2$ varies\\along rays};
+\node[align=center, font=\scriptsize] at (2.85,-1.05) {3D relief: $\beta_{\mathrm{cone}} < \beta_{\mathrm{wedge}}$ for same $\theta_c$, $M_1$};
+\end{tikzpicture}
+\caption{Schematic conical shock and axisymmetric ``3D relief'' relative to a wedge at the same half-angle.}
+\label{fig:conical-shock-relief}
+\end{figure}
 ```
 
 For a wedge at half-angle $\theta$, the post-shock flow is uniform and parallel to
@@ -1784,7 +1768,7 @@ angle measured from the axis. The surface conditions on the cone are reached onl
 at the innermost ray ($\theta = \theta_c$) after the flow has turned smoothly
 through the conical flow field.
 
-### 5.4.2 The Taylor-Maccoll Ordinary Differential Equation
+#### 5.4.2 The Taylor-Maccoll Ordinary Differential Equation
 
 The Taylor-Maccoll equation governs steady, inviscid, irrotational, conically
 symmetric supersonic flow. "Conical symmetry" means that all flow properties
@@ -1859,7 +1843,7 @@ The implementation detects near-singularity ($|\text{denominator}| < 10^{-15}$) 
 returns a large value with the physically correct sign to prevent the integrator
 from crossing through the sonic line improperly.
 
-### 5.4.3 Boundary Conditions
+#### 5.4.3 Boundary Conditions
 
 **At the shock** ($\theta = \beta_{\text{cone}}$): The conditions immediately
 behind the conical shock are computed using the oblique shock relations. The Mach
@@ -1882,7 +1866,7 @@ Note that $V_\theta$ is negative because the flow is turning toward the axis
 which means $V_\theta = 0$ at $\theta = \theta_c$. This is the condition that
 determines the correct shock angle $\beta_{\text{cone}}$.
 
-### 5.4.4 Shooting Method and Adaptive RK4 Integration
+#### 5.4.4 Shooting Method and Adaptive RK4 Integration
 
 Since the cone shock angle $\beta_{\text{cone}}$ is unknown, the problem is solved
 as a boundary value problem using a shooting method:
@@ -1948,7 +1932,7 @@ for (int step = 0; step < maxSteps; step++) {
 }
 ```
 
-### 5.4.5 Surface Conditions via Isentropic Path
+#### 5.4.5 Surface Conditions via Isentropic Path
 
 Once the cone shock angle $\beta_{\text{cone}}$ is determined and the integration
 reaches $\theta = \theta_c$, the surface conditions are recovered. The
@@ -1969,7 +1953,7 @@ The density ratio follows from the ideal gas law:
 
 $$\frac{\rho_s}{\rho_1} = \frac{p_s/p_1}{T_s/T_1} \tag{5.45}$$
 
-### 5.4.6 Cone Pressure Coefficient
+#### 5.4.6 Cone Pressure Coefficient
 
 The pressure coefficient on the cone surface is defined in the standard way:
 
@@ -1985,7 +1969,7 @@ public static double conePressureCoefficient(double m1, double coneAngle, double
 }
 ```
 
-### 5.4.7 Validation Table: Cone Shock vs Wedge Shock
+#### 5.4.7 Validation Table: Cone Shock vs Wedge Shock
 
 All angles in degrees. $\gamma = 1.4$. The cone shock angle is consistently
 smaller than the wedge shock angle for the same half-angle and Mach number,
@@ -2012,33 +1996,29 @@ Report 1135) agree with the computed cone shock angles to within $0.1°$ across 
 full range of conditions tested.
 
 
-## 5.5 Prandtl-Meyer Expansion
+### 5.5 Prandtl-Meyer Expansion
 
-### 5.5.1 Physical Description
+#### 5.5.1 Physical Description
 
 A Prandtl-Meyer expansion fan occurs when supersonic flow encounters a convex
 corner (the surface turns away from the flow). Unlike a shock wave, the expansion
 is a continuous, isentropic process: entropy is conserved, and the flow accelerates
 smoothly through a fan of Mach waves (characteristics) emanating from the corner.
 
-```
-                     Expansion fan
-         Upstream     | / / / / |   Downstream
-         M1 > 1       |/ / / /  |   M2 > M1
-    ===================/= = = ==|==================
-    \\\\\\\\\\\\\\\\\ /         |\\\\\\\\\\\\\\\\\\
-     \\\\\\\\\\\\\\\\/   delta  |\\\\\\\\\\\\\\\\\\
-      \\\\\\\\\\\\\\/ <-------->|\\\\\\\\\\\\\\\\\\
-       \\\\\\\\\\\\/            |\\\\\\\\\\\\\\\\\\\
-        \\\\\\\\\\\/            | \\\\\\\\\\\\\\\\\\
-         \\\\\\\\\\/            |  \\\\\\\\\\\\\\\\\
-          \\\\\\\\\/   Convex   |   \\\\\\\\\\\\\\\\
-                       corner
-
-    The fan spans from the upstream Mach angle mu1 = arcsin(1/M1)
-    to the downstream Mach angle mu2 = arcsin(1/M2).
-    The flow turns through angle delta between them.
-    All properties change continuously (no discontinuity).
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex]
+\draw[thick] (-3,0) -- (-0.5,0) node[midway, above] {$M_1>1$};
+\draw[thick] (1.2,0) -- (3.5,0) node[midway, above] {$M_2>M_1$};
+\foreach \a in {15,22,29,36,43,50} {\draw[densely dashed] (-0.5,0) -- ({-0.5+2.5*cos(\a)},{2.5*sin(\a)}); }
+\fill (-0.5,0) circle (1.5pt) node[below=2pt] {convex corner};
+\node[align=left, anchor=west, font=\scriptsize] at (-3.1,-1.35)
+  {Fan from $\mu_1=\arcsin(1/M_1)$ to $\mu_2=\arcsin(1/M_2)$;\\turn $\delta$; isentropic, continuous.};
+\end{tikzpicture}
+\caption{Prandtl--Meyer expansion fan at a convex corner (schematic Mach waves).}
+\label{fig:pm-expansion-fan}
+\end{figure}
 ```
 
 The key properties of a Prandtl-Meyer expansion:
@@ -2049,7 +2029,7 @@ The key properties of a Prandtl-Meyer expansion:
 - **Continuous**: Properties change smoothly through the fan (contrast with the
   discontinuous jump across a shock).
 
-### 5.5.2 Derivation of the Prandtl-Meyer Function $\nu(M)$
+#### 5.5.2 Derivation of the Prandtl-Meyer Function $\nu(M)$
 
 The Prandtl-Meyer function $\nu(M)$ gives the total turning angle required to
 accelerate a flow from $M = 1$ (sonic) to a given Mach number $M$ through a
@@ -2122,7 +2102,7 @@ public static double nu(double mach, double gamma) {
 }
 ```
 
-### 5.5.3 Maximum Prandtl-Meyer Angle
+#### 5.5.3 Maximum Prandtl-Meyer Angle
 
 As $M \to \infty$, $\sqrt{M^2-1} \to \infty$, and both arctangent terms approach
 $\pi/2$:
@@ -2143,7 +2123,7 @@ public static double nuMax(double gamma) {
 }
 ```
 
-### 5.5.4 Derivative of the Prandtl-Meyer Function
+#### 5.5.4 Derivative of the Prandtl-Meyer Function
 
 The derivative $d\nu/dM$ is needed for the Newton-Raphson inversion. From Eq. (5.49):
 
@@ -2160,7 +2140,7 @@ public static double dnuDm(double mach, double gamma) {
 }
 ```
 
-### 5.5.5 Newton-Raphson Inversion with Stanyukovich Initial Guess
+#### 5.5.5 Newton-Raphson Inversion with Stanyukovich Initial Guess
 
 The inverse problem, finding $M$ given $\nu$, requires solving the transcendental
 equation $\nu(M) = \nu_{\text{target}}$. Newton-Raphson iteration is well-suited
@@ -2204,7 +2184,7 @@ public static double machFromNu(double nuTarget, double gamma) {
 }
 ```
 
-### 5.5.6 Convergence Example
+#### 5.5.6 Convergence Example
 
 Target: $\nu_{\text{target}} = 26.38° = 0.46043$ rad. ($\gamma = 1.4$)
 
@@ -2229,7 +2209,7 @@ within 5.3% of the true value, providing an excellent starting point.
 
 The true answer is $M = 1.65295$ for $\nu = 26.38°$.
 
-### 5.5.7 Isentropic Pressure and Temperature Ratios
+#### 5.5.7 Isentropic Pressure and Temperature Ratios
 
 Since the expansion is isentropic, the total conditions ($p_0$, $T_0$) are
 preserved. The static property ratios across the expansion are:
@@ -2256,7 +2236,7 @@ public static double temperatureRatio(double m1, double m2, double gamma) {
 }
 ```
 
-### 5.5.8 Validation Table: $\nu(M)$ vs NACA 1135
+#### 5.5.8 Validation Table: $\nu(M)$ vs NACA 1135
 
 All values for $\gamma = 1.4$.
 
@@ -2275,7 +2255,7 @@ tabulated $(M, \nu)$ pair, computing `machFromNu(nu(M))` recovers $M$ to within
 $10^{-11}$ (limited only by the convergence tolerance $10^{-12}$).
 
 
-## 5.6 Summary of Numerical Parameters
+### 5.6 Summary of Numerical Parameters
 
 The following table summarizes all numerical tolerances, iteration limits, and
 algorithmic constants used in the shock relations package.
@@ -2307,7 +2287,9 @@ iteration limits (100 for bisection/Newton, 50,000 for the ODE integrator) are
 conservative upper bounds; typical convergence occurs well within these limits
 (bisection in approximately 40 iterations, Newton in 3-5 iterations, ODE
 integration in a few hundred steps).
-# Section 6. Drag Models
+
+
+## 6. Drag Models
 
 The total drag coefficient of a sounding rocket or high-power rocket vehicle
 is assembled from five independent contributions:
@@ -2335,9 +2317,7 @@ component, the blending algorithms that connect them across Mach regimes, and
 worked examples demonstrating quantitative results.
 
 
----
-
-## 6.1 Nose/Body Wave Drag
+### 6.1 Nose/Body Wave Drag
 
 Wave drag arises from the compression of air by surfaces inclined to the
 freestream at supersonic speeds. For axisymmetric bodies of revolution (nose
@@ -2357,7 +2337,7 @@ exact Taylor-Maccoll solution for cones through the Modified Newtonian
 approximation at hypersonic speeds.
 
 
-### 6.1.1 Taylor-Maccoll Exact Solution for Cones
+#### 6.1.1 Taylor-Maccoll Exact Solution for Cones
 
 For a conical nose at zero angle of attack with an attached oblique shock, the
 wave drag coefficient equals the surface pressure coefficient computed from the
@@ -2430,42 +2410,40 @@ angle (i.e., the cone angle exceeds the maximum deflection angle), the solver
 falls back to the stagnation pressure coefficient for a detached (bow) shock.
 
 
-### 6.1.2 Shock-Expansion Strip Integration for Ogives
+#### 6.1.2 Shock-Expansion Strip Integration for Ogives
 
 For non-conical axisymmetric shapes (ogives, parabolic series, power-law noses,
 etc.), the shock-expansion method is used. This technique approximates the body
 as a sequence of infinitesimal conical frustums, tracking the local Mach number
 and pressure as the flow expands (or compresses) around the curved surface.
 
-The algorithm uses $N = 100$ strips along the nose length:
+The algorithm uses $N = 100$ strips along the nose length.
 
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex]
+\draw[->, thick] (-0.2,0) -- (5.8,0) node[below] {$x$};
+\draw[thick] (0,0) -- (0.35,1.1) -- (1.1,1.35) -- (2.4,1.35) -- (5.5,0.45);
+\draw[dashed] (0.35,1.1) -- (-0.2,1.9) node[left, font=\scriptsize] {oblique shock};
+\node[above] at (2.8,1.35) {$N$ strips ($\mathrm{d}x$)};
+\foreach \x in {0.9,1.5,2.1,2.7,3.3} {\draw (\x,0.05) -- (\x,-0.12);}
+\node[below, font=\scriptsize] at (0.05,-0.2) {nose tip};
+\node[below, font=\scriptsize] at (5.4,0.2) {$R_{\mathrm{aft}}$};
+\end{tikzpicture}
+\caption{Shock-expansion strip model along an ogive (schematic).}
+\label{fig:strip-integration-ogive}
+\end{figure}
 ```
-  Freestream M_inf -->
-                         Oblique shock
-                        /
-                       / beta
-                      /
-  Nose tip  *--------+------> x
-             \  strip 1  strip 2  ...  strip N
-              \   |         |              |
-               \  | dx      | dx           | dx
-                \ |         |              |
-                 \|_________|______________|
-                  R_fore                   R_aft
 
-  For each strip i (i = 1 to N):
-    1. Compute local surface angle theta_i from profile geometry
-    2. Compute turn angle: delta_i = theta_{i-1} - theta_i
-    3. If delta_i > 0 (expansion): apply Prandtl-Meyer expansion
-       - M_i = PM_downstream(M_{i-1}, delta_i)
-       - p_i = p_{i-1} * pressureRatio(M_{i-1}, M_i)
-    4. If delta_i < 0 (compression): apply oblique shock
-       - Solve oblique shock at M_{i-1}, deflection |delta_i|
-       - p_i = p_{i-1} * shock pressure ratio
-       - M_i = post-shock Mach
-    5. Compute local Cp_i = 2/(gamma*M_inf^2) * (p_i/p_inf - 1)
-    6. Accumulate drag integral
-```
+For each strip $i$ ($i = 1\ldots N$):
+
+1. Compute local surface angle $\theta_i$ from profile geometry.
+2. Compute turn angle: $\delta_i = \theta_{i-1} - \theta_i$.
+3. If $\delta_i > 0$ (expansion): apply Prandtl--Meyer expansion — $M_i = \texttt{PM\_downstream}(M_{i-1}, \delta_i)$, $p_i = p_{i-1}\cdot\texttt{pressureRatio}(M_{i-1}, M_i)$.
+4. If $\delta_i < 0$ (compression): apply oblique shock — solve at $M_{i-1}$ with deflection $|\delta_i|$; $p_i = p_{i-1}\cdot$ (shock pressure ratio); $M_i = $ post-shock Mach.
+5. Compute local $C_{p,i} = \frac{2}{\gamma M_\infty^2}(p_i/p_\infty - 1)$.
+6. Accumulate drag integral.
 
 **Initial conditions.** The flow at the nose tip is initialized using the
 Taylor-Maccoll cone solution with the local tip half-angle $\theta_\text{tip}$,
@@ -2503,7 +2481,7 @@ positive $\Delta r$ (expanding radius, windward surface) contribute to the drag
 integral.
 
 
-### 6.1.3 Dahlem-Buck Shape Factors
+#### 6.1.3 Dahlem-Buck Shape Factors
 
 For nose shapes other than pure cones and ogives (POWER, PARABOLIC, HAACK),
 the NASA TR-R-100 empirical tables have limited Mach range and fineness ratio
@@ -2563,7 +2541,7 @@ C_d(M) = (1 - w) \cdot C_{d,\text{TR-R-100}} + w \cdot C_{d,\text{Dahlem-Buck}}
 $$
 
 
-### 6.1.4 Transonic Drag Rise
+#### 6.1.4 Transonic Drag Rise
 
 Below the drag divergence Mach number $M_{dd}$, no wave drag exists because the
 flow is everywhere subsonic on the body surface. Above $M_{dd}$, local
@@ -2644,29 +2622,43 @@ $$
 \left(\frac{dC_d}{dM}\right)_1 \le \frac{3 \, C_{d,1}}{\Delta M}
 $$
 
-The overall drag rise shape is:
+The overall drag rise shape is illustrated below (qualitative).
 
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.88\linewidth,
+  height=5.2cm,
+  xmin=0.55, xmax=1.15,
+  ymin=0, ymax=1.05,
+  xlabel={$M$},
+  ylabel={$C_d$ (qual.)},
+  grid=major,
+  grid style={gray!30},
+  tick label style={font=\small},
+  label style={font=\small},
+  legend style={font=\scriptsize, at={(0.97,0.05)}, anchor=south east},
+]
+\addplot[very thick, black] coordinates {
+  (0.60,0)(0.65,0.02)(0.70,0.06)(0.75,0.14)(0.80,0.28)(0.85,0.48)(0.90,0.72)(0.95,0.90)(1.00,1.0)(1.05,0.95)(1.10,0.88)
+};
+\addlegendentry{Lock + Hermite onset}
+\draw[dashed, gray] (axis cs:0.65,0) -- (axis cs:0.65,1.05);
+\draw[dashed, gray] (axis cs:0.75,0) -- (axis cs:0.75,1.05);
+\draw[dashed, gray] (axis cs:1.00,0) -- (axis cs:1.00,1.05);
+\node[font=\scriptsize] at (axis cs:0.62,0.12) {$M_{dd}$};
+\node[font=\scriptsize] at (axis cs:0.77,0.12) {$M_{\mathrm{crit}}$};
+\node[font=\scriptsize] at (axis cs:1.02,0.12) {$M_1$};
+\end{axis}
+\end{tikzpicture}
+\caption{Qualitative transonic drag rise: zero slope at $M_{dd}$, Lock fourth-power style onset, Hermite to first data point $M_1$.}
+\label{fig:drag-rise-shape}
+\end{figure}
 ```
-  Cd |
-     |                              * first data point (M1, Cd1)
-     |                           **
-     |                        **
-     |                     **      <-- Lock 4th-power onset
-     |                  **
-     |               *             <-- C1 Hermite
-     |            *
-     |          *
-     |        *
-     |     **
-     |   *
-     |  *
-     | *                           <-- zero slope at Mdd
-     +--*-*-*-*-*---+-------+-----> M
-        Mdd       Mcrit    M1
-```
 
-
-### 6.1.5 Modified Newtonian Theory (M > 5)
+#### 6.1.5 Modified Newtonian Theory (M > 5)
 
 At hypersonic Mach numbers ($M > 5$), the shock layer becomes thin and the
 pressure distribution is well approximated by the Modified Newtonian formula:
@@ -2734,7 +2726,7 @@ Only windward surfaces ($\Delta r > 0$) contribute. Leeward surfaces
 Newtonian theory.
 
 
-### 6.1.6 Blending Across Mach Regimes
+#### 6.1.6 Blending Across Mach Regimes
 
 Three blending regions connect the different wave drag models:
 
@@ -2771,22 +2763,30 @@ correction above $M = 1.5$, with a smoothstep blend in $[1.3, 1.5]$.
 
 **Regime summary diagram:**
 
-```
-  Cd |     TR-R-100        Analytical (T-M / S-E)            Newtonian
-     |     empirical       ________________________           ________
-     |    __________      /                        \         /
-     |   /          \    /                          \       /
-     |  /   Hermite  \  /   smoothstep blend         \     /
-     | /    drag rise  \/                             \   /
-     |/                                                \_/
-     +------+----+----+----+----+----+----+----+----+----+---> M
-           Mdd  1.0  1.3  1.5  2.0  3.0  4.0  5.0  6.0
-           |<-->| |<---->|    pure analytical     |<---->|
-           rise   blend                           blend
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\footnotesize, >=Latex]
+\draw[->, thick] (0,0) -- (11.2,0) node[below] {$M$};
+\foreach \x/\lbl in {0.8/{},1.6/$M_{dd}$,2.4/$1.0$,3.2/$1.3$,4.0/$1.5$,5.6/$2.0$,6.8/$3.0$,8.0/$4.0$,9.2/$5.0$,10.4/$6.0$}
+  \draw (\x,0.08) -- (\x,-0.08) node[below=2pt] {\lbl};
+\draw[very thick, blue!70!black] (1.0,2.0) .. controls (1.8,2.3) and (2.2,1.5) .. (3.0,1.2)
+  .. controls (4.5,0.9) and (6.5,0.85) .. (8.5,0.75) -- (10.8,0.65);
+\node[blue!70!black, align=center, anchor=south west] at (0.85,2.72) {TR-R-100 /\\Hermite rise};
+\node[align=center, anchor=south] at (4.5,2.15) {smoothstep\\blends};
+\node[align=center, anchor=south west] at (8.35,1.72) {Newtonian\\blend};
+\draw[decorate, decoration={brace, amplitude=4pt}] (1.4,-0.85) -- (2.2,-0.85) node[midway, below=6pt, font=\scriptsize] {rise};
+\draw[decorate, decoration={brace, amplitude=4pt}] (2.6,-0.85) -- (3.6,-0.85) node[midway, below=6pt, font=\scriptsize] {$1.3$--$1.5$};
+\draw[decorate, decoration={brace, amplitude=4pt}] (7.6,-0.85) -- (10.2,-0.85) node[midway, below=6pt, font=\scriptsize] {$4$--$6$};
+\end{tikzpicture}%
+}
+\caption{Qualitative wave-drag regime map: empirical / transonic rise, analytical Taylor--Maccoll and shock-expansion, and Modified Newtonian tail (schematic).}
+\label{fig:wave-drag-regimes}
+\end{figure}
 ```
 
-
-### 6.1.7 Worked Example: 15-Degree Cone
+#### 6.1.7 Worked Example: 15-Degree Cone
 
 Consider a conical nose with half-angle $\theta_c = 15\degree$, fineness ratio
 $f = L/(2R) \approx 1.87$, in air ($\gamma = 1.4$).
@@ -2842,9 +2842,7 @@ above $M \approx 2$, rather than monotonically decreasing as the extrapolation
 predicted.
 
 
----
-
-## 6.2 Base Drag
+### 6.2 Base Drag
 
 Base drag arises from the low-pressure wake region behind the aft end of the
 rocket body. It is a significant contributor to total drag, particularly at
@@ -2861,7 +2859,7 @@ where $A_\text{base} = \pi(R_\text{aft}^2 - R_\text{next}^2)$ is the exposed
 base area (accounting for the next downstream component's fore radius).
 
 
-### 6.2.1 Subsonic Base Drag
+#### 6.2.1 Subsonic Base Drag
 
 At subsonic Mach numbers ($M \le 0.85$), the base drag follows the Hoerner
 correlation for cylindrical afterbodies:
@@ -2876,7 +2874,7 @@ At $M = 0$, the base drag coefficient is 0.12, rising to 0.214 at $M = 0.85$.
 Reference: Hoerner, "Fluid-Dynamic Drag" (1965), Chapter 3.
 
 
-### 6.2.2 Supersonic Base Drag: Devan-Ashwood Correlation
+#### 6.2.2 Supersonic Base Drag: Devan-Ashwood Correlation
 
 At supersonic speeds ($M \ge 1.3$), the base drag is modeled by the
 Devan-Ashwood correlation:
@@ -2904,7 +2902,7 @@ At $M = 2.0$: $C_{d,\text{base}} = 0.064 + 0.186/4.0 = 0.111$
 At $M = 5.0$: $C_{d,\text{base}} = 0.064 + 0.186/25.0 = 0.071$
 
 
-### 6.2.3 Transonic Base Drag: Degree-4 Polynomial Blend
+#### 6.2.3 Transonic Base Drag: Degree-4 Polynomial Blend
 
 The transonic regime ($M \in [0.85, 1.3]$) features a sharp peak in base drag
 near $M \approx 1.05$, where the wake becomes highly unsteady and the flow
@@ -2925,7 +2923,7 @@ yielding a 4th-degree polynomial (5 constraints, 5 coefficients).
 
 The construction in the code:
 
-```
+```java
 PolyInterpolator baseDragInterp = new PolyInterpolator(
     new double[] { 0.85, 1.05, 1.30 },      // value points
     new double[] { 0.85, 1.30 });            // derivative points
@@ -2939,26 +2937,41 @@ baseDragTransonicPoly = baseDragInterp.interpolator(
 
 The resulting profile:
 
-```
-  Cd_base
-  0.25 |              *  peak at M=1.05
-       |            * . *
-       |          *  .    *
-  0.20 |        *    .      *
-       |      *      .        *
-       |    *        .          *
-  0.15 |  *          .            *--------- Devan-Ashwood
-       | *           .
-       |*            .
-  0.12 +             .
-       |             .
-       +---+---+---+-+---+---+---+---+---> M
-          0.5  0.7  0.85 1.0 1.05 1.3  2.0
-       |<-- subsonic -->|<-- poly -->|<- supersonic ->|
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.9\linewidth,
+  height=5.5cm,
+  xmin=0.45, xmax=2.15,
+  ymin=0.08, ymax=0.27,
+  xlabel={$M$},
+  ylabel={$C_{D,\mathrm{base}}$},
+  grid=major,
+  grid style={gray!30},
+  tick label style={font=\small},
+  label style={font=\small},
+  legend style={font=\scriptsize, at={(0.97,0.97)}, anchor=north east},
+]
+\addplot[thick, dashed, domain=0.5:0.85, samples=40] {0.12+0.13*x*x};
+\addlegendentry{subsonic $0.12+0.13M^2$}
+\addplot[very thick, black] coordinates {
+  (0.85,0.214)(0.90,0.22)(0.95,0.235)(1.00,0.245)(1.05,0.25)(1.10,0.23)(1.20,0.20)(1.30,0.174)
+};
+\addlegendentry{degree-4 transonic polynomial}
+\addplot[thick, blue, dashed, domain=1.3:2.1, samples=50] {0.064+0.186/(x*x)};
+\addlegendentry{Devan--Ashwood ($M\ge 1.3$)}
+\draw[dashed, gray] (axis cs:0.85,0.08) -- (axis cs:0.85,0.27);
+\draw[dashed, gray] (axis cs:1.30,0.08) -- (axis cs:1.30,0.27);
+\end{axis}
+\end{tikzpicture}
+\caption{Base drag coefficient: subsonic correlation, transonic polynomial with peak at $M=1.05$, and supersonic Devan--Ashwood branch (schematic).}
+\label{fig:base-drag-profile}
+\end{figure}
 ```
 
-
-### 6.2.4 Lamb-Oberkampf Reynolds Number Correction
+#### 6.2.4 Lamb-Oberkampf Reynolds Number Correction
 
 At supersonic speeds ($M > 1.3$), the base drag depends on the boundary layer
 state at the base corner, which is influenced by the Reynolds number. The
@@ -2990,7 +3003,7 @@ higher base pressure and lower base drag. At low Reynolds numbers
 | $10^8$    | 8.0               | 0.84     |
 
 
-### 6.2.5 Power-On Base Drag Reduction
+#### 6.2.5 Power-On Base Drag Reduction
 
 During motor burn, the exhaust plume partially fills the base region, raising
 the base pressure and reducing base drag. The reduction depends on the nozzle
@@ -3029,7 +3042,7 @@ power-on factor of $k_\text{base} = 0.15$ is used.
 Reference: NASA SP-8055 "Solid Rocket Motor Nozzles"; Hoerner Ch. 3.
 
 
-### 6.2.6 Boattail Correction
+#### 6.2.6 Boattail Correction
 
 When a body component tapers from a larger fore radius to a smaller aft radius
 (boattail), the converging flow creates a narrower wake with higher base
@@ -3091,7 +3104,7 @@ C_{d,\text{base,final}} = C_{d,\text{base}} \cdot f_\text{bt} \cdot \eta_\text{b
 $$
 
 
-### 6.2.7 Worked Examples
+#### 6.2.7 Worked Examples
 
 **At $M = 0.5$ (subsonic):**
 
@@ -3160,9 +3173,7 @@ high Mach. The Devan-Ashwood model correctly maintains a nonzero asymptote
 drag in the $M = 1.5$-$2.0$ range.
 
 
----
-
-## 6.3 Skin Friction Drag
+### 6.3 Skin Friction Drag
 
 Skin friction drag arises from the viscous shear stress on all wetted surfaces.
 It is typically the largest single drag component in the subsonic regime and
@@ -3170,7 +3181,7 @@ remains significant at supersonic speeds, though compressibility reduces it
 substantially.
 
 
-### 6.3.1 Incompressible Baseline
+#### 6.3.1 Incompressible Baseline
 
 The incompressible skin friction coefficient $C_{f,0}$ depends on the Reynolds
 number and whether the surface is aerodynamically smooth.
@@ -3220,7 +3231,7 @@ $$
 where $f_B = L_\text{body}/R_\text{max}$ is the body fineness parameter.
 
 
-### 6.3.2 Eckert Reference Temperature Method
+#### 6.3.2 Eckert Reference Temperature Method
 
 At supersonic speeds, the boundary layer temperature rises dramatically due to
 adiabatic compression and viscous dissipation. The Eckert method (1955)
@@ -3311,7 +3322,7 @@ defined relative to the freestream dynamic pressure, while the boundary layer
 properties are evaluated at $T^*$.
 
 
-### 6.3.3 Boundary Layer Transition: Michel Criterion
+#### 6.3.3 Boundary Layer Transition: Michel Criterion
 
 The transition from laminar to turbulent boundary layer is determined by the
 Michel criterion with a compressibility correction:
@@ -3347,7 +3358,7 @@ $Re_\text{tr} = 3.0 \times 10^6$, $x_\text{tr} = 0.45$ m, $f_\text{lam} = 0.225$
 $f_\text{transition} = 0.865$ (13.5% friction reduction).
 
 
-### 6.3.4 Transonic Blend (M 0.9 to 1.1)
+#### 6.3.4 Transonic Blend (M 0.9 to 1.1)
 
 The transition from the subsonic compressibility correction to the Eckert
 method is done by linear blending:
@@ -3359,7 +3370,7 @@ $$
 for $M \in [0.9, 1.1]$.
 
 
-### 6.3.5 Worked Examples
+#### 6.3.5 Worked Examples
 
 All examples assume: $T_e = 288.15$ K (sea level), $Re = 1.0 \times 10^7$,
 smooth (perfect) finish, $\gamma = 1.4$, $S = 110.4$ K.
@@ -3435,16 +3446,14 @@ Reference: Eckert, E.R.G. (1955). "Engineering relations for friction and heat
 transfer to surfaces in high velocity flow." J. Aeronautical Sciences, 22(8).
 
 
----
-
-## 6.4 Fin Wave Drag
+### 6.4 Fin Wave Drag
 
 Fins generate wave drag at supersonic speeds due to oblique shocks at their
 leading and trailing edges. At subsonic speeds, the fin contribution to
 pressure drag is negligible (friction-dominated).
 
 
-### 6.4.1 Ackeret Formula
+#### 6.4.1 Ackeret Formula
 
 The supersonic wave drag of a thin symmetric airfoil at zero angle of attack
 is given by Ackeret's linearized supersonic potential theory (1925):
@@ -3492,7 +3501,7 @@ This is implemented in `FinSetCalc.ackeretWaveDragCD()` and
 `FinSetCalc.ackeretWaveDragSlope()`.
 
 
-### 6.4.2 C1 Hermite Blend (M 0.9 to 1.2)
+#### 6.4.2 C1 Hermite Blend (M 0.9 to 1.2)
 
 The Ackeret formula diverges as $M \to 1^+$ ($\beta \to 0$), while no wave
 drag exists at subsonic speeds. A C1-continuous cubic Hermite spline blends
@@ -3553,7 +3562,7 @@ $$
 $$
 
 
-### 6.4.3 Sweep Correction
+#### 6.4.3 Sweep Correction
 
 The effective Mach number normal to the fin leading edge is reduced by the
 cosine of the sweep angle. The Ackeret wave drag is corrected by:
@@ -3569,7 +3578,7 @@ For a typical 30-degree swept fin: $\cos^2(30\degree) = 0.75$, reducing wave
 drag by 25%. For a highly swept 60-degree fin: $\cos^2(60\degree) = 0.25$.
 
 
-### 6.4.4 Trailing-Edge Base Drag
+#### 6.4.4 Trailing-Edge Base Drag
 
 Fins with blunt trailing edges generate a wake similar to the body base, with a
 pressure deficit that creates additional drag. The model depends on the fin
@@ -3606,7 +3615,7 @@ $$
 where $s$ is the fin span and $n_\text{fins}$ is the interference fin count.
 
 
-### 6.4.5 ESDU Transonic Similarity
+#### 6.4.5 ESDU Transonic Similarity
 
 The ESDU transonic similarity rule collapses fin aerodynamic data onto a
 universal curve using the transonic similarity parameter:
@@ -3649,7 +3658,7 @@ At the edges of the regime ($K_\text{trans} \in [-2, -1.5]$ and $[2.5, 3]$$),
 a linear blend transitions to/from the standard Barrowman fin CNa calculation.
 
 
-### 6.4.6 Worked Example
+#### 6.4.6 Worked Example
 
 Consider a fin with $\tau = t/c = 0.05$ (5% thickness), AIRFOIL cross-section,
 zero sweep ($\Lambda_{LE} = 0$).
@@ -3707,9 +3716,7 @@ substantial drag above $M = 1$, bringing the fin drag into agreement with
 thin-airfoil theory and experimental data.
 
 
----
-
-## 6.5 Lift-Induced Drag
+### 6.5 Lift-Induced Drag
 
 At nonzero angle of attack, the normal force $C_N$ has an axial (drag)
 component due to the geometric relationship between the force and velocity
@@ -3746,9 +3753,7 @@ angle of attack experiences enormous aerodynamic resistance due to the
 cross-flow component.
 
 
----
-
-## 6.6 Drag Budget Summary
+### 6.6 Drag Budget Summary
 
 The following tables present the complete drag budget for a representative
 sounding rocket: 10-degree conical nose (fineness ratio $f = 2.84$), cylindrical
@@ -3756,7 +3761,7 @@ body ($L = 1.5$ m, $D = 0.10$ m), 4 fins (AIRFOIL, $\tau = 0.05$,
 $\Lambda_{LE} = 0$, $s = 0.08$ m, $c = 0.15$ m). Sea level conditions,
 $\alpha = 0$, smooth finish. Reference area $S_\text{ref} = \pi D^2/4 = 7.854 \times 10^{-3}$ m$^2$.
 
-### Table 6.1: Drag Budget at $M = 0.5$
+#### Table 6.1: Drag Budget at $M = 0.5$
 
 | Component          | $C_D$ contribution | Fraction |
 |--------------------|--------------------|----------|
@@ -3772,7 +3777,7 @@ $\alpha = 0$, smooth finish. Reference area $S_\text{ref} = \pi D^2/4 = 7.854 \t
 At subsonic speeds, skin friction dominates (~63%), followed by base drag
 (~25%). Wave drag is absent.
 
-### Table 6.2: Drag Budget at $M = 2.0$
+#### Table 6.2: Drag Budget at $M = 2.0$
 
 | Component          | $C_D$ contribution | Fraction |
 |--------------------|--------------------|----------|
@@ -3790,7 +3795,7 @@ contributor (~25% combined). Skin friction is reduced by the Eckert method but
 remains the largest single component. Base drag decreases from its transonic
 peak.
 
-### Table 6.3: Drag Budget at $M = 5.0$
+#### Table 6.3: Drag Budget at $M = 5.0$
 
 | Component          | $C_D$ contribution | Fraction |
 |--------------------|--------------------|----------|
@@ -3809,7 +3814,7 @@ total drag coefficient decreases substantially from $M = 2$ to $M = 5$ because
 of the strong compressibility reduction in friction and the decay of wave drag
 with increasing Mach.
 
-### Table 6.4: Old vs. New Total $C_D$ Comparison
+#### Table 6.4: Old vs. New Total $C_D$ Comparison
 
 | Mach | Old OpenRocket | New (this work) | $\Delta C_D$ | Rel. change |
 |------|---------------|-----------------|---------------|-------------|
@@ -3848,9 +3853,7 @@ Key improvements over the original OpenRocket drag models:
 5. **Regime blending:** C1-continuous Hermite splines at every transition
    prevent the simulation instabilities that occurred with the original
    discontinuous model boundaries.
-# PART D -- Shock Geometry Pre-Pass and Stability Corrections
 
----
 
 ## 7. Shock Geometry Pre-Pass
 
@@ -3908,37 +3911,29 @@ timestep and distributes them to all downstream calculators.
 The following diagram illustrates the shock and expansion fan structure on
 a typical cone-cylinder-fins rocket at $M_\infty > 1$:
 
-```
-    Freestream M_inf
-    ==============================================>
-
-                 Oblique Shock
-                /
-               /
-              /       Post-shock region
-             /        M_2 < M_inf, p_2 > p_inf
-            /         T_2 > T_inf
-           /
-          /   .________________________________________.
-         / .'   Nose Cone   |  Body Tube  |  |\  Fins  |
-    ----+-------------------+-------------+--| \-------|---->  axis
-         `._________________|_____________|__|  \______|
-          \                 ^             ^  |  /
-           \            Shoulder      Fin station
-            \           expansion
-             \          fan (PM)
-              \
-               \  Expansion Fan
-                \  (surface turns away)
-
-    Stations:  x0    x1   x2   ...   xN-1   xN
-
-    Legend:
-    ====>   Freestream flow direction
-    /       Oblique shock surface
-    \       Expansion fan (Prandtl-Meyer)
-    ^       Junction points where flow turns
-    x_i     Computed station positions
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\footnotesize, >=Latex]
+\draw[->, very thick] (-0.3,1.2) -- (8.5,1.2) node[right] {freestream $M_\infty$};
+\draw[thick] (1.0,1.2) -- (2.2,2.35) node[midway, above, sloped] {oblique shock};
+\fill[blue!8] (1.0,0.35) -- (2.2,2.35) -- (2.0,0.35) -- cycle;
+\node[align=left, anchor=west] at (4.0,1.75) {\scriptsize post-shock:\\\scriptsize $M_2<M_\infty$, $p_2>p_\infty$};
+\draw[thick, fill=gray!12] (0,0.35) -- (1.8,1.35) -- (1.8,0.35) -- cycle;
+\node at (0.9,0.85) {nose};
+\draw[thick, fill=gray!12] (1.8,0.35) rectangle (5.2,1.35);
+\node at (3.5,0.85) {body tube};
+\draw[thick, fill=gray!18] (5.0,0.35) -- (6.2,1.9) -- (5.6,0.35) -- cycle;
+\node at (5.5,1.0) {\scriptsize fins};
+\draw[densely dashed] (1.8,1.35) -- (2.1,2.0);
+\node[font=\scriptsize, align=center] at (2.25,2.35) {shoulder\\PM fan};
+\draw[->] (4.0,-0.35) -- (4.0,0.25) node[below=8pt, font=\scriptsize] {stations $x_i$};
+\end{tikzpicture}%
+}
+\caption{Shock and expansion topology on a cone--cylinder--fin vehicle (schematic).}
+\label{fig:shock-topology-rocket}
+\end{figure}
 ```
 
 At the nose tip, the conical or ogive surface deflects the flow, generating
@@ -4213,38 +4208,30 @@ subsonic case -- the same object is reused across all timesteps below Mach 1.0.
 The shock geometry integrates into the existing calculator architecture as
 follows:
 
-```
-  BarrowmanCalculator.getAerodynamicForces()
-       |
-       |  (1) Compute shock geometry for current Mach
-       v
-  ShockGeometry.compute(configuration, conditions)
-       |
-       |  Returns: ShockGeometry object (or SUBSONIC singleton)
-       |
-       |  (2) Pass to stability calculator
-       v
-  BarrowmanStabilityCalculator.setShockGeometry(sg)
-       |
-       |  (3) Stability calculator iterates components
-       v
-  For each RocketComponent:
-       |
-       +---> calcObj.setShockGeometry(sg)          [inject into component calc]
-       |
-       +---> calcObj.calculateNonaxialForces(...)   [compute CNa, CP]
-                |
-                +---> getLocalConditions(sg)        [query local M, p, T, q]
-                |         |
-                |         v
-                |     sg.getConditionsAt(x_component)
-                |         |
-                |         v
-                |     Binary search + linear interpolation
-                |
-                +---> Use local M for K1/K2/K3     [FinSetCalc]
-                +---> Use local q ratio for scaling  [FinSetCalc]
-                +---> Use local M for F_WB, F_BW    [PittsNielsenKaattari]
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=0.42cm,
+  box/.style={rectangle, draw=black!72, thick, align=left, inner sep=3pt, minimum width=3.6cm},
+  arr/.style={-{Latex[length=1.6mm]}, thick}
+]
+\node[box] (bc) {\texttt{BarrowmanCalculator.getAerodynamicForces()}};
+\node[box, below=of bc] (sg) {(1) \texttt{ShockGeometry.compute(config, conditions)}};
+\node[box, below=of sg] (st) {(2) \texttt{BarrowmanStabilityCalculator.setShockGeometry(sg)}};
+\node[box, below=of st] (loop) {(3) For each \texttt{RocketComponent}: \texttt{setShockGeometry}; \texttt{calculateNonaxialForces}};
+\node[box, below=0.35cm of loop, text width=8.2cm, align=left] (q) {\texttt{getConditionsAt}($x$): binary search + linear interpolation of local $M$, $p$, $T$, $q$; used for fin $K_1$/$K_2$/$K_3$, $q$-scaling, PNK $F_{WB}$/$F_{BW}$.};
+\draw[arr] (bc) -- (sg);
+\draw[arr] (sg) -- (st);
+\draw[arr] (st) -- (loop);
+\draw[arr] (loop) -- (q);
+\end{tikzpicture}%
+}
+\caption{Data flow: shock geometry computed once per aerodynamic evaluation and injected into component calculators.}
+\label{fig:shockgeometry-dataflow}
+\end{figure}
 ```
 
 The `ShockGeometry` is also available to the drag calculator
@@ -4420,7 +4407,6 @@ The combined effect of local Mach and dynamic pressure corrections is a
 calculation.  This demonstrates why the shock geometry pre-pass is essential
 for accurate supersonic stability prediction.
 
----
 
 ## 8. Stability Corrections
 
@@ -4849,36 +4835,26 @@ and ensure numerical stability.
 
 #### 8.5.4 Mach Cone Diagram
 
-```
-                    Mach cone from body
-                   /
-                  /   mu = arcsin(1/M)
-                 /  .
-                / .   Zone of body influence
-               /.       on fin
-              /. . . . . . . . . .
-    ---------+========================+--------
-    Body     | Fin root chord c_r     | Body
-    ---------+========================+--------
-              \                      /
-               \ Outside Mach cone  /
-                \  (uninfluenced)  /
-                 \               /
-                  \             /
-                   \           /
-                    \  Fin    /
-                     \ tip   /
-                      \     /
-                       \   /
-                        \ /
-
-    At M = 2.0:  mu = 30 degrees
-    At M = 3.0:  mu = 19.5 degrees
-    At M = 5.0:  mu = 11.5 degrees
-
-    As M increases, the Mach cone narrows,
-    and less of the fin is influenced by
-    the body's upwash field.
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex]
+\fill[gray!15] (-0.2,0) rectangle (2.2,0.35);
+\fill[gray!15] (4.8,0) rectangle (7.2,0.35);
+\node at (1.0,0.18) {body};
+\node at (6.0,0.18) {body};
+\draw[thick] (2.2,0.35) rectangle (4.8,1.1);
+\node at (3.5,0.72) {fin ($c_r$)};
+\draw[thick] (2.2,0.35) -- (1.2,2.4) -- (5.8,2.4) -- (4.8,0.35);
+\path[fill=blue!12, draw=blue!60, dashed] (2.2,0.35) -- (1.2,2.4) -- (3.5,1.1) -- cycle;
+\node[blue!70!black, align=left, font=\scriptsize] at (2.0,1.35) {Mach cone\\$\mu=\arcsin(1/M)$};
+\node[align=left, font=\scriptsize] at (5.5,1.55) {outside cone:\\weaker body\\influence};
+\node[align=left, anchor=west, font=\scriptsize] at (-0.1,-0.85)
+  {$M=2.0$: $\mu\approx 30^\circ$;\quad $M=3.0$: $\mu\approx 19.5^\circ$;\quad $M=5.0$: $\mu\approx 11.5^\circ$.};
+\end{tikzpicture}
+\caption{Mach cone from body relative to fin planform (Pitts--Nielsen--Kaattari context; schematic).}
+\label{fig:mach-cone-fin}
+\end{figure}
 ```
 
 #### 8.5.5 Transonic Blend
@@ -5020,7 +4996,6 @@ similarity regime, blending is applied:
 Shock geometry (from Section 7.8): $M_\text{local} = 2.75$,
 $q_\text{local}/q_\infty = 0.807$.
 
----
 
 #### Case A: Without Shock Geometry Correction (Freestream $M = 2.0$)
 
@@ -5116,7 +5091,6 @@ $$
 \boxed{C_{N\alpha,\text{no\,corr}} = 1.8035}
 $$
 
----
 
 #### Case B: With Shock Geometry Correction ($M_\text{local} = 2.75$)
 
@@ -5206,7 +5180,6 @@ $$
 \boxed{C_{N\alpha,\text{corrected}} = 0.9280}
 $$
 
----
 
 #### Comparison
 
@@ -5242,20 +5215,15 @@ $C_{N\alpha}$.  The sign and magnitude of the correction are geometry-dependent,
 which is precisely why a physics-based shock geometry computation is necessary
 rather than a fixed empirical correction factor.
 
----
-# Part E -- Dynamic Stability, Regime Blending, Validation, and Conclusions
 
----
-
-# 9. Dynamic Stability and Six-Degree-of-Freedom Integration
+## 9. Dynamic Stability and Six-Degree-of-Freedom Integration
 
 The preceding sections developed the aerodynamic coefficient models -- drag, lift, center of pressure -- as functions of Mach number, angle of attack, and geometry. Those coefficients enter the flight simulation through the equations of motion, which in OpenRocket Plus are integrated in a full six-degree-of-freedom (6-DOF) framework using a classical fourth-order Runge-Kutta scheme. This section documents the dynamic stability derivatives that govern vehicle rotation, the Magnus force that couples roll and yaw, the gyroscopic terms that arise from spin-stabilized flight, and the state-vector formulation that ties everything together.
 
----
 
-## 9.1 Pitch Damping Derivative $C_{mq}$
+### 9.1 Pitch Damping Derivative $C_{mq}$
 
-### 9.1.1 Physical Origin
+#### 9.1.1 Physical Origin
 
 When a rocket pitches at angular rate $q$ (rad/s), each aerodynamic surface experiences a locally altered angle of attack due to the rotation. A fin or body panel located at axial distance $(x_{CP,i} - x_{CG})$ from the center of gravity sees an incremental velocity component perpendicular to the freestream:
 
@@ -5277,7 +5245,7 @@ and the moment arm is $(x_{CP,i} - x_{CG})/L_\text{ref}$, giving the squared arm
 
 The quantity $C_{mq}$ is always negative for a statically stable rocket (components aft of CG dominate), providing the restoring torque that damps pitch oscillations.
 
-### 9.1.2 Transonic Augmentation Factor
+#### 9.1.2 Transonic Augmentation Factor
 
 Near $M = 1$, unsteady shock oscillation on the body and fins amplifies the effective damping. This effect is modeled by a Gaussian augmentation factor centered at $M = 1$:
 
@@ -5289,7 +5257,7 @@ $$C_{mq}^\text{aug} = k_\text{transonic}(M) \cdot C_{mq}$$
 
 At $M = 1.0$, $k = 3.5$ (peak augmentation). At $M = 0.7$ or $M = 1.3$, $k \approx 1.0$ (no augmentation). The Gaussian form ensures $C^\infty$ smoothness everywhere and decays to unity within approximately $\pm 0.3$ Mach numbers of the center.
 
-### 9.1.3 Angle-of-Attack Rate Derivative
+#### 9.1.3 Angle-of-Attack Rate Derivative
 
 The derivative with respect to the rate of change of angle of attack, $C_{m\dot{\alpha}}$, is related to $C_{mq}$ by a fixed ratio based on slender-body theory (Tobak and Wehrend, 1956):
 
@@ -5299,7 +5267,7 @@ The combined pitch damping moment coefficient is:
 
 $$C_m^\text{damp} = (C_{mq} + C_{m\dot{\alpha}}) \hat{q} = 1.4 \, C_{mq} \, \hat{q}$$
 
-### 9.1.4 Worked Example -- 1-meter Reference Rocket
+#### 9.1.4 Worked Example -- 1-meter Reference Rocket
 
 Consider a rocket with $L_\text{ref} = 0.050$ m (reference diameter), total length $L = 1.0$ m, and three aerodynamic contributors:
 
@@ -5335,15 +5303,14 @@ $$C_{mq} = -2(128.0 + 4.5 + 294.0) = -2 \times 426.5 = -853.0$$
 
 The transonic amplification factor of 3.5 at $M = 1$ nearly triples the effective pitch damping, reflecting the physically observed increased damping effectiveness in the transonic regime where shock-boundary-layer interactions produce additional unsteady forces.
 
-### 9.1.5 Implementation
+#### 9.1.5 Implementation
 
 In `BarrowmanStabilityCalculator.calculateDampingMoments()`, the code iterates over all aerodynamic components, retrieves each component's $C_{N\alpha}$ and $x_{CP}$ from the per-component force analysis, computes the squared moment arm, and accumulates the sum. The transonic factor and $C_{m\dot{\alpha}}$ ratio are applied after summation. The results are stored in the `AerodynamicForces` object via `setCmq()` and `setCmAlphaDot()`.
 
----
 
-## 9.2 Magnus Force and Moment
+### 9.2 Magnus Force and Moment
 
-### 9.2.1 Physical Mechanism
+#### 9.2.1 Physical Mechanism
 
 When a spinning rocket flies at an angle of attack, the body boundary layer on the windward side is thinner than on the leeward side due to the interaction of the crossflow velocity $V_\infty \sin\alpha$ with the circumferential velocity $\omega r$ induced by the spin. The asymmetric boundary layer produces an asymmetric pressure distribution, generating a side force perpendicular to the plane of the angle of attack. This is the Magnus effect.
 
@@ -5365,7 +5332,7 @@ The Magnus side force in physical units is:
 
 $$F_\text{Magnus} = C_{y,p\alpha} \cdot \hat{p} \cdot \sin\alpha \cdot q_\infty S_\text{ref}$$
 
-### 9.2.2 Magnus Yaw Moment
+#### 9.2.2 Magnus Yaw Moment
 
 The Magnus force acts at the center of pressure, producing a yaw moment about the CG:
 
@@ -5377,7 +5344,7 @@ $$C_n^\text{Magnus} = C_{n,p\alpha} \cdot \hat{p} \cdot \sin\alpha$$
 
 For a statically stable rocket ($x_{CP}$ aft of $x_{CG}$, so $x_{CP} - x_{CG} > 0$ in the aft-positive convention, but in OpenRocket's nose-positive convention $x_{CP} < x_{CG}$ for stability), the Magnus moment tends to increase yaw when the rocket spins, which is a destabilizing effect. This is why excessive roll rates can reduce the effective stability margin.
 
-### 9.2.3 Body $C_{N\alpha}$ Fraction
+#### 9.2.3 Body $C_{N\alpha}$ Fraction
 
 The implementation approximates the body contribution as 30% of the total $C_{N\alpha}$:
 
@@ -5385,7 +5352,7 @@ $$C_{N\alpha,\text{body}} \approx 0.3 \, C_{N\alpha,\text{total}}$$
 
 This is conservative: for typical high-power rockets with 3 or 4 fins, the body contributes 20-40% of total normal force. The factor 0.3 is a reasonable central estimate that avoids the need to decompose the normal force into per-component contributions within the damping moment calculation.
 
-### 9.2.4 Worked Example -- Spinning Rocket at $M = 2$, $\alpha = 5°$
+#### 9.2.4 Worked Example -- Spinning Rocket at $M = 2$, $\alpha = 5°$
 
 Consider a rocket with the following parameters:
 - Total $C_{N\alpha} = 10.0$ rad$^{-1}$
@@ -5424,15 +5391,14 @@ $$C_n^\text{Magnus} = 8.60 \times 0.00229 \times 0.0872 = 1.72 \times 10^{-3}$$
 
 The Magnus side force of $-0.226$ N is small compared to the aerodynamic normal force (typically tens of newtons), confirming that the Magnus effect is a secondary correction. However, the yaw moment can accumulate over time, gradually increasing the dispersion of a spinning rocket, which is why the effect is included in the 6-DOF simulation.
 
----
 
-## 9.3 Euler Gyroscopic Coupling
+### 9.3 Euler Gyroscopic Coupling
 
-### 9.3.1 Motivation
+#### 9.3.1 Motivation
 
 A spinning rocket is a gyroscope. When external moments (aerodynamic pitch/yaw) are applied to a body with significant angular momentum about the roll axis, the body precesses rather than rotating directly in the direction of the applied moment. Neglecting this coupling in the equations of motion leads to incorrect prediction of the pitch-yaw phasing and, for fast-spinning rockets, can produce entirely wrong trajectory predictions.
 
-### 9.3.2 Derivation of the Euler Equations
+#### 9.3.2 Derivation of the Euler Equations
 
 Consider a rigid body with body-fixed principal axes $(x, y, z)$ where $z$ is the roll (longitudinal) axis and $x, y$ are the pitch and yaw axes. The inertia tensor in principal coordinates is diagonal:
 
@@ -5470,11 +5436,11 @@ $$I_\text{roll}\,\dot{\omega}_z = M_z$$
 
 The gyroscopic coupling terms $(I_\text{roll} - I_\text{long})\omega_y\omega_z$ and $(I_\text{long} - I_\text{roll})\omega_x\omega_z$ transfer energy between the pitch and yaw channels through the roll rate $\omega_z$. When the roll rate is zero, these terms vanish and the pitch and yaw equations decouple.
 
-### 9.3.3 Implementation in the Acceleration Computation
+#### 9.3.3 Implementation in the Acceleration Computation
 
 In `RK4SimulationStepper.computeAcceleration()`, after computing the aerodynamic moments $M_x$, $M_y$, $M_z$ (called `momX`, `momY`, `momZ` in the code), the gyroscopic correction is applied:
 
-```
+```java
 momX -= omega_y * (I_roll * omega_z) - omega_z * (I_long * omega_y)
 momY -= omega_z * (I_long * omega_x) - omega_x * (I_roll * omega_z)
 momZ -= omega_x * (I_long * omega_y) - omega_y * (I_long * omega_x)
@@ -5484,7 +5450,7 @@ This subtracts $\boldsymbol{\omega} \times (\mathbf{I}\boldsymbol{\omega})$ from
 
 $$\dot{\boldsymbol{\omega}} = \mathbf{I}^{-1}\left[\mathbf{M} - \boldsymbol{\omega} \times (\mathbf{I}\boldsymbol{\omega})\right]$$
 
-### 9.3.4 Coordinate Transform
+#### 9.3.4 Coordinate Transform
 
 The angular velocity vector is stored in world coordinates in the simulation state. Before applying the Euler equations, it must be transformed to body coordinates:
 
@@ -5498,41 +5464,29 @@ $$\boldsymbol{\omega}_\text{body} = R_z(-\theta) \, \boldsymbol{\omega}_\text{or
 
 After computing the angular acceleration in body coordinates, the reverse sequence transforms it back to world coordinates for integration.
 
-### 9.3.5 Gyroscopic Precession Diagram
+#### 9.3.5 Gyroscopic Precession Diagram
 
 The following diagram illustrates the gyroscopic precession of a spinning rocket. When an aerodynamic pitching moment $M_y$ is applied (e.g., by a wind gust creating angle of attack), the spin angular momentum $H_z = I_\text{roll}\omega_z$ causes the rocket to precess in yaw rather than pitch directly:
 
-```
-                  Applied pitch moment M_y
-                         |
-                         v
-                    +---------+
-                    |         |
-            H_z <---| Rocket  |---> omega_z (spin)
-            (spin   |  (top   |
-            ang.    |  view)  |
-            mom.)   +---------+
-                         |
-                         v
-                  Resulting yaw precession
-                  (omega_x response)
-
-
-   Side view of precession:
-
-        omega_z (roll)
-          ^
-          |       .  .  .
-          |    .           .        <-- Precession cone
-          |  .       |       .          traced by nose
-          | .        |        .
-          |.    omega_x,y     .
-          +----(pitch/yaw)------>
-          |.   (precession)   .
-          | .        |        .
-          |  .       |       .
-          |    .           .
-          |       .  .  .
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex, node distance=0.15cm]
+\node[draw, minimum width=2.6cm, minimum height=1.0cm, align=center] (box) {Rocket\\(top view)};
+\draw[->, thick] (box.north) -- ++(0,0.95) node[above, align=center] {applied pitch\\moment $M_y$};
+\draw[->] (box.west) -- ++(-1.0,0) node[left, align=right] {$H_z$\\(spin ang.~mom.)};
+\draw[->] (box.east) -- ++(1.0,0) node[right, align=left] {$\omega_z$ (spin)};
+\draw[->, thick] (box.south) -- ++(0,-0.95) node[below, align=center] {yaw response\\($\omega_x$ precession)};
+\begin{scope}[shift={(0,-3.0)}]
+\draw[->] (-0.2,0) -- (0,2.0) node[above] {$\omega_z$ (roll)};
+\draw[->] (-0.2,0) -- (2.4,0) node[right] {pitch/yaw plane};
+\draw[dashed, thick] (0,0) ellipse (1.5cm and 0.5cm);
+\node[font=\scriptsize, align=center] at (0.9,0.7) {precession cone\\(nose trace)};
+\end{scope}
+\end{tikzpicture}
+\caption{Gyroscopic coupling: with large spin angular momentum $H_z$, an applied pitching moment produces yaw precession (schematic).}
+\label{fig:gyro-precession}
+\end{figure}
 ```
 
 The precession rate for a torque-free symmetric top is:
@@ -5541,7 +5495,7 @@ $$\Omega_\text{prec} = \frac{(I_\text{long} - I_\text{roll})\,\omega_z}{I_\text{
 
 For a slender rocket with $I_\text{long} \gg I_\text{roll}$, this simplifies to $\Omega_\text{prec} \approx \omega_z$, meaning the precession rate approximately equals the roll rate.
 
-### 9.3.6 Dynamic Pressure Gate
+#### 9.3.6 Dynamic Pressure Gate
 
 The gyroscopic coupling terms are computationally active only when the dynamic pressure exceeds a threshold of $q_\infty > 1.0$ Pa. This gate serves two purposes:
 
@@ -5551,13 +5505,13 @@ The gyroscopic coupling terms are computationally active only when the dynamic p
 
 The gate is implemented as a simple conditional:
 
-```
+```java
 if (dynP > 1.0) {
     // Apply gyroscopic correction
 }
 ```
 
-### 9.3.7 Time-Step Limiting
+#### 9.3.7 Time-Step Limiting
 
 The RK4 integrator employs adaptive time-step selection based on angular rate limits. Two constraints are particularly relevant for gyroscopic dynamics:
 
@@ -5569,11 +5523,10 @@ where $\phi_\text{max,roll} = 2 \times 28.32° = 56.64°$ and $\phi_\text{max,pi
 
 The minimum time step is clamped to $\Delta t_\text{min} = \Delta t_\text{user}/20$ to prevent the step from shrinking to zero in pathological cases (e.g., a very fast spin with no aerodynamic damping).
 
----
 
-## 9.4 State Vector and RK4 Integration
+### 9.4 State Vector and RK4 Integration
 
-### 9.4.1 The 13-Component State Vector
+#### 9.4.1 The 13-Component State Vector
 
 The simulation state vector $\mathbf{y}$ contains 13 components:
 
@@ -5581,7 +5534,7 @@ $$\mathbf{y} = \begin{pmatrix} x \\ y \\ z \\ v_x \\ v_y \\ v_z \\ q_0 \\ q_1 \\
 
 The use of quaternions instead of Euler angles eliminates the gimbal lock singularity that would otherwise occur when the rocket is pointed straight up or straight down -- precisely the configurations encountered during ascent and at apogee.
 
-### 9.4.2 Quaternion Kinematics
+#### 9.4.2 Quaternion Kinematics
 
 The time derivative of the orientation quaternion is related to the angular velocity by:
 
@@ -5599,7 +5552,7 @@ $$\frac{dq_2}{dt} = \frac{1}{2}(q_0\omega_y - q_1\omega_z + q_3\omega_x)$$
 
 $$\frac{dq_3}{dt} = \frac{1}{2}(q_0\omega_z + q_1\omega_y - q_2\omega_x)$$
 
-### 9.4.3 Equations of Motion Summary
+#### 9.4.3 Equations of Motion Summary
 
 The complete 6-DOF equations of motion integrated by the RK4 stepper are:
 
@@ -5619,7 +5572,7 @@ $$\dot{\boldsymbol{\omega}} = \mathbf{I}^{-1}\left[\mathbf{M}_\text{aero} - \bol
 
 where $\mathbf{M}_\text{aero}$ includes the pitch moment $C_m q_\infty S_\text{ref} L_\text{ref}$, yaw moment $C_n q_\infty S_\text{ref} L_\text{ref}$ (with Magnus contribution), roll moment $C_l q_\infty S_\text{ref} L_\text{ref}$, and the pitch/yaw damping moments.
 
-### 9.4.4 RK4 Sub-Step Structure
+#### 9.4.4 RK4 Sub-Step Structure
 
 The classical fourth-order Runge-Kutta method evaluates the right-hand side at four points within each time step $h$:
 
@@ -5641,7 +5594,7 @@ Each sub-step $\mathbf{k}_i$ involves:
 
 At each evaluation point, the full aerodynamic calculation is performed: `ShockGeometry` pre-pass (if supersonic), component-level stability computation, drag computation, thrust evaluation, and gravity/Coriolis corrections. This means four complete aerodynamic evaluations per time step.
 
-### 9.4.5 Quaternion Normalization
+#### 9.4.5 Quaternion Normalization
 
 After the RK4 update, the quaternion $\mathbf{q}_{n+1}$ may drift from unit norm due to the finite-precision linear combination of the four sub-steps. The implementation checks $\|\mathbf{q}\|$ after each step and renormalizes if the deviation exceeds a threshold:
 
@@ -5649,7 +5602,7 @@ $$\mathbf{q} \leftarrow \frac{\mathbf{q}}{\|\mathbf{q}\|} \quad \text{if} \quad 
 
 This prevents the orientation from gradually becoming non-physical over thousands of integration steps.
 
-### 9.4.6 Integration Stability Bounds
+#### 9.4.6 Integration Stability Bounds
 
 The simulation enforces absolute bounds on the state vector to detect divergence:
 
@@ -5657,17 +5610,15 @@ $$\|\mathbf{v}\|^2 < 10^{18}, \quad \|\mathbf{x}\|^2 < 10^{18}, \quad \|\boldsym
 
 Exceeding any of these bounds triggers a `SimulationCalculationException`, halting the simulation with a diagnostic message. These bounds are set far beyond any physically realizable rocket flight (a velocity of $10^9$ m/s would exceed the speed of light) and exist solely to catch numerical runaway.
 
----
 
-# 10. Regime Blending
+## 10. Regime Blending
 
 The aerodynamic models described in Sections 3 through 8 each have limited domains of validity. No single model spans the entire Mach range from incompressible flow through hypersonic flight. The subsonic Barrowman method diverges as $M \to 1$; the Ackeret supersonic theory is singular at $M = 1$; the Taylor-Maccoll cone solution requires $M > 1 + \epsilon$. Connecting these models requires blending functions that transition smoothly between regimes.
 
 This section documents the blending methodology, proves the continuity properties, catalogs all eleven blending regions in the implementation, and provides design guidance for selecting blend types.
 
----
 
-## 10.1 Why $C^1$ Continuity Matters
+### 10.1 Why $C^1$ Continuity Matters
 
 A flight simulation integrates the aerodynamic coefficients as part of the equations of motion. A discontinuity in $C_D(M)$ produces a delta-function in $dC_D/dM$, which enters the force balance through the chain rule:
 
@@ -5685,11 +5636,10 @@ If $dC_D/dM$ is unbounded (i.e., $C_D$ has a jump), then the rate of change of d
 
 The requirement is therefore: all coefficient functions must be at least $C^1$-continuous (continuous value and continuous first derivative) across every regime boundary.
 
----
 
-## 10.2 Cubic Hermite Smoothstep
+### 10.2 Cubic Hermite Smoothstep
 
-### 10.2.1 Definition
+#### 10.2.1 Definition
 
 The cubic Hermite smoothstep is the simplest polynomial that achieves $C^1$ continuity between two constant values. Given a normalized parameter:
 
@@ -5703,7 +5653,7 @@ This function blends between value $f_0$ at $M_\text{lo}$ and value $f_1$ at $M_
 
 $$f(M) = f_0 \cdot (1 - w(t)) + f_1 \cdot w(t)$$
 
-### 10.2.2 Proof of $C^1$ Properties
+#### 10.2.2 Proof of $C^1$ Properties
 
 **Claim**: $w(t) = 3t^2 - 2t^3$ satisfies $w(0) = 0$, $w(1) = 1$, $w'(0) = 0$, $w'(1) = 0$.
 
@@ -5721,31 +5671,34 @@ $$w'(1) = 6 \cdot 1 \cdot (1 - 1) = 0 \qquad \checkmark$$
 
 Since $w'(0) = 0$, the blended function $f(M)$ has the same slope as $f_0$ at $M = M_\text{lo}$. Since $w'(1) = 0$, $f(M)$ has the same slope as $f_1$ at $M = M_\text{hi}$. If both $f_0(M)$ and $f_1(M)$ are themselves continuous, the composite function is $C^1$ across both boundaries.
 
-### 10.2.3 ASCII Diagram
+#### 10.2.3 Shape of $w(t)$
 
-```
-w(t)
- 1.0 |                         .--------
-     |                       .
-     |                     .
- 0.5 |                   *          <-- inflection at t = 0.5
-     |                 .
-     |               .
- 0.0 |------------ .
-     +---+---+---+---+---+---+---+---
-     0       0.25     0.5     0.75     1.0   t
-
-     w'(0) = 0                  w'(1) = 0
-     (flat entry)               (flat exit)
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.78\textwidth, height=0.34\textwidth,
+  xlabel={$t$}, ylabel={$w(t)$},
+  xmin=0, xmax=1, ymin=-0.02, ymax=1.06,
+  grid=major,
+  domain=0:1, samples=120
+]
+\addplot[thick, blue] {3*x^2 - 2*x^3};
+\addplot[only marks, mark=*, mark size=1.8pt, forget plot] coordinates {(0.5,0.5)};
+\end{axis}
+\end{tikzpicture}
+\caption{Cubic Hermite smoothstep: $w'(0)=w'(1)=0$ (flat entry and exit); inflection at $t=\tfrac{1}{2}$.}
+\label{fig:smoothstep-wt}
+\end{figure}
 ```
 
 The smoothstep is used where both endpoint models are themselves smooth and no particular slope matching is needed at the boundaries.
 
----
 
-## 10.3 Rational Blend (AP09 Formulation)
+### 10.3 Rational Blend (AP09 Formulation)
 
-### 10.3.1 Motivation
+#### 10.3.1 Motivation
 
 The cubic smoothstep has a fixed transition width defined by $[M_\text{lo}, M_\text{hi}]$ and uses a polynomial weight. For transitions near $M = 1$ where the physics is dominated by the Prandtl-Glauert singularity ($\beta \to 0$), a rational function provides a better approximation to the actual coefficient behavior. The AP09 formulation (from Guided Weapons Cooperative Research, 2009) uses:
 
@@ -5755,7 +5708,7 @@ $$g(M) = \frac{1}{2}\left(1 - \frac{t}{\sqrt{1 + t^2}}\right)$$
 
 where $M_b$ is the blend center (typically 1.0) and $w$ is the transition width parameter.
 
-### 10.3.2 Properties
+#### 10.3.2 Properties
 
 1. $g(M) \to 1$ as $M \to 0$ (fully subsonic weight)
 2. $g(M_b) = 0.5$ (center of transition)
@@ -5767,7 +5720,7 @@ The blended value is:
 
 $$f(M) = f_\text{sub}(M) \cdot g(M) + f_\text{sup}(M) \cdot (1 - g(M))$$
 
-### 10.3.3 Derivative
+#### 10.3.3 Derivative
 
 The derivative with respect to Mach is needed to verify $C^1$ continuity and is implemented in `RationalBlend.weightDerivative()`:
 
@@ -5779,29 +5732,39 @@ $$\frac{dg}{dM} = \frac{dg}{dt} \cdot \frac{dt}{dM} = \frac{-M}{w \cdot M_b^2 \c
 
 This derivative is always non-positive for $M \geq 0$ and is bounded everywhere (no singularity), confirming the $C^\infty$ property.
 
-### 10.3.4 Comparison with Smoothstep
+#### 10.3.4 Comparison with Smoothstep
 
-```
-g(M)  (blend center M_b = 1.0, width w = 0.3)
- 1.0 |---___
-     |       --__
-     |            -__                   Rational (AP09)
- 0.5 |               *                 ---- solid
-     |                -__
-     |                    --__          Smoothstep
- 0.0 |                        ---___   .... dotted
-     +---+---+---+---+---+---+---+---
-     0.5     0.7     0.9     1.1     1.3     M
-
-     The rational blend has longer tails (gradual onset/exit)
-     compared to the smoothstep's hard boundaries.
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.85\textwidth, height=0.36\textwidth,
+  xlabel={Mach number $M$}, ylabel={subsonic weight},
+  xmin=0.45, xmax=1.55, ymin=-0.05, ymax=1.05,
+  grid=major,
+  legend style={font=\scriptsize, at={(0.5,-0.26)}, anchor=north, legend columns=1},
+  samples=200,
+  clip=false,
+  enlargelimits=false
+]
+\addplot[thick, black, domain=0.5:1.5] {0.5*(1 - ((x^2-1)/0.3) / sqrt(1 + ((x^2-1)/0.3)^2))};
+\addlegendentry{Rational $g(M)$ ($M_b=1$, $w=0.3$)}
+\addplot[thick, blue, dashed, domain=0.5:0.75] {1};
+\addlegendentry{Compact smoothstep weight ($M\in[0.75,1.25]$)}
+\addplot[thick, blue, dashed, domain=0.75:1.25, forget plot] {1 - (3*((x-0.75)/0.5)^2 - 2*((x-0.75)/0.5)^3)};
+\addplot[thick, blue, dashed, domain=1.25:1.5, forget plot] {0};
+\end{axis}
+\end{tikzpicture}
+\caption{Rational AP09 weight $g(M)$ has gradual tails; a cubic smoothstep over a fixed interval has compact support with hard edges at its Mach endpoints (illustrative comparison).}
+\label{fig:rational-vs-smoothstep}
+\end{figure}
 ```
 
 The rational blend is preferred when the transition must be centered at a specific Mach number (like $M = 1$) but should not have hard "edges" where the blending activates or deactivates. The smoothstep is preferred when the endpoints are precisely known and a compact blending region is desired.
 
----
 
-## 10.4 Complete Blending Region Table
+### 10.4 Complete Blending Region Table
 
 The following table catalogs every Mach-regime blending region in the implementation. Each row identifies the quantity being blended, the Mach boundaries, the blend type, the source file, and the models being joined.
 
@@ -5828,50 +5791,57 @@ The following table catalogs every Mach-regime blending region in the implementa
 - The widest blend region is Entry 9 (Modified Newtonian, $\Delta M = 2.0$), reflecting the gradual transition from the shock-dependent regime to the purely local-inclination hypersonic regime.
 - The narrowest blend region is Entry 1 ($\beta$, $\Delta M = 0.10$), which must be tight to avoid distorting the compressibility factor at Mach numbers far from unity.
 
----
 
-## 10.5 Conceptual $C_D$ vs Mach Diagram with Blend Regions
+### 10.5 Conceptual $C_D$ vs Mach Diagram with Blend Regions
 
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\textwidth, height=0.40\textwidth,
+  xmin=0.2, xmax=5.3, ymin=-0.02, ymax=0.76,
+  xlabel={Mach number $M$}, ylabel={$C_D$ (conceptual)},
+  grid=major,
+  clip=false,
+  legend style={font=\scriptsize, at={(0.5,-0.12)}, anchor=north}
+]
+\fill[yellow!18, opacity=0.9] (axis cs:0.85,0) rectangle (axis cs:1.50,0.72);
+\fill[orange!15, opacity=0.85] (axis cs:4.0,0) rectangle (axis cs:5.3,0.72);
+\addplot[thick, black] coordinates {
+  (0.3,0.32) (0.5,0.34) (0.8,0.48) (0.9,0.56) (1.0,0.70) (1.1,0.60)
+  (1.3,0.48) (1.5,0.44) (2.0,0.36) (3.0,0.27) (5.0,0.19)
+};
+\addplot[only marks, mark=*, mark size=2pt, forget plot] coordinates {(1.0,0.70)};
+\addlegendentry{qualitative $C_D(M)$ with transonic peak}
+\end{axis}
+\end{tikzpicture}
+\caption{Conceptual total drag coefficient vs Mach (not a specific vehicle). Shaded band $M\in[0.85,1.50]$ highlights the dense transonic overlap of blend regions; $M\in[4,6]$ indicates the Modified Newtonian transition (Section~10.4 catalog).}
+\label{fig:cd-mach-blend-concept}
+\end{figure}
 ```
-Cd
-     |
-0.70 |                  *  Peak
-     |                 /|\
-0.60 |               /  | \
-     |             /   |  \
-0.50 |           /    |   \
-     |         /  [2] | [7] \
-0.40 |       /        |      \------___
-     |     /    [6]   |              -------____
-0.30 | ---/     [3]   |  [9]                    ----
-     |                |
-0.20 |           [1]  |  [10]
-     |                |
-0.10 |                |
-     +--+--+--+--+--+--+--+--+--+--+--+--+--+--
-        0.3  0.5  0.8 0.9 1.0 1.1 1.3 1.5 2.0 3.0  5.0  M
 
-     Blend regions (numbers refer to table above):
+Blend regions (numbers refer to the table in Section 10.4):
 
-     [1] beta factor:     |===|         M = 0.95 -- 1.05
-     [2] base drag:    |=========|      M = 0.85 -- 1.30
-     [3] skin friction:   |====|        M = 0.90 -- 1.10
-     [5] fin CNa:         |==========| M = 0.90 -- 1.50
-     [6] fin wave drag:   |======|     M = 0.90 -- 1.20
-     [7] nose wave drag:     |====|    M = 1.30 -- 1.50
-     [8] body CNa/CP:  |==========|    M = 0.80 -- 1.30
-     [9] Newtonian:                         |==========| M = 4.0 -- 6.0
-     [10] shock geom:       |==|       M = 1.00 -- 1.10
-     [11] PNK fin-body: |========|     M = 0.85 -- 1.15
-```
+| ID | Quantity | $M$ range |
+|:--:|----------|-----------|
+| [1] | $\beta$ factor | $0.95$ -- $1.05$ |
+| [2] | Base drag | $0.85$ -- $1.30$ |
+| [3] | Skin friction | $0.90$ -- $1.10$ |
+| [5] | Fin $C_{N\alpha}$ | $0.90$ -- $1.50$ |
+| [6] | Fin wave drag | $0.90$ -- $1.20$ |
+| [7] | Nose/body wave drag | $1.30$ -- $1.50$ |
+| [8] | Body $C_{N\alpha}$ / CP | $0.80$ -- $1.30$ |
+| [9] | Newtonian | $4.0$ -- $6.0$ |
+| [10] | Shock geometry | $1.00$ -- $1.10$ |
+| [11] | PNK fin-body | $0.85$ -- $1.15$ |
 
 The transonic region $M \in [0.85, 1.50]$ contains seven overlapping blend regions. The overlap is intentional: each aerodynamic quantity transitions at the Mach range appropriate to its physical behavior. Base drag peaks near $M = 1.05$ and must blend over a wide region (0.85 to 1.30) to capture the characteristic asymmetric transonic shape. Fin $C_{N\alpha}$, which depends on $1/\beta$, needs a wider supersonic margin (up to $M = 1.5$) because the Barrowman subsonic formula and the Ackeret supersonic formula both diverge as $M \to 1$ and the interpolation polynomial must span a region wide enough to control the curvature.
 
----
 
-## 10.6 Design Principles for Blend Selection
+### 10.6 Design Principles for Blend Selection
 
-### 10.6.1 When to Use Cubic Hermite Smoothstep
+#### 10.6.1 When to Use Cubic Hermite Smoothstep
 
 Use the $3t^2 - 2t^3$ smoothstep when:
 - Both endpoint models are smooth and well-defined at the blend boundaries
@@ -5881,7 +5851,7 @@ Use the $3t^2 - 2t^3$ smoothstep when:
 
 **Examples in this implementation**: Fin wave drag (Entry 6), body $C_{N\alpha}$ (Entry 8), Modified Newtonian (Entry 9).
 
-### 10.6.2 When to Use Constrained Polynomial
+#### 10.6.2 When to Use Constrained Polynomial
 
 Use a degree-4 or degree-5 constrained polynomial when:
 - Both values and derivatives must match at the endpoints (C1 boundary conditions)
@@ -5890,7 +5860,7 @@ Use a degree-4 or degree-5 constrained polynomial when:
 
 **Example**: Base drag blend (Entry 2), which must match the subsonic parabola and its slope at $M = 0.85$, pass through the transonic peak of 0.25 at $M = 1.05$, and match the Devan-Ashwood formula and its slope at $M = 1.30$.
 
-### 10.6.3 When to Use Rational Blend (AP09)
+#### 10.6.3 When to Use Rational Blend (AP09)
 
 Use the rational blend when:
 - The transition is centered at a specific Mach number and should have smooth tails
@@ -5900,7 +5870,7 @@ Use the rational blend when:
 
 The AP09 rational blend is $C^\infty$ everywhere and has the important property that it decays algebraically (not exponentially) in the tails, which means it provides a very gentle onset rather than an abrupt activation.
 
-### 10.6.4 When to Use Gaussian Augmentation
+#### 10.6.4 When to Use Gaussian Augmentation
 
 Use a Gaussian factor when:
 - A multiplicative correction is needed that peaks at a specific Mach number
@@ -5909,7 +5879,7 @@ Use a Gaussian factor when:
 
 **Example**: The pitch damping transonic factor $k(M) = 1 + 2.5\exp(-(((M-1)/0.15)^2)$ (Section 9.1.2). This is not a blend between two models but an augmentation of a single model, and the Gaussian shape naturally provides infinite smoothness.
 
-### 10.6.5 When to Use Linear Blend
+#### 10.6.5 When to Use Linear Blend
 
 Use a linear blend only when:
 - The blended quantity is itself a smooth correction that does not cause discontinuities
@@ -5918,17 +5888,15 @@ Use a linear blend only when:
 
 **Examples**: Shock geometry activation (Entry 10), skin friction transition (Entry 3). In both cases, the blended quantity modulates a correction that is itself smooth, so the slope discontinuity at the linear blend endpoints is multiplied by a small factor and does not cause simulation instability.
 
----
 
-# 11. Validation and Results
+## 11. Validation and Results
 
----
 
-## 11.1 Test Suite Overview
+### 11.1 Test Suite Overview
 
 The aerodynamic validation suite comprises **833 test cases** distributed across **53 test classes** in the `info.openrocket.core.aerodynamics` package hierarchy. Each model is validated at three levels: unit level (exact analytical comparisons against published tables), component level (coefficient magnitudes and trends against empirical correlations), and system level (full-vehicle Mach sweeps with continuity verification).
 
-### 11.1.1 Five Standard Rocket Geometries
+#### 11.1.1 Five Standard Rocket Geometries
 
 All system-level tests operate on five geometries spanning representative high-power amateur rocket configurations:
 
@@ -5942,7 +5910,7 @@ All system-level tests operate on five geometries spanning representative high-p
 
 5. **Von Karman-Fins (VKF)**: Sears-Haack/LD-Haack nose ($L_n = 0.180$ m), cylinder body ($L_b = 0.550$ m), 3-fin swept set. Provides comparison against a theoretically minimum-wave-drag configuration.
 
-### 11.1.2 Test Matrix
+#### 11.1.2 Test Matrix
 
 | Domain | Mach range | AoA range | Test classes | Test cases |
 |--------|-----------|-----------|--------------|------------|
@@ -5959,13 +5927,12 @@ All system-level tests operate on five geometries spanning representative high-p
 
 The suite covers freestream Mach numbers $M_\infty = 0.3, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.5, 2.0, 3.0, 5.0, 8.0, 10.0$ at discrete points, plus a continuous sweep over 235 Mach steps from $M = 0.3$ to $M = 5.0$ in steps of $\Delta M = 0.02$ for continuity validation.
 
----
 
-## 11.2 Gas Dynamics Validation Against NACA Report 1135
+### 11.2 Gas Dynamics Validation Against NACA Report 1135
 
 The three core gas-dynamics solvers are validated against the tabulated exact solutions in NACA Report 1135 (Ames Research Staff, 1953). All comparisons use $\gamma = 1.4$. The target tolerance is $< 0.1\%$ relative error.
 
-### 11.2.1 Normal Shock Relations
+#### 11.2.1 Normal Shock Relations
 
 **Table 11.1 -- Normal Shock Properties, $\gamma = 1.4$ (Computed vs NACA 1135)**
 
@@ -5980,7 +5947,7 @@ The three core gas-dynamics solvers are validated against the tabulated exact so
 
 Maximum relative error: $7 \times 10^{-5}$, well within the 0.1% specification.
 
-### 11.2.2 Oblique Shock Relations
+#### 11.2.2 Oblique Shock Relations
 
 **Table 11.2 -- Oblique Shock Wave Angle $\beta$ (Weak Solution, $\gamma = 1.4$)**
 
@@ -5996,7 +5963,7 @@ Maximum relative error: $7 \times 10^{-5}$, well within the 0.1% specification.
 
 All computed shock angles agree with NACA 1135 to within 0.021%.
 
-### 11.2.3 Prandtl-Meyer Expansion Function
+#### 11.2.3 Prandtl-Meyer Expansion Function
 
 **Table 11.3 -- Prandtl-Meyer Angle $\nu(M)$, $\gamma = 1.4$**
 
@@ -6011,7 +5978,7 @@ All computed shock angles agree with NACA 1135 to within 0.021%.
 
 The inverse Newton iteration recovers the input Mach to within $10^{-8}$ relative error over $M \in [1, 20]$.
 
-### 11.2.4 Gas Dynamics Tolerance Summary
+#### 11.2.4 Gas Dynamics Tolerance Summary
 
 **Table 11.4 -- Tolerance Summary**
 
@@ -6026,11 +5993,10 @@ The inverse Newton iteration recovers the input Mach to within $10^{-8}$ relativ
 
 All quantities meet or exceed the 0.1% specification.
 
----
 
-## 11.3 Drag Model Validation
+### 11.3 Drag Model Validation
 
-### 11.3.1 Total Drag Coefficient -- All Five Geometries
+#### 11.3.1 Total Drag Coefficient -- All Five Geometries
 
 **Table 11.5 -- Total $C_D$ vs Mach Number for All Standard Geometries**
 
@@ -6050,27 +6016,24 @@ Key observations:
 - The CCF geometry shows the largest absolute $C_D$ throughout, with fins contributing approximately 0.24 at $M = 1.1$.
 - Supersonic drag decays approximately as $M^{-2}$ above the transonic peak, consistent with wave drag theory.
 
-### 11.3.2 Drag Continuity Verification
+#### 11.3.2 Drag Continuity Verification
 
 The continuity sweep executes 235 Mach steps ($\Delta M = 0.02$) for all five geometries. The acceptance criterion is $|dC_D/dM| < 5.0$.
 
-```
-Geometry              Max |dCd/dM|   Location    Status
-------------------------------------------------------------
-Cone-Cylinder         1.02           M = 1.07     PASS
-Ogive-Cylinder        0.87           M = 1.08     PASS
-Cone-Cylinder-Fins    1.43           M = 1.06     PASS
-Ogive-Boattail-Fins   0.76           M = 1.07     PASS
-Von Karman-Fins       1.21           M = 1.08     PASS
-```
+| Geometry | $\max |dC_D/dM|$ | Location | Status |
+|----------|----------------:|----------|--------|
+| Cone-Cylinder | 1.02 | $M = 1.07$ | PASS |
+| Ogive-Cylinder | 0.87 | $M = 1.08$ | PASS |
+| Cone-Cylinder-Fins | 1.43 | $M = 1.06$ | PASS |
+| Ogive-Boattail-Fins | 0.76 | $M = 1.07$ | PASS |
+| Von Karman-Fins | 1.21 | $M = 1.08$ | PASS |
 
 All peaks occur in the physically real transonic drag rise region, not at model blend boundaries.
 
----
 
-## 11.4 Stability Validation
+### 11.4 Stability Validation
 
-### 11.4.1 Center of Pressure Position vs Mach
+#### 11.4.1 Center of Pressure Position vs Mach
 
 **Table 11.6 -- CP Position $x_{CP}$ (m from nose tip) for Ogive-Boattail-Fins**
 
@@ -6085,18 +6048,17 @@ All peaks occur in the physically real transonic drag rise region, not at model 
 
 The aft shift from $M = 0.3$ to $M = 5$ is approximately 0.37 m (49% of total rocket length), consistent with published supersonic behavior where fin $C_{N\alpha}$ decays as $1/\beta$ relative to the body contribution.
 
-### 11.4.2 Physical Consistency Checks
+#### 11.4.2 Physical Consistency Checks
 
 1. CP is aft of the nose tip at all Mach numbers for all three finned geometries.
 2. CP is continuous through $M = 1$ with no discontinuous jumps.
 3. Fin $C_{N\alpha}$ with shock-corrected local Mach differs from uncorrected by 5-15% at $M = 2$-3, confirming the `ShockGeometry` pre-pass is meaningfully altering fin lift.
 4. Total $C_{N\alpha}$ increases through transonic (9.67 at $M = 1$ vs 8.47 subsonic for CCF), which is physically correct.
 
----
 
-## 11.5 Hypersonic Validation
+### 11.5 Hypersonic Validation
 
-### 11.5.1 Maximum Pressure Coefficient
+#### 11.5.1 Maximum Pressure Coefficient
 
 **Table 11.7 -- $C_{p,\max}$ via Rayleigh Pitot Formula, $\gamma = 1.4$**
 
@@ -6110,7 +6072,7 @@ The aft shift from $M = 0.3$ to $M = 5$ is approximately 0.37 m (49% of total ro
 
 The theoretical Newtonian limit is $C_{p,\max} \to 1.839$ as $M \to \infty$. The computed value at $M = 20$ is 1.837, confirming correct asymptotic behavior.
 
-### 11.5.2 Effective Ratio of Specific Heats
+#### 11.5.2 Effective Ratio of Specific Heats
 
 **Table 11.8 -- $\gamma_\text{eff}$ vs Stagnation Temperature**
 
@@ -6124,9 +6086,8 @@ The theoretical Newtonian limit is $C_{p,\max} \to 1.839$ as $M \to \infty$. The
 
 The implementation clamps $\gamma_\text{eff} \geq 1.30$ to avoid nonphysical values before dissociation chemistry (which is not modeled).
 
----
 
-## 11.6 Performance Benchmarks
+### 11.6 Performance Benchmarks
 
 **Table 11.9 -- Mean Aerodynamic Calculation Time (OBF geometry, post-JIT warmup)**
 
@@ -6145,9 +6106,8 @@ Throughput at $M = 3$: 1000 calculations in approximately 820 ms (0.82 ms per ca
 
 **Subsonic passthrough**: At $M < 1.0$, `ShockGeometry.compute()` costs approximately 150-300 ns per call (a single branch and memory read), confirming zero measurable overhead for subsonic flight simulation.
 
----
 
-## 11.7 Comparison with Original OpenRocket
+### 11.7 Comparison with Original OpenRocket
 
 **Table 11.10 -- Old vs New Predictions for Cone-Cylinder**
 
@@ -6170,13 +6130,11 @@ Throughput at $M = 3$: 1000 calculations in approximately 820 ms (0.82 ms per ca
 | Hypersonic | No model | Modified Newtonian blended $M = 4$-6 |
 | Valid Mach range | $M < 2$ | $M < 10$ (5x extension) |
 
----
 
-# 12. Conclusions and References
+## 12. Conclusions and References
 
----
 
-## 12.1 Summary of Contributions
+### 12.1 Summary of Contributions
 
 This work has extended the OpenRocket aerodynamic simulation framework from a subsonic/low-transonic tool valid to approximately $M = 2$ into a comprehensive compressible-flow simulation validated from $M = 0.3$ to $M = 10+$. The seven principal contributions are:
 
@@ -6194,7 +6152,7 @@ This work has extended the OpenRocket aerodynamic simulation framework from a su
 
 7. **Dynamic stability derivatives.** Pitch damping ($C_{mq}$) computed from per-component $C_{N\alpha}$ and moment arms with a transonic Gaussian augmentation factor, Magnus force and moment derivatives for spinning rockets, and full Euler gyroscopic coupling in the 6-DOF integrator. These enable physically correct prediction of spin-stabilized flight, precession dynamics, and pitch damping through all Mach regimes.
 
-## 12.2 Validation Summary
+### 12.2 Validation Summary
 
 The extended aerodynamic module passes **833 automated tests with 0 failures** across 53 test classes. The test suite covers:
 
@@ -6207,11 +6165,11 @@ The extended aerodynamic module passes **833 automated tests with 0 failures** a
 
 The valid Mach range has been extended from approximately $M < 2$ (original OpenRocket) to $M < 10$ (OpenRocket Plus), a five-fold increase. Within the range $M = 0.3$ to $M = 5.0$, the total drag coefficient predictions are physically consistent with published experimental data and analytical solutions for all five standard geometries.
 
-## 12.3 Subsonic Compatibility
+### 12.3 Subsonic Compatibility
 
 At $M < 1.0$, the extended code paths are either inactive (ShockGeometry returns a passthrough with unit ratios, wave drag models return zero, Eckert correction reduces to incompressible) or reduce identically to the original Barrowman formulas. The subsonic passthrough cost is approximately 200 ns per call -- negligible compared to the ~180 microsecond component calculation time. All original subsonic tests continue to pass without modification.
 
-## 12.4 Limitations and Future Work
+### 12.4 Limitations and Future Work
 
 The current implementation does not model:
 - Real-gas dissociation chemistry above stagnation temperatures of approximately 5000 K (relevant for $M > 10$ at sea level)
@@ -6222,9 +6180,8 @@ The current implementation does not model:
 
 These items represent diminishing returns for the target application of amateur high-power rocketry, where the vast majority of flights remain below $M = 5$.
 
----
 
-## References
+### References
 
 1. Ackeret, J. (1925). "Luftkrafte auf Flugel, die mit grosserer als Schallgeschwindigkeit bewegt werden." *Zeitschrift fur Flugtechnik und Motorluftschiffahrt*, 16, pp. 72-74.
 
@@ -6304,6 +6261,4 @@ These items represent diminishing returns for the target application of amateur 
 
 39. Van Driest, E. R. (1956). "The Problem of Aerodynamic Heating." *Aeronautical Engineering Review*, 15(10), pp. 26-41.
 
----
 
-*End of Part E.*

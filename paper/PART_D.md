@@ -1,7 +1,3 @@
-# PART D -- Shock Geometry Pre-Pass and Stability Corrections
-
----
-
 ## 7. Shock Geometry Pre-Pass
 
 ### 7.1 Motivation
@@ -58,37 +54,29 @@ timestep and distributes them to all downstream calculators.
 The following diagram illustrates the shock and expansion fan structure on
 a typical cone-cylinder-fins rocket at $M_\infty > 1$:
 
-```
-    Freestream M_inf
-    ==============================================>
-
-                 Oblique Shock
-                /
-               /
-              /       Post-shock region
-             /        M_2 < M_inf, p_2 > p_inf
-            /         T_2 > T_inf
-           /
-          /   .________________________________________.
-         / .'   Nose Cone   |  Body Tube  |  |\  Fins  |
-    ----+-------------------+-------------+--| \-------|---->  axis
-         `._________________|_____________|__|  \______|
-          \                 ^             ^  |  /
-           \            Shoulder      Fin station
-            \           expansion
-             \          fan (PM)
-              \
-               \  Expansion Fan
-                \  (surface turns away)
-
-    Stations:  x0    x1   x2   ...   xN-1   xN
-
-    Legend:
-    ====>   Freestream flow direction
-    /       Oblique shock surface
-    \       Expansion fan (Prandtl-Meyer)
-    ^       Junction points where flow turns
-    x_i     Computed station positions
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\footnotesize, >=Latex]
+\draw[->, very thick] (-0.3,1.2) -- (8.5,1.2) node[right] {freestream $M_\infty$};
+\draw[thick] (1.0,1.2) -- (2.2,2.35) node[midway, above, sloped] {oblique shock};
+\fill[blue!8] (1.0,0.35) -- (2.2,2.35) -- (2.0,0.35) -- cycle;
+\node[align=left, anchor=west] at (4.0,1.75) {\scriptsize post-shock:\\\scriptsize $M_2<M_\infty$, $p_2>p_\infty$};
+\draw[thick, fill=gray!12] (0,0.35) -- (1.8,1.35) -- (1.8,0.35) -- cycle;
+\node at (0.9,0.85) {nose};
+\draw[thick, fill=gray!12] (1.8,0.35) rectangle (5.2,1.35);
+\node at (3.5,0.85) {body tube};
+\draw[thick, fill=gray!18] (5.0,0.35) -- (6.2,1.9) -- (5.6,0.35) -- cycle;
+\node at (5.5,1.0) {\scriptsize fins};
+\draw[densely dashed] (1.8,1.35) -- (2.1,2.0);
+\node[font=\scriptsize, align=center] at (2.25,2.35) {shoulder\\PM fan};
+\draw[->] (4.0,-0.35) -- (4.0,0.25) node[below=8pt, font=\scriptsize] {stations $x_i$};
+\end{tikzpicture}%
+}
+\caption{Shock and expansion topology on a cone--cylinder--fin vehicle (schematic).}
+\label{fig:shock-topology-rocket}
+\end{figure}
 ```
 
 At the nose tip, the conical or ogive surface deflects the flow, generating
@@ -363,38 +351,30 @@ subsonic case -- the same object is reused across all timesteps below Mach 1.0.
 The shock geometry integrates into the existing calculator architecture as
 follows:
 
-```
-  BarrowmanCalculator.getAerodynamicForces()
-       |
-       |  (1) Compute shock geometry for current Mach
-       v
-  ShockGeometry.compute(configuration, conditions)
-       |
-       |  Returns: ShockGeometry object (or SUBSONIC singleton)
-       |
-       |  (2) Pass to stability calculator
-       v
-  BarrowmanStabilityCalculator.setShockGeometry(sg)
-       |
-       |  (3) Stability calculator iterates components
-       v
-  For each RocketComponent:
-       |
-       +---> calcObj.setShockGeometry(sg)          [inject into component calc]
-       |
-       +---> calcObj.calculateNonaxialForces(...)   [compute CNa, CP]
-                |
-                +---> getLocalConditions(sg)        [query local M, p, T, q]
-                |         |
-                |         v
-                |     sg.getConditionsAt(x_component)
-                |         |
-                |         v
-                |     Binary search + linear interpolation
-                |
-                +---> Use local M for K1/K2/K3     [FinSetCalc]
-                +---> Use local q ratio for scaling  [FinSetCalc]
-                +---> Use local M for F_WB, F_BW    [PittsNielsenKaattari]
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=0.42cm,
+  box/.style={rectangle, draw=black!72, thick, align=left, inner sep=3pt, minimum width=3.6cm},
+  arr/.style={-{Latex[length=1.6mm]}, thick}
+]
+\node[box] (bc) {\texttt{BarrowmanCalculator.getAerodynamicForces()}};
+\node[box, below=of bc] (sg) {(1) \texttt{ShockGeometry.compute(config, conditions)}};
+\node[box, below=of sg] (st) {(2) \texttt{BarrowmanStabilityCalculator.setShockGeometry(sg)}};
+\node[box, below=of st] (loop) {(3) For each \texttt{RocketComponent}: \texttt{setShockGeometry}; \texttt{calculateNonaxialForces}};
+\node[box, below=0.35cm of loop, text width=8.2cm, align=left] (q) {\texttt{getConditionsAt}($x$): binary search + linear interpolation of local $M$, $p$, $T$, $q$; used for fin $K_1$/$K_2$/$K_3$, $q$-scaling, PNK $F_{WB}$/$F_{BW}$.};
+\draw[arr] (bc) -- (sg);
+\draw[arr] (sg) -- (st);
+\draw[arr] (st) -- (loop);
+\draw[arr] (loop) -- (q);
+\end{tikzpicture}%
+}
+\caption{Data flow: shock geometry computed once per aerodynamic evaluation and injected into component calculators.}
+\label{fig:shockgeometry-dataflow}
+\end{figure}
 ```
 
 The `ShockGeometry` is also available to the drag calculator
@@ -570,7 +550,6 @@ The combined effect of local Mach and dynamic pressure corrections is a
 calculation.  This demonstrates why the shock geometry pre-pass is essential
 for accurate supersonic stability prediction.
 
----
 
 ## 8. Stability Corrections
 
@@ -999,36 +978,26 @@ and ensure numerical stability.
 
 #### 8.5.4 Mach Cone Diagram
 
-```
-                    Mach cone from body
-                   /
-                  /   mu = arcsin(1/M)
-                 /  .
-                / .   Zone of body influence
-               /.       on fin
-              /. . . . . . . . . .
-    ---------+========================+--------
-    Body     | Fin root chord c_r     | Body
-    ---------+========================+--------
-              \                      /
-               \ Outside Mach cone  /
-                \  (uninfluenced)  /
-                 \               /
-                  \             /
-                   \           /
-                    \  Fin    /
-                     \ tip   /
-                      \     /
-                       \   /
-                        \ /
-
-    At M = 2.0:  mu = 30 degrees
-    At M = 3.0:  mu = 19.5 degrees
-    At M = 5.0:  mu = 11.5 degrees
-
-    As M increases, the Mach cone narrows,
-    and less of the fin is influenced by
-    the body's upwash field.
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex]
+\fill[gray!15] (-0.2,0) rectangle (2.2,0.35);
+\fill[gray!15] (4.8,0) rectangle (7.2,0.35);
+\node at (1.0,0.18) {body};
+\node at (6.0,0.18) {body};
+\draw[thick] (2.2,0.35) rectangle (4.8,1.1);
+\node at (3.5,0.72) {fin ($c_r$)};
+\draw[thick] (2.2,0.35) -- (1.2,2.4) -- (5.8,2.4) -- (4.8,0.35);
+\path[fill=blue!12, draw=blue!60, dashed] (2.2,0.35) -- (1.2,2.4) -- (3.5,1.1) -- cycle;
+\node[blue!70!black, align=left, font=\scriptsize] at (2.0,1.35) {Mach cone\\$\mu=\arcsin(1/M)$};
+\node[align=left, font=\scriptsize] at (5.5,1.55) {outside cone:\\weaker body\\influence};
+\node[align=left, anchor=west, font=\scriptsize] at (-0.1,-0.85)
+  {$M=2.0$: $\mu\approx 30^\circ$;\quad $M=3.0$: $\mu\approx 19.5^\circ$;\quad $M=5.0$: $\mu\approx 11.5^\circ$.};
+\end{tikzpicture}
+\caption{Mach cone from body relative to fin planform (Pitts--Nielsen--Kaattari context; schematic).}
+\label{fig:mach-cone-fin}
+\end{figure}
 ```
 
 #### 8.5.5 Transonic Blend
@@ -1170,7 +1139,6 @@ similarity regime, blending is applied:
 Shock geometry (from Section 7.8): $M_\text{local} = 2.75$,
 $q_\text{local}/q_\infty = 0.807$.
 
----
 
 #### Case A: Without Shock Geometry Correction (Freestream $M = 2.0$)
 
@@ -1266,7 +1234,6 @@ $$
 \boxed{C_{N\alpha,\text{no\,corr}} = 1.8035}
 $$
 
----
 
 #### Case B: With Shock Geometry Correction ($M_\text{local} = 2.75$)
 
@@ -1356,7 +1323,6 @@ $$
 \boxed{C_{N\alpha,\text{corrected}} = 0.9280}
 $$
 
----
 
 #### Comparison
 
@@ -1392,4 +1358,3 @@ $C_{N\alpha}$.  The sign and magnitude of the correction are geometry-dependent,
 which is precisely why a physics-based shock geometry computation is necessary
 rather than a fixed empirical correction factor.
 
----

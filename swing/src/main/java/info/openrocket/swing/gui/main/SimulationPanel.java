@@ -393,6 +393,7 @@ public class SimulationPanel extends JPanel {
 		document.getRocket().addComponentChangeListener(e -> {
 			if (e.isMotorChange() || e.isTreeChange()) {
 				updateMotorState();
+				updateActions();
 			}
 			fireMaintainSelection();
 		});
@@ -835,6 +836,7 @@ public class SimulationPanel extends JPanel {
 	}
 
 	public void updateActions() {
+		newSimulationAction.updateEnabledState();
 		editSimulationAction.updateEnabledState();
 		cutSimulationAction.updateEnabledState();
 		copySimulationAction.updateEnabledState();
