@@ -1,4 +1,4 @@
-# Section 6. Drag Models
+## 6. Drag Models
 
 The total drag coefficient of a sounding rocket or high-power rocket vehicle
 is assembled from five independent contributions:
@@ -26,9 +26,7 @@ component, the blending algorithms that connect them across Mach regimes, and
 worked examples demonstrating quantitative results.
 
 
----
-
-## 6.1 Nose/Body Wave Drag
+### 6.1 Nose/Body Wave Drag
 
 Wave drag arises from the compression of air by surfaces inclined to the
 freestream at supersonic speeds. For axisymmetric bodies of revolution (nose
@@ -48,7 +46,7 @@ exact Taylor-Maccoll solution for cones through the Modified Newtonian
 approximation at hypersonic speeds.
 
 
-### 6.1.1 Taylor-Maccoll Exact Solution for Cones
+#### 6.1.1 Taylor-Maccoll Exact Solution for Cones
 
 For a conical nose at zero angle of attack with an attached oblique shock, the
 wave drag coefficient equals the surface pressure coefficient computed from the
@@ -121,42 +119,40 @@ angle (i.e., the cone angle exceeds the maximum deflection angle), the solver
 falls back to the stagnation pressure coefficient for a detached (bow) shock.
 
 
-### 6.1.2 Shock-Expansion Strip Integration for Ogives
+#### 6.1.2 Shock-Expansion Strip Integration for Ogives
 
 For non-conical axisymmetric shapes (ogives, parabolic series, power-law noses,
 etc.), the shock-expansion method is used. This technique approximates the body
 as a sequence of infinitesimal conical frustums, tracking the local Mach number
 and pressure as the flow expands (or compresses) around the curved surface.
 
-The algorithm uses $N = 100$ strips along the nose length:
+The algorithm uses $N = 100$ strips along the nose length.
 
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex]
+\draw[->, thick] (-0.2,0) -- (5.8,0) node[below] {$x$};
+\draw[thick] (0,0) -- (0.35,1.1) -- (1.1,1.35) -- (2.4,1.35) -- (5.5,0.45);
+\draw[dashed] (0.35,1.1) -- (-0.2,1.9) node[left, font=\scriptsize] {oblique shock};
+\node[above] at (2.8,1.35) {$N$ strips ($\mathrm{d}x$)};
+\foreach \x in {0.9,1.5,2.1,2.7,3.3} {\draw (\x,0.05) -- (\x,-0.12);}
+\node[below, font=\scriptsize] at (0.05,-0.2) {nose tip};
+\node[below, font=\scriptsize] at (5.4,0.2) {$R_{\mathrm{aft}}$};
+\end{tikzpicture}
+\caption{Shock-expansion strip model along an ogive (schematic).}
+\label{fig:strip-integration-ogive}
+\end{figure}
 ```
-  Freestream M_inf -->
-                         Oblique shock
-                        /
-                       / beta
-                      /
-  Nose tip  *--------+------> x
-             \  strip 1  strip 2  ...  strip N
-              \   |         |              |
-               \  | dx      | dx           | dx
-                \ |         |              |
-                 \|_________|______________|
-                  R_fore                   R_aft
 
-  For each strip i (i = 1 to N):
-    1. Compute local surface angle theta_i from profile geometry
-    2. Compute turn angle: delta_i = theta_{i-1} - theta_i
-    3. If delta_i > 0 (expansion): apply Prandtl-Meyer expansion
-       - M_i = PM_downstream(M_{i-1}, delta_i)
-       - p_i = p_{i-1} * pressureRatio(M_{i-1}, M_i)
-    4. If delta_i < 0 (compression): apply oblique shock
-       - Solve oblique shock at M_{i-1}, deflection |delta_i|
-       - p_i = p_{i-1} * shock pressure ratio
-       - M_i = post-shock Mach
-    5. Compute local Cp_i = 2/(gamma*M_inf^2) * (p_i/p_inf - 1)
-    6. Accumulate drag integral
-```
+For each strip $i$ ($i = 1\ldots N$):
+
+1. Compute local surface angle $\theta_i$ from profile geometry.
+2. Compute turn angle: $\delta_i = \theta_{i-1} - \theta_i$.
+3. If $\delta_i > 0$ (expansion): apply Prandtl--Meyer expansion — $M_i = \texttt{PM\_downstream}(M_{i-1}, \delta_i)$, $p_i = p_{i-1}\cdot\texttt{pressureRatio}(M_{i-1}, M_i)$.
+4. If $\delta_i < 0$ (compression): apply oblique shock — solve at $M_{i-1}$ with deflection $|\delta_i|$; $p_i = p_{i-1}\cdot$ (shock pressure ratio); $M_i = $ post-shock Mach.
+5. Compute local $C_{p,i} = \frac{2}{\gamma M_\infty^2}(p_i/p_\infty - 1)$.
+6. Accumulate drag integral.
 
 **Initial conditions.** The flow at the nose tip is initialized using the
 Taylor-Maccoll cone solution with the local tip half-angle $\theta_\text{tip}$,
@@ -194,7 +190,7 @@ positive $\Delta r$ (expanding radius, windward surface) contribute to the drag
 integral.
 
 
-### 6.1.3 Dahlem-Buck Shape Factors
+#### 6.1.3 Dahlem-Buck Shape Factors
 
 For nose shapes other than pure cones and ogives (POWER, PARABOLIC, HAACK),
 the NASA TR-R-100 empirical tables have limited Mach range and fineness ratio
@@ -254,7 +250,7 @@ C_d(M) = (1 - w) \cdot C_{d,\text{TR-R-100}} + w \cdot C_{d,\text{Dahlem-Buck}}
 $$
 
 
-### 6.1.4 Transonic Drag Rise
+#### 6.1.4 Transonic Drag Rise
 
 Below the drag divergence Mach number $M_{dd}$, no wave drag exists because the
 flow is everywhere subsonic on the body surface. Above $M_{dd}$, local
@@ -335,29 +331,43 @@ $$
 \left(\frac{dC_d}{dM}\right)_1 \le \frac{3 \, C_{d,1}}{\Delta M}
 $$
 
-The overall drag rise shape is:
+The overall drag rise shape is illustrated below (qualitative).
 
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.88\linewidth,
+  height=5.2cm,
+  xmin=0.55, xmax=1.15,
+  ymin=0, ymax=1.05,
+  xlabel={$M$},
+  ylabel={$C_d$ (qual.)},
+  grid=major,
+  grid style={gray!30},
+  tick label style={font=\small},
+  label style={font=\small},
+  legend style={font=\scriptsize, at={(0.97,0.05)}, anchor=south east},
+]
+\addplot[very thick, black] coordinates {
+  (0.60,0)(0.65,0.02)(0.70,0.06)(0.75,0.14)(0.80,0.28)(0.85,0.48)(0.90,0.72)(0.95,0.90)(1.00,1.0)(1.05,0.95)(1.10,0.88)
+};
+\addlegendentry{Lock + Hermite onset}
+\draw[dashed, gray] (axis cs:0.65,0) -- (axis cs:0.65,1.05);
+\draw[dashed, gray] (axis cs:0.75,0) -- (axis cs:0.75,1.05);
+\draw[dashed, gray] (axis cs:1.00,0) -- (axis cs:1.00,1.05);
+\node[font=\scriptsize] at (axis cs:0.62,0.12) {$M_{dd}$};
+\node[font=\scriptsize] at (axis cs:0.77,0.12) {$M_{\mathrm{crit}}$};
+\node[font=\scriptsize] at (axis cs:1.02,0.12) {$M_1$};
+\end{axis}
+\end{tikzpicture}
+\caption{Qualitative transonic drag rise: zero slope at $M_{dd}$, Lock fourth-power style onset, Hermite to first data point $M_1$.}
+\label{fig:drag-rise-shape}
+\end{figure}
 ```
-  Cd |
-     |                              * first data point (M1, Cd1)
-     |                           **
-     |                        **
-     |                     **      <-- Lock 4th-power onset
-     |                  **
-     |               *             <-- C1 Hermite
-     |            *
-     |          *
-     |        *
-     |     **
-     |   *
-     |  *
-     | *                           <-- zero slope at Mdd
-     +--*-*-*-*-*---+-------+-----> M
-        Mdd       Mcrit    M1
-```
 
-
-### 6.1.5 Modified Newtonian Theory (M > 5)
+#### 6.1.5 Modified Newtonian Theory (M > 5)
 
 At hypersonic Mach numbers ($M > 5$), the shock layer becomes thin and the
 pressure distribution is well approximated by the Modified Newtonian formula:
@@ -425,7 +435,7 @@ Only windward surfaces ($\Delta r > 0$) contribute. Leeward surfaces
 Newtonian theory.
 
 
-### 6.1.6 Blending Across Mach Regimes
+#### 6.1.6 Blending Across Mach Regimes
 
 Three blending regions connect the different wave drag models:
 
@@ -462,22 +472,30 @@ correction above $M = 1.5$, with a smoothstep blend in $[1.3, 1.5]$.
 
 **Regime summary diagram:**
 
-```
-  Cd |     TR-R-100        Analytical (T-M / S-E)            Newtonian
-     |     empirical       ________________________           ________
-     |    __________      /                        \         /
-     |   /          \    /                          \       /
-     |  /   Hermite  \  /   smoothstep blend         \     /
-     | /    drag rise  \/                             \   /
-     |/                                                \_/
-     +------+----+----+----+----+----+----+----+----+----+---> M
-           Mdd  1.0  1.3  1.5  2.0  3.0  4.0  5.0  6.0
-           |<-->| |<---->|    pure analytical     |<---->|
-           rise   blend                           blend
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\footnotesize, >=Latex]
+\draw[->, thick] (0,0) -- (11.2,0) node[below] {$M$};
+\foreach \x/\lbl in {0.8/{},1.6/$M_{dd}$,2.4/$1.0$,3.2/$1.3$,4.0/$1.5$,5.6/$2.0$,6.8/$3.0$,8.0/$4.0$,9.2/$5.0$,10.4/$6.0$}
+  \draw (\x,0.08) -- (\x,-0.08) node[below=2pt] {\lbl};
+\draw[very thick, blue!70!black] (1.0,2.0) .. controls (1.8,2.3) and (2.2,1.5) .. (3.0,1.2)
+  .. controls (4.5,0.9) and (6.5,0.85) .. (8.5,0.75) -- (10.8,0.65);
+\node[blue!70!black, align=center, anchor=south west] at (0.85,2.72) {TR-R-100 /\\Hermite rise};
+\node[align=center, anchor=south] at (4.5,2.15) {smoothstep\\blends};
+\node[align=center, anchor=south west] at (8.35,1.72) {Newtonian\\blend};
+\draw[decorate, decoration={brace, amplitude=4pt}] (1.4,-0.85) -- (2.2,-0.85) node[midway, below=6pt, font=\scriptsize] {rise};
+\draw[decorate, decoration={brace, amplitude=4pt}] (2.6,-0.85) -- (3.6,-0.85) node[midway, below=6pt, font=\scriptsize] {$1.3$--$1.5$};
+\draw[decorate, decoration={brace, amplitude=4pt}] (7.6,-0.85) -- (10.2,-0.85) node[midway, below=6pt, font=\scriptsize] {$4$--$6$};
+\end{tikzpicture}%
+}
+\caption{Qualitative wave-drag regime map: empirical / transonic rise, analytical Taylor--Maccoll and shock-expansion, and Modified Newtonian tail (schematic).}
+\label{fig:wave-drag-regimes}
+\end{figure}
 ```
 
-
-### 6.1.7 Worked Example: 15-Degree Cone
+#### 6.1.7 Worked Example: 15-Degree Cone
 
 Consider a conical nose with half-angle $\theta_c = 15\degree$, fineness ratio
 $f = L/(2R) \approx 1.87$, in air ($\gamma = 1.4$).
@@ -533,9 +551,7 @@ above $M \approx 2$, rather than monotonically decreasing as the extrapolation
 predicted.
 
 
----
-
-## 6.2 Base Drag
+### 6.2 Base Drag
 
 Base drag arises from the low-pressure wake region behind the aft end of the
 rocket body. It is a significant contributor to total drag, particularly at
@@ -552,7 +568,7 @@ where $A_\text{base} = \pi(R_\text{aft}^2 - R_\text{next}^2)$ is the exposed
 base area (accounting for the next downstream component's fore radius).
 
 
-### 6.2.1 Subsonic Base Drag
+#### 6.2.1 Subsonic Base Drag
 
 At subsonic Mach numbers ($M \le 0.85$), the base drag follows the Hoerner
 correlation for cylindrical afterbodies:
@@ -567,7 +583,7 @@ At $M = 0$, the base drag coefficient is 0.12, rising to 0.214 at $M = 0.85$.
 Reference: Hoerner, "Fluid-Dynamic Drag" (1965), Chapter 3.
 
 
-### 6.2.2 Supersonic Base Drag: Devan-Ashwood Correlation
+#### 6.2.2 Supersonic Base Drag: Devan-Ashwood Correlation
 
 At supersonic speeds ($M \ge 1.3$), the base drag is modeled by the
 Devan-Ashwood correlation:
@@ -595,7 +611,7 @@ At $M = 2.0$: $C_{d,\text{base}} = 0.064 + 0.186/4.0 = 0.111$
 At $M = 5.0$: $C_{d,\text{base}} = 0.064 + 0.186/25.0 = 0.071$
 
 
-### 6.2.3 Transonic Base Drag: Degree-4 Polynomial Blend
+#### 6.2.3 Transonic Base Drag: Degree-4 Polynomial Blend
 
 The transonic regime ($M \in [0.85, 1.3]$) features a sharp peak in base drag
 near $M \approx 1.05$, where the wake becomes highly unsteady and the flow
@@ -616,7 +632,7 @@ yielding a 4th-degree polynomial (5 constraints, 5 coefficients).
 
 The construction in the code:
 
-```
+```java
 PolyInterpolator baseDragInterp = new PolyInterpolator(
     new double[] { 0.85, 1.05, 1.30 },      // value points
     new double[] { 0.85, 1.30 });            // derivative points
@@ -630,26 +646,41 @@ baseDragTransonicPoly = baseDragInterp.interpolator(
 
 The resulting profile:
 
-```
-  Cd_base
-  0.25 |              *  peak at M=1.05
-       |            * . *
-       |          *  .    *
-  0.20 |        *    .      *
-       |      *      .        *
-       |    *        .          *
-  0.15 |  *          .            *--------- Devan-Ashwood
-       | *           .
-       |*            .
-  0.12 +             .
-       |             .
-       +---+---+---+-+---+---+---+---+---> M
-          0.5  0.7  0.85 1.0 1.05 1.3  2.0
-       |<-- subsonic -->|<-- poly -->|<- supersonic ->|
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.9\linewidth,
+  height=5.5cm,
+  xmin=0.45, xmax=2.15,
+  ymin=0.08, ymax=0.27,
+  xlabel={$M$},
+  ylabel={$C_{D,\mathrm{base}}$},
+  grid=major,
+  grid style={gray!30},
+  tick label style={font=\small},
+  label style={font=\small},
+  legend style={font=\scriptsize, at={(0.97,0.97)}, anchor=north east},
+]
+\addplot[thick, dashed, domain=0.5:0.85, samples=40] {0.12+0.13*x*x};
+\addlegendentry{subsonic $0.12+0.13M^2$}
+\addplot[very thick, black] coordinates {
+  (0.85,0.214)(0.90,0.22)(0.95,0.235)(1.00,0.245)(1.05,0.25)(1.10,0.23)(1.20,0.20)(1.30,0.174)
+};
+\addlegendentry{degree-4 transonic polynomial}
+\addplot[thick, blue, dashed, domain=1.3:2.1, samples=50] {0.064+0.186/(x*x)};
+\addlegendentry{Devan--Ashwood ($M\ge 1.3$)}
+\draw[dashed, gray] (axis cs:0.85,0.08) -- (axis cs:0.85,0.27);
+\draw[dashed, gray] (axis cs:1.30,0.08) -- (axis cs:1.30,0.27);
+\end{axis}
+\end{tikzpicture}
+\caption{Base drag coefficient: subsonic correlation, transonic polynomial with peak at $M=1.05$, and supersonic Devan--Ashwood branch (schematic).}
+\label{fig:base-drag-profile}
+\end{figure}
 ```
 
-
-### 6.2.4 Lamb-Oberkampf Reynolds Number Correction
+#### 6.2.4 Lamb-Oberkampf Reynolds Number Correction
 
 At supersonic speeds ($M > 1.3$), the base drag depends on the boundary layer
 state at the base corner, which is influenced by the Reynolds number. The
@@ -681,7 +712,7 @@ higher base pressure and lower base drag. At low Reynolds numbers
 | $10^8$    | 8.0               | 0.84     |
 
 
-### 6.2.5 Power-On Base Drag Reduction
+#### 6.2.5 Power-On Base Drag Reduction
 
 During motor burn, the exhaust plume partially fills the base region, raising
 the base pressure and reducing base drag. The reduction depends on the nozzle
@@ -720,7 +751,7 @@ power-on factor of $k_\text{base} = 0.15$ is used.
 Reference: NASA SP-8055 "Solid Rocket Motor Nozzles"; Hoerner Ch. 3.
 
 
-### 6.2.6 Boattail Correction
+#### 6.2.6 Boattail Correction
 
 When a body component tapers from a larger fore radius to a smaller aft radius
 (boattail), the converging flow creates a narrower wake with higher base
@@ -782,7 +813,7 @@ C_{d,\text{base,final}} = C_{d,\text{base}} \cdot f_\text{bt} \cdot \eta_\text{b
 $$
 
 
-### 6.2.7 Worked Examples
+#### 6.2.7 Worked Examples
 
 **At $M = 0.5$ (subsonic):**
 
@@ -851,9 +882,7 @@ high Mach. The Devan-Ashwood model correctly maintains a nonzero asymptote
 drag in the $M = 1.5$-$2.0$ range.
 
 
----
-
-## 6.3 Skin Friction Drag
+### 6.3 Skin Friction Drag
 
 Skin friction drag arises from the viscous shear stress on all wetted surfaces.
 It is typically the largest single drag component in the subsonic regime and
@@ -861,7 +890,7 @@ remains significant at supersonic speeds, though compressibility reduces it
 substantially.
 
 
-### 6.3.1 Incompressible Baseline
+#### 6.3.1 Incompressible Baseline
 
 The incompressible skin friction coefficient $C_{f,0}$ depends on the Reynolds
 number and whether the surface is aerodynamically smooth.
@@ -911,7 +940,7 @@ $$
 where $f_B = L_\text{body}/R_\text{max}$ is the body fineness parameter.
 
 
-### 6.3.2 Eckert Reference Temperature Method
+#### 6.3.2 Eckert Reference Temperature Method
 
 At supersonic speeds, the boundary layer temperature rises dramatically due to
 adiabatic compression and viscous dissipation. The Eckert method (1955)
@@ -1002,7 +1031,7 @@ defined relative to the freestream dynamic pressure, while the boundary layer
 properties are evaluated at $T^*$.
 
 
-### 6.3.3 Boundary Layer Transition: Michel Criterion
+#### 6.3.3 Boundary Layer Transition: Michel Criterion
 
 The transition from laminar to turbulent boundary layer is determined by the
 Michel criterion with a compressibility correction:
@@ -1038,7 +1067,7 @@ $Re_\text{tr} = 3.0 \times 10^6$, $x_\text{tr} = 0.45$ m, $f_\text{lam} = 0.225$
 $f_\text{transition} = 0.865$ (13.5% friction reduction).
 
 
-### 6.3.4 Transonic Blend (M 0.9 to 1.1)
+#### 6.3.4 Transonic Blend (M 0.9 to 1.1)
 
 The transition from the subsonic compressibility correction to the Eckert
 method is done by linear blending:
@@ -1050,7 +1079,7 @@ $$
 for $M \in [0.9, 1.1]$.
 
 
-### 6.3.5 Worked Examples
+#### 6.3.5 Worked Examples
 
 All examples assume: $T_e = 288.15$ K (sea level), $Re = 1.0 \times 10^7$,
 smooth (perfect) finish, $\gamma = 1.4$, $S = 110.4$ K.
@@ -1126,16 +1155,14 @@ Reference: Eckert, E.R.G. (1955). "Engineering relations for friction and heat
 transfer to surfaces in high velocity flow." J. Aeronautical Sciences, 22(8).
 
 
----
-
-## 6.4 Fin Wave Drag
+### 6.4 Fin Wave Drag
 
 Fins generate wave drag at supersonic speeds due to oblique shocks at their
 leading and trailing edges. At subsonic speeds, the fin contribution to
 pressure drag is negligible (friction-dominated).
 
 
-### 6.4.1 Ackeret Formula
+#### 6.4.1 Ackeret Formula
 
 The supersonic wave drag of a thin symmetric airfoil at zero angle of attack
 is given by Ackeret's linearized supersonic potential theory (1925):
@@ -1183,7 +1210,7 @@ This is implemented in `FinSetCalc.ackeretWaveDragCD()` and
 `FinSetCalc.ackeretWaveDragSlope()`.
 
 
-### 6.4.2 C1 Hermite Blend (M 0.9 to 1.2)
+#### 6.4.2 C1 Hermite Blend (M 0.9 to 1.2)
 
 The Ackeret formula diverges as $M \to 1^+$ ($\beta \to 0$), while no wave
 drag exists at subsonic speeds. A C1-continuous cubic Hermite spline blends
@@ -1244,7 +1271,7 @@ $$
 $$
 
 
-### 6.4.3 Sweep Correction
+#### 6.4.3 Sweep Correction
 
 The effective Mach number normal to the fin leading edge is reduced by the
 cosine of the sweep angle. The Ackeret wave drag is corrected by:
@@ -1260,7 +1287,7 @@ For a typical 30-degree swept fin: $\cos^2(30\degree) = 0.75$, reducing wave
 drag by 25%. For a highly swept 60-degree fin: $\cos^2(60\degree) = 0.25$.
 
 
-### 6.4.4 Trailing-Edge Base Drag
+#### 6.4.4 Trailing-Edge Base Drag
 
 Fins with blunt trailing edges generate a wake similar to the body base, with a
 pressure deficit that creates additional drag. The model depends on the fin
@@ -1297,7 +1324,7 @@ $$
 where $s$ is the fin span and $n_\text{fins}$ is the interference fin count.
 
 
-### 6.4.5 ESDU Transonic Similarity
+#### 6.4.5 ESDU Transonic Similarity
 
 The ESDU transonic similarity rule collapses fin aerodynamic data onto a
 universal curve using the transonic similarity parameter:
@@ -1340,7 +1367,7 @@ At the edges of the regime ($K_\text{trans} \in [-2, -1.5]$ and $[2.5, 3]$$),
 a linear blend transitions to/from the standard Barrowman fin CNa calculation.
 
 
-### 6.4.6 Worked Example
+#### 6.4.6 Worked Example
 
 Consider a fin with $\tau = t/c = 0.05$ (5% thickness), AIRFOIL cross-section,
 zero sweep ($\Lambda_{LE} = 0$).
@@ -1398,9 +1425,7 @@ substantial drag above $M = 1$, bringing the fin drag into agreement with
 thin-airfoil theory and experimental data.
 
 
----
-
-## 6.5 Lift-Induced Drag
+### 6.5 Lift-Induced Drag
 
 At nonzero angle of attack, the normal force $C_N$ has an axial (drag)
 component due to the geometric relationship between the force and velocity
@@ -1437,9 +1462,7 @@ angle of attack experiences enormous aerodynamic resistance due to the
 cross-flow component.
 
 
----
-
-## 6.6 Drag Budget Summary
+### 6.6 Drag Budget Summary
 
 The following tables present the complete drag budget for a representative
 sounding rocket: 10-degree conical nose (fineness ratio $f = 2.84$), cylindrical
@@ -1447,7 +1470,7 @@ body ($L = 1.5$ m, $D = 0.10$ m), 4 fins (AIRFOIL, $\tau = 0.05$,
 $\Lambda_{LE} = 0$, $s = 0.08$ m, $c = 0.15$ m). Sea level conditions,
 $\alpha = 0$, smooth finish. Reference area $S_\text{ref} = \pi D^2/4 = 7.854 \times 10^{-3}$ m$^2$.
 
-### Table 6.1: Drag Budget at $M = 0.5$
+#### Table 6.1: Drag Budget at $M = 0.5$
 
 | Component          | $C_D$ contribution | Fraction |
 |--------------------|--------------------|----------|
@@ -1463,7 +1486,7 @@ $\alpha = 0$, smooth finish. Reference area $S_\text{ref} = \pi D^2/4 = 7.854 \t
 At subsonic speeds, skin friction dominates (~63%), followed by base drag
 (~25%). Wave drag is absent.
 
-### Table 6.2: Drag Budget at $M = 2.0$
+#### Table 6.2: Drag Budget at $M = 2.0$
 
 | Component          | $C_D$ contribution | Fraction |
 |--------------------|--------------------|----------|
@@ -1481,7 +1504,7 @@ contributor (~25% combined). Skin friction is reduced by the Eckert method but
 remains the largest single component. Base drag decreases from its transonic
 peak.
 
-### Table 6.3: Drag Budget at $M = 5.0$
+#### Table 6.3: Drag Budget at $M = 5.0$
 
 | Component          | $C_D$ contribution | Fraction |
 |--------------------|--------------------|----------|
@@ -1500,7 +1523,7 @@ total drag coefficient decreases substantially from $M = 2$ to $M = 5$ because
 of the strong compressibility reduction in friction and the decay of wave drag
 with increasing Mach.
 
-### Table 6.4: Old vs. New Total $C_D$ Comparison
+#### Table 6.4: Old vs. New Total $C_D$ Comparison
 
 | Mach | Old OpenRocket | New (this work) | $\Delta C_D$ | Rel. change |
 |------|---------------|-----------------|---------------|-------------|
