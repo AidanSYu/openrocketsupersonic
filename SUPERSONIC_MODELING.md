@@ -354,7 +354,7 @@ BarrowmanCalculator (orchestrator)
 **Problem:** Body lift at M > 2 uses a constant crossflow drag coefficient Cd_c = 1.2 (appropriate for subsonic/low-supersonic crossflow). At supersonic crossflow Mach numbers the actual Cd_c rises to 1.8–2.0, causing body normal force to be underpredicted by 10–30%.
 
 **Method:**
-- Implement a Mach-dependent crossflow drag coefficient lookup table based on Jorgensen (NASA TR R-829, 1977)
+- Implement a Mach-dependent crossflow drag coefficient lookup table based on Jorgensen (NASA TR R-474, 1977)
 - The crossflow Mach number is `M_crossflow = M * sin(alpha)`, where alpha is the angle of attack
 - For circular cylinders in crossflow:
 
@@ -386,14 +386,14 @@ BarrowmanCalculator (orchestrator)
 
 ---
 
-### 6b. Power-On Base Drag Correction (NASA SP-8050)
+### 6b. Power-On Base Drag Correction (Dempsey 1976 / Brazzel 1962)
 
 **Priority:** Easy win — large drag error during motor burn.
 
 **Problem:** During motor burn, the exhaust plume fills the rocket base region, raising base pressure and reducing base drag to near zero. The current model applies full unpowered base drag at all times, overpredicting total drag by 20–50% during the burn phase.
 
 **Method:**
-- Implement the NASA SP-8050 power-on base pressure correlation
+- Implement the semi-empirical power-on base pressure correction based on Brazzel et al. (1962) and Dempsey (1976, AIAA Paper 76-619)
 - The correction factor depends on the ratio of nozzle exit pressure to freestream pressure and the ratio of nozzle exit area to base area:
 
 ```
@@ -613,7 +613,7 @@ Cd_wave_total = blend(Cd_area_rule, Cd_component_sum, M, 1.2, 1.5)
 **Problem:** The current fin-body aerodynamic model uses Barrowman's subsonic interference factors (K_WB for fin-on-body carryover, K_BW for body-on-fin carryover) at all Mach numbers. These factors are derived from slender-body theory and overpredict fin-body lift by 10–20% at supersonic speeds because the Mach cone from the body limits the portion of the fin that "sees" the body's upwash field.
 
 **Method:**
-- Implement the Pitts-Nielsen-Kaattari (PNK) Mach-dependent interference factors from NASA TR R-1307 (1959) and NACA TN 3967
+- Implement the Pitts-Nielsen-Kaattari (PNK) Mach-dependent interference factors from NACA Report 1307 (1957) and NACA TN 3967
 - The key insight: at supersonic speeds, the body's influence on fin lift is limited to the region within the Mach cone emanating from the body-fin junction
 
 **K_WB (fin carryover onto body):**
@@ -656,12 +656,20 @@ For M > 1.0:   F_BW = 1.0 - 0.15 * (1 - 1/beta_s) * (r/s)^0.3
   - `computeK_BW(M, r_body, s_fin, c_root)` — returns corrected K_BW
 - Both methods return the subsonic value when M < 0.85 (no change to subsonic results)
 
+**Codebase note:** The existing code does not use K_WB/K_BW variable names. The body-fin interference is applied in `FinSetCalc.java` at line ~158 as:
+```java
+double tau = r / (span + r);   // tau = r/s where s = span+r (semispan from centerline)
+cna *= 1 + tau;                 // Classical Barrowman: equivalent to K_sub * CNa_fin
+```
+Phase 6f adds Mach-dependent correction factors F_WB and F_BW that multiply this existing `(1 + tau)` factor at supersonic speeds. The subsonic result `(1 + tau)` is the baseline that PNK modifies.
+
 **Files to modify:**
-- `FinSetCalc.java` — where K_WB and K_BW are currently computed/used in `calculateNonaxialForces()`, multiply by the PNK Mach correction factors
-- The existing subsonic K_WB/K_BW formulas remain as the baseline; PNK only modifies them at M > ~0.85
+- `FinSetCalc.java` — in `calculateNonaxialForces()`, after computing `tau`, compute the PNK Mach corrections and apply: `cna *= (1 + tau) * F_WB(M, tau) * F_BW(M, tau)` instead of `cna *= (1 + tau)` alone
+- New utility class: `PittsNielsenKaattari.java` in `aerodynamics/barrowman/` with the correction factor formulas
+- Both correction methods return 1.0 when M < 0.85 (no change to subsonic results)
 
 **Validation:**
-- At M < 0.85, fin CNa must be unchanged (F_WB = F_BW = 1.0)
+- At M < 0.85, fin CNa must be unchanged (F_WB = F_BW = 1.0, result equals existing `1 + tau`)
 - At M = 2.0, total fin-body CNa should decrease 10–20% compared to uncorrected
 - CP should shift slightly aft (reduced fin-body lift means body contribution is relatively larger)
 - Compare against wind tunnel data from NASA TN 3967 for a body-fin combination at M 1.5–3.0
@@ -718,11 +726,13 @@ p_base/p_e = [1 + 0.25*(gamma-1)*M_e^2]^(-gamma/(gamma-1)) * f(theta_BL/r_base)
 - For a diverging afterbody: BL thickens, base drag decreases
 - The ShockGeometry pre-pass already provides local Mach at the base; use this as M_e
 
+**Dependency:** Phase 6g requires `ShockGeometry.getMomentumThicknessAt(double x)`, which is introduced in **Phase 7d** (Interstage Stepped Base Drag). Implement Phase 7d first (or stub `getMomentumThicknessAt()` returning the flat-plate estimate `0.036*x / Re_x^0.2`) before building Phase 6g.
+
 **Files to modify:**
 - `BarrowmanDragCalculator.java` — replace or augment Devan-Ashwood with Chapman-Korst for the base drag term
 - New utility: `ChapmanKorstBaseDrag.java` in `aerodynamics/` with lookup tables and interpolation
 - Use ShockGeometry to get local Mach at the base station
-- Compute BL momentum thickness from wetted length and Eckert reference conditions
+- Compute BL momentum thickness via `ShockGeometry.getMomentumThicknessAt(x_base)` (from Phase 7d)
 
 **Fallback:**
 - If ShockGeometry is not available (subsonic), fall back to the existing Devan-Ashwood/Hoerner model
@@ -802,6 +812,90 @@ F_thickness = 1.0 + 2.5 * (t/c) + 8.0 * (t/c)^2
 
 ---
 
+### 6i. Lift-Induced Drag (CDi)
+
+**Priority:** Easy win — missing drag contribution at nonzero AoA.
+
+**Problem:** At nonzero angle of attack, normal force generates an axial drag component (induced drag, or wave drag at incidence). The current model computes drag only at zero AoA and does not account for the AoA-dependent drag increment. For typical HPR rockets at AoA 5–10°, this contributes 3–8% of total drag and is currently absent from all Mach regimes.
+
+**Method:**
+
+For a slender body at angle of attack `alpha`, the lift-induced drag is:
+```
+CDi = CNa * alpha^2   [in the body-axis frame]
+```
+This arises because the normal force has a component along the flight path. At supersonic Mach, the slender-body CNa is already computed; CDi is the direct axial projection.
+
+More precisely (from Hoerner Section 3-14 and Allen & Perkins):
+```
+CDi_body = CNa_body * alpha^2
+CDi_fins  = CNa_fins * alpha^2
+CDi_total = (CNa_body + CNa_fins) * alpha^2
+          = CN * alpha             [since CN ≈ CNa * alpha for small alpha]
+```
+
+The sign convention is positive (drag-adding). At zero AoA this term vanishes exactly.
+
+**Files to modify:**
+- `BarrowmanDragCalculator.java` — in the total drag assembly, add `CDi = CN * sin(alpha)` (exact) or `CDi = CNa * alpha^2` (small-angle approximation, adequate for alpha < 15°)
+- `CN` and `alpha` are already available from `FlightConditions` and the preceding stability computation
+
+**Validation:**
+- At `alpha = 0`: CDi = 0 — no change to existing results
+- At `alpha = 10°` (0.175 rad), CNa = 10 (typical finned rocket): CDi ≈ 10 * 0.175² ≈ 0.30 — a meaningful fraction of total drag
+- All existing zero-AoA tests must pass unchanged
+- Compare CDi vs Mach at alpha = 5° against Fleeman (2006) quick-check formulas
+
+---
+
+### 6j. Fin Trailing Edge Base Drag
+
+**Priority:** Medium — often 20–30% of total fin drag at supersonic speeds.
+
+**Problem:** The current fin drag model accounts for skin friction and leading-edge wave drag (Ackeret) but ignores trailing edge base drag. Fins with blunt trailing edges (square cross-section) generate a near-vacuum wake behind the trailing edge at supersonic speeds, contributing significant drag that is absent from the current model.
+
+**Method:**
+
+For supersonic flow over a fin with trailing-edge thickness `t_te` (equal to full fin thickness `t` for SQUARE cross-section, tapered to ~0.1*t for AIRFOIL/ROUNDED):
+
+**Step 1: Trailing edge base pressure coefficient**
+The flow expands around the trailing edge corner via a Prandtl-Meyer fan:
+```java
+double nu1 = PrandtlMeyerExpansion.prandtlMeyerAngle(mach);
+double nu2 = nu1 + Math.PI / 2.0;   // 90° turn around blunt TE
+double M_te = PrandtlMeyerExpansion.machFromPrandtlMeyerAngle(nu2);
+// For very high local Mach, M_te may not converge — clamp to M * 2.5 as upper bound
+double Cp_te = isentropicPressureCoefficient(mach, M_te);   // negative (expansion)
+```
+
+For SQUARE cross-sections (no taper): `t_te = thickness`
+For AIRFOIL/ROUNDED cross-sections: `t_te = 0.05 * thickness` (streamlined TE)
+
+**Step 2: Trailing edge base drag**
+```java
+double A_te = t_te * macLength * nFins;   // projected TE area (2 sides × planform)
+double Cd_te_base = -Cp_te * A_te / conditions.getRefArea();  // Cp_te is negative → Cd positive
+```
+
+At subsonic Mach, the trailing edge generates a turbulent wake; use the empirical Hoerner formula:
+```java
+// Subsonic TE base drag (Hoerner Ch. 3)
+double Cd_te_sub = 0.12 * Math.pow(t_te / macLength, 1.0) * 2 * finArea / conditions.getRefArea();
+```
+Blend C1-continuously from subsonic to supersonic formula for M 0.9–1.2.
+
+**Files to modify:**
+- `FinSetCalc.java` — in `calculatePressureCD()`, add trailing edge base drag after existing LE wave drag computation; dispatch on cross-section type to determine `t_te`
+- The existing `crossSection` field and `thickness` are already available in `FinSetCalc`
+
+**Validation:**
+- SQUARE fins at M = 2: trailing edge Cd should be 15–30% of total fin Cd (significant)
+- AIRFOIL fins at M = 2: trailing edge Cd should be < 5% of total (thin TE, small effect)
+- At M < 0.9: subsonic formula applies; result agrees with Hoerner data for bluff bodies
+- Fins increase in total drag vs Phase 5 baseline — verify no sign errors
+
+---
+
 ### Implementation Order
 
 The items are ordered to maximize incremental value while managing dependencies:
@@ -812,14 +906,19 @@ The items are ordered to maximize incremental value while managing dependencies:
 | 2 | 6b: Power-on base drag | Motor data access | 10–12 |
 | 3 | 6c: Dahlem-Buck nose drag | None | 8–10 |
 | 4 | 6d: AP09 rational blending | None | 10–12 |
-| 5 | 6h: ESDU transonic fin similarity | None (but benefits from 6d) | 10–12 |
-| 6 | 6f: PNK fin-body interference | Benefits from 6d | 10–12 |
-| 7 | 6g: Chapman-Korst base drag | ShockGeometry (Phase 3b) | 10–12 |
-| 8 | 6e: Transonic area rule | FlightConfiguration geometry access | 15–20 |
+| 5 | 6i: Lift-induced drag (CDi) | None | 5–6 |
+| 6 | 6j: Fin trailing edge base drag | PrandtlMeyerExpansion (Phase 1) | 6–8 |
+| 7 | 6h: ESDU transonic fin similarity | None (but benefits from 6d) | 10–12 |
+| 8 | 6f: PNK fin-body interference | Benefits from 6d | 10–12 |
+| 9 | 7d: Interstage stepped base drag | ShockGeometry momentum thickness | 10–12 |
+| 10 | 6g: Chapman-Korst base drag | **Requires 7d** (getMomentumThicknessAt) | 10–12 |
+| 11 | 6e: Transonic area rule | FlightConfiguration geometry access | 15–20 |
 
 **Total: ~80–100 new tests**
 
-Steps 1–4 are independent and can be developed in parallel. Steps 5–6 benefit from the rational blending utility (step 4) but are not blocked by it. Step 7 uses ShockGeometry which already exists. Step 8 is the most complex and should be implemented last.
+Steps 1–6 are independent and can be developed in parallel. Steps 7–8 benefit from the rational blending utility (step 4) but are not blocked by it. Step 9 (Phase 7d, moved here) must precede step 10. Step 11 is the most complex and should be implemented last.
+
+**Total: ~100–120 new tests**
 
 ### Phase 6 Validation Gate
 
@@ -830,6 +929,8 @@ Steps 1–4 are independent and can be developed in parallel. Steps 5–6 benefi
 - **Fin-body CNa:** At M=2, fin-body CNa reduced 10–20% vs uncorrected (PNK factors)
 - **Base drag with boattail:** Chapman-Korst predicts larger boattail benefit than geometric-only correction
 - **Fin transonic CNa:** Peak CNa near M=1 is 20–40% above subsonic (ESDU similarity)
+- **Lift-induced drag:** At alpha=10°, CDi > 0 and increases with CNa as predicted; zero at alpha=0
+- **Fin trailing edge drag:** SQUARE fins at M=2 have measurably higher Cd than AIRFOIL fins (15–30% difference); AIRFOIL fins unchanged vs Phase 5 baseline within 5%
 - **Regime transitions:** All dCd/dM and dCNa/dM bounded through every transition (rational blending)
 - **Subsonic regression:** All existing subsonic tests pass unchanged
 - **RASAero II gap:** Total Cd vs Mach within 5% of RASAero II for standard geometries M 0.5–5.0
@@ -841,42 +942,496 @@ Steps 1–4 are independent and can be developed in parallel. Steps 5–6 benefi
 To achieve "extreme accuracy for all designs," the aerodynamic engine must be expanded to handle multi-body interference, non-planar aerodynamic surfaces, and exotic flight configurations ("odd rocs", parallel staging).
 
 ### 7a. Multi-Body Shock Interference (Parallel Staging)
-- **Problem:** Strap-on boosters create massive asymmetric bow shocks that impinge on the core stage, creating high asymmetric pressures and plume interference.
-- **Method:** Model parallel staging using a 3D intersection mapping of Mach cones to compute cross-body shock impingement. This relies on generating oblique shock networks between cylindrical bodies and quantifying the asymmetrical lift and interference drag.
+
+**Priority:** High — required for parallel-staging configurations to give physically correct results.
+
+**Problem:** Strap-on boosters create asymmetric bow shocks that impinge on the core stage, creating elevated pressures on the impingement zone, an interference drag increment, and a net lateral force. The current architecture computes aerodynamics per-stage independently and cannot model this interaction.
+
+**Method:**
+
+At supersonic Mach, the Mach cone from each booster propagates outward at half-angle `mu = asin(1/M)`. For two cylindrical bodies with center-to-center separation `s`:
+
+**Step 1: Locate shock impingement**
+```
+x_impinge = (s - r_core - r_booster) / tan(mu)
+```
+where `x_impinge` is the axial distance downstream of the booster nose tip where the Mach cone first touches the core body. If `x_impinge > L_booster`, no impingement occurs at this Mach.
+
+**Step 2: Compute impingement shock angle**
+The oblique shock arrives at the cone surface angle from the booster nose. Use the existing `ObliqueShockSolver` to compute the reflected shock angle via `thetaBetaMach()`. For regular reflection (incident shock angle below the detachment limit):
+```
+theta_reflected = thetaBetaMach(M_post_incident, phi_core_surface)
+```
+where `phi_core_surface` is the core body surface angle at the impingement station (zero for a cylinder).
+
+**Step 3: Compute overpressure on core**
+Apply `ObliqueShockSolver.pressureRatioBehindShock()` at the reflected shock angle. The overpressure acts on a projected axial strip:
+```
+A_impinge = r_core * L_impinge * n_boosters
+L_impinge ≈ L_booster - x_impinge    (axial extent of impingement region)
+delta_Cd_interference = (p_impinge/p_inf - 1) * (1 / (0.5*gamma*M^2)) * A_impinge / S_ref
+```
+
+**Step 4: Side force**
+For a symmetric pair of boosters (180° apart), interference drag increments add while lateral forces cancel. For a single strap-on booster or asymmetric pair, a net side force results:
+```
+CY_interference = delta_Cd_interference * cos(phi_booster)
+```
+
+**Architectural requirement:** `ShockGeometry` must be extended to handle multi-body configurations. `BarrowmanCalculator` must detect parallel-stage layouts and pass adjacent body separations to `ShockGeometry`.
+
+**Files to modify:**
+- `ShockGeometry.java` — add `computeInterBodyImpingement(BodyGeometry core, List<BodyGeometry> boosters, double mach)` returning impingement zones with overpressure per station
+- `BarrowmanCalculator.java` — detect parallel stage configuration; call inter-body impingement computation and add interference drag to total
+- `AerodynamicForces.java` — add `CY` (side force) field if not already present (shared with Phase 8d and 9b)
+
+**Validation:**
+- At M < 1.0: no impingement — results must match independent per-stage sum
+- At M = 2.0 with 100 mm booster separation, verify `x_impinge` matches Mach cone geometry analytically: `x_impinge = (s - r_core - r_booster) * sqrt(M^2 - 1)`
+- Interference drag increment should be positive, 5–15% of total drag for close-coupled boosters
+- Symmetric booster pair: `CY = 0`; single booster offset: `CY > 0`
+
+---
 
 ### 7b. Ring Fin / Tube Fin Supersonic Model
-- **Problem:** `Ackeret` theory only handles planar airfoils. Ring fins transition from a detached bow shock (spilled flow, huge drag) to an internal oblique shock system (swallowed shock, lower drag) across a critical Mach number.
-- **Method:** Implement internal 1D compressible flow matching (Kantrowitz limit) to predict whether tubular fins will "swallow" their shocks or spill them, dynamically calculating the $C_D$ switchover point based on internal contraction ratios.
+
+**Priority:** Medium — only relevant for annular fin designs, but common in HPR and sounding rockets.
+
+**Problem:** Ackeret thin-airfoil theory applies to planar fins. Ring (annular) fins have an internal duct that creates two completely different flow regimes at supersonic speeds:
+- **Spilled flow** (M < M_start): the normal shock cannot be swallowed; a detached bow shock sits in front of the inlet, spilling flow around the outside — drag is 3–5× higher than a planar fin of the same planform area.
+- **Started flow** (M ≥ M_start): the normal shock is swallowed into the duct, supersonic flow passes through with an internal oblique shock train — drag drops sharply.
+
+**Method:**
+
+**Step 1: Kantrowitz starting Mach**
+The Kantrowitz (1946) criterion gives the minimum contraction ratio for shock starting at a given Mach:
+```
+(A_throat/A_capture)_Kantrowitz = ((gamma+1)/2)^(-(gamma+1)/(2*(gamma-1)))
+    * M_inf^(-1)
+    * ((2 + (gamma-1)*M_inf^2) / (gamma+1))^((gamma+1)/(2*(gamma-1)))
+    * ((2*gamma*M_inf^2 - (gamma-1)) / (gamma+1))^(-1/(gamma-1))
+```
+For a straight annular ring fin: `A_throat = A_capture = pi*(r_outer^2 - r_inner^2)` (contraction ratio = 1). The duct starts when the Kantrowitz ratio at freestream Mach exceeds 1.0:
+```
+// Solve: find M_start such that Kantrowitz_ratio(M_start) = 1.0
+// Numerically: M_start ≈ 1.6–2.0 for typical proportions
+double M_start = solveKantrowitz(r_inner / r_outer);
+```
+
+**Step 2: Drag in each regime**
+
+*Spilled flow (M < M_start):*
+```
+// Bow shock stagnation drag on the inlet annular face
+double Cp_stagnation = NormalShockRelations.stagnationPressureCoefficient(mach);
+double Cd_inlet_face = Cp_stagnation * A_annular / S_ref;
+double Cd_outer_surface = ackeretWaveDrag(r_outer, chord, mach);   // existing
+double Cd_ring_spilled = Cd_inlet_face + Cd_outer_surface;
+```
+
+*Started flow (M ≥ M_start):*
+```
+// Internal oblique shock train: treat as isentropic duct with terminal normal shock
+double M_internal = mach;  // first approximation (improves with duct length model)
+double Cd_internal_shock = NormalShockRelations.pressureRecovery(M_internal) * A_annular / S_ref;
+double Cd_ring_started = Cd_internal_shock + ackeretWaveDrag(r_outer, chord, mach);
+// Typically ~20–30% of spilled drag
+```
+
+**Step 3: Transition blending**
+C1-continuous cubic Hermite blend across M_start ± 0.15 to avoid the step discontinuity at shock swallowing. The transition is physically sharp but must be numerically smooth for simulation stability.
+
+**Files to modify:**
+- `FinSetCalc.java` — detect ring fin geometry (inner radius > 0 from the component model); add ring fin drag path in `calculatePressureDrag()` dispatching on the Kantrowitz regime
+- New utility method: `KantrowiztLimit.computeStartMach(double r_inner, double r_outer)` in `aerodynamics/barrowman/`
+
+**Validation:**
+- `M_start` for `r_inner/r_outer = 0.5` should be in the range 1.7–1.9 (verify against published annular inlet data)
+- Spilled drag should be 3–5× higher than started drag at M slightly below/above M_start
+- Drag in started regime should follow Ackeret scaling with Mach (increases as `1/sqrt(M^2-1)`)
+- At subsonic Mach, ring fin drag should revert to standard Barrowman planar-fin treatment (no shock terms)
+
+---
 
 ### 7c. Protuberance Wave Drag
-- **Problem:** Large asymmetrical protuberances (cameras, massive launch lugs) produce 3D oblique shocks that wrap around the body, perturbing the boundary layer and moving the CP asymmetrically.
-- **Method:** Implement Hoerner's 3D isolated protuberance wave drag methods. Account for the induced localized expansion/compression regions affecting pitch and yaw stability independently.
 
-### 7d. Interstage Stepped Base Drag
-- **Problem:** Multi-stage rockets often have exposed forward-facing step joints or interstage vents generating localized separation bubbles and extreme wave drag not captured by standard boattail models.
-- **Method:** Augment Chapman-Korst methods with forward-facing step analytics (ESDU 66011) to account for pressure recovery in separated regions before the reattachment point.
+**Priority:** Medium — affects drag accuracy for any rocket with launch lugs, rail buttons, or camera pods.
+
+**Problem:** Rail buttons and launch lugs are currently modeled with a constant drag coefficient from Hoerner's subsonic data. At M > 1.0, a protuberance generates an attached oblique shock (sharp protuberances) or detached bow shock (blunt), contributing wave drag that grows significantly with Mach and is not captured by the subsonic value.
+
+**Method:**
+
+For a protuberance of height `h`, leading-face half-angle `theta_p`, and frontal area `A_f` mounted on the rocket body:
+
+**Step 1: Determine shock regime**
+```java
+double theta_p = Math.atan2(h, length_protuberance);  // leading face half-angle
+boolean attached = ObliqueShockSolver.maxDeflectionAngle(mach) > theta_p;
+```
+
+**Step 2: Front-face pressure coefficient**
+```java
+double Cp_front;
+if (attached) {
+    double beta = ObliqueShockSolver.shockAngle(mach, theta_p);
+    Cp_front = ObliqueShockSolver.pressureCoefficientBehindShock(mach, beta);
+} else {
+    // Detached: normal shock stagnation
+    Cp_front = NormalShockRelations.stagnationPressureCoefficient(mach);
+}
+```
+
+**Step 3: Rear-face pressure (Prandtl-Meyer expansion)**
+```java
+// Flow expands around the trailing shoulder of the protuberance
+double nu1 = PrandtlMeyerExpansion.prandtlMeyerAngle(mach);
+double nu2 = nu1 + theta_p;  // turning through protuberance height angle
+double M_rear = PrandtlMeyerExpansion.machFromPrandtlMeyerAngle(nu2);
+double Cp_rear = isentropicPressureCoefficient(mach, M_rear);
+```
+
+**Step 4: Wave drag**
+```java
+double Cd_wave = (Cp_front - Cp_rear) * A_f / S_ref;
+```
+
+**Step 5: Body interference (downstream penalty)**
+The protuberance bow shock disturbs the body boundary layer for a distance of ~`3h` downstream. Apply a 20% friction drag penalty over that region:
+```java
+double A_interference = 3.0 * h * (2 * Math.PI * r_body / n_protuberances);
+double delta_Cd_interference = 0.20 * Cf_local * A_interference / S_ref;
+```
+
+**Files to modify:**
+- `RailButtonCalc.java` — replace constant Cd with the above formula at M > 1.0; retain the Hoerner subsonic value at M < 0.9; blend linearly M 0.9–1.1
+- `BarrowmanDragCalculator.java` — add protuberance interference (Step 5) when rail buttons or launch lugs are present
+
+**Validation:**
+- At M = 0.5: protuberance Cd unchanged vs existing (subsonic model retained)
+- At M = 2.0 with a blunt rail button (theta_p > max deflection): detached shock; Cd_wave ≈ 1.5–2.5 × Hoerner subsonic value
+- At M = 2.0 with a sharp profiled lug (theta_p = 15°): attached shock; Cd_wave lower than detached case
+- Interference drag (Step 5) should be 10–20% of protuberance frontal-area drag (secondary effect)
+
+---
+
+### 7d. Interstage Stepped Base Drag (ESDU 66011)
+
+**Priority:** Medium — relevant for any multi-stage rocket with an exposed step joint between stages.
+
+**Problem:** When the forward stage has a larger diameter than the stage behind it, there is a forward-facing step at the separation plane. At supersonic speeds this step creates: (1) a boundary layer separation bubble upstream of the step (elevated base pressure), (2) a stagnation pressure loading on the step face, and (3) a reattachment shock downstream. The net wave drag is not captured by the boattail model.
+
+**Method:**
+
+**Free Interaction Theory (Chapman, Kuehn & Larson, 1957 / ESDU 66011):**
+
+Separation bubble upstream of the step — plateau pressure in separated region:
+```
+Cp_plateau = C_FI * sqrt(2 * Cf_upstream / sqrt(M^2 - 1))
+```
+where `C_FI = 4.2` for turbulent flow and `Cf_upstream` is the undisturbed skin friction coefficient just upstream of the step (already available from the Eckert method).
+
+Upstream separation length:
+```
+L_sep = sqrt(2) * C_FI * theta_BL * M^2 / (Cf_upstream^0.5 * (M^2 - 1)^0.25)
+```
+where `theta_BL` is the boundary layer momentum thickness at the step station.
+
+Step face drag (stagnation pressure loading):
+```
+A_step = pi * (r_fore^2 - r_aft^2)   // annular forward-facing area
+Cp_step_face = NormalShockRelations.stagnationPressureCoefficient(mach)
+Cd_step_face = Cp_step_face * A_step / S_ref
+```
+
+Downstream reattachment pressure recovery (partial offset to drag):
+```
+// Reattachment shock adds pressure over a length ~3 * step_height downstream
+L_reattach = 3.0 * (r_fore - r_aft)
+Cp_reattach = Cp_plateau * 0.6   // ESDU 66011 empirical recovery factor
+Cd_reattach = -Cp_reattach * L_reattach * 2*pi*r_aft / S_ref   // negative: thrust
+```
+
+Total step drag:
+```
+Cd_step_total = Cd_step_face
+              + Cp_plateau * L_sep * 2*pi*r_aft / S_ref    // separation bubble pressure
+              + Cd_reattach                                  // recovery (negative)
+```
+
+**Files to modify:**
+- `SymmetricComponentCalc.java` — in `calculatePressureDrag()`, after existing wave drag, detect whether the component has a forward-facing step at its fore end (i.e., `foreRadius < aftRadius` of the adjacent upstream component); if so, compute step drag at M > 1.0 using the formulas above
+- `ShockGeometry.java` — expose `getMomentumThicknessAt(x)` so step drag computation can access `theta_BL` at the step station (BL thickness should already be tracked during the surface marching pass)
+
+**Validation:**
+- At M < 1.0: step drag = 0 (subsonic separated flow does not produce the same wave drag mechanism)
+- At M = 2.0 with a 20 mm step height on a 75 mm diameter body: total step `Cd ≈ 0.05–0.10` (verify against Roshko & Thomke, 1966, AIAA J.)
+- `L_sep` at M = 2 should be ~5–10× step height for turbulent BL
+- Reattachment recovery (negative Cd contribution) should be ~30–40% of step face drag
+
+---
+
+### Implementation Order
+
+| Step | Item | Dependencies | Estimated Tests |
+|------|------|-------------|-----------------|
+| 1 | 7c: Protuberance wave drag | ObliqueShockSolver (Phase 1), PrandtlMeyerExpansion | 8–10 |
+| 2 | 7d: Interstage stepped base drag | ShockGeometry momentum thickness, Eckert Cf | 10–12 |
+| 3 | 7b: Ring fin / tube fin | Ackeret fin drag (Phase 2c), Kantrowitz solver | 10–12 |
+| 4 | 7a: Multi-body shock interference | ShockGeometry (Phase 3b), AerodynamicForces CY field | 15–20 |
+
+**Total: ~45–55 new tests**
+
+Steps 1 and 2 are independent. Step 3 requires the Ackeret fin path already working (confirmed in Phase 2c). Step 4 is the most architecturally invasive — requires the CY field also needed in Phase 8d and 9b.
+
+### Phase 7 Validation Gate
+
+- **Protuberance wave drag:** Rail button drag at M = 2.0 is 2–4× the subsonic Hoerner value
+- **Step drag:** Interstage step Cd at M = 2.0 within 15% of Roshko & Thomke (1966) data; `L_sep` is 5–10× step height
+- **Ring fins:** Started/spilled transition occurs at M = 1.6–2.0 for typical proportions; drag drops 3–5× at transition
+- **Multi-body interference:** Symmetric booster pair drag exceeds independent-stage sum; side force `CY = 0` for symmetric pair
+- **Subsonic regression:** All existing tests pass unchanged
 
 ---
 
 ## Phase 8: High-Fidelity Viscous & Dynamic Stability
 
-At extreme speeds and high angles of attack, boundary layers, viscous effects, and pitch damping dictate vehicle survivability and accurately resolve the divergence of complex shapes.
+At extreme speeds and high angles of attack, boundary layers, viscous effects, and pitch damping dominate behavior that the quasi-steady aerodynamic model cannot capture. These items improve accuracy for simulations where dynamic stability matters — transonic oscillation, high-AoA recovery scenarios, and long burn times.
 
 ### 8a. Dynamic Stability (Transonic/Supersonic Pitch Damping)
-- **Problem:** While static stability ($C_{N_{\alpha}}$, $C_P$) is handled, dynamic pitch damping derivatives ($C_{m_q}$ and $C_{m_{\dot{\alpha}}}$) change heavily in transonic regimes. Some shapes experience *negative* damping near Mach 1.
-- **Method:** Implement the Tobak-Wehrend and advanced DATCOM methods to resolve $C_{m_q}$ and $C_{m_{\dot{\alpha}}}$. This simulates wobbling limit cycles and prevents catastrophic artificial stabilization during simulation.
+
+**Priority:** High — required for accurate simulation of rockets with marginal stability margin near M = 1.
+
+**Problem:** Static stability (CNa, CP) determines whether a perturbation grows; dynamic stability determines how fast it damps. The current simulation applies static aerodynamic forces only, implicitly assuming perfect damping. A rocket that is statically stable can be dynamically unstable near M = 1 if the pitch damping derivative `Cmq` is positive (destabilizing). Currently, OpenRocket models all rockets as dynamically stable by assumption.
+
+**Method:**
+
+The two key damping derivatives (Missile DATCOM, Section 4.2):
+
+**Cmq — moment due to pitch rate:**
+```
+// Component contributions, summed over body sections and fin sets:
+Cmq_body = -2 * CNa_body * (x_CP_body - x_CG)^2 / L_ref^2
+Cmq_fin  = -2 * CNa_fin  * (x_CP_fin  - x_CG)^2 / L_ref^2
+Cmq_total = sum of all components
+```
+where `L_ref` is the rocket reference length (use body length `L`, consistent with other moment coefficient normalization).
+
+**CmAlphaDot — moment due to AoA rate:**
+For axisymmetric bodies, DATCOM gives `CmAlphaDot ≈ 0.4 * Cmq` as a first approximation (body contribution dominates; fin contribution is similar in form).
+
+**Transonic sign reversal near M = 1:**
+For blunt or squat bodies, `Cmq` can become positive (destabilizing) near M = 1 due to unsteady shock motion. DATCOM Section 4.2.2.1 empirical correction:
+```
+k_transonic = 1.0 + 2.5 * exp(-((M - 1.0) / 0.15)^2)   // peaks at M=1, decays away
+// For fins: k_transonic ≈ 1.0 (fins are less affected)
+// For bodies: multiply body Cmq by k_transonic
+Cmq_body_corrected = Cmq_body * k_transonic
+```
+
+**Integration into simulation stepper:**
+The pitch moment gains a damping term proportional to pitch rate:
+```java
+// In RK4SimulationStepper, pitch moment computation:
+double Cmq = aeroForces.getCmq() + aeroForces.getCmAlphaDot();
+double M_damping = dynamicPressure * S_ref * L_ref * L_ref
+                 * Cmq * pitchRate / (2.0 * velocity);
+double M_pitch_total = M_pitch_static + M_damping;
+```
+Note: `pitchRate` is already tracked in the simulation state vector as the pitch angular velocity.
+
+**Files to modify:**
+- `AerodynamicForces.java` — add `cmq` and `cmAlphaDot` double fields with getters/setters
+- `BarrowmanStabilityCalculator.java` — compute `cmq` and `cmAlphaDot` from component CP and CNa data already available in the stability computation; add the transonic k-factor for body contribution
+- `AbstractSimulationStepper.java` (or `RK4SimulationStepper.java`) — apply damping moment in pitch integration using the new `cmq` field
+
+**Validation:**
+- For a statically stable rocket at M = 0.5: `Cmq` must be negative (stabilizing)
+- For a marginally stable rocket (SM = 1 cal) near M = 1 with positive k-factor: simulation must show oscillations with longer damping time than at M = 0.5
+- `Cmq` magnitude sanity check: for a 1 m rocket with 4 fins 0.5 m from CG, `Cmq ≈ -10 to -30` (dimensionless, normalized by `L^2`)
+- At M = 1.0, body `Cmq` is amplified by up to `1 + 2.5 = 3.5×` vs. slender body value
+
+---
 
 ### 8b. Shock-Boundary Layer Interaction (SBLI)
-- **Problem:** A strong shock interacting with a turbulent boundary layer ahead of fin roots causes localized flow separation, severely reducing fin control authority.
-- **Method:** Apply semi-empirical correction factors mapping the shock strength and local Reynolds number to a boundary-layer separation extent, dynamically reducing effective root chord and fin lift capabilities.
 
-### 8c. Dynamic Boundary Layer Transition Mapping
-- **Problem:** Models assume uniformly fully turbulent or fully laminar states, but in reality, transition points shift heavily with Mach number and localized heating. 
-- **Method:** Calculate boundary layer transition dynamically over the wetted body length based on the local Reynolds number, Mach number correction, and a surface roughness geometric factor to pinpoint exact $C_f$ integration transitions.
+**Priority:** Medium — most significant at M > 1.5 where fin root oblique shocks are strong.
+
+**Problem:** At the fin root junction, the body boundary layer encounters the oblique shock generated by the fin leading edge. If the shock is strong enough, the boundary layer separates ahead of the fin root, creating a dead-air region over the first portion of the fin root chord. This reduces the fin's effective chord and hence its CNa — an effect of 5–15% at M = 2.0 that the current model ignores.
+
+**Method:**
+
+**Step 1: Check separation criterion (free interaction theory)**
+The critical pressure coefficient for turbulent BL separation:
+```
+Cp_critical = 3.5 * sqrt(Cf_local / sqrt(M^2 - 1))
+```
+where `Cf_local` is the skin friction coefficient at the fin root station (from the Eckert method, already computed).
+
+The fin root shock pressure coefficient (using the fin leading-edge half-angle `theta_fin`):
+```java
+double beta_fin = ObliqueShockSolver.shockAngle(mach, theta_fin);
+double Cp_fin_shock = ObliqueShockSolver.pressureCoefficientBehindShock(mach, beta_fin);
+```
+If `Cp_fin_shock <= Cp_critical`: no separation — fin CNa unchanged. Exit early.
+
+**Step 2: Compute separation length**
+Chapman-Kuehn-Larson free interaction:
+```
+L_sep = sqrt(2) * C_FI * theta_BL * M^2 / (Cf_local^0.5 * (M^2 - 1)^0.25)
+```
+where `C_FI = 4.2` for turbulent flow and `theta_BL` is the BL momentum thickness at the fin station from `ShockGeometry.getMomentumThicknessAt(x_fin)`.
+
+**Step 3: Effective chord reduction**
+The separated region covers the first `L_sep` of the fin root chord. Apply proportional CNa reduction:
+```java
+double effective_chord = Math.max(chord - L_sep, 0.1 * chord);  // clamp at 10%
+double CNa_effective = CNa_nominal * (effective_chord / chord);
+```
+
+Plateau pressure adds a small local drag increment:
+```java
+double Cp_plateau = C_FI * Math.sqrt(2.0 * Cf_local / Math.sqrt(M*M - 1));
+double delta_Cd_SBLI = Cp_plateau * L_sep * span * n_fins / S_ref;
+```
+
+**Files to modify:**
+- `FinSetCalc.java` — after computing nominal fin CNa, check SBLI separation criterion using local `ShockGeometry` conditions at the fin station; if separated, apply effective chord reduction
+- `ShockGeometry.java` — expose `getMomentumThicknessAt(double x)` using BL momentum thickness growth already tracked during surface marching (estimate: `theta/x ≈ 0.036 / Re_x^0.2` from turbulent flat plate)
+- New utility: `FreeInteractionSBLI.java` in `aerodynamics/barrowman/` with static methods `isSeparated(M, Cf, Cp_shock)` and `separationLength(M, Cf, theta_BL)`
+
+**Validation:**
+- At M < 1.2 or weak shocks: no separation — fin CNa unchanged from Phase 6 baseline
+- At M = 2.0 with a 75 mm body and thick BL: expect 5–10% CNa reduction for large fins
+- Separation length should be 2–8× `theta_BL` (typical for turbulent SBLI — sanity check vs Delery & Marvin, 1986)
+- Compare CNa reduction trend against DeSpirito & Heavey ARL wind tunnel data (Phase 10 acquisition)
+
+---
+
+### 8c. Boundary Layer Transition Mapping
+
+**Priority:** Medium — affects skin friction accuracy for smooth rockets at moderate Reynolds numbers.
+
+**Problem:** The current model assumes fully turbulent flow over the entire rocket body, with a surface-finish factor `N_f` calibrating the magnitude. In reality, the nose region is laminar and transitions to turbulent flow at a Reynolds-number-dependent location. Assuming fully turbulent from the nose tip overpredicts friction drag by 15–30% for typical HPR rockets with polished finishes.
+
+**Method:**
+
+**Transition criterion — Michel (1951), compressible form:**
+The transition location is the axial station where the local Reynolds number reaches:
+```
+Re_x_transition = 3.0e6 / (1.0 + 0.045 * M^2)   // compressibility correction
+```
+(This reproduces the subsonic Michel criterion at M = 0 and shortens the laminar run at high Mach, consistent with supersonic instability growth.)
+
+Roughness correction (Granville criterion): if surface roughness height `k_s` is known,
+```
+Re_x_transition_rough = min(Re_x_transition, (k_s / L_ref)^(-2.6))
+```
+For the existing `N_f` roughness scale: `k_s ≈ 0.5e-6 / N_f` meters (smooth paint ~1 μm, rough paint ~50 μm).
+
+**Piecewise friction integration:**
+```java
+double x_tr = Re_x_transition * mu / (rho * V);  // transition station from nose
+
+if (x_tr >= componentLength) {
+    // Fully laminar component
+    double Re_comp = rho * V * componentLength / mu;
+    Cf = 1.328 / Math.sqrt(Re_comp);                // Blasius
+    Cf *= laminarCompressibilityCorrection(M);       // reference temperature, laminar form
+} else if (x_tr <= 0.0) {
+    // Fully turbulent (existing Eckert behavior)
+    Cf = computeTurbulentCf(Re_component, M);
+} else {
+    // Mixed laminar/turbulent
+    double f_laminar = x_tr / componentLength;
+    double Cf_lam = 1.328 / Math.sqrt(rho * V * x_tr / mu) * laminarCompressibilityCorrection(M);
+    double Cf_turb = computeTurbulentCf(Re_component, M);
+    Cf = f_laminar * Cf_lam + (1.0 - f_laminar) * Cf_turb;
+}
+```
+
+The existing `N_f` surface-finish factor continues to scale the turbulent Cf portion only. Laminar Cf is not affected by surface roughness (roughness only matters in the turbulent boundary layer).
+
+**Files to modify:**
+- `BarrowmanDragCalculator.java` — modify `calculateFrictionCoefficient()` to compute `x_tr` from `FlightConditions` (Mach, Re), then integrate Cf piecewise; replace the existing single `Cf * N_f` call with the mixed integral
+
+**Validation:**
+- Polished rocket at M = 0.3, Re = 5×10^5/m: transition at ~70% body length; total Cf ~20% below fully turbulent
+- Rough surface (N_f = 1): transition moved forward, result approaches fully turbulent; must match existing model within 5%
+- At M = 2.0: compressibility shortens laminar run; transitional Cf still lower than fully turbulent
+- Laminar Cf at the nose is ~3× lower than turbulent Cf at same Re (Blasius vs. Prandtl-Schlichting sanity check)
+
+---
 
 ### 8d. High AoA Asymmetric Vortex Shedding
-- **Problem:** While Jorgensen crossflow models high-AoA normal forces, it assumes symmetry. At extreme angles (>20°), even perfect bodies shed asymmetric vortices.
-- **Method:** Model the stochastic side-force coefficient envelope generated by alternating vortex shedding to correctly simulate "odd roc" divergence vectors at high incidence angles.
+
+**Priority:** Low — relevant only for tumbling/recovery scenarios and intentional high-AoA flights.
+
+**Problem:** The Jorgensen crossflow model (Phase 6a) assumes symmetric vortex shedding — both crossflow vortices are mirrored and produce equal and opposite lateral forces, yielding zero net side force. At AoA > ~20°, body vortex shedding becomes deterministically asymmetric, generating a net side force that can exceed the normal force at extreme AoA. This force causes divergent yaw that is unmodeled by the current symmetric formulation.
+
+**Method:**
+
+**Champigny-Lacau (1994) side force envelope:**
+
+| AoA range | Side force model |
+|-----------|-----------------|
+| < 20° | `CY = 0` (symmetric shedding, no change to existing) |
+| 20°–40° | `CY = k_v * CN_body * sin(phi_0)` (deterministic asymmetry) |
+| > 40° | `CY = CY_max` (saturated chaotic regime) |
+
+where:
+- `k_v ≈ 0.20` for a pointed rocket body (range: 0.15–0.30 depending on nose bluntness)
+- `phi_0` is the initial vortex asymmetry angle — a function of surface imperfections; effectively random across flights and unknown at simulation time
+
+**Implementation for simulation:**
+Since `phi_0` is unknowable, model it as a worst-case envelope (safety analysis use case):
+```java
+if (alpha < Math.toRadians(20.0)) {
+    CY = 0.0;
+} else if (alpha < Math.toRadians(40.0)) {
+    double f = (alpha - Math.toRadians(20.0)) / Math.toRadians(20.0);
+    // worst-case: phi_0 = 90 deg (maximum sin)
+    CY = k_v * CN_body * f;
+} else {
+    CY = k_v * CN_body;  // saturated
+}
+```
+Emit a simulation warning when AoA > 20°: "High angle of attack: asymmetric vortex shedding will produce an unpredictable lateral force. Simulation shows worst-case envelope."
+
+**Coupling to 6-DOF (Phase 9b):** Side force `CY` creates a yaw moment that requires the full 6-DOF state vector to integrate correctly. Implement Phase 8d concurrently with or after Phase 9b. The `CY` computation itself can be added to `AerodynamicForces` and tested independently.
+
+**Files to modify:**
+- `BarrowmanCalculator.java` — add `CY` computation in `getAerodynamicForces()` when `alpha > 20°`
+- `AerodynamicForces.java` — `CY` field (shared with Phase 7a and 9b; only needs to be added once across all phases that use it)
+- Simulation warning infrastructure: emit `SimulationAlert` when AoA > 20° during flight
+
+**Validation:**
+- At AoA < 20°: `CY = 0` — no change to existing behavior
+- At AoA = 30°, M = 0.5: `CY ≈ 0.10–0.15 * CN_body` (consistent with Champigny-Lacau Fig. 7)
+- At AoA = 45°: `CY` saturates — further AoA increase has no effect
+- Warning emitted in simulation output when AoA > 20° — verify via simulation log
+
+---
+
+### Implementation Order
+
+| Step | Item | Dependencies | Estimated Tests |
+|------|------|-------------|-----------------|
+| 1 | 8c: BL transition mapping | Eckert Cf (Phase 2d) | 8–10 |
+| 2 | 8a: Pitch damping (Cmq) | AerodynamicForces, BarrowmanStabilityCalc | 10–14 |
+| 3 | 8b: SBLI fin chord reduction | ShockGeometry `getMomentumThicknessAt()`, Phase 7d adds it | 8–10 |
+| 4 | 8d: Asymmetric vortex shedding | AerodynamicForces CY field (from Phase 7a or 9b) | 6–8 |
+
+**Total: ~35–45 new tests**
+
+Steps 1 and 2 are independent and can be built in parallel. Step 3 requires `ShockGeometry.getMomentumThicknessAt()` which is added in Phase 7d — build Phase 7d first or stub the method. Step 4 delivers its full value only after Phase 9b (6-DOF) is in place, but the `CY` computation and warning can be implemented and unit-tested independently.
+
+### Phase 8 Validation Gate
+
+- **Pitch damping:** `Cmq` is negative (stabilizing) for a standard finned rocket at M = 0.5; near M = 1, body `Cmq` amplified by up to 3.5×; simulation of a marginally stable rocket near M = 1 shows oscillations with finite damping time
+- **SBLI:** Fin CNa reduced 5–10% at M = 2.0 for large-finned rockets with a long body (thick BL); no separation predicted for small fins or at M < 1.2
+- **BL transition:** Polished rocket friction 15–25% lower than fully turbulent prediction; rough surface (N_f = 1) within 5% of existing model
+- **Vortex shedding:** `CY = 0` at AoA < 20°; warning emitted at AoA > 20°; `CY` magnitude consistent with Champigny-Lacau envelope
+- **Subsonic regression:** All existing tests pass unchanged
 
 ---
 
@@ -1098,13 +1653,27 @@ where `k_sep ≈ 2–4` depends on the boundary layer state (from Chapman-Korst,
 
 ---
 
+### Implementation Order
+
+| Step | Item | Dependencies | Estimated Tests |
+|------|------|-------------|-----------------|
+| 1 | 9c: Real atmospheric sounding | `AtmosphericConditions`, `SimulationOptions` | 8–10 |
+| 2 | 9a: Aeroelastic coupling | `FinSetCalc`, fin material model, `AerodynamicForces` | 12–15 |
+| 3 | 9b: Full 6-DOF simulation | `RK4SimulationStepper` state expansion, `AerodynamicForces` CY/Cn/Cl | 15–20 |
+| 4 | 9e: Plume-induced flow separation | Phase 6b power-on base drag, motor nozzle exit data | 10–12 |
+| 5 | 9d: Surrogate model | All Phases 1–8 complete; offline Python training pipeline | 10–12 |
+
+**Total: ~55–70 new tests**
+
+Step 1 (atmosphere) is a self-contained I/O and interpolation change — no aerodynamic model dependencies. Step 2 (aeroelastic) requires adding material properties to the fin model but no simulation stepper changes. Step 3 (6-DOF) is the most invasive: it changes the simulation state vector dimension and must not regress 3-DOF results for symmetric rockets. Steps 4 and 5 depend on everything upstream being stable. The surrogate (Step 5) is an offline-training + runtime-inference task; the training pipeline is a separate Python script run once when models are finalized.
+
 ### Phase 9 Validation Gate
 
 - **Aeroelastic:** Thin fins at high q show measurable CNa reduction; divergence detected before flutter
-- **6-DOF:** Symmetric rockets reproduce 3-DOF results; asymmetric rockets show physically correct coning
-- **Atmosphere:** Custom sounding data shifts transonic peak and apogee by expected amounts
+- **6-DOF:** Symmetric rockets reproduce 3-DOF results exactly (cross-products of inertia = 0); asymmetric rockets show physically correct coning motion at correct frequency
+- **Atmosphere:** Custom sounding data shifts transonic drag peak and predicted apogee by expected amounts; standard-atmosphere sounding file reproduces existing model results exactly
 - **Surrogate:** < 2% RMS error vs analytical; 10×+ speedup; out-of-distribution detection works
-- **Plume:** Sea-level results unchanged; high-altitude fin effectiveness drops during burn as predicted
+- **Plume:** Sea-level results unchanged; high-altitude fin effectiveness drops during burn as predicted; effect deactivates at burnout
 - **Subsonic regression:** All existing tests pass unchanged
 
 ---
@@ -1142,10 +1711,9 @@ File: `BarrowmanDragCalculator.java` — supersonic base drag computation (curre
 // Lamb-Oberkampf base drag correlation (Ref 31)
 // Valid M > 1.0, Re_D > 1e4
 double logReD = Math.log10(reD);
-double Cd_base_LO = (0.064 + 0.186 / (mach * mach))
-                  * (1.0 - 0.08 * (logReD - 6.0));  // Re correction centered at Re=1e6
-// Clamp Re correction factor to [0.7, 1.3] for safety
-Cd_base_LO *= MathUtil.clamp(1.0 - 0.08 * (logReD - 6.0), 0.7, 1.3);
+// Re correction factor: clamped to [0.7, 1.3] (±30% max adjustment)
+double reFactor = MathUtil.clamp(1.0 - 0.08 * (logReD - 6.0), 0.7, 1.3);
+double Cd_base_LO = (0.064 + 0.186 / (mach * mach)) * reFactor;
 ```
 
 3. Keep the existing Devan-Ashwood as the fallback when Re_D is unavailable or < 1e4
@@ -1975,6 +2543,140 @@ if (q_local > 0.8 * q_flutter) {
 
 ---
 
+## Phase 11: Roll-Pitch Resonance & Magnus Aerodynamics
+
+This phase introduces true roll-pitch coupling dynamics, accounting for the complex aerodynamic interactions that plague unguided sounding rockets in the upper atmosphere.
+
+### 11a. Magnus Force & Moment Derivatives
+
+**Problem:** When a spinning rocket experiences a slight angle of attack, asymmetric boundary layer separation occurs due to the Magnus effect. This creates lateral forces entirely orthogonal to normal aerodynamic lift. Without this, 6-DOF models only capture gyroscopic inertia, ignoring the aerodynamic driver of roll-pitch resonance.
+
+**Dependency:** Requires Phase 9b (Full 6-DOF Simulation) for the side force and yaw moment channels. The coefficients can be computed and unit-tested independently, but they have no effect until the 6-DOF stepper exists.
+
+**Method:**
+
+The Magnus side force and yaw moment arise from the interaction of roll rate `p` with the body's normal force distribution. From Missile DATCOM Section 4.2.3.2 (slender body of revolution):
+
+**Magnus side force coefficient slope (per radian AoA, per unit of non-dimensional roll rate):**
+```
+Cy_pa = -2 * (volume integral of body radius^2 over length) / (S_ref * L_ref)
+      ≈ -(2/3) * CNa_body   [pointed-tip slender body approximation]
+```
+
+**Magnus yaw moment coefficient:**
+```
+Cn_pa = Cy_pa * (x_CP_body - x_CG) / L_ref
+```
+
+**Applied side force and yaw moment at each timestep:**
+```java
+double omega_hat = rollRate * bodyDiameter / (2.0 * velocity);  // non-dim roll rate
+double CY_magnus = Cy_pa * omega_hat * alpha;
+double Cn_magnus = Cn_pa * omega_hat * alpha;
+```
+
+where `alpha` is the instantaneous angle of attack and `rollRate` is the angular velocity about the body axis (from the 6-DOF state vector).
+
+**Fin contribution to Magnus moment:**
+```
+Cy_pa_fin ≈ -Cl_p_fin * (x_fin_CP - x_CG) / L_ref
+```
+where `Cl_p_fin` is the roll damping coefficient from Phase 11b. Fins typically contribute 30–60% of the total Magnus moment for HPR rockets.
+
+**Files to modify:**
+- `AerodynamicForces.java` — add `cyMagnus` and `cnMagnus` double fields (reuse `Cside`/`Cyaw` if already present)
+- `BarrowmanStabilityCalculator.java` — compute `Cy_pa` and `Cn_pa` from body volume integral and fin roll damping; apply omega_hat * alpha scaling
+- `AbstractSimulationStepper.java` — apply Magnus side force and yaw moment in the 6-DOF integration (alongside Phase 9b changes)
+
+**Validation:**
+- At zero roll rate (`p = 0`): Magnus force = 0 — no change to existing 3-DOF behavior
+- At M = 2, alpha = 5°, p*D/(2V) = 0.1: `CY_magnus ≈ -(2/3) * CNa_body * 0.1 * 0.087`
+- Magnus moment arm `(x_CP - x_CG)` must be negative for a statically stable rocket (restoring, not diverging)
+- Cross-validate against MAPLEAF (Phase 10) for a finned rocket in spin-stabilized flight
+
+---
+
+### 11b. Supersonic Roll Damping
+
+**Problem:** To accurately predict pitch-roll resonance, the simulation must precisely predict the rocket's spin rate. The existing roll damping in `FinSetCalc.calculateDampingMoment()` uses K1/K2/K3 (Ackeret 2D theory) without accounting for the Mach cone span limitation. At supersonic speeds the Mach cone from the fin root limits how much fin area contributes to roll damping, reducing the effective damping well below the subsonic prediction.
+
+**Method:**
+
+**Mach cone span limitation:**
+At supersonic Mach M, the Mach cone from the fin root leading edge extends radially outward by:
+```
+y_cone = c_root * sqrt(M^2 - 1)   [radial reach at the fin trailing edge station]
+```
+The effective fin semispan for roll damping is therefore:
+```
+span_eff = min(span_exposed, c_root * sqrt(M^2 - 1))
+```
+When `span_eff < span_exposed` (i.e., the Mach cone does not reach the fin tip), only the inboard portion of the fin generates roll damping. This becomes significant at M close to 1 for low-AR fins.
+
+**Supersonic roll damping coefficient (Ackeret + Mach cone limit):**
+```
+Cl_p = -n_fins * (4 / beta) * integral[r_body to r_body+span_eff] [y^2 * chord(y) / (S_ref * L_ref)] dy
+```
+where `beta = sqrt(M^2 - 1)` and the integral is over the effective fin span only.
+
+For a trapezoidal fin with linear chord taper:
+```
+chord(y) = c_root + (c_tip - c_root) * (y - r_body) / span_exposed
+```
+Integrating analytically:
+```java
+double beta = Math.sqrt(mach * mach - 1.0);
+double y1 = bodyRadius;
+double y2 = bodyRadius + spanEff;            // clamped span
+double c_avg_eff = chord at midpoint of [y1, y2];  // linear interpolation
+
+double Cl_p_fin = -nFins * (4.0 / beta)
+    * (c_avg_eff * (y2*y2*y2 - y1*y1*y1) / 3.0)
+    / (conditions.getRefArea() * conditions.getRefLength());
+```
+
+**Subsonic behavior (M < 0.9):** Retain the existing K1/K2/K3 damping integration (no change). Blend linearly between subsonic and supersonic formulations for M 0.9–1.1, consistent with other transonic blending regions.
+
+**Files to modify:**
+- `FinSetCalc.java` — in `calculateDampingMoment()`, add a supersonic branch that computes `span_eff` from the Mach cone formula and integrates `Cl_p` analytically; blend with existing subsonic damping for M 0.9–1.1
+- `AerodynamicForces.java` — `CrollDamp` field already exists; no structural change needed
+
+**Validation:**
+- At M = 0.5: result must match existing roll damping implementation exactly
+- At M = 2, typical HPR fin (c_root = 100 mm, span = 150 mm): `span_eff = 100*sqrt(3) ≈ 173 mm > 150 mm`, so no Mach cone clipping — Cl_p follows `4/beta` Ackeret scaling
+- At M = 1.2, same fin: `span_eff = 100*sqrt(0.44) ≈ 66 mm < 150 mm` — significant clipping, Cl_p reduced ~55%
+- Simulated terminal spin rate should increase vs uncorrected model at M 1.0–1.5 (where clipping is most severe)
+
+### 11c. Resonance Telemetry & Flight State Graphing
+
+**Problem:** Users need to visually observe pitch-roll instability boundaries before flying. Right now, this dynamic stability data is buried inside the physics solver.
+
+**Method:** 
+- Route dynamic stability metrics directly to the `FlightDataBranch` so they can be plotted in the standard OpenRocket UI.
+- Expose graphing parameters: `Natural Pitch Frequency (Hz)`, `Roll Rate (Hz)`, `Magnus Side Force (N)`, and `Coning Angle (deg)`.
+- Introduce an automatic **Simulation Warning:** "Roll-Pitch Resonance Imminent" if the roll frequency approaches within 10% of the natural pitch frequency during flight.
+
+---
+
+## Phase 12: Telemetry & Data Visualization Engine
+
+To make all advanced physics visible to users, the new variables must be explicitly exposed to OpenRocket's graphing and CSV-export engine via custom `FlightDataType` variables.
+
+### 12a. Aerodynamic Coefficient Breakdown Plotting
+- **Problem:** Currently, OpenRocket only plots total Drag Coefficient (`Cd`) and Normal Force Coefficient (`CNa`). At supersonic speeds, users need to know exactly which drag component is dominating.
+- **Method:** Add custom variables to `FlightDataType` to expose sub-components: `Drag Coefficient - Base`, `Drag Coefficient - Pressure/Wave`, `Drag Coefficient - Skin Friction`, and `Fin Lift Effectiveness`.
+- **Implementation timing:** `AerodynamicForces` already tracks `pressureCD`, `baseCD`, and `frictionCD` fields. The `FlightDataType` routing should be implemented **alongside Phase 6**, not deferred to Phase 12 — the breakdown plots are essential for debugging and validating every Phase 6–11 model as it is built. Phase 12a as listed here refers only to the UI grouping and labelling; the underlying data pipeline should be wired up immediately.
+
+### 12b. Dynamic Stability & Thermo-Structural Limits
+- **Problem:** Divergent limits (aeroelastic flutter or resonance) occur instantly in the simulation, but users have no graph to anticipate them.
+- **Method:** Track and expose pre-calculated danger margins: `Fin Flutter Margin (%)`, `Pitch Damping Derivative (Cmq)`, `Magnus Side Force (N)`, and `Stagnation Temperature (°C)`.
+
+### 12c. UI Integration
+- **Problem:** OpenRocket's "Plot Flight" UI needs configuration for these new types.
+- **Method:** Register these `FlightDataType` instances inside the plot configuration dialogue and logically group them under "Advanced Supersonic Metrics" and "Structural Limits".
+
+---
+
 ## Optimization & Performance
 
 As the aerodynamic model grows in complexity (Phases 6–10 add significant per-timestep computation), performance optimization becomes critical for interactive simulation. The following strategies keep simulation time manageable.
@@ -2071,10 +2773,10 @@ As the aerodynamic model grows in complexity (Phases 6–10 add significant per-
 
 ## References
 
-16. **Jorgensen, L.H.** (1977). "Prediction of Static Aerodynamic Characteristics for Slender Bodies Alone and with Lifting Surfaces to Very High Angles of Attack." NASA TR R-474.
-17. **NASA SP-8050** (1971). "Liquid Rocket Engine Nozzles." NASA Space Vehicle Design Criteria.
+16. **Jorgensen, L.H.** (1977). "Prediction of Static Aerodynamic Characteristics for Slender Bodies Alone and with Lifting Surfaces to Very High Angles of Attack." NASA TR R-474. *(Note: Phase 6a text previously cited the non-existent R-829; the correct report is R-474.)*
+17. **Brazzel, C.E., Henderson, J.H. & Kittrell, J.R.** (1962). "An Empirical Method for Estimating the Powered Base Pressure of Rocket Vehicles." NASA TM X-53012. Also: **Dempsey, E.E.** (1976). "Power-On Base Pressure Prediction Methods for Solid Rocket Motors." AIAA Paper 76-619. *(Phase 6b. Original document incorrectly cited NASA SP-8050, which covers liquid rocket engine nozzle design and is unrelated to base pressure.)*
 18. **Dahlem, V. & Buck, M.** (1966). "A Method for Predicting Zero-Lift Wave Drag of Slender Bodies of Revolution." AIAA Paper 66-505.
-19. **Pitts, W.C., Nielsen, J.N. & Kaattari, G.E.** (1957). "Lift and Center of Pressure of Wing-Body-Tail Combinations at Subsonic, Transonic, and Supersonic Speeds." NACA Report 1307.
+19. **Pitts, W.C., Nielsen, J.N. & Kaattari, G.E.** (1957). "Lift and Center of Pressure of Wing-Body-Tail Combinations at Subsonic, Transonic, and Supersonic Speeds." NACA Report 1307. *(Phase 6f. Note: report number is NACA 1307, not NASA TR R-1307 as previously stated.)*
 20. **Whitcomb, R.T.** (1956). "A Study of the Zero-Lift Drag-Rise Characteristics of Wing-Body Combinations Near the Speed of Sound." NACA Report 1273.
 21. **ESDU 78019** (1978). "A Method for Estimating the Pressure Drag of Bodies of Revolution at Zero Incidence in the Transonic Regime." Engineering Sciences Data Unit.
 22. **ESDU 77021** (1977). "Estimation of Base Pressure Coefficients at Supersonic Speeds." Engineering Sciences Data Unit.
@@ -2114,6 +2816,8 @@ As the aerodynamic model grows in complexity (Phases 6–10 add significant per-
 55. **Simmons, R.** (2009). "Aeroelastic Optimization of Sounding Rocket Fins." AFIT Thesis, DTIC ADA502110.
 56. **NATO STO-TR-AVT-240** (2019). "Hypersonic Boundary-Layer Transition Prediction." NATO Science and Technology Organization.
 57. **Stoldt, H. et al.** (2021). "MAPLEAF: A 6-DOF Rocket Simulator." University of Calgary. Open source.
+58. **Hoerner, S.F.** (1965). "Fluid-Dynamic Drag." Published by author, Ch. 3 (bluff body base drag, trailing edge wake), Ch. 17 (induced drag on bodies of revolution). *(Phase 6i induced drag, Phase 6j trailing edge base drag.)*
+59. **Allen, H.J. & Perkins, E.W.** (1951). "A Study of Effects of Viscosity on Flow over Slender Inclined Bodies of Revolution." NACA Report 1048. *(Phase 6i: body CDi at incidence.)*
 58. **KTH Thesis** (2024). "Finding an Empirical Model for a Rocket's Drag Coefficients." KTH Royal Institute of Technology. OpenRocket vs CFD comparison showing 12–73% drag overprediction.
 59. **Sooy, T.J. & Schmidt, R.H.** (2005). "Aerodynamic Predictions, Comparisons, and Validations Using Missile DATCOM (97) and Aeroprediction 98." J. Spacecraft and Rockets, 42(4).
 60. **RASAero II Flight Validation Database**. Rogers, C.E. rasaero.com/comparisons-flight.htm. Published flight-vs-prediction comparisons, average error 3.38%.
@@ -2204,5 +2908,14 @@ As the aerodynamic model grows in complexity (Phases 6–10 add significant per-
 | `ARCASValidationTest` | ~8 | ARCAS sounding rocket wind tunnel data |
 | `FlightDataValidationTest` | ~10 | RASAero published flight comparisons |
 
-**Total: 534 implemented (all passing) + ~340 planned (Phase 6-10) aerodynamic tests** covering every model from subsonic through hypersonic complex-body dynamics.
+| **Phase 11 (planned)** | | |
+| `SupersonicRollDampingTest` | ~12 | Fin roll damping bounds at M>1, interaction with Mach cone |
+| `MagnusForceTest` | ~14 | Magnus side force vs AoA and spin rate, DATCOM validation |
+| `RollPitchResonanceTest` | ~8 | Divergence capture when spin rate matches pitch frequency |
+
+| **Phase 12 (planned)** | | |
+| `FlightDataTypeRegistrationTest` | ~5 | Ensures all aerodynamic types are correctly loaded into the simulation scope |
+| `PlotDataExportTest` | ~10 | Ensures CSV generation properly exports Phase 8-11 limit values |
+
+**Total: 534 implemented (all passing) + ~389 planned (Phase 6-12) aerodynamic tests** covering every model from subsonic through hypersonic complex-body dynamics.
 

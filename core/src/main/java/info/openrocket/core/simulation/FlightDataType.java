@@ -198,6 +198,30 @@ public class FlightDataType implements Comparable<FlightDataType>, Groupable<Fli
 	public static final FlightDataType TYPE_NATURAL_FREQUENCY = newType(
 			trans.get("FlightDataType.TYPE_NATURAL_FREQUENCY"), "\u03c9n", UnitGroup.UNITS_ROLL,
 			FlightDataTypeGroup.STABILITY, 4);
+	//// Pitch damping derivative
+	public static final FlightDataType TYPE_PITCH_DAMPING_DERIVATIVE = newType(
+			trans.get("FlightDataType.TYPE_PITCH_DAMPING_DERIVATIVE"), "Cmq", UnitGroup.UNITS_COEFFICIENT,
+			FlightDataTypeGroup.STABILITY, 5);
+
+	//// Fin lift effectiveness (ratio of actual to theoretical lift)
+	public static final FlightDataType TYPE_FIN_LIFT_EFFECTIVENESS = newType(
+			trans.get("FlightDataType.TYPE_FIN_LIFT_EFFECTIVENESS"), "\u03b7f", UnitGroup.UNITS_COEFFICIENT,
+			FlightDataTypeGroup.STABILITY, 6);
+
+	//// Fin flutter margin (%)
+	public static final FlightDataType TYPE_FLUTTER_MARGIN = newType(
+			trans.get("FlightDataType.TYPE_FLUTTER_MARGIN"), "FM", UnitGroup.UNITS_COEFFICIENT,
+			FlightDataTypeGroup.STABILITY, 7);
+
+	//// Coning angle (deg)
+	public static final FlightDataType TYPE_CONING_ANGLE = newType(
+			trans.get("FlightDataType.TYPE_CONING_ANGLE"), "\u03b1c", UnitGroup.UNITS_ANGLE,
+			FlightDataTypeGroup.STABILITY, 8);
+
+	//// Natural pitch frequency (Hz)
+	public static final FlightDataType TYPE_NATURAL_PITCH_FREQUENCY = newType(
+			trans.get("FlightDataType.TYPE_NATURAL_PITCH_FREQUENCY"), "fn", UnitGroup.UNITS_FREQUENCY,
+			FlightDataTypeGroup.STABILITY, 9);
 
 	// Characteristic numbers
 	//// Mach number
@@ -302,6 +326,10 @@ public class FlightDataType implements Comparable<FlightDataType>, Groupable<Fli
 	public static final FlightDataType TYPE_CORRECTIVE_MOMENT_COEFF = newType(
 			trans.get("FlightDataType.TYPE_CORRECTIVE_MOMENT_COEFF"), "Ccm", UnitGroup.UNITS_MOMENT,
 			FlightDataTypeGroup.COEFFICIENTS, 13);
+	//// Magnus side force slope
+	public static final FlightDataType TYPE_MAGNUS_SIDE_FORCE = newType(
+			trans.get("FlightDataType.TYPE_MAGNUS_SIDE_FORCE"), "Cy_pa", UnitGroup.UNITS_COEFFICIENT,
+			FlightDataTypeGroup.COEFFICIENTS, 14);
 
 	//// Coriolis acceleration
 	public static final FlightDataType TYPE_CORIOLIS_ACCELERATION = newType(
@@ -342,6 +370,10 @@ public class FlightDataType implements Comparable<FlightDataType>, Groupable<Fli
 	public static final FlightDataType TYPE_SPEED_OF_SOUND = newType(trans.get("FlightDataType.TYPE_SPEED_OF_SOUND"),
 			"Vs", UnitGroup.UNITS_VELOCITY,
 			FlightDataTypeGroup.ATMOSPHERIC_CONDITIONS, 5);
+	//// Stagnation temperature
+	public static final FlightDataType TYPE_STAGNATION_TEMPERATURE = newType(
+			trans.get("FlightDataType.TYPE_STAGNATION_TEMPERATURE"), "T0", UnitGroup.UNITS_TEMPERATURE,
+			FlightDataTypeGroup.ATMOSPHERIC_CONDITIONS, 6);
 
 	// Simulation information
 	//// Simulation time step
@@ -411,8 +443,14 @@ public class FlightDataType implements Comparable<FlightDataType>, Groupable<Fli
 			TYPE_DAMPING_MOMENT_COEFF_AERODYNAMIC,
 			TYPE_DAMPING_MOMENT_COEFF_PROPULSIVE,
 			TYPE_CORRECTIVE_MOMENT_COEFF,
+			TYPE_MAGNUS_SIDE_FORCE,
 			TYPE_DAMPING_RATIO,
 			TYPE_NATURAL_FREQUENCY,
+			TYPE_PITCH_DAMPING_DERIVATIVE,
+			TYPE_FIN_LIFT_EFFECTIVENESS,
+			TYPE_FLUTTER_MARGIN,
+			TYPE_CONING_ANGLE,
+			TYPE_NATURAL_PITCH_FREQUENCY,
 			TYPE_CORIOLIS_ACCELERATION,
 			TYPE_REFERENCE_LENGTH,
 			TYPE_REFERENCE_AREA,
@@ -424,6 +462,7 @@ public class FlightDataType implements Comparable<FlightDataType>, Groupable<Fli
 			TYPE_AIR_PRESSURE,
 			TYPE_AIR_DENSITY,
 			TYPE_SPEED_OF_SOUND,
+			TYPE_STAGNATION_TEMPERATURE,
 			TYPE_TIME_STEP,
 			TYPE_COMPUTATION_TIME
 	};

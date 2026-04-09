@@ -213,10 +213,15 @@ public class FinSetCalcTest {
 		assertTrue(pressureCD > 0, "Square fin pressure CD should be positive");
 		assertTrue(componentBaseCD > 0, "Square fin base CD should be positive");
 
-		// Base drag should scale with baseCD (doubling baseCD should double component base drag)
+		// The baseCD-dependent portion should scale linearly. Phase 6j added a trailing-edge
+		// base drag term that is independent of baseCD, so we verify linearity by checking
+		// that the *change* in component base CD equals the expected change.
 		double componentBaseCD2 = calc.calculateComponentBaseCD(conditions, baseCD * 2, warnings);
-		assertEquals(componentBaseCD * 2, componentBaseCD2, EPSILON,
-				"Square fin base CD should scale linearly with baseCD");
+		double delta = componentBaseCD2 - componentBaseCD;
+		double componentBaseCD0 = calc.calculateComponentBaseCD(conditions, 0, warnings);
+		double baseDependentPart = componentBaseCD - componentBaseCD0;
+		assertEquals(baseDependentPart * 2, componentBaseCD2 - componentBaseCD0, EPSILON,
+				"Square fin base CD (baseCD-dependent portion) should scale linearly");
 
 		// Pressure CD should not change when baseCD changes (it depends on stagnationCD)
 		double pressureCD2 = calc.calculatePressureCD(conditions, stagnationCD, baseCD * 2, warnings);

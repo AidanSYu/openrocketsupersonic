@@ -418,6 +418,15 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 		double fN = store.forces.getCN() * dynP * refArea;
 		double fSide = store.forces.getCside() * dynP * refArea;
 
+		// Phase 9b/11a: Magnus side force — cyPa is the derivative dCy/d(pHat)/d(alpha)
+		// pHat = p * refLength / (2 * V) is the non-dimensional roll rate
+		double velocity = store.flightConditions.getVelocity();
+		double rollRate = store.flightConditions.getRollRate();
+		if (velocity > 0.01 && !Double.isNaN(store.forces.getCyPa())) {
+			double pHat = rollRate * refLength / (2.0 * velocity);
+			fSide += store.forces.getCyPa() * pHat * Math.sin(store.flightConditions.getAOA()) * dynP * refArea;
+		}
+
 		store.thrustForce = calculateThrust(status, store);
 		double forceZ =  store.thrustForce - store.dragForce;
 		
@@ -463,17 +472,50 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 			// Shift moments to CG
 			double Cm = store.forces.getCm() - store.forces.getCN() * store.rocketMass.getCM().getX() / refLength;
 			double Cyaw = store.forces.getCyaw() - store.forces.getCside() * store.rocketMass.getCM().getX() / refLength;
-			
+
+			// Phase 9b: Magnus yaw moment — cnPa derivative applied with non-dimensional roll rate
+			if (velocity > 0.01 && !Double.isNaN(store.forces.getCnPa())) {
+				double pHat = rollRate * refLength / (2.0 * velocity);
+				Cyaw += store.forces.getCnPa() * pHat * Math.sin(store.flightConditions.getAOA());
+			}
+
 			// Compute moments
 			double momX = -Cyaw * dynP * refArea * refLength;
 			double momY = Cm * dynP * refArea * refLength;
 			double momZ = store.forces.getCroll() * dynP * refArea * refLength;
-			
+
+			// Phase 9b: Euler gyroscopic coupling — ω × (I·ω) counters precession
+			// Only apply when dynamic pressure is significant (stable flight).
+			// At low dynamic pressure (near/after apogee), the rocket is tumbling and
+			// the gyroscopic terms create numerical stiffness without improving accuracy.
+			if (dynP > 1.0) {
+				CoordinateIF rvWorld = status.getRocketRotationVelocity();
+				MutableCoordinate rotVelBody = new MutableCoordinate(rvWorld.getX(), rvWorld.getY(), rvWorld.getZ());
+				status.getRocketOrientationQuaternion().invRotateInPlace(rotVelBody);
+				store.thetaRotation.invRotateZInPlace(rotVelBody);
+
+				double Ilong = store.rocketMass.getLongitudinalInertia();
+				double Iroll = store.rocketMass.getRotationalInertia();
+				double wx = rotVelBody.getX();  // yaw rate (body)
+				double wy = rotVelBody.getY();  // pitch rate (body)
+				double wz = rotVelBody.getZ();  // roll rate (body)
+
+				// I·ω in body frame (diagonal tensor: Ix=Ilong, Iy=Ilong, Iz=Iroll)
+				double Iwx = Ilong * wx;
+				double Iwy = Ilong * wy;
+				double Iwz = Iroll * wz;
+
+				// Gyroscopic correction: subtract ω × (I·ω) from moments
+				momX -= wy * Iwz - wz * Iwy;
+				momY -= wz * Iwx - wx * Iwz;
+				momZ -= wx * Iwy - wy * Iwx;
+			}
+
 			// Compute angular acceleration in rocket coordinates
-			angularAcceleration = new MutableCoordinate(momX / store.rocketMass.getLongitudinalInertia(),
-					momY / store.rocketMass.getLongitudinalInertia(),
-					momZ / store.rocketMass.getRotationalInertia());
-			
+			double Ifinal_long = store.rocketMass.getLongitudinalInertia();
+			double Ifinal_roll = store.rocketMass.getRotationalInertia();
+			angularAcceleration = new MutableCoordinate(momX / Ifinal_long, momY / Ifinal_long, momZ / Ifinal_roll);
+
 			store.thetaRotation.rotateZInPlace(angularAcceleration);
 
 			// Convert to world coordinates

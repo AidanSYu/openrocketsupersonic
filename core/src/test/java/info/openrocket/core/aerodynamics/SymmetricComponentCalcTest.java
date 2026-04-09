@@ -127,15 +127,17 @@ public class SymmetricComponentCalcTest {
 		// Phase 2E: wave drag is zero below drag divergence Mach (~0.82 for this
 		// ellipsoid), then rises through the transonic regime via a C1-continuous
 		// polynomial to the TR-R-100 empirical data.
+		// Phase 10: Lock's 4th-power drag rise onset produces a more gradual
+		// transonic rise than the original cubic Hermite model.
 		double cd[] = {
 				0, 0, 0,
 				0, 0, 0,
 				0, 0, 0,
 				0, 0, 0,
 				0, 0, 0,
-				0, 0, 3.6893857035647654e-03,
-				1.3892501631781690e-02, 2.9297156472277500e-02, 4.8590565804568430e-02,
-				7.0459945208174030e-02, 9.3592510262608240e-02, 1.1667547654738976e-01 };
+				0, 0, 3.3717774353245384e-04,
+				1.7076203298293240e-03, 5.3980504513008905e-03, 1.3180555932259908e-02,
+				2.7333643846480012e-02, 5.0642240517195715e-02, 8.6397691517102210e-02 };
 
 		for (int i = 0; i < cd.length; i++) {
 			double m = i / 20.0;

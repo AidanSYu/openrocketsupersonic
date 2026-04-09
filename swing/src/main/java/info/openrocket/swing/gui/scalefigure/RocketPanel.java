@@ -140,7 +140,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -258,6 +260,22 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 
 	// Store the basic frame to know which tab is selected (Rocket design, Motors & Configuration, Flight simulations)
 	private final BasicFrame basicFrame;
+
+	/* Debounce and async computation fields */
+	private static final int DEBOUNCE_DELAY_MS = 120;
+	private javax.swing.Timer extrasDebounceTimer;
+	private volatile boolean pendingExtrasUpdate = false;
+
+	/** Single-thread executor for background CP/CG computation */
+	private final ExecutorService extrasComputeExecutor = Executors.newSingleThreadExecutor(r -> {
+		Thread t = new Thread(r, "RocketPanel-extras-compute");
+		t.setDaemon(true);
+		t.setPriority(Thread.NORM_PRIORITY - 1);
+		return t;
+	});
+	private Future<?> currentExtrasComputation;
+	/** Monotonically increasing ID to detect stale results */
+	private final AtomicLong extrasRequestId = new AtomicLong(0);
 
 
 	/**
@@ -521,25 +539,39 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 		is3d = true;
 		go2D();
 
-		rkt.addChangeListener(new StateChangeListener() {
-			@Override
-			public void stateChanged(EventObject e) {
-				updateExtras();
-				updateFigures();
-				scrollPane.componentResized(null);	// Triggers a resize so that when the rocket becomes smaller, the scrollPane updates its size
+		// Initialize debounce timer for async extras computation
+		extrasDebounceTimer = new javax.swing.Timer(DEBOUNCE_DELAY_MS, e -> {
+			if (pendingExtrasUpdate) {
+				pendingExtrasUpdate = false;
+				updateExtrasAsync();
 			}
 		});
+		extrasDebounceTimer.setRepeats(false);
 
+		// Single unified listener for all rocket changes.
+		// Note: Rocket.notifyAllListeners() fires BOTH ComponentChangeListener AND
+		// StateChangeListener for every event — using both would cause 2x updateFigures().
 		rkt.addComponentChangeListener(new ComponentChangeListener() {
 			@Override
 			public void componentChanged(ComponentChangeEvent e) {
-				updateExtras();
-				if (is3d) {
-					if (e.isTextureChange()) {
-						figure3d.flushTextureCaches();
-					}
+				long t0 = System.nanoTime();
+				boolean needsExtras = e.isAerodynamicChange() || e.isMassChange() || e.isTreeChange();
+
+				if (is3d && e.isTextureChange()) {
+					figure3d.flushTextureCaches();
 				}
+				// Immediately repaint figure geometry (cheap with shape caching)
 				updateFigures();
+				long t1 = System.nanoTime();
+				scrollPane.componentResized(null);
+				long t2 = System.nanoTime();
+				// Only schedule expensive CP/CG computation if aero/mass/tree changed
+				if (needsExtras) {
+					scheduleExtrasUpdate();
+				}
+				long t3 = System.nanoTime();
+				log.info("[PERF] componentChanged: updateFigures={}ms, scrollResize={}ms, total={}ms, event={}",
+						(t1 - t0) / 1_000_000.0, (t2 - t1) / 1_000_000.0, (t3 - t0) / 1_000_000.0, e);
 			}
 		});
 
@@ -635,13 +667,8 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 	private void createPanel() {
 		final Rocket rkt = document.getRocket();
 
-		rkt.addChangeListener(new StateChangeListener(){
-			@Override
-			public void stateChanged(EventObject eo) {
-				updateExtras();
-				updateFigures();
-			}
-		});
+		// Note: StateChangeListener + ComponentChangeListener already registered in constructor.
+		// Do NOT add duplicate listeners here — each fires updateFigures() redundantly.
 
 		setLayout(new MigLayout("", "[shrink][grow]", "[shrink 0][grow][shrink 0]"));
 
@@ -679,7 +706,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 							caliperManager.updateSnapTargets();
 						}
 					}
-					updateExtras(); // when switching from side view to back view, need to clear CP & CG markers
+					updateExtras(); // when switching views, run synchronously (infrequent, needs immediate CP/CG update)
 					go2D();
 					updateRulers();
 				}
@@ -798,7 +825,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 		rotationControl.getRotationSlider().addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				updateExtras();
+				scheduleExtrasUpdate();
 			}
 		});
 
@@ -833,8 +860,8 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				document.getDocumentPreferences().putBoolean(PREF_SHOW_WARNINGS, showWarnings.isSelected());
-				updateExtras();
 				updateFigures();
+				scheduleExtrasUpdate();
 			}
 		});
 
@@ -919,8 +946,8 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 				(Double.isNaN(aoa) && Double.isNaN(cpAOA)))
 			return;
 		cpAOA = aoa;
-		updateExtras();
 		updateFigures();
+		scheduleExtrasUpdate();
 		fireChangeEvent();
 	}
 
@@ -935,8 +962,8 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 		cpTheta = theta;
 		if (!Double.isNaN(theta))
 			figure.setRotation(theta);
-		updateExtras();
 		updateFigures();
+		scheduleExtrasUpdate();
 		fireChangeEvent();
 	}
 
@@ -949,8 +976,8 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 				(Double.isNaN(mach) && Double.isNaN(cpMach)))
 			return;
 		cpMach = mach;
-		updateExtras();
 		updateFigures();
+		scheduleExtrasUpdate();
 		fireChangeEvent();
 	}
 
@@ -963,8 +990,8 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 				(Double.isNaN(roll) && Double.isNaN(cpRoll)))
 			return;
 		cpRoll = roll;
-		updateExtras();
 		updateFigures();
+		scheduleExtrasUpdate();
 		fireChangeEvent();
 	}
 
@@ -1234,8 +1261,194 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 	}
 
 	/**
+	 * Schedules an asynchronous update of CP/CG extras after a debounce delay.
+	 * Multiple rapid calls are coalesced — only the last one triggers computation.
+	 */
+	private void scheduleExtrasUpdate() {
+		pendingExtrasUpdate = true;
+		extrasDebounceTimer.restart();
+	}
+
+	/**
+	 * Launches a background thread to compute CP, CG, and mass data, then applies
+	 * results on the EDT. Cancels any in-progress computation first.
+	 */
+	private void updateExtrasAsync() {
+		long t0 = System.nanoTime();
+		// Cancel any in-progress background computation
+		if (currentExtrasComputation != null && !currentExtrasComputation.isDone()) {
+			currentExtrasComputation.cancel(true);
+		}
+
+		// Capture a unique request ID so we can discard stale results
+		final long requestId = extrasRequestId.incrementAndGet();
+
+		// Phase A: capture all parameters on EDT (cheap)
+		final FlightConfiguration curConfig = document.getSelectedConfiguration();
+		final double rotation = figure.getRotation(true);
+		final double mach = Double.isNaN(cpMach) ? Application.getPreferences().getDefaultMach() : cpMach;
+		final double aoa = Double.isNaN(cpAOA) ? 0 : cpAOA;
+		final double roll = Double.isNaN(cpRoll) ? 0 : cpRoll;
+		final double theta = cpTheta;
+		final boolean hasTheta = !Double.isNaN(cpTheta);
+		final boolean showWarningsSelected = (this.showWarnings != null) && showWarnings.isSelected();
+		final RocketPanel.VIEW_TYPE viewType = figure.getCurrentViewType();
+
+		long t1 = System.nanoTime();
+		// Deep-copy the rocket for thread-safe background computation
+		final Rocket duplicate = (Rocket) document.getRocket().copy();
+		long t2 = System.nanoTime();
+		final FlightConfiguration bgConfig = duplicate.getSelectedConfiguration();
+
+		// Create a fresh calculator instance (clean caches, no shared state)
+		final AerodynamicCalculator bgCalc = aerodynamicCalculator.newInstance();
+		long t3 = System.nanoTime();
+		log.info("[PERF] updateExtrasAsync EDT setup: params={}ms, Rocket.copy={}ms, newCalc={}ms, total={}ms",
+				(t1 - t0) / 1_000_000.0, (t2 - t1) / 1_000_000.0, (t3 - t2) / 1_000_000.0, (t3 - t0) / 1_000_000.0);
+
+		// Phase B: submit background computation
+		currentExtrasComputation = extrasComputeExecutor.submit(() -> {
+			try {
+				if (Thread.currentThread().isInterrupted()) return;
+
+				FlightConditions conditions = new FlightConditions(bgConfig);
+				conditions.setMach(mach);
+				conditions.setAOA(aoa);
+				conditions.setRollRate(roll);
+				// Always use a fixed theta for background display — getWorstCP() runs 360×
+				// full supersonic aero calculations (~300s) which is unacceptably slow.
+				conditions.setTheta(hasTheta ? theta : 0);
+
+				WarningSet bgWarnings = new WarningSet();
+				long bgT0 = System.nanoTime();
+				CoordinateIF cp = bgCalc.getCP(bgConfig, conditions, bgWarnings);
+				long bgT1 = System.nanoTime();
+
+				if (Thread.currentThread().isInterrupted()) return;
+
+				CoordinateIF cg = MassCalculator.calculateLaunch(bgConfig).getCM();
+				long bgT2 = System.nanoTime();
+				RigidBody emptyInfo = MassCalculator.calculateStructure(bgConfig);
+				long bgT3 = System.nanoTime();
+				log.info("[PERF] Background compute: getCP={}ms, massLaunch={}ms, massStruct={}ms, total={}ms",
+						(bgT1 - bgT0) / 1_000_000.0, (bgT2 - bgT1) / 1_000_000.0,
+						(bgT3 - bgT2) / 1_000_000.0, (bgT3 - bgT0) / 1_000_000.0);
+
+				if (Thread.currentThread().isInterrupted()) return;
+
+				// Phase C: apply results on EDT
+				final CoordinateIF finalCp = cp;
+				final CoordinateIF finalCg = cg;
+				SwingUtilities.invokeLater(() -> {
+					// Discard if a newer request has been submitted
+					if (requestId != extrasRequestId.get()) return;
+
+					applyExtrasResults(finalCp, finalCg, emptyInfo, bgWarnings, curConfig,
+							rotation, viewType, mach, theta, showWarningsSelected);
+				});
+			} catch (Exception e) {
+				if (!(e instanceof InterruptedException) &&
+						!(e.getCause() instanceof InterruptedException)) {
+					log.error("Background CP/CG computation failed", e);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Applies precomputed CP/CG results to the UI elements. Must be called on EDT.
+	 */
+	private void applyExtrasResults(CoordinateIF cp, CoordinateIF cg, RigidBody emptyInfo,
+									WarningSet bgWarnings, FlightConfiguration curConfig,
+									double rotation, VIEW_TYPE viewType, double mach,
+									double theta, boolean showWarningsSelected) {
+		long applyT0 = System.nanoTime();
+		double cpx = Double.NaN, cpy = Double.NaN;
+		double cgx = Double.NaN, cgy = Double.NaN;
+
+		if (cp.getWeight() > MathUtil.EPSILON) {
+			cpx = cp.getX();
+			cpy = cp.getY() * Math.cos(rotation) + cp.getZ() * Math.sin(rotation);
+		}
+
+		if (cg.getWeight() > MassCalculator.MIN_MASS) {
+			cgx = cg.getX();
+			cgy = cg.getY() * Math.cos(rotation) + cg.getZ() * Math.sin(rotation);
+		}
+
+		if (viewType == RocketPanel.VIEW_TYPE.TopView) {
+			cgy = -cgy;
+		}
+
+		double length = curConfig.getLength();
+		double diameter = Double.NaN;
+		for (RocketComponent c : curConfig.getCoreComponents()) {
+			if (c instanceof SymmetricComponent) {
+				double d1 = ((SymmetricComponent) c).getForeRadius() * 2;
+				double d2 = ((SymmetricComponent) c).getAftRadius() * 2;
+				diameter = MathUtil.max(diameter, d1, d2);
+			}
+		}
+
+		extraText.setCurrentConfig(curConfig);
+		extraText.setMach(mach);
+		extraText.setAOA(cpAOA);
+		extraText.setTheta(theta);
+		extraText.setCG(cgx);
+		extraText.setCP(cpx);
+		extraText.setLength(length);
+		extraText.setDiameter(diameter);
+		extraText.setMassWithMotors(cg.getWeight());
+		extraText.setMassWithoutMotors(emptyInfo.getMass());
+		extraText.setWarnings(bgWarnings);
+		extraText.setShowWarnings(showWarningsSelected);
+
+		if (length > 0) {
+			figure3d.setCG(cg);
+			figure3d.setCP(cp);
+		} else {
+			figure3d.setCG(new Coordinate(Double.NaN, Double.NaN));
+			figure3d.setCP(new Coordinate(Double.NaN, Double.NaN));
+		}
+
+		if (length > 0 &&
+				((viewType == RocketPanel.VIEW_TYPE.TopView) || (viewType == RocketPanel.VIEW_TYPE.SideView))) {
+			extraCP.setPosition(cpx, cpy);
+			extraCG.setPosition(cgx, cgy);
+
+			if (caliperManager != null) {
+				caliperManager.setCGPosition(cgx, cgy);
+				caliperManager.setCPPosition(cpx, cpy);
+				if (caliperManager.isSnapModeActive()) {
+					caliperManager.updateSnapTargets();
+				}
+			}
+		} else {
+			extraCP.setPosition(Double.NaN, Double.NaN);
+			extraCG.setPosition(Double.NaN, Double.NaN);
+
+			if (caliperManager != null) {
+				caliperManager.setCGPosition(Double.NaN, Double.NaN);
+				caliperManager.setCPPosition(Double.NaN, Double.NaN);
+				if (caliperManager.isSnapModeActive()) {
+					caliperManager.updateSnapTargets();
+				}
+			}
+		}
+
+		// Trigger repaint to show updated CP/CG markers
+		updateFigures();
+
+		// Now handle background flight simulation (runs on its own executor)
+		updateBackgroundFlightSim(curConfig);
+		long applyT1 = System.nanoTime();
+		log.info("[PERF] applyExtrasResults: total={}ms", (applyT1 - applyT0) / 1_000_000.0);
+	}
+
+	/**
 	 * Updates the extra data included in the figure.  Currently this includes
 	 * the CP and CG carets. Also start the background simulator.
+	 * This synchronous version is used for initial load and view-type switches.
 	 */
 	private WarningSet warnings = new WarningSet();
 
@@ -1275,12 +1488,9 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 			conditions.setRollRate(0);
 		}
 
-		if (!Double.isNaN(cpTheta)) {
-			conditions.setTheta(cpTheta);
-			cp = aerodynamicCalculator.getCP(curConfig, conditions, warnings);
-		} else {
-			cp = aerodynamicCalculator.getWorstCP(curConfig, conditions, warnings);
-		}
+		// Use a fixed theta — getWorstCP() runs 360× full supersonic aero calculations
+		conditions.setTheta(!Double.isNaN(cpTheta) ? cpTheta : 0);
+		cp = aerodynamicCalculator.getCP(curConfig, conditions, warnings);
 		extraText.setTheta(cpTheta);
 		if (cp.getWeight() > MathUtil.EPSILON){
 			cpx = cp.getX();
@@ -1361,8 +1571,14 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 			}
 		}
 
-		////////  Flight simulation in background
+		updateBackgroundFlightSim(curConfig);
+	}
 
+	/**
+	 * Handles launching/updating background flight simulations.
+	 * Shared by both synchronous updateExtras() and async applyExtrasResults().
+	 */
+	private void updateBackgroundFlightSim(FlightConfiguration curConfig) {
 		// Check whether to compute or not
 		if (!((SwingPreferences) Application.getPreferences()).computeFlightInBackground()) {
 			extraText.setSimulation(null);
@@ -1610,7 +1826,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 			caliperManager.loadCaliperStateForView(getCurrentViewType());
 		}
 
-		updateExtras();
+		updateExtras(); // Initial synchronous computation on startup
 		updateCaliperElements();
 	}
 

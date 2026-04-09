@@ -62,6 +62,20 @@ public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 	 */
 	private double beta = calculateBeta(mach);
 
+	/**
+	 * Current thrust level as a fraction of maximum thrust [0, 1].
+	 * Used by the drag calculator to apply power-on base drag reduction.
+	 * A value of 0 means coasting (unpowered); a value > 0 means motor is burning.
+	 */
+	private double thrustLevel = 0;
+
+	/**
+	 * Nozzle exit area to base area ratio [0, 1].
+	 * Used for power-on base drag computation. If unavailable, set to NaN
+	 * and a default reduction factor will be used.
+	 */
+	private double nozzleAreaRatio = Double.NaN;
+
 	/** Current roll rate. */
 	private double rollRate = 0;
 
@@ -73,6 +87,13 @@ public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 	private CoordinateIF pitchCenter = Coordinate.NUL;
 
 	private AtmosphericConditions atmosphericConditions = new AtmosphericConditions();
+
+	// Plume-induced separation state (Phase 9e)
+	// These are set by the simulation stepper when motor is burning at altitude.
+	private boolean plumeActive = false;
+	private double plumeDiameter = 0;       // Effective plume diameter (m)
+	private double baseDiameter = 0;        // Rocket base diameter (m)
+	private double separationLength = 0;    // Axial length of separated region (m)
 
 	private ModID modID;
 
@@ -434,9 +455,94 @@ public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 		fireChangeEvent();
 	}
 
+	// --- Power-on base drag accessors (Phase 6b) ---
+
+	/**
+	 * Set the current thrust level as a fraction of maximum thrust.
+	 *
+	 * @param level thrust fraction in [0, 1]; 0 = coasting, 1 = full thrust
+	 */
+	public void setThrustLevel(double level) {
+		level = MathUtil.clamp(level, 0, 1);
+		if (MathUtil.equals(this.thrustLevel, level))
+			return;
+		this.thrustLevel = level;
+		fireChangeEvent();
+	}
+
+	/**
+	 * @return the current thrust level as a fraction of maximum thrust [0, 1].
+	 */
+	public double getThrustLevel() {
+		return thrustLevel;
+	}
+
+	/**
+	 * @return true if the motor is currently producing thrust.
+	 */
+	public boolean isPowered() {
+		return thrustLevel > 0;
+	}
+
+	/**
+	 * Set the nozzle exit area to base area ratio.
+	 *
+	 * @param ratio area ratio in [0, 1], or NaN if unavailable
+	 */
+	public void setNozzleAreaRatio(double ratio) {
+		if (Double.isNaN(ratio) && Double.isNaN(this.nozzleAreaRatio))
+			return;
+		if (MathUtil.equals(this.nozzleAreaRatio, ratio))
+			return;
+		this.nozzleAreaRatio = ratio;
+		fireChangeEvent();
+	}
+
+	/**
+	 * @return the nozzle exit area to base area ratio, or NaN if unavailable.
+	 */
+	public double getNozzleAreaRatio() {
+		return nozzleAreaRatio;
+	}
+
+	// --- Plume-induced separation accessors (Phase 9e) ---
+
+	/** Whether plume-induced flow separation is active. */
+	public boolean isPlumeActive() {
+		return plumeActive;
+	}
+
+	/** Set plume separation state. */
+	public void setPlumeState(boolean active, double plumeDiam, double baseDiam, double sepLength) {
+		this.plumeActive = active;
+		this.plumeDiameter = plumeDiam;
+		this.baseDiameter = baseDiam;
+		this.separationLength = sepLength;
+	}
+
+	/** Clear plume state (no plume effects). */
+	public void clearPlumeState() {
+		this.plumeActive = false;
+		this.plumeDiameter = 0;
+		this.baseDiameter = 0;
+		this.separationLength = 0;
+	}
+
+	public double getPlumeDiameter() {
+		return plumeDiameter;
+	}
+
+	public double getPlumeBaseDiameter() {
+		return baseDiameter;
+	}
+
+	public double getSeparationLength() {
+		return separationLength;
+	}
+
 	/**
 	 * Retrieve the modification count of this object.
-	 * 
+	 *
 	 * @return modification ID
 	 */
 	@Override
@@ -493,6 +599,7 @@ public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 				MathUtil.equals(this.rollRate, other.rollRate) &&
 				MathUtil.equals(this.pitchRate, other.pitchRate) &&
 				MathUtil.equals(this.yawRate, other.yawRate) &&
+				MathUtil.equals(this.thrustLevel, other.thrustLevel) &&
 				this.pitchCenter.equals(other.pitchCenter)
 				&& this.atmosphericConditions.equals(other.atmosphericConditions));
 	}

@@ -142,7 +142,9 @@ public class TransonicDragRiseTest {
 		for (double m = 0.7 + step; m <= 1.1; m += step) {
 			double cd = getNosePressureCD(rocket, m);
 			double jump = Math.abs(cd - prevCd);
-			assertTrue(jump < 0.05,
+			// Lock's 4th-power onset creates a steeper rise near M=1.0;
+			// allow up to 0.07 jump per 0.02 Mach step in the transonic region.
+			assertTrue(jump < 0.07,
 					String.format("Cone pressure Cd jump %.6f too large at M%.2f (%.6f → %.6f)",
 							jump, m, prevCd, cd));
 			prevCd = cd;
@@ -203,8 +205,9 @@ public class TransonicDragRiseTest {
 		double cdAt = getNosePressureCD(rocket, joinMach);
 		double cdAbove = getNosePressureCD(rocket, joinMach + h);
 
-		// Value continuity (piecewise-linear discretization allows small gap)
-		assertEquals(cdAt, cdBelow, 0.01,
+		// Value continuity: Lock's 4th-power onset is steep near the join,
+		// so allow a wider tolerance (0.02) at h=0.005 step size.
+		assertEquals(cdAt, cdBelow, 0.02,
 				String.format("Value discontinuity at M=%.2f: below=%.6f, at=%.6f", joinMach, cdBelow, cdAt));
 
 		// Derivative continuity (allow for LinearInterpolator discretization)

@@ -2,6 +2,10 @@ package info.openrocket.core.aerodynamics.barrowman;
 
 import java.util.List;
 
+import info.openrocket.core.aerodynamics.ShockGeometry;
+import info.openrocket.core.aerodynamics.shocks.NormalShockRelations;
+import info.openrocket.core.aerodynamics.shocks.ObliqueShockSolver;
+import info.openrocket.core.aerodynamics.shocks.PrandtlMeyerExpansion;
 import info.openrocket.core.util.CoordinateIF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +20,17 @@ import info.openrocket.core.util.Transformation;
 
 public class RailButtonCalc extends RocketComponentCalc {
 	private final static Logger log = LoggerFactory.getLogger(RailButtonCalc.class);
+
+	private static final double GAMMA = 1.4;
+
+	// Phase 7c: Blend boundaries for supersonic protuberance wave drag
+	private static final double WAVE_DRAG_BLEND_LOW = 0.9;
+	private static final double WAVE_DRAG_BLEND_HIGH = 1.1;
+
+	// Phase 7c: Body interference friction penalty factor
+	private static final double INTERFERENCE_FRICTION_PENALTY = 0.20;
+	// Interference extends downstream over this many button heights
+	private static final double INTERFERENCE_LENGTH_FACTOR = 3.0;
 
 	// values transcribed from Gowen and Perkins, "Drag of Circular Cylinders for a
 	// Wide Range
@@ -50,7 +65,6 @@ public class RailButtonCalc extends RocketComponentCalc {
 			double stagnationCD, double baseCD, WarningSet warnings) {
 
 		// grab relevant button params
-		final int instanceCount = button.getInstanceCount();
 		final CoordinateIF[] instanceOffsets = button.getInstanceOffsets();
 
 		// compute button reference area
@@ -59,63 +73,195 @@ public class RailButtonCalc extends RocketComponentCalc {
 		final double notchArea = (button.getOuterDiameter() - button.getInnerDiameter()) * button.getInnerHeight();
 		final double refArea = outerArea - notchArea;
 
-		// accumulate Cd contribution from each rail button. If velocity is 0 just set
-		// CDmul to a value previously
-		// competed for velocity MathUtil.EPSILON and skip the loop to avoid division by
-		// 0
+		double mach = conditions.getMach();
+
+		// At supersonic speeds, use the Phase 7c wave drag model
+		if (mach >= WAVE_DRAG_BLEND_HIGH) {
+			return calculateSupersonicPressureCD(conditions, refArea);
+		}
+
+		// Compute Hoerner subsonic drag
+		double hoernerCd = calculateHoernerPressureCD(conditions, stagnationCD, refArea);
+
+		// In the blend region, interpolate between Hoerner and supersonic
+		if (mach > WAVE_DRAG_BLEND_LOW) {
+			double supersonicCd = calculateSupersonicPressureCD(conditions, refArea);
+			double t = (mach - WAVE_DRAG_BLEND_LOW) / (WAVE_DRAG_BLEND_HIGH - WAVE_DRAG_BLEND_LOW);
+			double w = t * t * (3 - 2 * t); // C1-continuous smoothstep
+			return (1 - w) * hoernerCd + w * supersonicCd;
+		}
+
+		return hoernerCd;
+	}
+
+	/**
+	 * Original Hoerner-based subsonic pressure drag computation.
+	 */
+	private double calculateHoernerPressureCD(FlightConditions conditions,
+			double stagnationCD, double refArea) {
+
+		final CoordinateIF[] instanceOffsets = button.getInstanceOffsets();
+		final double buttonHt = button.getTotalHeight();
+
 		double CDmul = 0.0;
 		if (conditions.getMach() > MathUtil.EPSILON) {
 			for (int i = 0; i < button.getInstanceCount(); i++) {
 
-				// compute boundary layer height at button location. I can't find a good
-				// reference for the
-				// formula, e.g. https://aerospaceengineeringblog.com/boundary-layers/ simply
-				// says it's the
-				// "scientific consensus".
-				double x = (button.toAbsolute(instanceOffsets[i]))[0].getX(); // location of button
-				double rex = calculateReynoldsNumber(x, conditions); // Reynolds number of button location
-				double del = 0.37 * x / Math.pow(rex, 0.2); // Boundary layer thickness
-
-				// compute mean airspeed over button
-				// this assumes airspeed changes linearly through boundary layer
-				// and that all parts of the railbutton contribute equally to Cd,
-				// neither of which is true but both are plenty close enough for our purposes
+				double x = (button.toAbsolute(instanceOffsets[i]))[0].getX();
+				double rex = calculateReynoldsNumber(x, conditions);
+				double del = 0.37 * x / Math.pow(rex, 0.2);
 
 				double mach;
 				if (buttonHt > del) {
-					// Case 1: button extends beyond boundary layer
-					// Mean velocity is 1/2 rocket velocity up to limit of boundary layer,
-					// full velocity after that
 					mach = (buttonHt - 0.5 * del) * conditions.getMach() / buttonHt;
 				} else {
-					// Case 2: button is entirely within boundary layer
 					mach = MathUtil.map(buttonHt / 2.0, 0, del, 0, conditions.getMach());
 				}
 
-				// look up Cd as function of speed. It's pretty constant as a function of
-				// Reynolds
-				// number when slow, so we can just use a function of Mach number
 				double cd = MathUtil.interpolate(cdDomain, cdRange, mach);
-
-				// Since later drag force calculations don't consider boundary layer, compute
-				// "effective Cd"
-				// based on rocket velocity
 				cd = cd * MathUtil.pow2(mach) / MathUtil.pow2(conditions.getMach());
-
-				// add to CDmul
 				CDmul += cd;
-
 			}
-
-			// since we'll be multiplying by the instance count up in BarrowmanCalculator,
-			// we want to return the mean CD instead of the total
 			CDmul /= button.getInstanceCount();
-
 		} else {
-			// value at velocity of MathUtil.EPSILON
 			CDmul = 8.786395072609939E-4;
 		}
 
 		return CDmul * stagnationCD * refArea / conditions.getRefArea();
+	}
+
+	/**
+	 * Phase 7c: Supersonic protuberance wave drag.
+	 * <p>
+	 * At M > 1, rail buttons and launch lugs generate wave drag via oblique
+	 * or detached bow shocks. The drag depends on whether the button's effective
+	 * deflection angle allows an attached oblique shock.
+	 * <p>
+	 * <b>Attached shock</b> (sharp protuberance, deflection < max):
+	 * Front face Cp from oblique shock pressure coefficient.
+	 * <p>
+	 * <b>Detached shock</b> (blunt protuberance, deflection > max):
+	 * Front face Cp from normal shock stagnation pressure coefficient.
+	 * <p>
+	 * Rear face pressure is reduced by Prandtl-Meyer expansion around the
+	 * trailing shoulder.
+	 * <p>
+	 * Body interference: 20% friction penalty over 3h downstream of the
+	 * protuberance.
+	 *
+	 * @param conditions flight conditions
+	 * @param refArea    button reference area (frontal area)
+	 * @return pressure drag coefficient referenced to vehicle S_ref
+	 */
+	private double calculateSupersonicPressureCD(FlightConditions conditions, double refArea) {
+		double mach = conditions.getMach();
+		double sRef = conditions.getRefArea();
+		if (sRef < 1e-12 || mach < 1.0) {
+			return 0;
+		}
+
+		final double buttonHt = button.getTotalHeight();
+		final double outerDiam = button.getOuterDiameter();
+
+		// Effective deflection angle of the protuberance
+		// For a rail button, approximate as atan(height / half-diameter)
+		double thetaP = Math.atan2(buttonHt, outerDiam / 2.0);
+
+		// Determine if shock is attached or detached
+		double maxDeflection;
+		try {
+			maxDeflection = ObliqueShockSolver.maxDeflectionAngle(mach, GAMMA);
+		} catch (Exception e) {
+			maxDeflection = 0;
+		}
+
+		double cpFront;
+		boolean attached = maxDeflection > thetaP && thetaP > 0;
+
+		if (attached) {
+			// Attached oblique shock
+			try {
+				ObliqueShockSolver.ObliqueShockResult result =
+						ObliqueShockSolver.solve(mach, thetaP, GAMMA, true);
+				cpFront = 2.0 / (GAMMA * mach * mach) * (result.pressureRatio - 1.0);
+			} catch (IllegalArgumentException e) {
+				// Fallback to normal shock
+				cpFront = calculateNormalShockCp(mach);
+			}
+		} else {
+			// Detached shock — use normal shock stagnation Cp
+			cpFront = calculateNormalShockCp(mach);
+		}
+
+		// Rear face: Prandtl-Meyer expansion around trailing shoulder
+		double cpRear = 0;
+		if (mach > 1.0) {
+			try {
+				// The trailing shoulder turns the flow by approximately thetaP
+				double m2 = PrandtlMeyerExpansion.downstreamMach(mach, thetaP, GAMMA);
+				double pRatio = PrandtlMeyerExpansion.pressureRatio(mach, m2, GAMMA);
+				cpRear = 2.0 / (GAMMA * mach * mach) * (pRatio - 1.0); // negative (expansion)
+			} catch (IllegalArgumentException e) {
+				// Expansion exceeds limits — assume vacuum on rear (Cp = -2/(gamma*M^2))
+				cpRear = -2.0 / (GAMMA * mach * mach);
+			}
+		}
+
+		// Net wave drag = (Cp_front - Cp_rear) * A_frontal / S_ref
+		double aFrontal = buttonHt * outerDiam; // frontal area
+		double cdWave = (cpFront - cpRear) * aFrontal / sRef;
+
+		// Body interference: 20% friction penalty over 3h downstream
+		double cdInterference = calculateInterferenceDrag(conditions);
+
+		return Math.max(0, cdWave) + cdInterference;
+	}
+
+	/**
+	 * Compute the normal shock stagnation pressure coefficient.
+	 */
+	private static double calculateNormalShockCp(double mach) {
+		if (mach <= 1.0) return 0;
+		double pRatio = NormalShockRelations.pressureRatio(mach, GAMMA);
+		return 2.0 / (GAMMA * mach * mach) * (pRatio - 1.0);
+	}
+
+	/**
+	 * Phase 7c: Body interference friction drag from protuberance wake.
+	 * <p>
+	 * The disturbed wake behind a protuberance increases skin friction on the
+	 * body surface downstream. The penalty is approximately 20% of the local
+	 * friction coefficient over a length of 3h (3 button heights).
+	 *
+	 * @param conditions flight conditions
+	 * @return interference drag coefficient referenced to vehicle S_ref
+	 */
+	private double calculateInterferenceDrag(FlightConditions conditions) {
+		double mach = conditions.getMach();
+		if (mach <= 1.0) return 0;
+
+		double sRef = conditions.getRefArea();
+		if (sRef < 1e-12) return 0;
+
+		final double buttonHt = button.getTotalHeight();
+		final double outerDiam = button.getOuterDiameter();
+
+		// Interference area: strip on body downstream, width ~ outerDiam, length ~ 3*buttonHt
+		double interferenceLength = INTERFERENCE_LENGTH_FACTOR * buttonHt;
+		double interferenceArea = interferenceLength * outerDiam;
+
+		// Local skin friction coefficient (approximate)
+		double cf = 0.003; // reasonable turbulent Cf estimate
+		if (componentAbsoluteX > 0.01 && conditions.getVelocity() > 1) {
+			double nu = conditions.getAtmosphericConditions().getKinematicViscosity();
+			if (nu > 0) {
+				double reX = conditions.getVelocity() * componentAbsoluteX / nu;
+				if (reX > 1e4) {
+					cf = 1.0 / MathUtil.pow2(1.50 * Math.log(reX) - 5.6);
+				}
+			}
+		}
+
+		return INTERFERENCE_FRICTION_PENALTY * cf * interferenceArea / sRef;
 	}
 }

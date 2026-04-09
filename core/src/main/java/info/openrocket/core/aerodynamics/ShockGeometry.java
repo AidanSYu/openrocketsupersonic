@@ -47,6 +47,11 @@ public class ShockGeometry {
 	/** Minimum angle change to trigger shock/expansion computation (radians) */
 	private static final double MIN_TURN_ANGLE = 1e-6;
 
+	/** Upper Mach limit for smooth shock geometry activation blending.
+	 *  Below M=1.0: no shock geometry. Above this: full corrections.
+	 *  Between M=1.0 and this value: corrections are linearly blended toward freestream. */
+	private static final double SHOCK_BLEND_MACH = 1.1;
+
 	/**
 	 * Local flow conditions at a point along the rocket body.
 	 */
@@ -118,6 +123,22 @@ public class ShockGeometry {
 		}
 
 		List<LocalConditions> stations = computeStations(mach, bodyChain, configuration);
+
+		// Smooth activation: blend corrections toward freestream near M=1.0
+		// to eliminate the step discontinuity when shock geometry first activates.
+		if (mach < SHOCK_BLEND_MACH) {
+			double blend = (mach - 1.0) / (SHOCK_BLEND_MACH - 1.0);
+			blend = Math.max(0, Math.min(1, blend));
+			for (int i = 0; i < stations.size(); i++) {
+				LocalConditions s = stations.get(i);
+				double bMach = mach + blend * (s.localMach - mach);
+				double bP = 1.0 + blend * (s.pressureRatio - 1.0);
+				double bT = 1.0 + blend * (s.temperatureRatio - 1.0);
+				double bQ = 1.0 + blend * (s.dynamicPressureRatio - 1.0);
+				stations.set(i, new LocalConditions(s.x, bMach, bP, bT, bQ));
+			}
+		}
+
 		return new ShockGeometry(mach, stations);
 	}
 
@@ -399,6 +420,21 @@ public class ShockGeometry {
 				}
 			} else {
 				// Body tube: constant radius, surface angle = 0
+
+				// Flow recovery after detached shock: if the nose shock was detached,
+				// the normal shock fallback sets localMach to subsonic, and the surface
+				// marching skips all expansion fans (they require localMach >= 1.0).
+				// This incorrectly propagates deep-subsonic conditions to downstream
+				// components (fins). In reality, the flow re-accelerates around the
+				// nose and is near-freestream by the body tube. Reset to freestream.
+				if (localMach < 1.0 && mach > 1.0) {
+					log.debug("Flow recovery at body tube compX={}: localMach={} reset to freestream M={}",
+							compX, localMach, mach);
+					localMach = mach;
+					pRatio = 1.0;
+					tRatio = 1.0;
+				}
+
 				// Check for junction with previous component
 				double surfAngle = 0;
 				double turnAngle = prevSurfaceAngle - surfAngle;
@@ -490,6 +526,126 @@ public class ShockGeometry {
 		double r2 = trans.getRadius(x2);
 		double angle = Math.atan2(r2 - r1, x2 - x1);
 		return Math.max(angle, 0); // Clamp negative angles (boattail handled separately)
+	}
+
+	/**
+	 * Estimate the turbulent boundary layer momentum thickness at axial
+	 * position {@code x} from the nose tip.
+	 * <p>
+	 * Uses the turbulent flat-plate approximation:
+	 * <pre>
+	 *   theta_BL = 0.036 * x / Re_x^0.2
+	 * </pre>
+	 * where {@code Re_x = rho * V * x / mu}.
+	 * <p>
+	 * This is needed by the ESDU 66011 forward-facing step drag model
+	 * (Phase 7d) and the protuberance interference penalty (Phase 7c).
+	 *
+	 * @param x          axial distance from the nose (meters)
+	 * @param conditions current flight conditions (for velocity, density, viscosity)
+	 * @return estimated momentum thickness (meters), always >= 0
+	 */
+	public static double getMomentumThicknessAt(double x,
+			FlightConditions conditions) {
+		if (x <= 0 || conditions.getVelocity() < 1e-6) {
+			return 0;
+		}
+		double nu = conditions.getAtmosphericConditions().getKinematicViscosity();
+		if (nu <= 0) {
+			return 0;
+		}
+		double Re_x = conditions.getVelocity() * x / nu;
+		if (Re_x < 1.0) {
+			return 0;
+		}
+		return 0.036 * x / Math.pow(Re_x, 0.2);
+	}
+
+	// ---- Multi-body shock interference (Phase 7a) ----
+
+	/**
+	 * Result of inter-body shock impingement computation.
+	 */
+	public static class InterBodyImpingement {
+		/** Axial position of impingement on the core body (meters from nose). */
+		public final double xImpinge;
+		/** Interference drag coefficient increment (referenced to S_ref). */
+		public final double deltaCd;
+		/** Side force coefficient (non-zero for asymmetric configurations). */
+		public final double cySide;
+
+		public InterBodyImpingement(double xImpinge, double deltaCd, double cySide) {
+			this.xImpinge = xImpinge;
+			this.deltaCd = deltaCd;
+			this.cySide = cySide;
+		}
+	}
+
+	/**
+	 * Compute the inter-body shock impingement for a strap-on booster
+	 * relative to the core stage.
+	 * <p>
+	 * At supersonic speeds, each body generates a bow shock at its nose.
+	 * The Mach cone half-angle is mu = asin(1/M). If the lateral separation
+	 * between core and booster is {@code s}, the impingement location on the
+	 * core is:
+	 * <pre>
+	 *   x_impinge = (s - r_core - r_booster) / tan(mu)
+	 * </pre>
+	 *
+	 * @param mach          freestream Mach number (must be > 1)
+	 * @param separation    center-to-center distance between core and booster (m)
+	 * @param rCore         core body radius (m)
+	 * @param rBooster      booster body radius (m)
+	 * @param boosterLength length of the booster body (m)
+	 * @param sRef          reference area (m^2)
+	 * @param gamma         ratio of specific heats
+	 * @return impingement result, or null if no impingement
+	 */
+	public static InterBodyImpingement computeInterBodyImpingement(
+			double mach, double separation, double rCore, double rBooster,
+			double boosterLength, double sRef, double gamma) {
+		if (mach <= 1.0 || separation <= 0 || rCore <= 0 || rBooster <= 0
+				|| boosterLength <= 0 || sRef <= 0) {
+			return null;
+		}
+
+		double gap = separation - rCore - rBooster;
+		if (gap <= 0) {
+			return null;
+		}
+
+		double mu = Math.asin(1.0 / mach);
+		double tanMu = Math.tan(mu);
+		if (tanMu < 1e-12) {
+			return null;
+		}
+
+		double xImpinge = gap / tanMu;
+		if (xImpinge > boosterLength) {
+			return null;
+		}
+
+		double deflectionAngle = mu;
+
+		double pressureRatio;
+		try {
+			ObliqueShockSolver.ObliqueShockResult result =
+					ObliqueShockSolver.solve(mach, deflectionAngle, gamma, true);
+			pressureRatio = result.pressureRatio;
+		} catch (IllegalArgumentException e) {
+			try {
+				pressureRatio = NormalShockRelations.pressureRatio(mach, gamma);
+			} catch (Exception e2) {
+				return null;
+			}
+		}
+
+		double cp = (pressureRatio - 1.0) / (0.5 * gamma * mach * mach);
+		double aImpinge = Math.PI * rBooster * rCore;
+		double deltaCd = cp * aImpinge / sRef;
+
+		return new InterBodyImpingement(xImpinge, Math.max(0, deltaCd), 0);
 	}
 
 	/**

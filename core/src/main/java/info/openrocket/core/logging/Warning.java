@@ -474,6 +474,12 @@ public abstract class Warning extends Message {
 	/** Body calculations may not be entirely accurate at supersonic speeds. */
 	public static final Warning SUPERSONIC = new Other(trans.get("Warning.SUPERSONIC"), MessagePriority.NORMAL);
 
+	/** Fin aeroelastic divergence: dynamic pressure exceeds structural limit. */
+	public static final Warning FIN_DIVERGENCE = new Other(trans.get("Warning.FIN_DIVERGENCE"), MessagePriority.HIGH);
+
+	/** Exhaust plume-induced flow separation affecting aft body. */
+	public static final Warning PLUME_SEPARATION = new Other(trans.get("Warning.PLUME_SEPARATION"), MessagePriority.NORMAL);
+
 	/** Aerodynamic models use Modified Newtonian approximation above Mach 5. */
 	public static final Warning HYPERSONIC = new Other(trans.get("Warning.HYPERSONIC"), MessagePriority.NORMAL);
 
@@ -512,4 +518,7 @@ public abstract class Warning extends Message {
 
 	/** Simulation branch contains no data */
 	public static final Warning EMPTY_BRANCH = new Other(trans.get("Warning.EMPTY_BRANCH"), MessagePriority.HIGH);
+
+	/** Asymmetric vortex shedding at high angle of attack */
+	public static final Warning HIGH_AOA_VORTEX = new Other(trans.get("Warning.HIGH_AOA_VORTEX"), MessagePriority.NORMAL);
 }

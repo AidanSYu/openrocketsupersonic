@@ -6,7 +6,9 @@ import static info.openrocket.core.util.MathUtil.pow2;
 import java.util.Arrays;
 
 import info.openrocket.core.aerodynamics.AerodynamicForces;
+import info.openrocket.core.aerodynamics.AeroelasticModel;
 import info.openrocket.core.aerodynamics.FlightConditions;
+import info.openrocket.core.aerodynamics.PlumeModel;
 import info.openrocket.core.aerodynamics.ShockGeometry;
 import info.openrocket.core.logging.Warning;
 import info.openrocket.core.logging.WarningSet;
@@ -24,7 +26,10 @@ public class FinSetCalc extends RocketComponentCalc {
 	
 	/** considers the stall angle as 20 degrees*/
 	private static final double STALL_ANGLE = (20 * Math.PI / 180);
-	
+
+	/** Mach number below which SBLI effects are not applied. */
+	private static final double SBLI_MACH_MIN = 1.2;
+
 	/** Number of divisions in the fin chords. */
 	protected static final int DIVISIONS = 48;
 	
@@ -53,7 +58,18 @@ public class FinSetCalc extends RocketComponentCalc {
 	private final int finCount;
 	private final double cantAngle;
 	private final FinSet.CrossSection crossSection;
-	
+	protected double rootChord = Double.NaN;
+
+	/** Distance from nose tip to fin leading edge, for SBLI BL thickness estimate. */
+	private final double xFinFromNose;
+
+	/** Cached SBLI separation length from the last CNa computation (used by pressure drag). */
+	private double cachedSBLI_Lsep = 0.0;
+
+	// Aeroelastic coupling parameters (Phase 9a)
+	private final double shearModulus;   // Shear modulus of fin material (Pa)
+	private final double torsionalJ;     // Torsional second moment of area (m^4)
+
 	/**
 	 * builds a calculator of aerodynamic forces a specified fin
 	 * @param component		The fin in consideration
@@ -71,7 +87,27 @@ public class FinSetCalc extends RocketComponentCalc {
 		this.span = component.getSpan();
 		this.finArea = component.getPlanformArea();
 		this.crossSection = component.getCrossSection();
-		
+
+		// Distance from nose to fin leading edge (absolute x)
+		double xFin = 0.0;
+		try {
+			CoordinateIF[] abs = component.toAbsolute(Coordinate.NUL);
+			if (abs.length > 0) {
+				xFin = abs[0].getX();
+			}
+		} catch (Exception e) {
+			// If component is not yet attached, use 0
+		}
+		this.xFinFromNose = Math.max(xFin, 0.01); // floor to avoid degenerate cases
+
+		// Aeroelastic parameters from fin material
+		String materialName = (component.getMaterial() != null) ? component.getMaterial().getName() : null;
+		this.shearModulus = AeroelasticModel.getShearModulus(materialName);
+		// Use root chord as representative chord for torsional J
+		double rootChordInit = component.getLength();
+		this.torsionalJ = AeroelasticModel.computeTorsionalJ(
+				rootChordInit > 0 ? rootChordInit : 0.1, this.thickness);
+
 		calculateFinGeometry(component);
 		calculatePoly();
 		calculateInterferenceFinCount(component);
@@ -109,6 +145,10 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		// One fin without interference (both sub- and supersonic):
 		double cna1 = calculateFinCNa1(localConditions);
+
+		// Apply SBLI chord reduction at supersonic speeds
+		double sbliChordRatio = computeSBLIChordReduction(conditions);
+		cna1 *= sbliChordRatio;
 
 		// Multiple fins with fin-fin interference
 		double cna;
@@ -155,7 +195,18 @@ public class FinSetCalc extends RocketComponentCalc {
 		double tau = r / (span + r);
 		if (Double.isNaN(tau) || Double.isInfinite(tau))
 			tau = 0;
-		cna *= 1 + tau; // Classical Barrowman
+		double interferenceFactor = 1 + tau; // Classical Barrowman (subsonic)
+
+		// Phase 6f: Pitts-Nielsen-Kaattari Mach-dependent correction (NACA Report 1307)
+		// At M < 0.85, F_WB = F_BW = 1.0 (no change to subsonic results).
+		// At supersonic speeds, the Mach cone limits the body upwash influence
+		// on the fin, reducing interference lift by 10-20%.
+		double machForPNK = localConditions.getMach();
+		double sweepLE = (cosGammaLead > 0 && cosGammaLead <= 1.0)
+				? Math.acos(cosGammaLead) : 0.0;
+		double F_WB = PittsNielsenKaattari.computeF_WB(machForPNK, r, span, rootChord, sweepLE);
+		double F_BW = PittsNielsenKaattari.computeF_BW(machForPNK, r, span, rootChord);
+		cna *= interferenceFactor * F_WB * F_BW;
 
 		// Phase 3c: Scale normal force by local dynamic pressure ratio.
 		// Behind the body shock, the dynamic pressure differs from freestream.
@@ -165,6 +216,29 @@ public class FinSetCalc extends RocketComponentCalc {
 			ShockGeometry.LocalConditions local = getLocalConditions(shockGeometry);
 			if (local != null) {
 				cna *= local.dynamicPressureRatio;
+			}
+		}
+
+		// Phase 9a: Aeroelastic coupling — reduce CNa at high dynamic pressure
+		double q = 0.5 * conditions.getAtmosphericConditions().getDensity()
+				* MathUtil.pow2(conditions.getVelocity());
+		if (q > AeroelasticModel.Q_THRESHOLD && torsionalJ > 0) {
+			double cpArm = macSpan > 0 ? macSpan : span * 0.5;
+			double etaAe = AeroelasticModel.computeEffectivenessClamped(
+					q, finArea, cna, cpArm, shearModulus, torsionalJ);
+			if (AeroelasticModel.isDivergence(q, finArea, cna, cpArm, shearModulus, torsionalJ)) {
+				warnings.add(Warning.FIN_DIVERGENCE);
+			}
+			cna *= etaAe;
+		}
+
+		// Phase 9e: Plume-induced flow separation — reduce fin effectiveness
+		if (conditions.isPlumeActive() && span > 0) {
+			double fOverlap = PlumeModel.computeFinOverlapFraction(
+					conditions.getPlumeDiameter(), conditions.getPlumeBaseDiameter(), span);
+			if (fOverlap > 0) {
+				double etaPlume = PlumeModel.computeFinEffectiveness(fOverlap);
+				cna *= etaPlume;
 			}
 		}
 
@@ -178,7 +252,7 @@ public class FinSetCalc extends RocketComponentCalc {
 		//		forces.CrollForce = fins * (macSpan+r) * cna1 * component.getCantAngle() / 
 		//			conditions.getRefLength();
 		// With body-fin interference effect:
-		forces.setCrollForce((macSpan + r) * cna1 * (1 + tau) * cantAngle / conditions.getRefLength());
+		forces.setCrollForce((macSpan + r) * cna1 * interferenceFactor * F_WB * F_BW * cantAngle / conditions.getRefLength());
 		
 		if (conditions.getAOA() > STALL_ANGLE) {
 			forces.setCrollForce(forces.getCrollForce() * MathUtil.clamp(
@@ -356,6 +430,12 @@ public class FinSetCalc extends RocketComponentCalc {
 			}
 		}
 		
+		// Root chord from the chord arrays at span station 0
+		rootChord = chordTrail[0] - chordLead[0];
+		if (rootChord < 0 || Double.isNaN(rootChord)) {
+			rootChord = 0;
+		}
+
 		/* Calculate fin properties:
 		 * 
 		 * macLength // MAC length
@@ -466,32 +546,60 @@ public class FinSetCalc extends RocketComponentCalc {
 			return 0;
 		}
 
+		double cna1;
+
 		// Subsonic case
 		if (mach <= CNA_SUBSONIC) {
-			return 2 * Math.PI * pow2(span) / (1 + MathUtil.safeSqrt(1 + (1 - pow2(mach)) *
+			cna1 = 2 * Math.PI * pow2(span) / (1 + MathUtil.safeSqrt(1 + (1 - pow2(mach)) *
 					pow2(pow2(span) / (finArea * cosGamma)))) / ref;
 		}
-		
 		// Supersonic case
-		if (mach >= CNA_SUPERSONIC) {
-			return finArea * (K1.getValue(mach) + K2.getValue(mach) * alpha +
+		else if (mach >= CNA_SUPERSONIC) {
+			cna1 = finArea * (K1.getValue(mach) + K2.getValue(mach) * alpha +
 					K3.getValue(mach) * pow2(alpha)) / ref;
 		}
-		
 		// Transonic case, interpolate
-		double subV, superV;
-		double subD, superD;
-		
-		double sq = MathUtil.safeSqrt(1 + (1 - pow2(CNA_SUBSONIC)) * pow2(span * span / (finArea * cosGamma)));
-		subV = 2 * Math.PI * pow2(span) / ref / (1 + sq);
-		subD = 2 * mach * Math.PI * pow(span, 6) / (pow2(finArea * cosGamma) * ref *
-				sq * pow2(1 + sq));
-		
-		superV = finArea * (K1.getValue(CNA_SUPERSONIC) + K2.getValue(CNA_SUPERSONIC) * alpha +
-				K3.getValue(CNA_SUPERSONIC) * pow2(alpha)) / ref;
-		superD = -finArea / ref * 2 * CNA_SUPERSONIC / CNA_SUPERSONIC_B;
-		
-		return cnaInterpolator.interpolate(mach, subV, superV, subD, superD, 0);
+		else {
+			double subV, superV;
+			double subD, superD;
+
+			double sq = MathUtil.safeSqrt(1 + (1 - pow2(CNA_SUBSONIC)) * pow2(span * span / (finArea * cosGamma)));
+			subV = 2 * Math.PI * pow2(span) / ref / (1 + sq);
+			subD = 2 * CNA_SUBSONIC * Math.PI * pow(span, 6) / (pow2(finArea * cosGamma) * ref *
+					sq * pow2(1 + sq));
+
+			superV = finArea * (K1.getValue(CNA_SUPERSONIC) + K2.getValue(CNA_SUPERSONIC) * alpha +
+					K3.getValue(CNA_SUPERSONIC) * pow2(alpha)) / ref;
+			superD = -finArea / ref * 2 * CNA_SUPERSONIC / CNA_SUPERSONIC_B;
+
+			cna1 = cnaInterpolator.interpolate(mach, subV, superV, subD, superD, 0);
+		}
+
+		// Phase 6h: ESDU transonic similarity correction
+		// When K_trans is in [-2, +3], override with the universal curve model
+		if (macLength > MathUtil.EPSILON) {
+			double thicknessRatio = thickness / macLength;
+			double sweepLE = (cosGammaLead > 0 && cosGammaLead <= 1.0) ? Math.acos(cosGammaLead) : 0.0;
+			double kTrans = TransonicSimilarity.computeKTrans(mach, thicknessRatio, sweepLE);
+
+			if (TransonicSimilarity.isInTransonicRegime(kTrans) && thicknessRatio > 0.01) {
+				double cnaPeak = TransonicSimilarity.computeCNaPeak(ar, thicknessRatio);
+				double h = TransonicSimilarity.universalCurve(kTrans);
+				double cnaTransonic = cnaPeak * h;
+
+				if (kTrans < -1.5) {
+					double blend = (kTrans + 2.0) / 0.5;
+					cna1 = cna1 * (1 - blend) + cnaTransonic * blend;
+				} else if (kTrans > 2.5) {
+					double blend = (kTrans - 2.5) / 0.5;
+					cna1 = cnaTransonic * (1 - blend) + cna1 * blend;
+				} else {
+					cna1 = cnaTransonic;
+				}
+			}
+		}
+
+		return cna1;
 	}
 	
 	private double calculateDampingMoment(FlightConditions conditions) {
@@ -534,20 +642,29 @@ public class FinSetCalc extends RocketComponentCalc {
 			double k1 = K1.getValue(mach);
 			double k2 = K2.getValue(mach);
 			double k3 = K3.getValue(mach);
-			
+
+			// Phase 11b: Mach cone limits effective fin span for roll damping
+			// span_eff = min(span, c_root * sqrt(M^2 - 1))
+			double spanEff = span;
+			if (rootChord > MathUtil.EPSILON) {
+				double machConeSpan = rootChord * Math.sqrt(mach * mach - 1.0);
+				spanEff = Math.min(span, machConeSpan);
+			}
+
 			double sum = 0;
-			
-			double dy = span / (DIVISIONS - 1);
 
 			for (int i = 0; i < DIVISIONS; i++) {
-				double y = i * dy;
+				double y = i * span / (DIVISIONS - 1);
+				if (y > spanEff) {
+					break; // beyond effective span
+				}
 				double angle = rollRate * (bodyRadius + y) / vel;
 
 				sum += (k1 * angle + k2 * angle * angle + k3 * angle * angle * angle)
 						* chordLength[i] * (bodyRadius + y);
 			}
 
-			return sum * dy /
+			return sum * span / (DIVISIONS - 1) /
 					(conditions.getRefArea() * conditions.getRefLength());
 		}
 		
@@ -621,8 +738,84 @@ public class FinSetCalc extends RocketComponentCalc {
 		poly[1] = (-31.6049 * (-0.705375 + ar) * (-0.198476 + ar)) / denom;
 		poly[0] = (9.16049 * (-0.588838 + ar) * (-0.20624 + ar)) / denom;
 	}
-	
-	
+
+	/**
+	 * Compute the effective chord ratio due to SBLI separation at supersonic speeds.
+	 * Also caches L_sep for use in pressure drag calculation.
+	 *
+	 * @param conditions flight conditions
+	 * @return ratio of effective chord to nominal chord (1.0 = no reduction)
+	 */
+	private double computeSBLIChordReduction(FlightConditions conditions) {
+		double mach = conditions.getMach();
+		cachedSBLI_Lsep = 0.0;
+
+		if (mach < SBLI_MACH_MIN || thickness < MathUtil.EPSILON || macLength < MathUtil.EPSILON) {
+			return 1.0;
+		}
+
+		double velocity = conditions.getVelocity();
+		double kinVisc = conditions.getAtmosphericConditions().getKinematicViscosity();
+		if (kinVisc <= 0.0 || velocity <= 0.0) {
+			return 1.0;
+		}
+
+		double reX = velocity * xFinFromNose / kinVisc;
+		if (reX < 1.0e4) {
+			return 1.0;
+		}
+
+		double cfLocal = 0.027 / Math.pow(reX, 1.0 / 7.0);
+
+		double thetaFin = Math.atan(thickness / (2.0 * macLength));
+		double beta = Math.sqrt(mach * mach - 1.0);
+		double cpShock = 2.0 * thetaFin / beta;
+
+		if (!FreeInteractionSBLI.isSeparated(mach, cfLocal, cpShock)) {
+			return 1.0;
+		}
+
+		double thetaBL = FreeInteractionSBLI.estimateMomentumThickness(xFinFromNose, reX);
+		double lSep = FreeInteractionSBLI.separationLength(mach, cfLocal, thetaBL);
+
+		double effectiveChord = Math.max(macLength - lSep, 0.1 * macLength);
+		cachedSBLI_Lsep = lSep;
+
+		return effectiveChord / macLength;
+	}
+
+	/**
+	 * Returns the SBLI plateau pressure drag increment.
+	 *
+	 * @param conditions flight conditions
+	 * @return SBLI pressure drag coefficient increment (referenced to S_ref)
+	 */
+	double calculateSBLIPressureDrag(FlightConditions conditions) {
+		if (cachedSBLI_Lsep <= 0.0 || finArea < MathUtil.EPSILON) {
+			return 0.0;
+		}
+
+		double mach = conditions.getMach();
+		if (mach < SBLI_MACH_MIN) {
+			return 0.0;
+		}
+
+		double velocity = conditions.getVelocity();
+		double kinVisc = conditions.getAtmosphericConditions().getKinematicViscosity();
+		if (kinVisc <= 0.0 || velocity <= 0.0) {
+			return 0.0;
+		}
+		double reX = velocity * xFinFromNose / kinVisc;
+		if (reX < 1.0e4) {
+			return 0.0;
+		}
+		double cfLocal = 0.027 / Math.pow(reX, 1.0 / 7.0);
+
+		double cpPlateau = FreeInteractionSBLI.cpPlateau(mach, cfLocal);
+
+		return cpPlateau * cachedSBLI_Lsep * span * finCount / conditions.getRefArea();
+	}
+
 	@Override
 	public double calculateFrictionCD(FlightConditions conditions, double componentCf, WarningSet warnings) {
 		// a fin with 0 area contributes no drag
@@ -727,6 +920,9 @@ public class FinSetCalc extends RocketComponentCalc {
 			cd += waveCdPlanform * finArea / conditions.getRefArea();
 		}
 
+		// Add SBLI plateau pressure drag
+		cd += calculateSBLIPressureDrag(conditions);
+
 		return cd;
 	}
 
@@ -791,9 +987,59 @@ public class FinSetCalc extends RocketComponentCalc {
 		// Scale to correct reference area
 		cd *= span * thickness / conditions.getRefArea();
 
+		// Phase 6j: Mach-dependent trailing-edge base drag
+		cd += calculateTrailingEdgeBaseCD(conditions);
+
 		return cd;
 	}
-	
+
+	/**
+	 * Phase 6j: Fin trailing-edge base drag. Fins with blunt trailing edges
+	 * (SQUARE cross-section) generate significant wake drag at supersonic speeds.
+	 *
+	 * Subsonic (M &lt; 0.9): Hoerner turbulent wake, Cd_te = 0.12 * t_te/c
+	 * Supersonic (M &gt; 1.2): backward-facing step, Cd_te = 0.135 * (t_te/c) / sqrt(beta)
+	 * Transonic: smoothstep blend
+	 */
+	double calculateTrailingEdgeBaseCD(FlightConditions conditions) {
+		if (macLength < MathUtil.EPSILON || thickness < MathUtil.EPSILON) {
+			return 0.0;
+		}
+
+		double t_te;
+		if (crossSection == FinSet.CrossSection.SQUARE) {
+			t_te = thickness;
+		} else {
+			t_te = 0.05 * thickness;  // thin TE for AIRFOIL/ROUNDED
+		}
+
+		if (t_te < MathUtil.EPSILON) {
+			return 0.0;
+		}
+
+		double mach = conditions.getMach();
+		double Cd_te;
+
+		if (mach > 1.2) {
+			double beta = conditions.getBeta();
+			Cd_te = 0.135 * (t_te / macLength) / Math.sqrt(beta);
+		} else if (mach > 0.9) {
+			double subsonicCdTe = 0.12 * (t_te / macLength);
+			double supersonicBeta = Math.sqrt(1.44 - 1.0);
+			double supersonicCdTe = 0.135 * (t_te / macLength) / Math.sqrt(supersonicBeta);
+			double t = (mach - 0.9) / 0.3;
+			double s = t * t * (3 - 2 * t);
+			Cd_te = subsonicCdTe * (1 - s) + supersonicCdTe * s;
+		} else {
+			Cd_te = 0.12 * (t_te / macLength);
+		}
+
+		double teArea = t_te * span * interferenceFinCount;
+		Cd_te *= 2.0 * teArea / conditions.getRefArea();
+
+		return Cd_te;
+	}
+
 	private void calculateInterferenceFinCount(FinSet component) {
 		RocketComponent parent = component.getParent();
 		if (parent == null) {
