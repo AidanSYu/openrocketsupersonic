@@ -215,13 +215,16 @@ public class FinSetCalc extends RocketComponentCalc {
 		// reduced fin authority by ~2x at M>2, causing spurious instability.
 
 		// Phase 9a: Aeroelastic coupling — reduce CNa at high dynamic pressure
+		// Use single-fin CNa (cna1) for aeroelastic analysis, not the total
+		// multi-fin interferenced value (cna). The aeroelastic model analyzes
+		// structural deflection of one fin under its own aerodynamic load.
 		double q = 0.5 * conditions.getAtmosphericConditions().getDensity()
 				* MathUtil.pow2(conditions.getVelocity());
 		if (q > AeroelasticModel.Q_THRESHOLD && torsionalJ > 0) {
 			double cpArm = macSpan > 0 ? macSpan : span * 0.5;
 			double etaAe = AeroelasticModel.computeEffectivenessClamped(
-					q, finArea, cna, cpArm, shearModulus, torsionalJ);
-			if (AeroelasticModel.isDivergence(q, finArea, cna, cpArm, shearModulus, torsionalJ)) {
+					q, finArea, cna1, cpArm, shearModulus, torsionalJ);
+			if (AeroelasticModel.isDivergence(q, finArea, cna1, cpArm, shearModulus, torsionalJ)) {
 				warnings.add(Warning.FIN_DIVERGENCE);
 			}
 			cna *= etaAe;
@@ -580,7 +583,9 @@ public class FinSetCalc extends RocketComponentCalc {
 			if (TransonicSimilarity.isInTransonicRegime(kTrans) && thicknessRatio > 0.01) {
 				double cnaPeak = TransonicSimilarity.computeCNaPeak(ar, thicknessRatio);
 				double h = TransonicSimilarity.universalCurve(kTrans);
-				double cnaTransonic = cnaPeak * h;
+				// cnaPeak is CLα per unit fin area; cna1 is per unit reference area.
+				// Must scale by finArea/ref to match dimensions.
+				double cnaTransonic = cnaPeak * h * finArea / ref;
 
 				if (kTrans < -1.5) {
 					double blend = (kTrans + 2.0) / 0.5;

@@ -40,9 +40,31 @@ public abstract class RASAeroMotorsLoader {
                 return motor;
             }
         }
+        // Debug: check partial matches
+        for (ThrustCurveMotor motor : allMotors) {
+            if (motor.getDesignation().contains(motorName) || motorName.contains(motor.getDesignation())) {
+                System.out.println("  Near-match: '" + motorName + "' vs designation='" + motor.getDesignation() +
+                    "', mfg='" + motor.getManufacturer().getDisplayName() + "', mfgMatch=" + motor.getManufacturer().matches(manufacturer));
+                break;
+            }
+        }
         warnings.add("Could not find motor '" + motorString
                 + "' in the OpenRocket motors database. Please add it manually.");
         return null;
+    }
+
+    /**
+     * Add a motor directly to the internal cache. Used for loading motors
+     * from external files (e.g., rasp.eng) in test environments where the
+     * Application motor database may not be a singleton.
+     *
+     * @param motor the motor to add
+     */
+    public static void addMotorToCache(ThrustCurveMotor motor) {
+        if (allMotors == null) {
+            allMotors = new ArrayList<>();
+        }
+        allMotors.add(motor);
     }
 
     /**

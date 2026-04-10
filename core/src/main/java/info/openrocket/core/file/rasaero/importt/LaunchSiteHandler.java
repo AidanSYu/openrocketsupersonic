@@ -47,8 +47,13 @@ public class LaunchSiteHandler extends AbstractElementHandler {
                 launchSiteSettings.setLaunchAltitude(
                         Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_ALTITUDE);
             } else if (RASAeroCommonConstants.LAUNCH_PRESSURE.equals(element)) {
-                launchSiteSettings.setLaunchPressure(
-                        Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_PRESSURE);
+                double pressureInHg = Double.parseDouble(content);
+                // RASAero uses 0 to mean "use standard atmosphere pressure"
+                if (pressureInHg > 0) {
+                    launchSiteSettings.setLaunchPressure(
+                            pressureInHg / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_PRESSURE);
+                }
+                // else: leave at default ISA pressure
             } else if (RASAeroCommonConstants.LAUNCH_ROD_ANGLE.equals(element)) {
                 launchSiteSettings.setLaunchRodAngle(
                         Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_ANGLE);

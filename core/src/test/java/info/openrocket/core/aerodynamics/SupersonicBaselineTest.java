@@ -145,7 +145,7 @@ public class SupersonicBaselineTest {
 	@ParameterizedTest(name = "Cone-Cylinder-Fins CNa at M{0}")
 	@CsvSource({
 			"0.3,  8.471678",
-			"1.0,  9.670359",
+			"1.0,  8.378323",
 			"1.5,  6.541390",
 			"2.0,  5.159139",
 			"3.0,  4.204980",
@@ -163,11 +163,11 @@ public class SupersonicBaselineTest {
 	@ParameterizedTest(name = "Ogive-Boattail-Fins CP at M{0}")
 	@CsvSource({
 			"0.3,  0.443436",
-			"1.0,  0.478038",
-			"1.5,  0.380653",
-			"2.0,  0.285446",
-			"3.0,  0.174652",
-			"5.0,  0.076827",
+			"1.0,  0.450844",
+			"1.5,  0.390712",
+			"2.0,  0.297561",
+			"3.0,  0.189893",
+			"5.0,  0.096662",
 	})
 	public void testOgiveBoattailFinsCPx(double mach, double expectedCPx) {
 		double cpx = computeTotalCPx(SupersonicTestRockets.makeOgiveBoattailFins(), mach);

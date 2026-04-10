@@ -92,6 +92,7 @@ public class RASAeroCommonConstants {
     public static final String CROSS_SECTION_SQUARE = "Square";
     public static final String CROSS_SECTION_ROUNDED = "Rounded";
     public static final String CROSS_SECTION_SUBSONIC_NACA = "Subsonic NACA";
+    public static final String CROSS_SECTION_HEXAGONAL = "Hexagonal";
 
     // Launch lug settings
     public static final String LAUNCH_LUG_DIAMETER = "LaunchLugDiameter";
@@ -314,6 +315,9 @@ public class RASAeroCommonConstants {
             return FinSet.CrossSection.ROUNDED;
         } else if (CROSS_SECTION_SUBSONIC_NACA.equals(crossSection)) {
             return FinSet.CrossSection.AIRFOIL;
+        } else if (CROSS_SECTION_HEXAGONAL.equals(crossSection)) {
+            // Hexagonal (double-wedge/diamond) is closest to Square in OpenRocket
+            return FinSet.CrossSection.SQUARE;
         } else {
             String msg = "Unknown fin cross section: " + crossSection + ", defaulting to Airfoil.";
             warnings.add(msg);

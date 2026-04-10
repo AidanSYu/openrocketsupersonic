@@ -17,8 +17,18 @@ import java.util.Map;
  */
 public class AeroelasticModel {
 
-	/** Minimum dynamic pressure (Pa) below which aeroelastic effects are negligible */
-	public static final double Q_THRESHOLD = 10_000.0; // 10 kPa
+	/**
+	 * Minimum dynamic pressure (Pa) below which aeroelastic effects are negligible.
+	 * Set very high to effectively disable the aeroelastic model until it is
+	 * validated against real flight data. The current thin-rectangle torsional
+	 * stiffness formula (J = chord * t^3 / 3) dramatically underestimates real
+	 * fin stiffness, causing the model to predict divergence at M~0.7 for typical
+	 * high-power rocket fins (0.125" fiberglass on 6" chord). Real rockets fly
+	 * stably through Mach 3+ with these fin geometries.
+	 * TODO Phase 9a: Validate aeroelastic model against real flutter/divergence data
+	 * before re-enabling (lower this threshold back to ~10 kPa).
+	 */
+	public static final double Q_THRESHOLD = 1.0e12; // Effectively disabled
 
 	/**
 	 * Material shear modulus lookup table.
