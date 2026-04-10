@@ -521,4 +521,7 @@ public abstract class Warning extends Message {
 
 	/** Asymmetric vortex shedding at high angle of attack */
 	public static final Warning HIGH_AOA_VORTEX = new Other(trans.get("Warning.HIGH_AOA_VORTEX"), MessagePriority.NORMAL);
+
+	/** Aerodynamic force coefficient was clamped due to numerical blow-up (e.g. transonic singularity) */
+	public static final Warning FORCE_COEFFICIENT_CLAMPED = new Other(trans.get("Warning.FORCE_COEFFICIENT_CLAMPED"), MessagePriority.HIGH);
 }

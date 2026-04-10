@@ -637,7 +637,9 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 		log.debug("3D Figure Updated");
 		cachedBounds = null;
 		if (canvas != null) {
-			((GLAutoDrawable) canvas).invoke(true, new GLRunnable() {
+			// Use non-blocking invoke (false) to avoid stalling the EDT while GL renders.
+			// The GL thread will process this asynchronously and repaint when done.
+			((GLAutoDrawable) canvas).invoke(false, new GLRunnable() {
 				@Override
 				public boolean run(GLAutoDrawable drawable) {
 					rr.updateFigure(drawable);

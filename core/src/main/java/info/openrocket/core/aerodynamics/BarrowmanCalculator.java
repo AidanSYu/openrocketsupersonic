@@ -91,23 +91,23 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 			}
 
 			if (forces.getCP().isNaN()) {
-				logger.warn("NaN CP detected for component {}, defaulting to zero", comp);
+				logger.warn("Non-finite CP detected for component {}, defaulting to zero", comp);
 				forces.setCP(Coordinate.ZERO);
 			}
-			if (Double.isNaN(forces.getBaseCD())) {
-				logger.warn("NaN baseCD detected for component {}, defaulting to zero", comp);
+			if (!Double.isFinite(forces.getBaseCD())) {
+				logger.warn("Non-finite baseCD={} for component {}, defaulting to zero", forces.getBaseCD(), comp);
 				forces.setBaseCD(0);
 			}
-			if (Double.isNaN(forces.getPressureCD())) {
-				logger.warn("NaN pressureCD detected for component {}, defaulting to zero", comp);
+			if (!Double.isFinite(forces.getPressureCD())) {
+				logger.warn("Non-finite pressureCD={} for component {}, defaulting to zero", forces.getPressureCD(), comp);
 				forces.setPressureCD(0);
 			}
-			if (Double.isNaN(forces.getFrictionCD())) {
-				logger.warn("NaN frictionCD detected for component {}, defaulting to zero", comp);
+			if (!Double.isFinite(forces.getFrictionCD())) {
+				logger.warn("Non-finite frictionCD={} for component {}, defaulting to zero", forces.getFrictionCD(), comp);
 				forces.setFrictionCD(0);
 			}
-			if (Double.isNaN(forces.getOverrideCD())) {
-				logger.warn("NaN overrideCD detected for component {}, defaulting to zero", comp);
+			if (!Double.isFinite(forces.getOverrideCD())) {
+				logger.warn("Non-finite overrideCD={} for component {}, defaulting to zero", forces.getOverrideCD(), comp);
 				forces.setOverrideCD(0);
 			}
 
@@ -137,6 +137,11 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 		AerodynamicForces total = stabilityCalculator.calculateNonAxialForces(configuration, conditions, actualWarnings);
 
 		dragCalculator.calculateDrag(configuration, conditions, null, null, total, actualWarnings);
+
+		// Sanitize aero coefficients: catch NaN, Infinity, and extreme values
+		// that would cause the RK4 stepper to diverge. These can arise from
+		// transonic singularities (e.g. division by beta near M=1).
+		sanitizeForces(total, conditions, actualWarnings);
 
 		stabilityCalculator.calculateDampingMoments(configuration, conditions, total);
 		total.setCm(total.getCm() - total.getPitchDampingMoment());
@@ -176,6 +181,75 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 
 	public static double calculateBaseCD(double m) {
 		return BarrowmanDragCalculator.calculateBaseCD(m);
+	}
+
+	/**
+	 * Maximum physically reasonable total drag coefficient.
+	 * A blunt body at Mach 10 has Cd ~ 2. With base + friction + wave drag,
+	 * a total Cd above 10 is unphysical for any rocket geometry and indicates
+	 * a numerical blow-up in one of the component calculations.
+	 */
+	private static final double MAX_REASONABLE_CD = 10.0;
+
+	/**
+	 * Maximum physically reasonable normal force coefficient.
+	 * CN = CN_alpha * alpha; for typical rockets CN_alpha ~ 2-20/rad.
+	 * At extreme AoA, CN can reach ~30-50. Values beyond 100 are unphysical.
+	 */
+	private static final double MAX_REASONABLE_CN = 100.0;
+
+	/**
+	 * Sanitize aerodynamic force coefficients to prevent simulation divergence.
+	 * Catches NaN, Infinity, and extreme values from transonic singularities
+	 * or other numerical issues in the component calculators.
+	 */
+	private static void sanitizeForces(AerodynamicForces forces, FlightConditions conditions,
+			WarningSet warnings) {
+		boolean clamped = false;
+
+		// Sanitize drag coefficients
+		double cd = forces.getCD();
+		if (!Double.isFinite(cd) || cd > MAX_REASONABLE_CD) {
+			logger.warn("Non-finite or extreme CD={} at M={}, clamping to {}", cd, conditions.getMach(), MAX_REASONABLE_CD);
+			forces.setCD(MAX_REASONABLE_CD);
+			forces.setCDaxial(MAX_REASONABLE_CD);
+			clamped = true;
+		}
+
+		double cdAxial = forces.getCDaxial();
+		if (!Double.isFinite(cdAxial) || Math.abs(cdAxial) > MAX_REASONABLE_CD) {
+			logger.warn("Non-finite or extreme CDaxial={} at M={}, clamping", cdAxial, conditions.getMach());
+			forces.setCDaxial(Math.copySign(MAX_REASONABLE_CD, cdAxial));
+			clamped = true;
+		}
+
+		// Sanitize normal force coefficient
+		double cn = forces.getCN();
+		if (!Double.isFinite(cn) || Math.abs(cn) > MAX_REASONABLE_CN) {
+			logger.warn("Non-finite or extreme CN={} at M={}, clamping", cn, conditions.getMach());
+			forces.setCN(Math.copySign(MAX_REASONABLE_CN, Double.isFinite(cn) ? cn : 0));
+			clamped = true;
+		}
+
+		// Sanitize pitching moment
+		double cm = forces.getCm();
+		if (!Double.isFinite(cm)) {
+			logger.warn("Non-finite Cm={} at M={}, zeroing", cm, conditions.getMach());
+			forces.setCm(0);
+			clamped = true;
+		}
+
+		// Sanitize side force
+		double cside = forces.getCside();
+		if (!Double.isFinite(cside)) {
+			logger.warn("Non-finite Cside={} at M={}, zeroing", cside, conditions.getMach());
+			forces.setCside(0);
+			clamped = true;
+		}
+
+		if (clamped) {
+			warnings.add(Warning.FORCE_COEFFICIENT_CLAMPED);
+		}
 	}
 
 	/** AoA threshold for asymmetric vortex shedding onset (20 degrees). */

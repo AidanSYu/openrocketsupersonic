@@ -130,6 +130,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	private boolean cdOverridden = false;
 	private boolean overrideSubcomponentsCD = false;
 	private RocketComponent CDOverriddenBy = null;	// The (super-)parent component that overrides the CD of this component
+	private transient ModID overrideCDCacheId = ModID.ZERO;  // aeroModID when overrideCD was last computed
 	
 	// User-given name of the component
     protected String name = null;
@@ -766,11 +767,39 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 */
 	public final double getOverrideCD() {
 		mutex.verify();
-		if (!isCDOverridden()) {
-			ApplicationPreferences preferences = Application.getPreferences();
-			overrideCD = getComponentCD(0, 0, preferences.getDefaultMach(), 0);
-		}
+		// When CD is not overridden, return the cached display value immediately.
+		// Computing the actual CD requires a full BarrowmanCalculator.getForceAnalysis()
+		// pass (~100-500ms) which must never block the EDT.  The cached value is populated
+		// asynchronously by refreshOverrideCDAsync() and updated when results arrive.
 		return overrideCD;
+	}
+
+	/**
+	 * Returns true if the cached display CD for non-overridden mode is stale
+	 * (i.e., the aerodynamic configuration has changed since it was last computed).
+	 */
+	public boolean isOverrideCDStale() {
+		if (isCDOverridden()) return false;
+		try {
+			return getRocket().getAerodynamicModID() != overrideCDCacheId;
+		} catch (IllegalStateException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Updates the cached display CD from precomputed aerodynamic force data.
+	 * Called from background computation pipelines that already have force analysis results.
+	 * This avoids redundant BarrowmanCalculator runs just for the override CD display.
+	 *
+	 * @param cd the computed CD for this component
+	 * @param aeroId the aeroModID at the time of computation, for cache coherence
+	 */
+	public void updateCachedCD(double cd, ModID aeroId) {
+		if (!isCDOverridden()) {
+			overrideCD = cd;
+			overrideCDCacheId = aeroId;
+		}
 	}
 
 	/**
@@ -837,8 +866,9 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 		}
 
 		if (!cdOverridden) {
-			ApplicationPreferences preferences = Application.getPreferences();
-			overrideCD = getComponentCD(0, 0, preferences.getDefaultMach(), 0);
+			// Invalidate the cache so the next getOverrideCD() call will recompute.
+			// Don't compute synchronously here — it blocks the EDT.
+			overrideCDCacheId = ModID.ZERO;
 		}
 
 		fireComponentChangeEvent(ComponentChangeEvent.AERODYNAMIC_CHANGE);

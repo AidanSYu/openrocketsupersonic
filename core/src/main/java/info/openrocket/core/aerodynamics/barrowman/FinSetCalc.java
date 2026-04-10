@@ -208,16 +208,11 @@ public class FinSetCalc extends RocketComponentCalc {
 		double F_BW = PittsNielsenKaattari.computeF_BW(machForPNK, r, span, rootChord);
 		cna *= interferenceFactor * F_WB * F_BW;
 
-		// Phase 3c: Scale normal force by local dynamic pressure ratio.
-		// Behind the body shock, the dynamic pressure differs from freestream.
-		// The fin normal force is proportional to local q, so we scale CNa
-		// by (q_local / q_freestream) to get the correct total force.
-		if (shockGeometry != null && shockGeometry.isSupersonic()) {
-			ShockGeometry.LocalConditions local = getLocalConditions(shockGeometry);
-			if (local != null) {
-				cna *= local.dynamicPressureRatio;
-			}
-		}
+		// Phase 3c note: dynamic pressure ratio scaling was removed here.
+		// The local post-shock Mach (applied via getLocalFlowConditions) already
+		// corrects K1/K2/K3 and the fin CNa for post-shock conditions.
+		// Multiplying again by dynamicPressureRatio was a double-correction that
+		// reduced fin authority by ~2x at M>2, causing spurious instability.
 
 		// Phase 9a: Aeroelastic coupling — reduce CNa at high dynamic pressure
 		double q = 0.5 * conditions.getAtmosphericConditions().getDensity()
@@ -697,7 +692,11 @@ public class FinSetCalc extends RocketComponentCalc {
 		if (m >= 2) {
 			// At supersonic speeds use empirical formula
 			double beta = cond.getBeta();
-			return (ar * beta - 0.67) / (2 * ar * beta - 1);
+			double denom = 2 * ar * beta - 1;
+			if (Math.abs(denom) < 0.01) {
+				denom = Math.copySign(0.01, denom);
+			}
+			return (ar * beta - 0.67) / denom;
 		}
 		
 		// In between use interpolation polynomial
@@ -730,7 +729,13 @@ public class FinSetCalc extends RocketComponentCalc {
 	 */
 	private void calculatePoly() {
 		double denom = pow2(1 - 3.4641 * ar); // common denominator
-		
+		// Guard: denom approaches zero when ar ≈ 1/(2*sqrt(3)) ≈ 0.2887.
+		// This is a mathematical singularity in the Barrowman polynomial
+		// derivation. Clamp to avoid infinite coefficients.
+		if (denom < 1e-4) {
+			denom = 1e-4;
+		}
+
 		poly[5] = (-1.58025 * (-0.728769 + ar) * (-0.192105 + ar)) / denom;
 		poly[4] = (12.8395 * (-0.725688 + ar) * (-0.19292 + ar)) / denom;
 		poly[3] = (-39.5062 * (-0.72074 + ar) * (-0.194245 + ar)) / denom;

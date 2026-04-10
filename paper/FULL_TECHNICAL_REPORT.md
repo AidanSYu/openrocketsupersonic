@@ -2423,13 +2423,36 @@ The algorithm uses $N = 100$ strips along the nose length.
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[font=\small, >=Latex]
-\draw[->, thick] (-0.2,0) -- (5.8,0) node[below] {$x$};
-\draw[thick] (0,0) -- (0.35,1.1) -- (1.1,1.35) -- (2.4,1.35) -- (5.5,0.45);
-\draw[dashed] (0.35,1.1) -- (-0.2,1.9) node[left, font=\scriptsize] {oblique shock};
-\node[above] at (2.8,1.35) {$N$ strips ($\mathrm{d}x$)};
-\foreach \x in {0.9,1.5,2.1,2.7,3.3} {\draw (\x,0.05) -- (\x,-0.12);}
-\node[below, font=\scriptsize] at (0.05,-0.2) {nose tip};
-\node[below, font=\scriptsize] at (5.4,0.2) {$R_{\mathrm{aft}}$};
+% Axis
+\draw[thin, dash dot, gray!60] (-0.2,0) -- (6.0,0);
+\draw[->, thick] (-0.2,-0.4) -- (6.0,-0.4) node[below] {$x$};
+
+% Ogive profile (smooth curve, upper half)
+\draw[very thick] (0,0) .. controls (0.4,0.7) and (0.9,1.1) .. (1.4,1.25)
+                        .. controls (1.9,1.35) and (2.5,1.38) .. (3.0,1.38)
+                        .. controls (3.8,1.38) and (4.5,1.20) .. (5.5,0.70);
+
+% Strip division lines
+\foreach \x in {0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0}
+  \draw[thin, gray!50] (\x,0) -- (\x,{0.05});
+\foreach \x in {0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0}
+  \draw[thin, gray!50] (\x,-0.33) -- (\x,-0.47);
+
+% Strip brace
+\draw[decorate, decoration={brace, amplitude=3pt, mirror}] (1.0,-0.55) -- (1.5,-0.55)
+  node[midway, below=4pt, font=\scriptsize] {$\mathrm{d}x$};
+\node[font=\scriptsize, above] at (2.8,1.52) {$N$ strips};
+
+% Oblique shock from nose tip
+\draw[thick, dashed, red!70!black] (0,0) -- (-0.35,1.6) node[left, font=\scriptsize] {oblique shock};
+\draw[thick, dashed, red!70!black] (0,0) -- (1.6,1.7);
+
+% Labels
+\node[below, font=\scriptsize] at (0.0,-0.15) {nose tip};
+\draw[<-, thin] (5.5,0.70) -- (5.9,1.0) node[right, font=\scriptsize] {$R_{\mathrm{aft}}$};
+% Surface angle annotation
+\draw[->, thin] (2.5,1.37) -- (3.3,1.55);
+\node[font=\scriptsize, above] at (3.5,1.52) {$\theta_i$};
 \end{tikzpicture}
 \caption{Shock-expansion strip model along an ogive (schematic).}
 \label{fig:strip-integration-ogive}
@@ -3916,19 +3939,53 @@ a typical cone-cylinder-fins rocket at $M_\infty > 1$:
 \centering
 \resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[font=\footnotesize, >=Latex]
-\draw[->, very thick] (-0.3,1.2) -- (8.5,1.2) node[right] {freestream $M_\infty$};
-\draw[thick] (1.0,1.2) -- (2.2,2.35) node[midway, above, sloped] {oblique shock};
-\fill[blue!8] (1.0,0.35) -- (2.2,2.35) -- (2.0,0.35) -- cycle;
-\node[align=left, anchor=west] at (4.0,1.75) {\scriptsize post-shock:\\\scriptsize $M_2<M_\infty$, $p_2>p_\infty$};
-\draw[thick, fill=gray!12] (0,0.35) -- (1.8,1.35) -- (1.8,0.35) -- cycle;
-\node at (0.9,0.85) {nose};
-\draw[thick, fill=gray!12] (1.8,0.35) rectangle (5.2,1.35);
-\node at (3.5,0.85) {body tube};
-\draw[thick, fill=gray!18] (5.0,0.35) -- (6.2,1.9) -- (5.6,0.35) -- cycle;
-\node at (5.5,1.0) {\scriptsize fins};
-\draw[densely dashed] (1.8,1.35) -- (2.1,2.0);
-\node[font=\scriptsize, align=center] at (2.25,2.35) {shoulder\\PM fan};
-\draw[->] (4.0,-0.35) -- (4.0,0.25) node[below=8pt, font=\scriptsize] {stations $x_i$};
+% --- Freestream arrow (well above the vehicle) ---
+\draw[->, very thick] (-0.5,2.1) -- (8.2,2.1) node[right] {freestream $M_\infty$};
+
+% --- Axis of symmetry ---
+\draw[thin, dash dot, gray!60] (-0.3,0) -- (7.8,0) node[right, font=\scriptsize, gray!80] {axis};
+
+% --- Nose cone (conical, symmetric about y=0) ---
+\fill[gray!12] (0,0) -- (2.0,0.55) -- (2.0,-0.55) -- cycle;
+\draw[thick] (0,0) -- (2.0,0.55);
+\draw[thick] (0,0) -- (2.0,-0.55);
+\node[font=\scriptsize] at (1.15,0) {nose};
+
+% --- Body tube ---
+\fill[gray!8] (2.0,-0.55) rectangle (5.8,0.55);
+\draw[thick] (2.0,0.55) -- (5.8,0.55);
+\draw[thick] (2.0,-0.55) -- (5.8,-0.55);
+\draw[thick] (5.8,0.55) -- (5.8,-0.55);
+\node[font=\scriptsize] at (3.9,0) {body tube};
+
+% --- Fins (upper and lower, trapezoidal) ---
+\fill[gray!20] (4.8,0.55) -- (4.5,1.25) -- (5.7,1.25) -- (5.8,0.55) -- cycle;
+\fill[gray!20] (4.8,-0.55) -- (4.5,-1.25) -- (5.7,-1.25) -- (5.8,-0.55) -- cycle;
+\draw[thick] (4.8,0.55) -- (4.5,1.25) -- (5.7,1.25) -- (5.8,0.55);
+\draw[thick] (4.8,-0.55) -- (4.5,-1.25) -- (5.7,-1.25) -- (5.8,-0.55);
+\node[font=\scriptsize] at (5.15,0.92) {fin};
+
+% --- Oblique shock from nose tip ---
+\fill[blue!5] (0,0) -- (3.2,1.75) -- (3.2,0.55) -- (2.0,0.55) -- cycle;
+\draw[thick, red!70!black] (0,0) -- (3.2,1.75);
+\draw[thick, red!70!black] (0,0) -- (3.2,-1.75);
+\node[red!70!black, font=\scriptsize, above, sloped] at (1.6,0.88) {oblique shock ($\beta_s$)};
+
+% --- Post-shock label ---
+\node[align=left, font=\scriptsize, anchor=west] at (3.4,1.5)
+  {post-shock: $M_2\!<\!M_\infty$,\; $p_2\!>\!p_\infty$};
+
+% --- Shoulder expansion fan (at nose--body junction) ---
+\draw[densely dashed, blue!65!black] (2.0,0.55) -- (2.7,1.15);
+\draw[densely dashed, blue!65!black] (2.0,0.55) -- (3.0,0.90);
+\draw[densely dashed, blue!65!black] (2.0,0.55) -- (3.15,0.72);
+\node[blue!65!black, font=\scriptsize, align=center, anchor=south] at (2.85,1.15) {shoulder\\PM fan};
+
+% --- Station markers ---
+\foreach \x in {0.5,1.5,2.5,3.5,4.5,5.5}
+  \draw[gray!70] (\x,-0.72) -- (\x,-0.88);
+\draw[->, gray!70] (3.0,-1.1) -- (3.0,-0.75);
+\node[font=\scriptsize, gray!70] at (3.0,-1.25) {stations $x_i$};
 \end{tikzpicture}%
 }
 \caption{Shock and expansion topology on a cone--cylinder--fin vehicle (schematic).}
@@ -4839,17 +4896,41 @@ and ensure numerical stability.
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[font=\small, >=Latex]
-\fill[gray!15] (-0.2,0) rectangle (2.2,0.35);
-\fill[gray!15] (4.8,0) rectangle (7.2,0.35);
-\node at (1.0,0.18) {body};
-\node at (6.0,0.18) {body};
-\draw[thick] (2.2,0.35) rectangle (4.8,1.1);
-\node at (3.5,0.72) {fin ($c_r$)};
-\draw[thick] (2.2,0.35) -- (1.2,2.4) -- (5.8,2.4) -- (4.8,0.35);
-\path[fill=blue!12, draw=blue!60, dashed] (2.2,0.35) -- (1.2,2.4) -- (3.5,1.1) -- cycle;
-\node[blue!70!black, align=left, font=\scriptsize] at (2.0,1.35) {Mach cone\\$\mu=\arcsin(1/M)$};
-\node[align=left, font=\scriptsize] at (5.5,1.55) {outside cone:\\weaker body\\influence};
-\node[align=left, anchor=west, font=\scriptsize] at (-0.1,-0.85)
+% --- Body tube (continuous strip, planform / top-down view) ---
+\fill[gray!12] (-0.3,0) rectangle (7.5,0.40);
+\draw[thick] (-0.3,0.40) -- (7.5,0.40);
+\draw[thick] (-0.3,0) -- (7.5,0);
+\node[font=\scriptsize] at (1.0,0.20) {body};
+
+% --- Freestream arrow ---
+\draw[->, very thick] (-0.6,0.20) -- (-0.3,0.20);
+\node[font=\scriptsize, left] at (-0.6,0.20) {$M_\infty$};
+
+% --- Fin planform (swept trapezoidal, extending outward from body) ---
+%   Root chord: x=2.0 to x=4.6 at y=0.40 (body surface)
+%   Tip chord:  x=2.8 to x=4.4 at y=2.3  (fin tip, swept back)
+\fill[gray!20] (2.0,0.40) -- (2.8,2.3) -- (4.4,2.3) -- (4.6,0.40) -- cycle;
+\draw[thick] (2.0,0.40) -- (2.8,2.3) -- (4.4,2.3) -- (4.6,0.40);
+\node[font=\scriptsize] at (3.3,1.35) {fin planform};
+\node[font=\scriptsize, anchor=west] at (4.7,0.65) {$c_r$};
+\draw[<->] (4.65,0.40) -- (4.65,0.55) node {} ;
+
+% --- Mach cone from body LE (at root LE, emanating outward) ---
+\fill[blue!10] (2.0,0.40) -- (3.5,2.3) -- (2.8,2.3) -- cycle;
+\draw[blue!60, thick, dashed] (2.0,0.40) -- (3.5,2.3);
+\node[blue!70!black, align=left, font=\scriptsize, anchor=east] at (2.3,1.55)
+  {Mach cone\\$\mu=\arcsin(1/M)$};
+
+% --- Region outside cone ---
+\node[align=left, font=\scriptsize, anchor=west] at (4.5,1.8)
+  {outside cone:\\weaker body\\influence};
+
+% --- Spanwise label ---
+\draw[<->, thin, gray] (1.6,0.40) -- (1.6,2.3);
+\node[font=\scriptsize, gray, rotate=90, anchor=south] at (1.45,1.35) {span};
+
+% --- Mach angle examples ---
+\node[align=left, anchor=west, font=\scriptsize] at (-0.1,-0.65)
   {$M=2.0$: $\mu\approx 30^\circ$;\quad $M=3.0$: $\mu\approx 19.5^\circ$;\quad $M=5.0$: $\mu\approx 11.5^\circ$.};
 \end{tikzpicture}
 \caption{Mach cone from body relative to fin planform (Pitts--Nielsen--Kaattari context; schematic).}
@@ -5471,17 +5552,39 @@ The following diagram illustrates the gyroscopic precession of a spinning rocket
 ```{=latex}
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[font=\small, >=Latex, node distance=0.15cm]
-\node[draw, minimum width=2.6cm, minimum height=1.0cm, align=center] (box) {Rocket\\(top view)};
-\draw[->, thick] (box.north) -- ++(0,0.95) node[above, align=center] {applied pitch\\moment $M_y$};
-\draw[->] (box.west) -- ++(-1.0,0) node[left, align=right] {$H_z$\\(spin ang.~mom.)};
-\draw[->] (box.east) -- ++(1.0,0) node[right, align=left] {$\omega_z$ (spin)};
-\draw[->, thick] (box.south) -- ++(0,-0.95) node[below, align=center] {yaw response\\($\omega_x$ precession)};
-\begin{scope}[shift={(0,-3.0)}]
-\draw[->] (-0.2,0) -- (0,2.0) node[above] {$\omega_z$ (roll)};
-\draw[->] (-0.2,0) -- (2.4,0) node[right] {pitch/yaw plane};
-\draw[dashed, thick] (0,0) ellipse (1.5cm and 0.5cm);
-\node[font=\scriptsize, align=center] at (0.9,0.7) {precession cone\\(nose trace)};
+\begin{tikzpicture}[font=\small, >=Latex]
+% --- Rocket body (top view, elongated shape) ---
+\fill[gray!12] (-2.2,0) ellipse (0.12cm and 0.25cm);
+\fill[gray!12] (-2.2,-0.25) rectangle (2.0,0.25);
+\fill[gray!10] (2.0,0) -- (3.0,0) arc(0:-15:0.05) -- (2.0,-0.25) -- cycle;
+\draw[thick] (-2.2,0.25) -- (2.0,0.25);
+\draw[thick] (-2.2,-0.25) -- (2.0,-0.25);
+\draw[thick] (2.0,0.25) -- (3.0,0);
+\draw[thick] (2.0,-0.25) -- (3.0,0);
+% Fins (top view, thin rectangles sticking out)
+\fill[gray!20] (-1.8,0.25) rectangle (-1.2,0.55);
+\fill[gray!20] (-1.8,-0.25) rectangle (-1.2,-0.55);
+\draw[thick] (-1.8,0.25) -- (-1.8,0.55) -- (-1.2,0.55) -- (-1.2,0.25);
+\draw[thick] (-1.8,-0.25) -- (-1.8,-0.55) -- (-1.2,-0.55) -- (-1.2,-0.25);
+\node[font=\scriptsize, gray!60] at (0.4,0) {top view};
+
+% --- Arrows for vectors ---
+\draw[->, very thick, blue!70!black] (0,0.55) -- (0,1.4)
+  node[above, align=center, font=\scriptsize] {applied pitch\\moment $M_y$};
+\draw[->, thick] (3.2,0) -- (4.2,0)
+  node[right, align=left, font=\scriptsize] {$H_z$ (spin\\ang.~mom.)};
+\draw[->, thick, dashed] (-2.5,0) -- (-3.3,0)
+  node[left, align=right, font=\scriptsize] {$\omega_z$ (spin)};
+\draw[->, very thick, red!70!black] (0,-0.55) -- (0,-1.4)
+  node[below, align=center, font=\scriptsize] {yaw response\\($\omega_x$ precession)};
+
+% --- Precession cone diagram (below) ---
+\begin{scope}[shift={(0,-3.4)}]
+\draw[->] (0,0) -- (0,1.8) node[above, font=\scriptsize] {$\omega_z$ (roll axis)};
+\draw[->] (0,0) -- (2.4,0) node[right, font=\scriptsize] {pitch/yaw plane};
+\draw[thick, dashed] (0,0) ellipse (1.4cm and 0.45cm);
+\draw[thin, gray] (0,0) -- (1.1,0.35);
+\node[font=\scriptsize, align=center, anchor=south west] at (1.0,0.5) {precession cone\\(nose trace)};
 \end{scope}
 \end{tikzpicture}
 \caption{Gyroscopic coupling: with large spin angular momentum $H_z$, an applied pitching moment produces yaw precession (schematic).}
