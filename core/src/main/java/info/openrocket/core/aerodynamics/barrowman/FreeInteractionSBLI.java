@@ -64,6 +64,11 @@ public final class FreeInteractionSBLI {
 			return 0.0;
 		}
 		double m2m1 = mach * mach - 1.0;
+		// Guard against near-sonic singularity: (M^2-1)^0.25 → 0 as M → 1,
+		// causing L_sep → infinity.  Require M > ~1.05 for meaningful results.
+		if (m2m1 < 0.1) {
+			m2m1 = 0.1;
+		}
 		return Math.sqrt(2.0) * 4.2 * thetaBL * mach * mach
 				/ (Math.sqrt(cfLocal) * Math.pow(m2m1, 0.25));
 	}

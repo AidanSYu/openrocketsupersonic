@@ -1,0 +1,124 @@
+<RASAeroDocument>
+  <FileVersion>2</FileVersion>
+  <RocketDesign>
+    <NoseCone>
+      <PartType>NoseCone</PartType>
+      <Length>28.5</Length>
+      <Diameter>6</Diameter>
+      <Shape>Conical</Shape>
+      <BluntRadius>0.25</BluntRadius>
+      <Location>0</Location>
+      <Color>Black</Color>
+    </NoseCone>
+    <BodyTube>
+      <PartType>BodyTube</PartType>
+      <Length>141.5</Length>
+      <Diameter>6</Diameter>
+      <LaunchLugDiameter>0</LaunchLugDiameter>
+      <LaunchLugLength>0</LaunchLugLength>
+      <RailGuideDiameter>1.5</RailGuideDiameter>
+      <RailGuideHeight>0.7</RailGuideHeight>
+      <LaunchShoeArea>0</LaunchShoeArea>
+      <Location>28.5</Location>
+      <Color>Black</Color>
+      <BoattailLength>1</BoattailLength>
+      <BoattailRearDiameter>5</BoattailRearDiameter>
+      <BoattailOffset>0</BoattailOffset>
+      <Overhang>0</Overhang>
+      <Fin>
+        <Count>3</Count>
+        <Chord>10.1</Chord>
+        <Span>9</Span>
+        <SweepDistance>7.05</SweepDistance>
+        <TipChord>3.05</TipChord>
+        <Thickness>0.1875</Thickness>
+        <LERadius>0</LERadius>
+        <Location>14</Location>
+        <AirfoilSection>Hexagonal</AirfoilSection>
+        <FX1>2</FX1>
+        <FX3>1</FX3>
+      </Fin>
+    </BodyTube>
+    <BoatTail>
+      <PartType>BoatTail</PartType>
+      <Length>1</Length>
+      <Diameter>6</Diameter>
+      <RearDiameter>5</RearDiameter>
+      <Location>170</Location>
+      <Color>Black</Color>
+    </BoatTail>
+    <Surface>Smooth (Zero Roughness)</Surface>
+    <CP>0</CP>
+    <ModifiedBarrowman>False</ModifiedBarrowman>
+    <Turbulence>False</Turbulence>
+    <SustainerNozzle>4.8</SustainerNozzle>
+    <Booster1Nozzle>0</Booster1Nozzle>
+    <Booster2Nozzle>0</Booster2Nozzle>
+    <UseBooster1>False</UseBooster1>
+    <UseBooster2>False</UseBooster2>
+    <Comments>Proteus 6
+Loki Research P9381 Solid Rocket Motor
+Curt Newport and Jeff Taylor
+
+Carried 2 ARTS Instrumentation Packages - Accelerometer, Barometric Altimeter, and GPS.
+
+Apogee Altitude 85067 ft based on integrated accelerometer data, average of the two accelerometers.
+RASAero II Prediction = 81499 ft, Error = -4.19%
+
+Maximum Velocity 3201 ft/sec (Mach 2.94) based on integrated accelerometer data, average of the two accelerometers.
+RASAero II Prediction = 3063 ft/sec, Error = -4.31%
+
+Barometric Altimeter data and GPS data during parachute descent from 46000 ft to landing.  Parachute descent time apogee to landing = 529 sec.
+RASAero II Prediction = 480 sec, Error = -9.26%
+</Comments>
+  </RocketDesign>
+  <LaunchSite>
+    <Altitude>3933</Altitude>
+    <Pressure>0</Pressure>
+    <RodAngle>2</RodAngle>
+    <RodLength>18</RodLength>
+    <Temperature>80</Temperature>
+    <WindSpeed>0</WindSpeed>
+  </LaunchSite>
+  <Recovery>
+    <Altitude1>1000</Altitude1>
+    <Altitude2>1000</Altitude2>
+    <DeviceType1>Parachute</DeviceType1>
+    <DeviceType2>None</DeviceType2>
+    <Event1>True</Event1>
+    <Event2>False</Event2>
+    <Size1>45.5</Size1>
+    <Size2>1</Size2>
+    <EventType1>Apogee</EventType1>
+    <EventType2>None</EventType2>
+    <CD1>1.33</CD1>
+    <CD2>1.33</CD2>
+  </Recovery>
+  <MachAlt />
+  <SimulationList>
+    <Simulation>
+      <SustainerEngine>P9381  (LR-EX)</SustainerEngine>
+      <SustainerLaunchWt>186.7</SustainerLaunchWt>
+      <SustainerNozzleDiameter>4.8</SustainerNozzleDiameter>
+      <SustainerCG>111</SustainerCG>
+      <SustainerIgnitionDelay>0</SustainerIgnitionDelay>
+      <Booster1LaunchWt>0</Booster1LaunchWt>
+      <Booster1SeparationDelay>0</Booster1SeparationDelay>
+      <Booster1IgnitionDelay>0</Booster1IgnitionDelay>
+      <Booster1CG>0</Booster1CG>
+      <Booster1NozzleDiameter>0</Booster1NozzleDiameter>
+      <IncludeBooster1>False</IncludeBooster1>
+      <Booster2LaunchWt>0</Booster2LaunchWt>
+      <Booster2Delay>0</Booster2Delay>
+      <Booster2CG>0</Booster2CG>
+      <Booster2NozzleDiameter>0</Booster2NozzleDiameter>
+      <IncludeBooster2>False</IncludeBooster2>
+      <FlightTime>0</FlightTime>
+      <TimetoApogee>68.73627</TimetoApogee>
+      <MaxAltitude>81498.75</MaxAltitude>
+      <MaxVelocity>3062.629</MaxVelocity>
+      <OptimumWt>0</OptimumWt>
+      <OptimumMaxAlt>0</OptimumMaxAlt>
+    </Simulation>
+  </SimulationList>
+</RASAeroDocument>

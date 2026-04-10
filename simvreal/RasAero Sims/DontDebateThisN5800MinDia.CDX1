@@ -1,0 +1,131 @@
+<RASAeroDocument>
+  <FileVersion>2</FileVersion>
+  <RocketDesign>
+    <NoseCone>
+      <PartType>NoseCone</PartType>
+      <Length>18</Length>
+      <Diameter>3.9173</Diameter>
+      <Shape>Conical</Shape>
+      <BluntRadius>0.05</BluntRadius>
+      <Location>0</Location>
+      <Color>Black</Color>
+    </NoseCone>
+    <BodyTube>
+      <PartType>BodyTube</PartType>
+      <Length>80.25</Length>
+      <Diameter>3.9173</Diameter>
+      <LaunchLugDiameter>0</LaunchLugDiameter>
+      <LaunchLugLength>0</LaunchLugLength>
+      <RailGuideDiameter>0</RailGuideDiameter>
+      <RailGuideHeight>0</RailGuideHeight>
+      <LaunchShoeArea>0</LaunchShoeArea>
+      <Location>18</Location>
+      <Color>Black</Color>
+      <BoattailLength>0</BoattailLength>
+      <BoattailRearDiameter>0</BoattailRearDiameter>
+      <BoattailOffset>0</BoattailOffset>
+      <Overhang>0</Overhang>
+    </BodyTube>
+    <FinCan>
+      <PartType>FinCan</PartType>
+      <Length>13</Length>
+      <Diameter>4.15</Diameter>
+      <InsideDiameter>3.9173</InsideDiameter>
+      <LaunchLugDiameter>0</LaunchLugDiameter>
+      <LaunchLugLength>0</LaunchLugLength>
+      <RailGuideDiameter>0</RailGuideDiameter>
+      <RailGuideHeight>0</RailGuideHeight>
+      <LaunchShoeArea>0</LaunchShoeArea>
+      <Location>98.25</Location>
+      <ShoulderLength>0.5</ShoulderLength>
+      <Offset>-13</Offset>
+      <Color>Black</Color>
+      <Fin>
+        <Count>3</Count>
+        <Chord>12</Chord>
+        <Span>4</Span>
+        <SweepDistance>10.3</SweepDistance>
+        <TipChord>2.25</TipChord>
+        <Thickness>0.189</Thickness>
+        <LERadius>0.025</LERadius>
+        <Location>12.25</Location>
+        <AirfoilSection>Hexagonal</AirfoilSection>
+        <FX1>1</FX1>
+        <FX3>1</FX3>
+      </Fin>
+    </FinCan>
+    <Surface>Smooth Paint</Surface>
+    <CP>0</CP>
+    <ModifiedBarrowman>False</ModifiedBarrowman>
+    <Turbulence>True</Turbulence>
+    <SustainerNozzle>2.488</SustainerNozzle>
+    <Booster1Nozzle>0</Booster1Nozzle>
+    <Booster2Nozzle>0</Booster2Nozzle>
+    <UseBooster1>False</UseBooster1>
+    <UseBooster2>False</UseBooster2>
+    <Comments>Don't Debate This N5800 Minimum Diameter Rocket
+First N5800 Minimum Diameter Rocket to Survive and Not Shred
+Mike Pasaretti
+Black Rock Launch Site
+
+Featherweight Barometric Altitude = 56504 ft
+PerfectFlight Barometric Altitude = 56641 ft
+
+Average of the Two Barometric Altitudes = 56573 ft
+
+RASAero II Prediction = 61982 ft
+Error = 9.56%
+</Comments>
+  </RocketDesign>
+  <LaunchSite>
+    <Altitude>3750</Altitude>
+    <Pressure>0</Pressure>
+    <RodAngle>2</RodAngle>
+    <RodLength>10</RodLength>
+    <Temperature>80</Temperature>
+    <WindSpeed>5</WindSpeed>
+  </LaunchSite>
+  <Recovery>
+    <Altitude1>1000</Altitude1>
+    <Altitude2>2000</Altitude2>
+    <DeviceType1>Parachute</DeviceType1>
+    <DeviceType2>Parachute</DeviceType2>
+    <Event1>True</Event1>
+    <Event2>True</Event2>
+    <Size1>24</Size1>
+    <Size2>72</Size2>
+    <EventType1>Apogee</EventType1>
+    <EventType2>Altitude</EventType2>
+    <CD1>1.33</CD1>
+    <CD2>1.33</CD2>
+  </Recovery>
+  <MachAlt>
+    <Item>0, 0</Item>
+  </MachAlt>
+  <SimulationList>
+    <Simulation>
+      <SustainerEngine>N5800-CS  (CTI)</SustainerEngine>
+      <SustainerLaunchWt>48.19</SustainerLaunchWt>
+      <SustainerNozzleDiameter>2.488</SustainerNozzleDiameter>
+      <SustainerCG>64.69</SustainerCG>
+      <SustainerIgnitionDelay>0</SustainerIgnitionDelay>
+      <Booster1LaunchWt>0</Booster1LaunchWt>
+      <Booster1SeparationDelay>0</Booster1SeparationDelay>
+      <Booster1IgnitionDelay>0</Booster1IgnitionDelay>
+      <Booster1CG>0</Booster1CG>
+      <Booster1NozzleDiameter>0</Booster1NozzleDiameter>
+      <IncludeBooster1>False</IncludeBooster1>
+      <Booster2LaunchWt>0</Booster2LaunchWt>
+      <Booster2Delay>0</Booster2Delay>
+      <Booster2CG>0</Booster2CG>
+      <Booster2NozzleDiameter>0</Booster2NozzleDiameter>
+      <IncludeBooster2>False</IncludeBooster2>
+      <FlightTime>0</FlightTime>
+      <TimetoApogee>55.48669</TimetoApogee>
+      <MaxAltitude>61982.29</MaxAltitude>
+      <MaxVelocity>3469.286</MaxVelocity>
+      <OptimumWt>0</OptimumWt>
+      <OptimumMaxAlt>0</OptimumMaxAlt>
+    </Simulation>
+  </SimulationList>
+</RASAeroDocument>
