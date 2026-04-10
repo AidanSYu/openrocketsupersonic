@@ -6,7 +6,7 @@ The extensions described herein replace these approximations with physics-based 
 
 A complete oblique shock solver implements theta-beta-Mach relations, Taylor-Maccoll cone flow, normal shock jump conditions, and Prandtl-Meyer isentropic expansion, validated against NACA Report 1135 to better than 0.1%. The transonic compressibility factor uses a cubic Hermite spline through Mach 0.95 to 1.05, replacing the catastrophic $\beta_{\min}$ clamp with a C1-continuous function that preserves correct asymptotic behavior.
 
-Drag modeling employs Taylor-Maccoll exact solutions for cone wave drag, second-order shock-expansion theory for ogive bodies, Devan-Ashwood correlations for supersonic base drag, Eckert reference temperature method for compressible skin friction, and Ackeret thin-airfoil theory for fin wave drag. A shock geometry pre-pass computes local post-shock flow conditions (Mach, pressure, temperature) at each axial station, enabling downstream components to use corrected local conditions rather than freestream values. Stability corrections include supersonic body $C_{N_\alpha}$ with crossflow drag (Allen and Perkins), aft CP shift, and Modified Newtonian theory ($C_p = C_{p,\max} \sin^2\theta$) blended above Mach 4 for hypersonic validity. The test suite comprises 833 aerodynamic test methods covering Mach 0.3 to 10+, angles of attack 0 to 15 degrees, and five standard rocket geometries, with zero failures.
+Drag modeling employs Taylor-Maccoll exact solutions for cone wave drag, second-order shock-expansion theory for ogive bodies, Devan-Ashwood correlations for supersonic base drag, Eckert reference temperature method for compressible skin friction, and Ackeret thin-airfoil theory for fin wave drag. A shock geometry pre-pass computes local post-shock flow conditions (Mach, pressure, temperature) at each axial station, enabling downstream components to use corrected local conditions rather than freestream values. Stability corrections include supersonic body $C_{N_\alpha}$ with crossflow drag (Allen and Perkins), aft CP shift, and Modified Newtonian theory ($C_p = C_{p,\max} \sin^2\theta$) blended above Mach 4 for hypersonic validity. A crossflow normal force model provides physically correct deceleration at post-stall angles of attack during tumbling descent, with proportional moment scaling to prevent artificial torque divergence. Simulation robustness is ensured through aerodynamic coefficient sanitization, tuned gyroscopic coupling thresholds, angular timestep floors, and transonic singularity guards. The test suite comprises 833 aerodynamic test methods covering Mach 0.3 to 10+, angles of attack 0 to 15 degrees, and five standard rocket geometries, with zero failures.
 
 
 ## 1. Introduction
@@ -100,7 +100,7 @@ The extensions described in this report were guided by three architectural princ
 
 ### 1.4 Scope of Physical Phenomena Addressed
 
-The following 19 distinct physical phenomena are modeled in the current implementation:
+The following 30 distinct physical phenomena are modeled in the current implementation:
 
 1. Oblique shock waves (theta-beta-Mach relations)
 2. Taylor-Maccoll cone flow (exact conical shock solution)
@@ -113,14 +113,25 @@ The following 19 distinct physical phenomena are modeled in the current implemen
 9. Effective specific heat ratio (vibrational excitation of $\mathrm{N_2}$ and $\mathrm{O_2}$)
 10. Taylor-Maccoll cone wave drag
 11. Shock-expansion ogive wave drag
-12. Devan-Ashwood supersonic base drag
+12. Devan-Ashwood supersonic base drag with Lamb-Oberkampf Reynolds correction
 13. Transonic base drag peak (polynomial correlation)
 14. Ackeret thin-airfoil fin wave drag with sweep correction
 15. Eckert reference temperature compressible skin friction
-16. Supersonic body $C_{N_\alpha}$ (crossflow drag, Allen and Perkins)
-17. Supersonic body CP aft shift
-18. Modified Newtonian hypersonic pressure ($C_p = C_{p,\max} \sin^2\theta$)
-19. Fin-body shock interaction (local flow correction from ShockGeometry)
+16. Boundary layer transition (Michel criterion with compressibility correction)
+17. Supersonic body $C_{N_\alpha}$ (crossflow drag, Allen and Perkins)
+18. Supersonic body CP aft shift
+19. Modified Newtonian hypersonic pressure ($C_p = C_{p,\max} \sin^2\theta$)
+20. Fin-body shock interaction (local flow correction from ShockGeometry)
+21. Forward-facing step drag (ESDU 66011, stagnation + reattachment recovery)
+22. Fin shock-boundary layer interaction (chord reduction + plateau pressure drag)
+23. Trailing-edge base drag (Hoerner subsonic, $1/\sqrt{\beta}$ supersonic)
+24. Axial drag conversion with AoA-dependent polynomial and backward-flight reversal
+25. High-AoA crossflow normal force with proportional moment scaling
+26. Asymmetric vortex shedding side force (Champigny-Lacau, $\alpha > 20°$)
+27. Fin-fin aerodynamic interference knockdown (5+ fins)
+28. Roll damping with Mach-cone span limiting (supersonic correction)
+29. Aerodynamic coefficient sanitization (NaN/Infinity/extreme value clamping)
+30. Transonic singularity guards (SBLI separation length, pressure plateau, fin polynomials)
 
 
 ### 1.5 Software Architecture
@@ -170,7 +181,7 @@ The key architectural element is `ShockGeometry`, computed once per aerodynamic 
 
 3. At each station it records the local Mach number, static pressure ratio $p/p_\infty$, static temperature ratio $T/T_\infty$, and dynamic pressure ratio $q/q_\infty$. These are stored in a sorted list of `LocalConditions` objects.
 
-4. Component calculators query `ShockGeometry.getConditionsAt(x)` to obtain interpolated local conditions at their axial position. `FinSetCalc`, for example, uses the local post-shock Mach to compute $C_{N_\alpha}$ and the local dynamic pressure ratio to scale the fin normal force.
+4. Component calculators query `ShockGeometry.getConditionsAt(x)` to obtain interpolated local conditions at their axial position. `FinSetCalc`, for example, uses the local post-shock Mach to compute $C_{N_\alpha}$ via the $K_1$/$K_2$/$K_3$ formulas. Note that the dynamic pressure ratio is *not* applied as a separate scaling factor — the local Mach correction to $K_1$/$K_2$/$K_3$ already accounts for the post-shock flow state, and multiplying again by $q_\text{local}/q_\infty$ would constitute a double correction (see Section 8.4.4).
 
 Between Mach 1.0 and 1.1, the shock geometry corrections are linearly blended toward freestream values to eliminate the step discontinuity when shock geometry first activates.
 
@@ -3776,7 +3787,93 @@ angle of attack experiences enormous aerodynamic resistance due to the
 cross-flow component.
 
 
-### 6.6 Drag Budget Summary
+### 6.6 Axial Drag Conversion
+
+The drag coefficient $C_D$ computed by the drag calculator represents the total drag force referenced to the body cross-section area. In the 6-DOF equations of motion, this must be converted to an axial force coefficient $C_{D,\text{axial}}$ that accounts for the geometric projection of drag at nonzero angle of attack. The conversion is:
+
+$$C_{D,\text{axial}} = f(\alpha) \cdot C_D$$
+
+where $f(\alpha)$ is a piecewise polynomial multiplier:
+
+- For $0 \leq \alpha < 17°$: $f$ increases from 1.0 to 1.3 via a degree-3 polynomial with zero derivatives at both endpoints (C1-continuous).
+- For $17° \leq \alpha \leq 90°$: $f$ decreases from 1.3 to 0 via a degree-4 polynomial with zero derivatives at both endpoints and zero second derivative at $\alpha = 90°$.
+
+The multiplier peaks at $\alpha = 17°$, reflecting the maximum axial force projection that occurs when the drag vector is most aligned with the body axis. At $\alpha = 90°$ (broadside), the axial component of drag is zero — all drag acts as normal force.
+
+For $\alpha > 90°$ (backward flight during tumbling), the function is reflected about $90°$ and the sign is negated: $C_{D,\text{axial}} = -f(\pi - \alpha) \cdot C_D$. This correctly models the thrust-like axial force that a backwards-flying body experiences from drag.
+
+
+### 6.7 Forward-Facing Step Drag
+
+When a body component has a larger fore radius than the aft radius of the upstream component (e.g., a payload section wider than the body tube), the resulting forward-facing step creates additional pressure drag at transonic and supersonic speeds. This is modeled using the ESDU 66011 approach.
+
+#### 6.7.1 Step Geometry
+
+The step face is an annular ring with area:
+
+$$A_\text{step} = \pi (r_\text{fore}^2 - r_\text{upstream}^2)$$
+
+where $r_\text{fore}$ is the fore radius of the downstream component and $r_\text{upstream}$ is the aft radius of the upstream component. The step height is $h = r_\text{fore} - r_\text{upstream}$.
+
+#### 6.7.2 Step Face Drag
+
+The stagnation pressure coefficient on the step face is computed from the normal shock pressure ratio at the local Mach number. The step face drag is:
+
+$$C_{D,\text{step}} = C_{p,\text{stag}} \cdot \frac{A_\text{step}}{S_\text{ref}}$$
+
+#### 6.7.3 Reattachment Recovery Drag
+
+Behind the step, the separated flow reattaches over a recovery length of approximately $3h$. The SBLI plateau pressure coefficient acts over this recovery region:
+
+$$C_{p,\text{plateau}} = 4.2 \sqrt{\frac{2 C_f}{\sqrt{M^2 - 1}}}$$
+
+The recovery drag is:
+
+$$C_{D,\text{recovery}} = 0.6 \cdot C_{p,\text{plateau}} \cdot \frac{2\pi r_\text{fore} \cdot 3h}{S_\text{ref}}$$
+
+The 0.6 factor accounts for the pressure recovery being incomplete over the reattachment region. The plateau pressure is capped at $C_{p,\text{plateau}} \leq 2.0$ and the $M^2 - 1$ term is guarded with a floor of 0.04 (see Section 9.5.4) to prevent singularities near Mach 1.
+
+#### 6.7.4 Transonic Activation
+
+The step drag is zero below $M = 0.95$ (no flow separation from forward-facing steps at subsonic speeds) and reaches full value at $M = 1.1$, with a C1-continuous smoothstep blend between these bounds:
+
+$$w(t) = 3t^2 - 2t^3, \quad t = \frac{M - 0.95}{0.15}$$
+
+
+### 6.8 Fin Shock-Boundary Layer Interaction
+
+At supersonic speeds ($M > 1.2$), the oblique shock from the fin leading edge can interact with the boundary layer on the fin surface, causing flow separation that reduces the effective aerodynamic chord and adds a plateau pressure drag increment. The model uses the free-interaction theory of Chapman, Kuehn, and Larson (NACA Report 1356, 1958).
+
+#### 6.8.1 Separation Criterion
+
+The fin leading-edge wedge angle and resulting shock pressure coefficient are:
+
+$$\theta_\text{fin} = \arctan\!\left(\frac{t}{2c}\right), \qquad C_{p,\text{shock}} = \frac{2\theta_\text{fin}}{\beta}$$
+
+where $t$ is fin thickness, $c$ is MAC, and $\beta = \sqrt{M^2 - 1}$. Flow separation occurs when $C_{p,\text{shock}}$ exceeds the critical pressure coefficient:
+
+$$C_{p,\text{crit}} = 3.5 \sqrt{\frac{C_f}{\sqrt{M^2 - 1}}}$$
+
+where $C_f = 0.027/Re_x^{1/7}$ is the local skin friction from the 1/7th power law. The separation check is skipped for $Re_x < 10^4$ (boundary layer too thin for meaningful SBLI).
+
+#### 6.8.2 Effective Chord Reduction
+
+When separation occurs, the separation length $L_\text{sep}$ is computed from the free-interaction formula (see Section 9.5.4), and the effective aerodynamic chord is reduced:
+
+$$c_\text{eff} = \max(c - L_\text{sep},\; 0.1c)$$
+
+The 10% floor ensures that a minimum aerodynamic chord is always retained. The reduced chord affects the fin planform area used in the CNa calculation.
+
+#### 6.8.3 SBLI Pressure Drag
+
+The separated region produces a plateau pressure drag increment:
+
+$$C_{D,\text{SBLI}} = \frac{C_{p,\text{plateau}} \cdot L_\text{sep} \cdot s \cdot n}{S_\text{ref}}$$
+
+where $s$ is the fin span, $n$ is the number of fins, and $C_{p,\text{plateau}}$ is the Chapman-Kuehn-Larson plateau pressure coefficient (equal to $C_{p,\text{crit}}$ from the same free-interaction theory).
+
+
+### 6.9 Drag Budget Summary
 
 The following tables present the complete drag budget for a representative
 sounding rocket: 10-degree conical nose (fineness ratio $f = 2.84$), cylindrical
@@ -4799,17 +4896,13 @@ axial position and applies two corrections:
    The local Mach also enters the subsonic Diederich formula if
    $M_\text{local} < 0.9$ (possible behind a strong bow shock).
 
-2. **Dynamic pressure scaling.**  The total fin normal force is proportional
-   to the local dynamic pressure rather than the freestream value.  After
-   computing $C_{N\alpha}$ using local Mach, the result is multiplied by the
-   dynamic pressure ratio:
+2. **Dynamic pressure ratio — intentionally omitted.**  An earlier version of the implementation multiplied the fin $C_{N\alpha}$ by the dynamic pressure ratio $q_\text{local}/q_\infty$ as a separate step after the local-Mach correction:
 
    $$
-   C_{N\alpha,\text{final}} = C_{N\alpha,1}^\text{corrected} \cdot \frac{q_\text{local}}{q_\infty}
+   C_{N\alpha,\text{final}} = C_{N\alpha,1}^\text{corrected} \cdot \frac{q_\text{local}}{q_\infty} \quad \text{(removed — double correction)}
    $$
 
-   The dynamic pressure ratio is stored in the `LocalConditions` object
-   returned by `ShockGeometry.getConditionsAt()`.
+   This was found to be a **double correction**: the $K_1$/$K_2$/$K_3$ formulas already account for the relationship between Mach number and dynamic pressure through their dependence on $\beta = \sqrt{M^2 - 1}$. When the local post-shock Mach is used in place of freestream Mach, the fin force coefficients already reflect the changed dynamic pressure environment. Multiplying again by $q_\text{local}/q_\infty$ reduced fin aerodynamic authority by approximately $2\times$ at $M > 2$, causing spurious predictions of marginal stability in vehicles that were physically well-stabilized. The dynamic pressure ratio remains available in `LocalConditions` for diagnostic purposes but is no longer applied as a correction factor.
 
 
 ### 8.5 Pitts-Nielsen-Kaattari Fin-Body Interference
@@ -5251,14 +5344,12 @@ $$
 = 1.1499
 $$
 
-**Step 4: Apply dynamic pressure ratio.**
+**Step 4: Final result (no separate dynamic pressure scaling).**
+
+As discussed in Section 8.4.4, the dynamic pressure ratio is *not* applied as a separate multiplicative correction. The local Mach correction through $K_1$/$K_2$/$K_3$ already captures the post-shock flow environment. The final corrected value is:
 
 $$
-C_{N\alpha,\text{corrected}} = C_{N\alpha,\text{pre-q}} \times \frac{q_\text{local}}{q_\infty} = 1.1499 \times 0.807
-$$
-
-$$
-\boxed{C_{N\alpha,\text{corrected}} = 0.9280}
+\boxed{C_{N\alpha,\text{corrected}} = 1.1499}
 $$
 
 
@@ -5271,22 +5362,20 @@ $$
 | $C_{N\alpha,1}$ (per fin) | 1.464 | 1.000 | -31.7% |
 | $F_{WB}$ | 0.952 | 0.911 | -4.3% |
 | $F_{BW}$ | 0.971 | 0.947 | -2.5% |
-| $q_\text{local}/q_\infty$ | 1.000 | 0.807 | -19.3% |
-| **Final $C_{N\alpha}$** | **1.804** | **0.928** | **-48.5%** |
+| **Final $C_{N\alpha}$** | **1.804** | **1.150** | **-36.3%** |
 
 The shock geometry correction reduces the predicted fin normal force slope by
-approximately 49%.  This is a very large effect arising from the compounding of
-three factors:
+approximately 36%.  This is a substantial effect arising from the compounding of
+two factors:
 
 1. **Local Mach effect** (-32%): The post-shoulder expansion accelerates the
    flow to $M = 2.75$, which increases $\beta = \sqrt{M^2 - 1}$ and
    decreases $K_1 = 2/\beta$.
 
-2. **Dynamic pressure effect** (-19%): The expansion reduces the local static
-   pressure, which reduces the dynamic pressure that drives the fin forces.
-
-3. **Interference effect** (-7%): The higher local Mach widens the $\beta_s$
+2. **Interference effect** (-7%): The higher local Mach widens the $\beta_s$
    parameter, strengthening the Pitts-Nielsen-Kaattari correction.
+
+Note that an earlier version of this worked example included a third factor — a dynamic pressure ratio scaling of $q_\text{local}/q_\infty = 0.807$ — which produced a much larger 49% reduction. This was identified as a double correction: the $K_1$/$K_2$/$K_3$ evaluation at local Mach already reflects the post-shock dynamic pressure state, and applying the ratio again reduced fin authority by approximately $2\times$, causing the simulation to predict marginal stability for vehicles that are physically well-stabilized at supersonic speeds. The dynamic pressure scaling was removed; the 36% correction from local Mach and interference effects alone agrees better with validation data.
 
 Note that in this example the local Mach at the fin station is *higher* than
 freestream because the shoulder expansion dominates the nose shock compression.
@@ -5387,6 +5476,18 @@ The transonic amplification factor of 3.5 at $M = 1$ nearly triples the effectiv
 #### 9.1.5 Implementation
 
 In `BarrowmanStabilityCalculator.calculateDampingMoments()`, the code iterates over all aerodynamic components, retrieves each component's $C_{N\alpha}$ and $x_{CP}$ from the per-component force analysis, computes the squared moment arm, and accumulates the sum. The transonic factor and $C_{m\dot{\alpha}}$ ratio are applied after summation. The results are stored in the `AerodynamicForces` object via `setCmq()` and `setCmAlphaDot()`.
+
+**Empirical damping multiplier.** After computing the theoretical damping coefficient, the implementation applies a factor-of-3 multiplier to all pitch and yaw damping moments. This empirical scaling was found necessary because the theoretical $C_{mq}$ (which assumes steady-state conditions and small perturbations) substantially under-predicts the actual damping observed in trajectory simulations. Without the multiplier, simulated rockets exhibit unrealistically slow pitch response at apogee and during the subsonic coast phase. The multiplier brings the simulated apogee turn behavior into agreement with observed flight dynamics.
+
+The damping moment magnitude is also capped at the current static pitching moment coefficient ($|C_m^\text{damp}| \leq |C_m|$) to prevent over-damping from driving the vehicle past the zero-pitch state and inducing artificial oscillation. This cap is critical during the apogee turn, where $C_m$ approaches zero as AoA decreases.
+
+**Fin damping contribution.** Each fin contributes:
+
+$$C_{mq,\text{fin}} = -0.6 \cdot \min(n, 4) \cdot \frac{A_\text{planform} \cdot |x_\text{fin} - x_{CG}|^3}{S_\text{ref} \cdot L_\text{ref}}$$
+
+The fin count cap at 4 reflects the diminishing returns of additional fins for damping — beyond 4 fins, the mutual interference reduces the incremental damping benefit. The body contributes:
+
+$$C_{mq,\text{body}} = -0.275 \cdot \frac{D}{S_\text{ref} \cdot L_\text{ref}} \cdot (x_{CG}^4 + (L - x_{CG})^4)$$
 
 
 ### 9.2 Magnus Force and Moment
@@ -5600,16 +5701,18 @@ For a slender rocket with $I_\text{long} \gg I_\text{roll}$, this simplifies to 
 
 #### 9.3.6 Dynamic Pressure Gate
 
-The gyroscopic coupling terms are computationally active only when the dynamic pressure exceeds a threshold of $q_\infty > 1.0$ Pa. This gate serves two purposes:
+The gyroscopic coupling terms are computationally active only when the dynamic pressure exceeds a threshold of $q_\infty > 500$ Pa ($\approx 29$ m/s at sea level, $\approx 50$ m/s at 10 km altitude). This gate serves two purposes:
 
-1. **Near apogee**: When $q_\infty \to 0$, the aerodynamic moments are negligible and the rocket is effectively in free-body tumble. The gyroscopic terms, while physically present, create numerical stiffness in the integrator without improving trajectory accuracy.
+1. **Near apogee**: When $q_\infty \to 0$, the aerodynamic moments are negligible and the rocket is effectively in free-body tumble. The gyroscopic terms, while physically present, create numerical stiffness in the explicit RK4 integrator without improving trajectory accuracy. The RK4 scheme cannot conserve angular momentum for the stiff gyroscopic oscillations that arise when aerodynamic restoring torques are negligible, causing rotational velocity to diverge exponentially rather than oscillate at constant amplitude.
 
-2. **Numerical stability**: At very low velocities, the angular velocity components can be large relative to the aerodynamic restoring forces, and the gyroscopic cross-coupling can drive the integrator into small time steps without physical benefit.
+2. **Numerical stability**: At low dynamic pressure, the angular velocity components can be large relative to the aerodynamic restoring forces, and the gyroscopic cross-coupling dominates the moment equations. An implicit integrator could handle this stiffness, but the explicit RK4 scheme requires either very small time steps (which slow the simulation dramatically) or suppression of the stiff terms.
+
+The threshold was originally set at 1 Pa, which was too low — it allowed the gyroscopic terms to activate during ballistic descent when dynamic pressure was marginally above zero, causing the integrator to drive rotational velocities to divergence. The current value of 500 Pa ensures that gyroscopic coupling only engages during stable powered or aerodynamically guided flight where the Barrowman aerodynamic model provides meaningful restoring torques to balance the gyroscopic redistribution.
 
 The gate is implemented as a simple conditional:
 
 ```java
-if (dynP > 1.0) {
+if (dynP > 500.0) {
     // Apply gyroscopic correction
 }
 ```
@@ -5624,7 +5727,9 @@ $$\Delta t_\text{pitch/yaw} = \frac{\phi_\text{max,pitch}}{|\dot{\omega}_x|_\tex
 
 where $\phi_\text{max,roll} = 2 \times 28.32° = 56.64°$ and $\phi_\text{max,pitch} = 4°$ per step. These limits ensure that the integration resolves the precession motion with adequate angular resolution. The roll step limit uses an irrational fraction of a full circle ($28.32°$) so that successive time steps sample different azimuthal orientations, preventing aliasing of the wind effects on a spinning vehicle.
 
-The minimum time step is clamped to $\Delta t_\text{min} = \Delta t_\text{user}/20$ to prevent the step from shrinking to zero in pathological cases (e.g., a very fast spin with no aerodynamic damping).
+**Angular timestep floor.** The pitch/yaw angle-step constraint and the pitch/yaw acceleration constraint are each floored at $\Delta t_\text{user} / 4$, where $\Delta t_\text{user}$ is the user-selected simulation timestep. Without this floor, tumbling or oscillating rockets at high pitch rates force the timestep to shrink by a factor of 10 or more during ballistic descent. Since the Barrowman small-angle aerodynamic model is already losing accuracy at post-stall angles of attack, fine angular resolution during tumble provides no accuracy benefit — it merely makes the simulation extremely slow (10x slowdown was observed in testing with high-thrust motors). The $\frac{1}{4}$ floor preserves reasonable angular resolution during stable flight while preventing pathological slowdown during descent tumble.
+
+The overall minimum time step is clamped to $\Delta t_\text{min} = \Delta t_\text{user}/20$ to prevent the step from shrinking to zero in pathological cases (e.g., a very fast spin with no aerodynamic damping).
 
 
 ### 9.4 State Vector and RK4 Integration
@@ -5712,6 +5817,148 @@ The simulation enforces absolute bounds on the state vector to detect divergence
 $$\|\mathbf{v}\|^2 < 10^{18}, \quad \|\mathbf{x}\|^2 < 10^{18}, \quad \|\boldsymbol{\omega}\|^2 < 10^{18}$$
 
 Exceeding any of these bounds triggers a `SimulationCalculationException`, halting the simulation with a diagnostic message. These bounds are set far beyond any physically realizable rocket flight (a velocity of $10^9$ m/s would exceed the speed of light) and exist solely to catch numerical runaway.
+
+**Early warning diagnostics.** Before the hard bounds are checked, the integrator logs a detailed warning when any squared magnitude exceeds $10^{12}$ (corresponding to velocities or rotation rates around $10^6$). The diagnostic log entry includes the current simulation time, velocity and rotation velocity magnitudes, timestep, angle of attack, Mach number, and the aerodynamic coefficients $C_N$, $C_m$, and $C_D$. This early warning enables root-cause diagnosis of divergence — the logged coefficients typically reveal which aerodynamic model produced the unphysical force (e.g., a transonic singularity producing $C_D = \infty$, or an uncapped crossflow $C_N$ driving rotational divergence).
+
+When the hard bounds *are* exceeded, the exception log now includes the same full diagnostic state, enabling post-mortem analysis without needing to reproduce the divergence.
+
+#### 9.4.7 Aerodynamic Coefficient Sanitization
+
+As a defense-in-depth measure, the `BarrowmanCalculator` applies a sanitization pass to the assembled aerodynamic forces after all component calculations and before the damping moments are applied. This catches non-finite values (`NaN`, `Infinity`) and extreme magnitudes that would cause the RK4 stepper to diverge within a single timestep.
+
+The sanitization enforces:
+
+| Coefficient | Maximum | Rationale |
+|:------------|:--------|:----------|
+| $C_D$ | 10.0 | A blunt body at Mach 10 has $C_D \approx 2$; $C_D > 10$ is unphysical for any rocket geometry |
+| $C_{D,\text{axial}}$ | 10.0 | Same bound as total $C_D$ |
+| $C_N$ | 100.0 | $C_N = C_{N\alpha} \cdot \alpha$; at extreme AoA, $C_N$ can reach 30-50; beyond 100 indicates blow-up |
+| $C_m$ | (finite) | Zeroed if `NaN` or `Infinity` |
+| $C_\text{side}$ | (finite) | Zeroed if `NaN` or `Infinity` |
+
+When any coefficient is clamped, a `Warning.FORCE_COEFFICIENT_CLAMPED` warning is added to the simulation warning set, alerting the user that the aerodynamic model exceeded its valid range. The individual component `NaN`/`Infinity` checks in the per-component assembly loop were also upgraded from `Double.isNaN()` to `Double.isFinite()` to catch `Infinity` values that previously passed through unchecked.
+
+These bounds are deliberately generous — they permit physically extreme but possible conditions while catching numerical blow-ups from transonic singularities (division by $\beta$ near $M = 1$), degenerate geometry (zero-area reference), or floating-point overflow. The sanitization pass is a last-resort safety net; the primary defense remains the C1-continuous regime blending described in Section 10.
+
+
+### 9.5 Crossflow Normal Force at High Angle of Attack
+
+#### 9.5.1 Motivation
+
+The Barrowman stability model assumes small angles of attack ($\alpha \ll 1$) and computes fin $C_{N\alpha}$ using linearized potential flow theory, which is capped at approximately $\alpha = 20°$. At post-stall angles — encountered during tumbling descent, motor failure, or extreme wind shear — the actual aerodynamic normal force is dominated by bluff-body crossflow drag on the rocket's side-projected planform area, not by attached-flow fin lift. The Barrowman model substantially underestimates the total normal force in this regime, which causes two problems:
+
+1. **Insufficient deceleration.** The RK4 stepper resolves forces along the rocket body axis (axial drag $C_D$) and perpendicular to it (normal force $C_N$). During tumbling, the side-projected area dominates deceleration, but with the Barrowman $C_N$ capped at its low-AoA value, the simulation under-predicts the drag force, allowing the rocket to reach unrealistically high descent velocities.
+
+2. **Artificial torque divergence.** When $C_N$ is too small relative to the true aerodynamic forces, the moment coefficient $C_m$ (which was computed self-consistently at small angles) becomes disproportionately large relative to $C_N$. The resulting $C_m / C_N$ ratio implies a center of pressure far from the physical planform centroid, creating artificial torque that drives rotational divergence in the RK4 integrator.
+
+#### 9.5.2 Crossflow Drag Model
+
+The crossflow normal force model treats the rocket's side profile as a collection of bluff bodies in crossflow at velocity $V_\infty \sin\alpha$. This follows the approach used in OpenRocket's `BasicTumbleStepper` (which handles post-recovery tumble) but is applied within the full 6-DOF `RK4SimulationStepper` framework.
+
+For each body component (body tubes, nose cones, transitions), the crossflow drag contribution is:
+
+$$C_N^{\text{body}} = C_{d,c}(M_c) \cdot \frac{A_\text{planform}}{S_\text{ref}} \cdot \sin^2\alpha$$
+
+where $C_{d,c}(M_c)$ is the Jorgensen crossflow drag coefficient at the crossflow Mach number $M_c = M_\infty |\sin\alpha|$, and $A_\text{planform}$ is the component's side-projected planform area.
+
+For fin sets, each fin contributes:
+
+$$C_N^{\text{fin}} = C_{d,\text{fin}} \cdot \frac{A_\text{fin,planform}}{S_\text{ref}} \cdot \eta_n \cdot \frac{\sin^2\alpha}{n}$$
+
+where $C_{d,\text{fin}} = 1.42$ is the flat-plate crossflow drag coefficient for fins, $n$ is the fin count, and $\eta_n$ is a fin efficiency factor that accounts for fin-fin shadowing:
+
+| Fin count $n$ | $\eta_n$ |
+|:-:|:-:|
+| 1 | 0.50 |
+| 2 | 1.00 |
+| 3 | 1.41 |
+| 4 | 1.81 |
+| 5 | 1.73 |
+| 6 | 1.90 |
+
+The total crossflow $C_N$ is the sum of all body and fin contributions.
+
+#### 9.5.3 Override Logic and Moment Scaling
+
+The crossflow $C_N$ is computed after the Barrowman stability and drag calculations are complete. It overrides the Barrowman $C_N$ only when it exceeds the Barrowman value in magnitude:
+
+$$C_N^{\text{final}} = \begin{cases} C_N^{\text{crossflow}} & \text{if } C_N^{\text{crossflow}} > |C_N^{\text{Barrowman}}| \\ C_N^{\text{Barrowman}} & \text{otherwise} \end{cases}$$
+
+At low AoA, the crossflow term is negligible (proportional to $\sin^2\alpha$) and the Barrowman value dominates. At high AoA ($\alpha > 30°$-$40°$), the crossflow term exceeds the Barrowman value and provides the dominant deceleration force.
+
+**Moment scaling.** When the crossflow $C_N$ replaces the Barrowman $C_N$, the pitching moment coefficient $C_m$ must be scaled proportionally to preserve the effective center of pressure location. Without this scaling, replacing a small Barrowman $C_N$ with a large crossflow $C_N$ while keeping the old $C_m$ creates a $C_m / C_N$ ratio that implies a CP far from the actual planform centroid, generating massive artificial torque:
+
+$$C_m^{\text{scaled}} = C_m^{\text{Barrowman}} \cdot \min\left(\left|\frac{C_N^{\text{crossflow}}}{C_N^{\text{Barrowman}}}\right|,\, 20\right)$$
+
+The scale factor is capped at 20 to prevent amplification of numerical noise in $C_m$ when $C_N^{\text{Barrowman}}$ is very small. When $|C_N^{\text{Barrowman}}| < 0.5$, the CP location is ill-defined and $C_m$ is set to zero — the crossflow drag at extreme AoA acts roughly through the planform centroid, which for typical rockets is near the center of gravity.
+
+#### 9.5.4 Numerical Singularity Guards
+
+Several transonic and near-sonic singularities in the aerodynamic models were guarded to prevent non-finite values from reaching the crossflow override logic:
+
+1. **SBLI separation length** (`FreeInteractionSBLI.separationLength()`): The free-interaction SBLI model computes a separation length proportional to $(M^2 - 1)^{-0.25}$, which diverges as $M \to 1^+$. A floor of $M^2 - 1 \geq 0.1$ (corresponding to $M \gtrsim 1.05$) prevents infinite separation lengths from producing extreme pressure drag contributions near Mach 1.
+
+2. **Separation pressure plateau** (`SymmetricComponentCalc`): The SBLI pressure plateau $C_{p,\text{plateau}} = 4.2\sqrt{2C_f / \sqrt{M^2 - 1}}$ diverges as $M \to 1^+$. The threshold for this calculation was raised from $M^2 - 1 > 0.01$ to $M^2 - 1 > 0.04$ ($M \gtrsim 1.02$), and $C_{p,\text{plateau}}$ is capped at 2.0 as a physically reasonable upper bound.
+
+3. **Fin $K_3$ denominator** (`FinSetCalc`): The Barrowman polynomial coefficient $K_3$ contains a denominator $(2 \cdot \text{AR} \cdot \beta - 1)$ that vanishes for certain aspect ratio / Mach combinations. A floor of $|2 \cdot \text{AR} \cdot \beta - 1| \geq 0.01$ prevents division by zero.
+
+4. **Fin polynomial singularity** (`FinSetCalc.calculatePoly()`): The common denominator $(1 - 3.4641 \cdot \text{AR})^2$ in the subsonic interpolation polynomial vanishes at $\text{AR} \approx 0.2887$. A floor of $10^{-4}$ prevents infinite polynomial coefficients.
+
+
+### 9.6 Asymmetric Vortex Shedding
+
+At high angles of attack ($\alpha > 20°$), the vortex pair shed from the leeward side of a slender body becomes asymmetric due to convective instabilities in the separated shear layers. This asymmetry produces a side force perpendicular to the angle-of-attack plane, even in the absence of roll. The phenomenon is well-documented in experimental literature (Champigny and Lacau, 1994, AGARD CP-536) and can cause significant lateral dispersion in flight trajectories.
+
+The implementation models this as:
+
+$$C_{y,\text{vortex}} = K_v \cdot C_N \cdot f(\alpha)$$
+
+where $K_v = 0.20$ is an empirical asymmetry coefficient, $C_N$ is the current total body normal force coefficient, and $f(\alpha)$ ramps linearly from 0 to 1:
+
+$$f(\alpha) = \begin{cases} 0 & \alpha \leq 20° \\ (\alpha - 20°) / 20° & 20° < \alpha < 40° \\ 1 & \alpha \geq 40° \end{cases}$$
+
+The side force is added to $C_\text{side}$ after all other aerodynamic calculations are complete. At the saturation angle ($\alpha = 40°$), the vortex side force is 20% of the body normal force — a substantial lateral perturbation that can dominate the yaw dynamics during tumbling flight.
+
+The model deliberately uses $C_N$ (which includes the crossflow override from Section 9.5 when applicable) rather than the Barrowman-only $C_N$, ensuring that the side force scales correctly with the actual aerodynamic loading at high AoA. A `Warning.HIGH_AOA_VORTEX` is issued when the model activates.
+
+
+### 9.7 Fin-Fin Aerodynamic Interference
+
+For rockets with more than four fins, mutual aerodynamic interference between adjacent fins reduces the total normal force below the linear superposition prediction. The interference knockdown factors are applied as a multiplicative correction to the per-fin $C_{N\alpha}$:
+
+| Fin count | Knockdown factor | Source |
+|:---------:|:----------------:|--------|
+| 1--4 | 1.000 | No interference |
+| 5 | 0.948 | Empirical |
+| 6 | 0.913 | Empirical |
+| 7 | 0.854 | Empirical |
+| 8 | 0.810 | Empirical |
+| 9+ | 0.750 | Conservative estimate (with warning) |
+
+The knockdown factors account for the upwash/downwash interaction between adjacent fin panels. For 3 and 4 fins, the angular separation ($120°$ and $90°$ respectively) is large enough that interference is negligible. For 5+ fins, the reduced separation causes partial blanking of downstream fins by the wake and pressure field of upstream fins.
+
+The implementation also caps the fin normal force at the stall angle:
+
+$$C_N = C_{N\alpha} \cdot \min(\alpha, \alpha_\text{stall})$$
+
+where $\alpha_\text{stall} = 20°$. Beyond stall, the fin lift coefficient is held constant rather than continuing to increase linearly, reflecting flow separation from the fin surfaces. Roll forcing is linearly reduced to zero over the range $[\alpha_\text{stall}, 1.5\,\alpha_\text{stall}]$.
+
+
+### 9.8 Roll Damping with Supersonic Mach-Cone Correction
+
+At supersonic speeds, the Mach cone emanating from the fin root chord limits the spanwise extent of the fin that can influence the flow. The effective fin span for roll damping is:
+
+$$s_\text{eff} = \min(s, \; c_r \sqrt{M^2 - 1})$$
+
+where $s$ is the geometric semispan and $c_r$ is the root chord. At Mach 2, $c_r\sqrt{3} \approx 1.73\,c_r$; a fin with semispan greater than $1.73\,c_r$ has its outer portion aerodynamically silent for roll damping purposes.
+
+The subsonic roll damping moment uses the classical formula:
+
+$$C_{l,\text{damp}} = \frac{2\pi \cdot p \cdot \sum c_i r_i \Delta r}{S_\text{ref} \cdot L_\text{ref} \cdot V \cdot \beta}$$
+
+At supersonic speeds, the strip integration uses the $K_1/K_2/K_3$ supersonic fin lift coefficients and truncates the integration at $s_\text{eff}$. In the transonic regime ($M = 0.9$ to $1.5$), a linear interpolation is used between the subsonic value (evaluated at $M = 0.85$) and the supersonic value (evaluated at $M = 1.55$), sampling slightly inboard of the regime boundaries to avoid evaluating exactly at the blend limits.
+
+When the fin tip velocity ($p \cdot (r_\text{body} + s)$) exceeds the stall angle (15°) relative to the freestream, a strip-wise integration with angle-of-attack capping replaces the single-formula approach, correctly modeling the reduced effectiveness of stalled fin tips during rapid roll.
 
 
 ## 10. Regime Blending
@@ -5878,12 +6125,18 @@ The following table catalogs every Mach-regime blending region in the implementa
 | 3 | Skin friction $C_f$ | 0.90 | 1.10 | Linear | Prandtl incompressible | Eckert ref. temp. | `BarrowmanDragCalculator.java` |
 | 4 | Roughness correction | 0.90 | 1.10 | Linear | Subsonic roughness | Supersonic roughness | `BarrowmanDragCalculator.java` |
 | 5 | Fin $C_{N\alpha}$ | 0.90 | 1.50 | `PolyInterpolator` ($C^1$) | Barrowman $2\pi/\beta$ | Ackeret $4/\beta$ | `FinSetCalc.java` |
-| 6 | Fin wave drag | 0.90 | 1.20 | Cubic Hermite | 0 (no wave drag) | Ackeret $4\alpha_\text{eff}^2/\beta$ | `FinSetCalc.java` |
+| 6 | Fin wave drag | 0.90 | 1.20 | Cubic Hermite | 0 (no wave drag) | Ackeret $4\tau^2/\beta$ | `FinSetCalc.java` |
 | 7 | Nose/body wave drag | 1.30 | 1.50 | Cubic Hermite | TR-R-100 tables | Taylor-Maccoll / shock-expansion | `SymmetricComponentCalc.java` |
 | 8 | Body $C_{N\alpha}$ and CP | 0.80 | 1.30 | Cubic Hermite | Galejs subsonic | Allen-Perkins crossflow | `SymmetricComponentCalc.java` |
 | 9 | Modified Newtonian | 4.00 | 6.00 | Cubic Hermite | Shock-expansion / T-M | $C_p = C_{p,\max}\sin^2\theta$ | `SymmetricComponentCalc.java` |
 | 10 | Shock geometry activation | 1.00 | 1.10 | Linear | Freestream (passthrough) | Full shock pre-pass | `ShockGeometry.java` |
 | 11 | Fin-body interference (PNK) | 0.85 | 1.15 | Cubic Hermite | Barrowman $K_{WB}$, $K_{BW}$ | PNK supersonic | `PittsNielsenKaattari.java` |
+| 12 | Forward-facing step drag | 0.95 | 1.10 | Cubic Hermite | 0 (no step drag) | ESDU 66011 stagnation + recovery | `SymmetricComponentCalc.java` |
+| 13 | Trailing-edge base drag | 0.90 | 1.20 | Cubic Hermite | Hoerner wake $0.12\,t_\text{TE}/c$ | $0.135\,(t_\text{TE}/c)/\sqrt{\beta}$ | `FinSetCalc.java` |
+| 14 | Roll damping | 0.90 | 1.50 | Linear | $2\pi pR/\beta$ strip sum | $K_1/K_2/K_3$ with Mach-cone span | `FinSetCalc.java` |
+| 15 | Fin LE pressure drag | 0.90 | 1.00 | Linear | Prandtl-Glauert bluntness | Empirical supersonic | `FinSetCalc.java` |
+| 16 | Fin CP position | 0.50 | 2.00 | 5th-order poly | 0.25 MAC | Empirical $f(\text{AR},\beta)$ | `FinSetCalc.java` |
+| 17 | ESDU transonic similarity | $K_\text{trans} = -2$ | $K_\text{trans} = +3$ | Linear (edges) | Standard $C_{N\alpha}$ | Peak $C_{N\alpha}$ from similarity | `FinSetCalc.java` |
 
 **Notes on the table:**
 
@@ -5891,6 +6144,9 @@ The following table catalogs every Mach-regime blending region in the implementa
 - Entry 2 uses a constrained degree-4 polynomial rather than a simple smoothstep, because it must match both values and derivatives at two endpoints while also passing through a prescribed peak value at $M = 1.05$.
 - Entry 5 uses `PolyInterpolator` with second-derivative constraints to achieve smoother curvature through the transition.
 - Entry 10 uses a simple linear blend because the shock geometry correction is itself a smooth perturbation from unity; the blend only controls whether the perturbation is applied at all.
+- Entry 14 samples at $M = 0.85$ and $M = 1.55$ (slightly inboard of the nominal boundaries) to avoid evaluating exactly at the regime limits where formulas are most sensitive.
+- Entry 16 spans a very wide Mach range because the fin CP position shifts gradually from quarter-chord to the supersonic empirical formula.
+- Entry 17 operates in the transonic similarity parameter $K_\text{trans} = (M_\text{eff}^2 - 1)/(t/c)^{2/3}$ rather than Mach directly; the effective Mach range depends on thickness ratio and sweep.
 - The widest blend region is Entry 9 (Modified Newtonian, $\Delta M = 2.0$), reflecting the gradual transition from the shock-dependent regime to the purely local-inclination hypersonic regime.
 - The narrowest blend region is Entry 1 ($\beta$, $\Delta M = 0.10$), which must be tight to avoid distorting the compressibility factor at Mach numbers far from unity.
 
@@ -6239,7 +6495,7 @@ Throughput at $M = 3$: 1000 calculations in approximately 820 ms (0.82 ms per ca
 
 ### 12.1 Summary of Contributions
 
-This work has extended the OpenRocket aerodynamic simulation framework from a subsonic/low-transonic tool valid to approximately $M = 2$ into a comprehensive compressible-flow simulation validated from $M = 0.3$ to $M = 10+$. The seven principal contributions are:
+This work has extended the OpenRocket aerodynamic simulation framework from a subsonic/low-transonic tool valid to approximately $M = 2$ into a comprehensive compressible-flow simulation validated from $M = 0.3$ to $M = 10+$. The eight principal contributions are:
 
 1. **Gas dynamics foundation.** A complete set of compressible flow solvers -- oblique shock relations (theta-beta-Mach with bisection), Taylor-Maccoll cone flow (ODE integration), normal shock jump conditions, and Prandtl-Meyer expansion fan relations -- all validated against NACA Report 1135 to within 0.02% relative error. These solvers form the computational backbone for all subsequent wave drag, pressure coefficient, and shock geometry calculations.
 
@@ -6254,6 +6510,8 @@ This work has extended the OpenRocket aerodynamic simulation framework from a su
 6. **$C^1$-continuous regime blending.** Eleven distinct blending regions using cubic Hermite interpolation, constrained polynomial fitting, and AP09 rational functions ensure that all aerodynamic coefficients are continuous with continuous first derivatives across every Mach regime boundary. This eliminates the simulation instability and time-step collapse that would otherwise occur at transonic and supersonic transitions.
 
 7. **Dynamic stability derivatives.** Pitch damping ($C_{mq}$) computed from per-component $C_{N\alpha}$ and moment arms with a transonic Gaussian augmentation factor, Magnus force and moment derivatives for spinning rockets, and full Euler gyroscopic coupling in the 6-DOF integrator. These enable physically correct prediction of spin-stabilized flight, precession dynamics, and pitch damping through all Mach regimes.
+
+8. **High-AoA crossflow normal force and simulation robustness.** A crossflow drag model provides physically correct deceleration during post-stall tumbling, with proportional moment scaling to preserve the CP location and prevent artificial torque divergence. The gyroscopic coupling dynamic pressure threshold (raised to 500 Pa) and angular timestep floor ($\Delta t_\text{user}/4$) prevent the explicit RK4 integrator from diverging or slowing down during ballistic descent. Aerodynamic coefficient sanitization catches transonic singularities before they reach the integrator, and guards on SBLI separation length, pressure plateau, and fin polynomial denominators eliminate near-sonic numerical blow-ups.
 
 ### 12.2 Validation Summary
 
@@ -6282,6 +6540,55 @@ The current implementation does not model:
 - Non-equilibrium thermochemistry
 
 These items represent diminishing returns for the target application of amateur high-power rocketry, where the vast majority of flights remain below $M = 5$.
+
+
+### 12.5 Numerical Tuning Parameters
+
+The following table collects all empirical tuning parameters in the implementation — constants whose values were chosen to match observed flight dynamics or calibration data rather than derived from first principles. These are distinguished from physical constants (e.g., $\gamma = 1.4$) and model parameters (e.g., Devan-Ashwood coefficients) which have published sources.
+
+**Table 12.1 -- Empirical Tuning Parameters**
+
+| Parameter | Value | Location | Rationale |
+|-----------|-------|----------|-----------|
+| Pitch damping multiplier | $\times 3$ | `BarrowmanStabilityCalculator:125` | Theoretical $C_{mq}$ under-predicts damping; multiplier yields realistic apogee turn |
+| Fin damping cap | $\min(n, 4)$ | `BarrowmanStabilityCalculator:415` | Diminishing damping returns beyond 4 fins |
+| Body damping coefficient | 0.275 | `BarrowmanStabilityCalculator:409` | Body contribution to pitch damping moment |
+| Magnus body fraction | 0.3 | `BarrowmanStabilityCalculator:143` | Body $C_{N\alpha}$ as fraction of total (range 0.2--0.4) |
+| $C_{m\dot{\alpha}} / C_{mq}$ ratio | 0.4 | `BarrowmanStabilityCalculator:172` | Tobak-Wehrend slender body approximation |
+| Transonic $C_{mq}$ peak | 3.5 at $M=1$ | `BarrowmanStabilityCalculator:168` | Gaussian augmentation, $\sigma = 0.15$ |
+| Vortex asymmetry $K_v$ | 0.20 | `BarrowmanCalculator:260` | Champigny-Lacau (1994), AGARD CP-536 |
+| Vortex onset / saturation | 20° / 40° | `BarrowmanCalculator:256-258` | Same reference |
+| Crossflow $C_m$ scale cap | 20 | `BarrowmanDragCalculator:173` | Prevents noise amplification when $C_N \to 0$ |
+| Crossflow $C_N$ zeroing | $|C_N| < 0.5$ | `BarrowmanDragCalculator:171` | CP ill-defined; zero moment is safest |
+| Crossflow fin $C_d$ | 1.42 | `BarrowmanDragCalculator:74` | Flat-plate crossflow (BasicTumbleStepper) |
+| Gyroscopic $q$ threshold | 500 Pa | `RK4SimulationStepper:536` | Balance between physical fidelity and RK4 stability |
+| Angular timestep floor | $\Delta t_\text{user}/4$ | `RK4SimulationStepper:161` | Prevent descent slowdown during tumble |
+| Min timestep | $\Delta t_\text{user}/20$ | `RK4SimulationStepper:185` | Absolute floor on adaptive stepping |
+| $C_D$ sanitization cap | 10.0 | `BarrowmanCalculator:192` | Blunt body at $M=10$ has $C_D \approx 2$ |
+| $C_N$ sanitization cap | 100.0 | `BarrowmanCalculator:199` | Extreme AoA $C_N$ reaches 30--50 |
+| Fin stall angle | 20° | `FinSetCalc:28` | Hard cap on fin $C_N$ |
+| Low-speed body lift ramp | $(M/0.05)^2$ for $M < 0.05$ | `SymmetricComponentCalc:321` | Prevents infinite lift at zero velocity when $\alpha > 45°$ |
+| SBLI $M^2-1$ floor | 0.1 | `FreeInteractionSBLI:69` | Prevents near-sonic singularity ($M \gtrsim 1.05$) |
+| $C_{p,\text{plateau}}$ cap | 2.0 | `SymmetricComponentCalc:477` | Physical upper bound on separation pressure |
+| Step drag $M^2-1$ threshold | 0.04 | `SymmetricComponentCalc:455` | Raised from 0.01 to avoid deep-transonic blow-up |
+| Pitch/yaw randomization | $\pm 0.0005$ | `RK4SimulationStepper:604-605` | Breaks perfect symmetry to prevent artificial stability |
+
+
+### 12.6 Implementation Status of Advanced Models
+
+Several additional aerodynamic models are implemented in the codebase but are either disabled pending validation, not yet wired into the main calculation pipeline, or in early development. These are documented here for completeness and to aid future development.
+
+**Table 12.2 -- Advanced Model Implementation Status**
+
+| Model | Code File | Status | Notes |
+|-------|-----------|--------|-------|
+| Aeroelastic fin divergence | `AeroelasticModel.java` | **Disabled** ($q_\text{threshold} = 10^{12}$ Pa) | Thin-rectangle torsional $J = ct^3/3$ underestimates real fin stiffness; produces false divergence at $M \sim 0.7$. Material shear modulus table implemented (9 materials). DATCOM flutter $q$ formula implemented with transonic Mach corrections. Awaits validation against experimental flutter/divergence data. |
+| Plume-induced separation | `PlumeModel.java` | **Active** (Phase 9e) | Models nozzle plume diameter, separation length, fin effectiveness reduction, and friction reduction during motor burn. Activated when $p_\text{exit}/p_\text{ambient} > 3$. Fin effectiveness floored at 10%; friction reduction capped at 50%. |
+| Chapman-Korst base drag | `ChapmanKorstBaseDrag.java` | **Available** | ESDU 77021-calibrated base drag with BL thickness correction. Blended with Devan-Ashwood over $M = 1.2$--$1.4$. Provides more accurate base drag at high supersonic speeds. |
+| Transonic area rule | `TransonicAreaRule.java` | **Available** | Whitcomb/von Karman area-rule wave drag from cross-sectional area distribution (200 stations, $O(N^2)$ double integral). Blended with component wave drag over $M = 1.2$--$1.5$. Sears-Haack minimum drag reference included. |
+| Kantrowitz limit | `KantrowitzLimit.java` | **Available** | Computes starting Mach for internal flow through annular passages (e.g., strap-on boosters, ducted configurations). Bisection solver on $[1.001, 20]$ with $10^{-10}$ tolerance. |
+| Dahlem-Buck shape factors | `DahlemBuckShapeFactors.java` | **Active** (Phase 6c) | Shape-dependent wave drag correction for POWER, PARABOLIC, HAACK nose shapes. Fineness correction $(3/f)^{1.6}$. Active above $M = 1.3$ via smoothstep blend. |
+| Rational blend (AP09) | `RationalBlend.java` | **Active** | $C^\infty$-smooth rational blending function for near-$M=1$ transitions. |
 
 
 ### References

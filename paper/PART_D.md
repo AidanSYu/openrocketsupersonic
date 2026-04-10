@@ -885,17 +885,13 @@ axial position and applies two corrections:
    The local Mach also enters the subsonic Diederich formula if
    $M_\text{local} < 0.9$ (possible behind a strong bow shock).
 
-2. **Dynamic pressure scaling.**  The total fin normal force is proportional
-   to the local dynamic pressure rather than the freestream value.  After
-   computing $C_{N\alpha}$ using local Mach, the result is multiplied by the
-   dynamic pressure ratio:
+2. **Dynamic pressure ratio — intentionally omitted.**  An earlier version of the implementation multiplied the fin $C_{N\alpha}$ by the dynamic pressure ratio $q_\text{local}/q_\infty$ as a separate step after the local-Mach correction:
 
    $$
-   C_{N\alpha,\text{final}} = C_{N\alpha,1}^\text{corrected} \cdot \frac{q_\text{local}}{q_\infty}
+   C_{N\alpha,\text{final}} = C_{N\alpha,1}^\text{corrected} \cdot \frac{q_\text{local}}{q_\infty} \quad \text{(removed — double correction)}
    $$
 
-   The dynamic pressure ratio is stored in the `LocalConditions` object
-   returned by `ShockGeometry.getConditionsAt()`.
+   This was found to be a **double correction**: the $K_1$/$K_2$/$K_3$ formulas already account for the relationship between Mach number and dynamic pressure through their dependence on $\beta = \sqrt{M^2 - 1}$. When the local post-shock Mach is used in place of freestream Mach, the fin force coefficients already reflect the changed dynamic pressure environment. Multiplying again by $q_\text{local}/q_\infty$ reduced fin aerodynamic authority by approximately $2\times$ at $M > 2$, causing spurious predictions of marginal stability in vehicles that were physically well-stabilized. The dynamic pressure ratio remains available in `LocalConditions` for diagnostic purposes but is no longer applied as a correction factor.
 
 
 ### 8.5 Pitts-Nielsen-Kaattari Fin-Body Interference
@@ -1313,14 +1309,12 @@ $$
 = 1.1499
 $$
 
-**Step 4: Apply dynamic pressure ratio.**
+**Step 4: Final result (no separate dynamic pressure scaling).**
+
+As discussed in Section 8.4.4, the dynamic pressure ratio is *not* applied as a separate multiplicative correction. The local Mach correction through $K_1$/$K_2$/$K_3$ already captures the post-shock flow environment. The final corrected value is:
 
 $$
-C_{N\alpha,\text{corrected}} = C_{N\alpha,\text{pre-q}} \times \frac{q_\text{local}}{q_\infty} = 1.1499 \times 0.807
-$$
-
-$$
-\boxed{C_{N\alpha,\text{corrected}} = 0.9280}
+\boxed{C_{N\alpha,\text{corrected}} = 1.1499}
 $$
 
 
@@ -1333,22 +1327,20 @@ $$
 | $C_{N\alpha,1}$ (per fin) | 1.464 | 1.000 | -31.7% |
 | $F_{WB}$ | 0.952 | 0.911 | -4.3% |
 | $F_{BW}$ | 0.971 | 0.947 | -2.5% |
-| $q_\text{local}/q_\infty$ | 1.000 | 0.807 | -19.3% |
-| **Final $C_{N\alpha}$** | **1.804** | **0.928** | **-48.5%** |
+| **Final $C_{N\alpha}$** | **1.804** | **1.150** | **-36.3%** |
 
 The shock geometry correction reduces the predicted fin normal force slope by
-approximately 49%.  This is a very large effect arising from the compounding of
-three factors:
+approximately 36%.  This is a substantial effect arising from the compounding of
+two factors:
 
 1. **Local Mach effect** (-32%): The post-shoulder expansion accelerates the
    flow to $M = 2.75$, which increases $\beta = \sqrt{M^2 - 1}$ and
    decreases $K_1 = 2/\beta$.
 
-2. **Dynamic pressure effect** (-19%): The expansion reduces the local static
-   pressure, which reduces the dynamic pressure that drives the fin forces.
-
-3. **Interference effect** (-7%): The higher local Mach widens the $\beta_s$
+2. **Interference effect** (-7%): The higher local Mach widens the $\beta_s$
    parameter, strengthening the Pitts-Nielsen-Kaattari correction.
+
+Note that an earlier version of this worked example included a third factor — a dynamic pressure ratio scaling of $q_\text{local}/q_\infty = 0.807$ — which produced a much larger 49% reduction. This was identified as a double correction: the $K_1$/$K_2$/$K_3$ evaluation at local Mach already reflects the post-shock dynamic pressure state, and applying the ratio again reduced fin authority by approximately $2\times$, causing the simulation to predict marginal stability for vehicles that are physically well-stabilized at supersonic speeds. The dynamic pressure scaling was removed; the 36% correction from local Mach and interference effects alone agrees better with validation data.
 
 Note that in this example the local Mach at the fin station is *higher* than
 freestream because the shoulder expansion dominates the nose shock compression.
