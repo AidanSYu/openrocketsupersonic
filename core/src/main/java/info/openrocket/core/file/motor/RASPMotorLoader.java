@@ -102,76 +102,86 @@ public class RASPMotorLoader extends AbstractMotorLoader {
 				// desig diam len delays prop.w tot.w manufacturer
 				pieces = split(line);
 				if (pieces.length != 7) {
-					throw new IOException("Illegal file format. Motor header line must contain 7 fields:<br>" +
-							"&nbsp designation diameter length delays propellantWeight totalWeight manufacturer");
-				}
-
-				designation = pieces[0];
-				diameter = Double.parseDouble(pieces[1]) / 1000.0;
-				length = Double.parseDouble(pieces[2]) / 1000.0;
-
-				if (pieces[3].equalsIgnoreCase("None")) {
-
-				} else {
-					buf = split(pieces[3], "[-,]+");
-					for (String s : buf) {
-						if (s.equalsIgnoreCase("P") ||
-								s.equalsIgnoreCase("plugged")) {
-							delays.add(Motor.PLUGGED_DELAY);
-						} else if (s.matches("[0-9]+")) {
-							// Many RASP files have "100" as an only delay
-							double d = Double.parseDouble(s);
-							if (d < 99)
-								delays.add(d);
-						}
+					// Skip this motor — malformed header
+					for (line = in.readLine(); (line != null)
+							&& (line.length() == 0 || line.charAt(0) != ';'); line = in.readLine()) {
+						// skip past data
 					}
-					Collections.sort(delays);
+					continue;
 				}
 
-				propW = Double.parseDouble(pieces[4]);
-				totalW = Double.parseDouble(pieces[5]);
-				manufacturer = pieces[6];
+				try {
+					designation = pieces[0];
+					diameter = Double.parseDouble(pieces[1]) / 1000.0;
+					length = Double.parseDouble(pieces[2]) / 1000.0;
 
-				if (propW > totalW) {
-					throw new IOException("Propellant weight exceeds total weight in " +
-							"RASP file " + filename);
-				}
-
-				// Read the data
-				for (line = in.readLine(); (line != null)
-						&& (line.length() == 0 || line.charAt(0) != ';'); line = in.readLine()) {
-
-					buf = split(line);
-					if (buf.length == 0) {
-						continue;
-					} else if (buf.length == 2) {
-
-						time.add(Double.parseDouble(buf[0]));
-						thrust.add(Double.parseDouble(buf[1]));
+					if (pieces[3].equalsIgnoreCase("None")) {
 
 					} else {
-						throw new IOException("Illegal file format.<br>" +
-								"Data should only have 2 entries: a time and thrust value.");
+						buf = split(pieces[3], "[-,]+");
+						for (String s : buf) {
+							if (s.equalsIgnoreCase("P") ||
+									s.equalsIgnoreCase("plugged")) {
+								delays.add(Motor.PLUGGED_DELAY);
+							} else if (s.matches("[0-9]+")) {
+								// Many RASP files have "100" as an only delay
+								double d = Double.parseDouble(s);
+								if (d < 99)
+									delays.add(d);
+							}
+						}
+						Collections.sort(delays);
+					}
+
+					propW = Double.parseDouble(pieces[4]);
+					totalW = Double.parseDouble(pieces[5]);
+					manufacturer = pieces[6];
+
+					if (propW > totalW) {
+						// Skip this motor — data error in RASP file
+						for (line = in.readLine(); (line != null)
+								&& (line.length() == 0 || line.charAt(0) != ';'); line = in.readLine()) {
+							// skip
+						}
+						continue;
+					}
+
+					// Read the data
+					for (line = in.readLine(); (line != null)
+							&& (line.length() == 0 || line.charAt(0) != ';'); line = in.readLine()) {
+
+						buf = split(line);
+						if (buf.length == 0) {
+							continue;
+						} else if (buf.length == 2) {
+							time.add(Double.parseDouble(buf[0]));
+							thrust.add(Double.parseDouble(buf[1]));
+						} else {
+							break; // Malformed data line, skip rest of this motor
+						}
+					}
+
+					// Build the motor if we have enough data
+					if (time.size() >= 2) {
+						double[] delayArray = new double[delays.size()];
+						for (int i = 0; i < delays.size(); i++) {
+							delayArray[i] = delays.get(i);
+						}
+						motors.add(createRASPMotor(manufacturer, designation, comment,
+								length, diameter, delayArray, propW, totalW, time, thrust, removeDelayFromDesignation));
+					}
+				} catch (NumberFormatException e) {
+					// Skip this motor — bad number format
+					for (line = in.readLine(); (line != null)
+							&& (line.length() == 0 || line.charAt(0) != ';'); line = in.readLine()) {
+						// skip
 					}
 				}
-
-				// Comment of EOF encountered, marks the start of the next motor
-				if (time.size() < 2) {
-					throw new IOException("Illegal file format, too short thrust-curve.");
-				}
-				double[] delayArray = new double[delays.size()];
-				for (int i = 0; i < delays.size(); i++) {
-					delayArray[i] = delays.get(i);
-				}
-				motors.add(createRASPMotor(manufacturer, designation, comment,
-						length, diameter, delayArray, propW, totalW, time, thrust, removeDelayFromDesignation));
 			}
 
 		} catch (NumberFormatException e) {
-
 			throw new IOException("Illegal file format. Could not convert value to a number.<br" +
 					">Verify that each number is correctly formatted.");
-
 		}
 
 		return motors;

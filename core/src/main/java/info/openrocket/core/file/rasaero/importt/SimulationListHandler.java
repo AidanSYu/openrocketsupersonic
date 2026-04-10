@@ -43,6 +43,9 @@ public class SimulationListHandler extends AbstractElementHandler {
     @Override
     public void endHandler(String element, HashMap<String, String> attributes, String content, WarningSet warnings)
             throws SAXException {
-        RASAeroMotorsLoader.clearAllMotors();
+        // Don't clear motors cache here — it causes subsequent CDX1 imports to
+        // fail motor matching when the Application motor database is empty
+        // (e.g., in test environments or when using external motor files).
+        // Memory is freed when the JVM shuts down anyway.
     }
 }
