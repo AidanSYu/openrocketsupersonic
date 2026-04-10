@@ -146,12 +146,22 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 		// If the user selected a really small timestep, use MIN_TIME_STEP instead.
 		dt[0] = MathUtil.max(status.getSimulationConditions().getTimeStep(), MIN_TIME_STEP);
 		dt[1] = maxTimeStep;
+
 		dt[2] = status.getSimulationConditions().getMaximumAngleStep() / store.lateralPitchRate;
 		dt[3] = Math.abs(MAX_ROLL_STEP_ANGLE / store.flightConditions.getRollRate());
 		dt[4] = Math.abs(MAX_ROLL_RATE_CHANGE / store.accelerationData.getRotationalAccelerationRC().getZ());
 		dt[5] = Math.abs(MAX_PITCH_YAW_CHANGE /
 						 MathUtil.max(Math.abs(store.accelerationData.getRotationalAccelerationRC().getX()),
 									  Math.abs(store.accelerationData.getRotationalAccelerationRC().getY())));
+
+		// Cap angular step limits: don't let pitch/yaw constraints shrink the
+		// timestep below 1/4 of the user-selected step.  When the rocket is
+		// oscillating or tumbling at high pitch rates, the Barrowman small-angle
+		// model is already losing accuracy and fine angular resolution gives no
+		// benefit — it just makes the simulation extremely slow.
+		double angularFloor = dt[0] / 4.0;
+		dt[2] = Math.max(dt[2], angularFloor);
+		dt[5] = Math.max(dt[5], angularFloor);
 		if (!status.isLaunchRodCleared()) {
 			dt[0] /= 5.0;
 			dt[6] = status.getSimulationConditions().getLaunchRodLength() / k1.v.length() / 10;
@@ -305,11 +315,42 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 			throw new IllegalArgumentException("Stepping backwards in time, timestep=" + store.timeStep);
 		}
 		status.setSimulationTime(status.getSimulationTime() + store.timeStep);
-		
+
+		// Early warning: log when values are growing large but haven't hit the hard limit yet
+		if (status.getRocketVelocity().length2() > 1.0e12 ||
+				status.getRocketRotationVelocity().length2() > 1.0e12) {
+			log.warn("Values growing large at t={}: |vel|={}, |rotVel|={}, dt={}, AoA={}, Mach={}, CN={}, Cm={}, CD={}",
+					status.getSimulationTime(),
+					Math.sqrt(status.getRocketVelocity().length2()),
+					Math.sqrt(status.getRocketRotationVelocity().length2()),
+					store.timeStep,
+					store.flightConditions != null ? Math.toDegrees(store.flightConditions.getAOA()) : "null",
+					store.flightConditions != null ? store.flightConditions.getMach() : "null",
+					store.forces != null ? store.forces.getCN() : "null",
+					store.forces != null ? store.forces.getCm() : "null",
+					store.forces != null ? store.forces.getCD() : "null");
+		}
+
 		// Verify that values don't run out of range
 		if (status.getRocketVelocity().length2() > 1.0e18 ||
 				status.getRocketPosition().length2() > 1.0e18 ||
 				status.getRocketRotationVelocity().length2() > 1.0e18) {
+			log.error("Simulation divergence at t={}: vel={} (|v|²={}), pos={} (|p|²={}), rotVel={} (|rv|²={}), " +
+					"last dt={}, CN={}, Cm={}, CD={}, CDaxial={}, AoA={}, Mach={}, dynP={}",
+					status.getSimulationTime(),
+					status.getRocketVelocity(), status.getRocketVelocity().length2(),
+					status.getRocketPosition(), status.getRocketPosition().length2(),
+					status.getRocketRotationVelocity(), status.getRocketRotationVelocity().length2(),
+					store.timeStep,
+					store.forces != null ? store.forces.getCN() : "null",
+					store.forces != null ? store.forces.getCm() : "null",
+					store.forces != null ? store.forces.getCD() : "null",
+					store.forces != null ? store.forces.getCDaxial() : "null",
+					store.flightConditions != null ? store.flightConditions.getAOA() : "null",
+					store.flightConditions != null ? store.flightConditions.getMach() : "null",
+					store.flightConditions != null ?
+						(0.5 * store.flightConditions.getAtmosphericConditions().getDensity()
+						 * MathUtil.pow2(store.flightConditions.getVelocity())) : "null");
 			throw new SimulationCalculationException(trans.get("error.valuesTooLarge"), status.getFlightDataBranch());
 		}
 	}
@@ -485,10 +526,14 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 			double momZ = store.forces.getCroll() * dynP * refArea * refLength;
 
 			// Phase 9b: Euler gyroscopic coupling — ω × (I·ω) counters precession
-			// Only apply when dynamic pressure is significant (stable flight).
-			// At low dynamic pressure (near/after apogee), the rocket is tumbling and
-			// the gyroscopic terms create numerical stiffness without improving accuracy.
-			if (dynP > 1.0) {
+			// Only apply when dynamic pressure is high enough that aerodynamic
+			// restoring torques can balance the gyroscopic redistribution.
+			// At low dynP (near/after apogee), the rocket tumbles and the
+			// gyroscopic terms dominate — the explicit RK4 integrator cannot
+			// conserve angular momentum for these stiff oscillations, causing
+			// rotational velocity to diverge exponentially.
+			// Threshold: 500 Pa ≈ 29 m/s at sea level, 50 m/s at 10 km.
+			if (dynP > 500.0) {
 				CoordinateIF rvWorld = status.getRocketRotationVelocity();
 				MutableCoordinate rotVelBody = new MutableCoordinate(rvWorld.getX(), rvWorld.getY(), rvWorld.getZ());
 				status.getRocketOrientationQuaternion().invRotateInPlace(rotVelBody);
