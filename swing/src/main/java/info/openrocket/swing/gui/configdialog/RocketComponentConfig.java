@@ -39,8 +39,10 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import info.openrocket.core.rocketcomponent.ComponentChangeEvent;
 import info.openrocket.core.rocketcomponent.FinSet;
 import info.openrocket.core.rocketcomponent.NoseCone;
+import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.swing.gui.main.BasicFrame;
 import info.openrocket.swing.gui.main.RocketActions;
@@ -795,6 +797,13 @@ public class RocketComponentConfig extends JPanel implements Invalidatable, Inva
 
 		// END OVERRIDE CD --------------------------------------------------
 
+		// Asynchronously compute the display CD so the spinner shows the actual value
+		// without blocking the EDT.  The result is written back via updateCachedCD()
+		// and a NONFUNCTIONAL_CHANGE event refreshes the DoubleModel.
+		if (!component.isCDOverridden() && component.isOverrideCDStale()) {
+			refreshOverrideCDAsync();
+		}
+
 		// OVERRIDE MASS, CG DOESN'T INCLUDE MOTORS  --------------------------------------------------
 		panel.add(new StyledLabel(trans.get("RocketCompCfg.lbl.longB1") +
 						//// The center of gravity is measured from the front end of the
@@ -806,6 +815,30 @@ public class RocketComponentConfig extends JPanel implements Invalidatable, Inva
 	}
 	
 	
+	/**
+	 * Computes the component's CD on a background thread and updates the cached value.
+	 * Fires a NONFUNCTIONAL_CHANGE event on the EDT so the override CD spinner refreshes.
+	 */
+	private void refreshOverrideCDAsync() {
+		final RocketComponent comp = component;
+		Thread t = new Thread(() -> {
+			try {
+				Rocket rocket = comp.getRocket();
+				var aeroId = rocket.getAerodynamicModID();
+				double cd = comp.getComponentCD(0, 0, preferences.getDefaultMach(), 0);
+				comp.updateCachedCD(cd, aeroId);
+				// Fire on EDT so DoubleModel re-reads the updated value
+				SwingUtilities.invokeLater(() -> {
+					comp.fireComponentChangeEvent(ComponentChangeEvent.NONFUNCTIONAL_CHANGE);
+				});
+			} catch (Exception e) {
+				// Component detached or calculation failed — leave cached value as-is
+			}
+		}, "OverrideCD-async");
+		t.setDaemon(true);
+		t.start();
+	}
+
 	private JPanel commentTab() {
 		JPanel panel = new JPanel(new MigLayout("fill","[]","[][grow]"));
 		

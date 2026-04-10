@@ -8,11 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import info.openrocket.core.aerodynamics.barrowman.RocketComponentCalc;
+import info.openrocket.core.aerodynamics.barrowman.SymmetricComponentCalc;
 import info.openrocket.core.models.atmosphere.AtmosphericConditions;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.rocketcomponent.ComponentAssembly;
 import info.openrocket.core.rocketcomponent.ExternalComponent;
 import info.openrocket.core.rocketcomponent.ExternalComponent.Finish;
+import info.openrocket.core.rocketcomponent.FinSet;
 import info.openrocket.core.rocketcomponent.FlightConfiguration;
 import info.openrocket.core.rocketcomponent.InstanceContext;
 import info.openrocket.core.rocketcomponent.InstanceMap;
@@ -64,6 +66,19 @@ public class BarrowmanDragCalculator implements DragCalculator {
 
 	/** Turbulent recovery factor: Pr^(1/3) with Pr ≈ 0.71 for air. */
 	private static final double TURBULENT_RECOVERY_FACTOR = Math.pow(0.71, 1.0 / 3.0);
+
+	/**
+	 * Crossflow drag coefficient for flat-plate fins at high angle of attack.
+	 * From BasicTumbleStepper / techdoc.pdf, validated empirically.
+	 */
+	private static final double CROSSFLOW_FIN_CD = 1.42;
+
+	/**
+	 * Fin efficiency factors for crossflow drag, indexed by fin count.
+	 * Accounts for fin-fin shadowing when multiple fins are present.
+	 * From BasicTumbleStepper / techdoc.pdf.
+	 */
+	private static final double[] FIN_CROSSFLOW_EFF = { 0.0, 0.5, 1.0, 1.41, 1.81, 1.73, 1.90, 1.85 };
 
 	static {
 		PolyInterpolator interpolator;
@@ -134,6 +149,18 @@ public class BarrowmanDragCalculator implements DragCalculator {
 
 		totalForces.setCD(frictionCD + pressureCD + baseCD + overrideCD + CDi);
 		totalForces.setCDaxial(calculateAxialCD(conditions, totalForces.getCD()));
+
+		// Crossflow drag at high AoA: when the rocket is tumbling or at large
+		// angle of attack, the side profile acts as a bluff body. The Barrowman
+		// stability calculator underestimates the normal force at post-stall
+		// angles (fin CN capped at 20°, body CN linearized). This adds the
+		// crossflow drag as a normal force so the RK4 stepper properly
+		// decelerates the rocket through force resolution.
+		double crossflowCN = computeCrossflowCN(configuration, conditions);
+		double existingCN = totalForces.getCN();
+		if (crossflowCN > Math.abs(existingCN)) {
+			totalForces.setCN(existingCN >= 0 ? crossflowCN : -crossflowCN);
+		}
 	}
 
 	@Override
@@ -595,6 +622,64 @@ public class BarrowmanDragCalculator implements DragCalculator {
 			return mul * cd;
 		}
 		return -mul * cd;
+	}
+
+	/**
+	 * Compute the crossflow normal force coefficient for the full rocket at the
+	 * current angle of attack. This models the bluff-body drag that arises when
+	 * the rocket's side profile is exposed to the airflow at high AoA.
+	 * <p>
+	 * Uses the same drag coefficients as {@code BasicTumbleStepper} (1.42 for fins,
+	 * Jorgensen Cd_c for body tubes) applied to component planform areas, scaled
+	 * by sin²(alpha) to account for the crossflow velocity component.
+	 * <p>
+	 * At low AoA this value is small and the existing Barrowman CN dominates.
+	 * At high AoA (post-stall / tumbling) this value exceeds the Barrowman CN
+	 * and provides the dominant deceleration force through the normal force
+	 * channel in the RK4 stepper.
+	 *
+	 * @param configuration current flight configuration
+	 * @param conditions    current flight conditions (Mach, AoA, etc.)
+	 * @return crossflow normal force coefficient (always non-negative)
+	 */
+	private double computeCrossflowCN(FlightConfiguration configuration, FlightConditions conditions) {
+		double alpha = conditions.getAOA();
+		double sinAlpha = Math.sin(alpha);
+		if (Math.abs(sinAlpha) < 1e-6) {
+			return 0;
+		}
+
+		double crossflowMach = conditions.getMach() * Math.abs(sinAlpha);
+		double bodyCd = SymmetricComponentCalc.getCrossflowDragCoefficient(crossflowMach);
+
+		double finCDArea = 0;
+		double bodyCDArea = 0;
+
+		InstanceMap imap = configuration.getActiveInstances();
+		for (Map.Entry<RocketComponent, ArrayList<InstanceContext>> entry : imap.entrySet()) {
+			RocketComponent c = entry.getKey();
+			if (!c.isAerodynamic()) {
+				continue;
+			}
+
+			if (c instanceof FinSet) {
+				FinSet fin = (FinSet) c;
+				double planform = fin.getPlanformArea();
+				int count = fin.getFinCount();
+				if (count >= FIN_CROSSFLOW_EFF.length) {
+					count = FIN_CROSSFLOW_EFF.length - 1;
+				}
+				finCDArea += CROSSFLOW_FIN_CD * planform * FIN_CROSSFLOW_EFF[count] / fin.getFinCount();
+			} else if (c instanceof SymmetricComponent) {
+				bodyCDArea += bodyCd * ((SymmetricComponent) c).getComponentPlanformArea();
+			}
+		}
+
+		double refArea = conditions.getRefArea();
+		if (refArea < 1e-9) {
+			return 0;
+		}
+		return (finCDArea + bodyCDArea) / refArea * sinAlpha * sinAlpha;
 	}
 
 	public static double calculateStagnationCD(double m) {

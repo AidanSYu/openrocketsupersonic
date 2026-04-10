@@ -468,8 +468,13 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 			if (cf > 1e-12) {
 				double m2 = mach * mach;
 				double betaSq = m2 - 1.0;
-				if (betaSq > 0.01) {
+				if (betaSq > 0.04) {
+					// Guard: sqrt(cf/sqrt(betaSq)) grows as betaSq→0.
+					// Raised threshold from 0.01 to 0.04 (M≈1.02) to avoid
+					// extreme cpPlateau values in the deep transonic region.
 					double cpPlateau = 4.2 * Math.sqrt(2.0 * cf / Math.sqrt(betaSq));
+					// Cap cpPlateau to a physically reasonable range
+					cpPlateau = Math.min(cpPlateau, 2.0);
 
 					double recoveryLength = 3.0 * stepHeight;
 					double recoveryArea = 2.0 * Math.PI * foreRadius * recoveryLength;
