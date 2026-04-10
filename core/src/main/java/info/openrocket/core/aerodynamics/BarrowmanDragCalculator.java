@@ -165,11 +165,13 @@ public class BarrowmanDragCalculator implements DragCalculator {
 			// large crossflow CN while keeping the old Cm creates an artificial
 			// destabilizing moment (Cm_CG = Cm - CN*xCG/refLen) that drives
 			// rotational divergence.
-			if (Math.abs(existingCN) > 1e-6) {
-				totalForces.setCm(totalForces.getCm() * newCN / existingCN);
+			// When existingCN is too small, CP is ill-defined — zero the moment
+			// since crossflow drag at extreme AoA acts roughly through the
+			// planform centroid (near CG for typical rockets).
+			if (Math.abs(existingCN) > 0.5) {
+				double scale = Math.min(Math.abs(newCN / existingCN), 20.0);
+				totalForces.setCm(totalForces.getCm() * Math.copySign(scale, newCN / existingCN));
 			} else {
-				// existingCN ≈ 0 means CP is undefined; zero the moment to
-				// avoid an unphysical torque from the crossflow force.
 				totalForces.setCm(0);
 			}
 			totalForces.setCN(newCN);
