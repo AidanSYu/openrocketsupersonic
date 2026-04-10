@@ -159,7 +159,20 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		double crossflowCN = computeCrossflowCN(configuration, conditions);
 		double existingCN = totalForces.getCN();
 		if (crossflowCN > Math.abs(existingCN)) {
-			totalForces.setCN(existingCN >= 0 ? crossflowCN : -crossflowCN);
+			double newCN = existingCN >= 0 ? crossflowCN : -crossflowCN;
+			// Scale Cm proportionally so the effective CP stays at the same
+			// location.  Without this, replacing a small Barrowman CN with a
+			// large crossflow CN while keeping the old Cm creates an artificial
+			// destabilizing moment (Cm_CG = Cm - CN*xCG/refLen) that drives
+			// rotational divergence.
+			if (Math.abs(existingCN) > 1e-6) {
+				totalForces.setCm(totalForces.getCm() * newCN / existingCN);
+			} else {
+				// existingCN ≈ 0 means CP is undefined; zero the moment to
+				// avoid an unphysical torque from the crossflow force.
+				totalForces.setCm(0);
+			}
+			totalForces.setCN(newCN);
 		}
 	}
 

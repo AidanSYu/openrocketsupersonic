@@ -1,0 +1,100 @@
+<SOAP-ENV:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:clr="http://schemas.microsoft.com/soap/encoding/clr/1.0" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+<SOAP-ENV:Body>
+<a1:RocketClass id="ref-1" xmlns:a1="http://schemas.microsoft.com/clr/nsassem/RASAero/RASAero%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull">
+<NC_type id="ref-3">Ogive</NC_type>
+<NC_length>16.5</NC_length>
+<NC_BluntRadius>0</NC_BluntRadius>
+<BodyTubeLength>42.5</BodyTubeLength>
+<MaxDiameter>3.998</MaxDiameter>
+<NozzleDiameter>0.4</NozzleDiameter>
+<Fin href="#ref-4"/>
+<Fincan href="#ref-5"/>
+<Boattail href="#ref-6"/>
+<RailguideArea>0</RailguideArea>
+<LaunchLugdiameter>0.6</LaunchLugdiameter>
+<LaunchShoeArea>0</LaunchShoeArea>
+<Weight>0</Weight>
+<TotalWeight>4.9</TotalWeight>
+<EmptyWeight>3.14</EmptyWeight>
+<CGLoc>0.00</CGLoc>
+<MachAlt href="#ref-7"/>
+<recover href="#ref-8"/>
+<barrowman>false</barrowman>
+<turbulence>false</turbulence>
+<Comments id="ref-9">LOC/Precision EZI-65
+Kelly Badger
+SIngle-Use Aerotech J100 (Historical)
+
+Optical Track
+Altitude = 5671 ft
+
+RASAero Prediction = 6472 ft
+Error = 14.12%
+</Comments>
+<RailGuideHeight>0</RailGuideHeight>
+<RailGuideDiameter>0</RailGuideDiameter>
+<site href="#ref-10"/>
+<EngineName id="ref-11">J100  (Hist)</EngineName>
+<SurfaceFinish id="ref-12">Smooth (Zero Roughness)</SurfaceFinish>
+</a1:RocketClass>
+<a1:FinClass id="ref-4" xmlns:a1="http://schemas.microsoft.com/clr/nsassem/RASAero/RASAero%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull">
+<RootChord>5.5625</RootChord>
+<TipChord>3.75</TipChord>
+<Span>5</Span>
+<SweepDistance>0.5938</SweepDistance>
+<OffsetfromNose>53.4375</OffsetfromNose>
+<Count>3</Count>
+<Airfoiltype id="ref-13">Hexagonal</Airfoiltype>
+<FX1>0.3</FX1>
+<FX3>0.3</FX3>
+<Thickness>0.125</Thickness>
+<LERadius>0</LERadius>
+</a1:FinClass>
+<a1:FinCanClass id="ref-5" xmlns:a1="http://schemas.microsoft.com/clr/nsassem/RASAero/RASAero%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull">
+<Length>0</Length>
+<OuterDiameter>0</OuterDiameter>
+<ShoulderLength>0</ShoulderLength>
+</a1:FinCanClass>
+<a1:BoatTailClass id="ref-6" xmlns:a1="http://schemas.microsoft.com/clr/nsassem/RASAero/RASAero%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull">
+<Length>0</Length>
+<Diameter>0</Diameter>
+</a1:BoatTailClass>
+<SOAP-ENC:Array id="ref-7" SOAP-ENC:arrayType="a1:MachAlt[0]" xmlns:a1="http://schemas.microsoft.com/clr/nsassem/RASAero/RASAero%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull">
+</SOAP-ENC:Array>
+<a1:RecoveryClass id="ref-8" xmlns:a1="http://schemas.microsoft.com/clr/nsassem/RASAero/RASAero%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull">
+<Events href="#ref-14"/>
+<EventTypes href="#ref-15"/>
+<DeviceType href="#ref-16"/>
+<Size href="#ref-17"/>
+<Altitude href="#ref-18"/>
+</a1:RecoveryClass>
+<a1:LaunchSiteClass id="ref-10" xmlns:a1="http://schemas.microsoft.com/clr/nsassem/RASAero/RASAero%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull">
+<Altitude>2848</Altitude>
+<Temperature>70</Temperature>
+<Pressure>0</Pressure>
+<RodLength>8</RodLength>
+<RodAngle>0</RodAngle>
+<WindSpeed>0</WindSpeed>
+</a1:LaunchSiteClass>
+<SOAP-ENC:Array id="ref-14" SOAP-ENC:arrayType="xsd:boolean[2]">
+<item>False</item>
+<item>False</item>
+</SOAP-ENC:Array>
+<SOAP-ENC:Array id="ref-15" SOAP-ENC:arrayType="xsd:string[2]">
+<item id="ref-19">None</item>
+<item id="ref-20">None</item>
+</SOAP-ENC:Array>
+<SOAP-ENC:Array id="ref-16" SOAP-ENC:arrayType="xsd:string[2]">
+<item id="ref-21">None</item>
+<item id="ref-22">None</item>
+</SOAP-ENC:Array>
+<SOAP-ENC:Array id="ref-17" SOAP-ENC:arrayType="xsd:float[2]">
+<item>1</item>
+<item>1</item>
+</SOAP-ENC:Array>
+<SOAP-ENC:Array id="ref-18" SOAP-ENC:arrayType="xsd:float[2]">
+<item>1000</item>
+<item>1000</item>
+</SOAP-ENC:Array>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
