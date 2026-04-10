@@ -15,7 +15,7 @@ The extensions described herein replace these approximations with physics-based 
 
 A complete oblique shock solver implements theta-beta-Mach relations, Taylor-Maccoll cone flow, normal shock jump conditions, and Prandtl-Meyer isentropic expansion, validated against NACA Report 1135 to better than 0.1%. The transonic compressibility factor uses a cubic Hermite spline through Mach 0.95 to 1.05, replacing the catastrophic $\beta_{\min}$ clamp with a C1-continuous function that preserves correct asymptotic behavior.
 
-Drag modeling employs Taylor-Maccoll exact solutions for cone wave drag, second-order shock-expansion theory for ogive bodies, Devan-Ashwood correlations for supersonic base drag, Eckert reference temperature method for compressible skin friction, and Ackeret thin-airfoil theory for fin wave drag. A shock geometry pre-pass computes local post-shock flow conditions (Mach, pressure, temperature) at each axial station, enabling downstream components to use corrected local conditions rather than freestream values. Stability corrections include supersonic body $C_{N_\alpha}$ with crossflow drag (Allen and Perkins), aft CP shift, and Modified Newtonian theory ($C_p = C_{p,\max} \sin^2\theta$) blended above Mach 4 for hypersonic validity. The test suite comprises 833 aerodynamic test methods covering Mach 0.3 to 10+, angles of attack 0 to 15 degrees, and five standard rocket geometries, with zero failures.
+Drag modeling employs Taylor-Maccoll exact solutions for cone wave drag, second-order shock-expansion theory for ogive bodies, Devan-Ashwood correlations for supersonic base drag, Eckert reference temperature method for compressible skin friction, and Ackeret thin-airfoil theory for fin wave drag. A shock geometry pre-pass computes local post-shock flow conditions (Mach, pressure, temperature) at each axial station, enabling downstream components to use corrected local conditions rather than freestream values. Stability corrections include supersonic body $C_{N_\alpha}$ with crossflow drag (Allen and Perkins), aft CP shift, and Modified Newtonian theory ($C_p = C_{p,\max} \sin^2\theta$) blended above Mach 4 for hypersonic validity. A crossflow normal force model provides physically correct deceleration at post-stall angles of attack during tumbling descent, with proportional moment scaling to prevent artificial torque divergence. Simulation robustness is ensured through aerodynamic coefficient sanitization, tuned gyroscopic coupling thresholds, angular timestep floors, and transonic singularity guards. The test suite comprises 833 aerodynamic test methods covering Mach 0.3 to 10+, angles of attack 0 to 15 degrees, and five standard rocket geometries, with zero failures.
 
 
 ## 1. Introduction
@@ -109,7 +109,7 @@ The extensions described in this report were guided by three architectural princ
 
 ### 1.4 Scope of Physical Phenomena Addressed
 
-The following 19 distinct physical phenomena are modeled in the current implementation:
+The following 30 distinct physical phenomena are modeled in the current implementation:
 
 1. Oblique shock waves (theta-beta-Mach relations)
 2. Taylor-Maccoll cone flow (exact conical shock solution)
@@ -122,14 +122,25 @@ The following 19 distinct physical phenomena are modeled in the current implemen
 9. Effective specific heat ratio (vibrational excitation of $\mathrm{N_2}$ and $\mathrm{O_2}$)
 10. Taylor-Maccoll cone wave drag
 11. Shock-expansion ogive wave drag
-12. Devan-Ashwood supersonic base drag
+12. Devan-Ashwood supersonic base drag with Lamb-Oberkampf Reynolds correction
 13. Transonic base drag peak (polynomial correlation)
 14. Ackeret thin-airfoil fin wave drag with sweep correction
 15. Eckert reference temperature compressible skin friction
-16. Supersonic body $C_{N_\alpha}$ (crossflow drag, Allen and Perkins)
-17. Supersonic body CP aft shift
-18. Modified Newtonian hypersonic pressure ($C_p = C_{p,\max} \sin^2\theta$)
-19. Fin-body shock interaction (local flow correction from ShockGeometry)
+16. Boundary layer transition (Michel criterion with compressibility correction)
+17. Supersonic body $C_{N_\alpha}$ (crossflow drag, Allen and Perkins)
+18. Supersonic body CP aft shift
+19. Modified Newtonian hypersonic pressure ($C_p = C_{p,\max} \sin^2\theta$)
+20. Fin-body shock interaction (local flow correction from ShockGeometry)
+21. Forward-facing step drag (ESDU 66011, stagnation + reattachment recovery)
+22. Fin shock-boundary layer interaction (chord reduction + plateau pressure drag)
+23. Trailing-edge base drag (Hoerner subsonic, $1/\sqrt{\beta}$ supersonic)
+24. Axial drag conversion with AoA-dependent polynomial and backward-flight reversal
+25. High-AoA crossflow normal force with proportional moment scaling
+26. Asymmetric vortex shedding side force (Champigny-Lacau, $\alpha > 20°$)
+27. Fin-fin aerodynamic interference knockdown (5+ fins)
+28. Roll damping with Mach-cone span limiting (supersonic correction)
+29. Aerodynamic coefficient sanitization (NaN/Infinity/extreme value clamping)
+30. Transonic singularity guards (SBLI separation length, pressure plateau, fin polynomials)
 
 
 ### 1.5 Software Architecture
@@ -179,7 +190,7 @@ The key architectural element is `ShockGeometry`, computed once per aerodynamic 
 
 3. At each station it records the local Mach number, static pressure ratio $p/p_\infty$, static temperature ratio $T/T_\infty$, and dynamic pressure ratio $q/q_\infty$. These are stored in a sorted list of `LocalConditions` objects.
 
-4. Component calculators query `ShockGeometry.getConditionsAt(x)` to obtain interpolated local conditions at their axial position. `FinSetCalc`, for example, uses the local post-shock Mach to compute $C_{N_\alpha}$ and the local dynamic pressure ratio to scale the fin normal force.
+4. Component calculators query `ShockGeometry.getConditionsAt(x)` to obtain interpolated local conditions at their axial position. `FinSetCalc`, for example, uses the local post-shock Mach to compute $C_{N_\alpha}$ via the $K_1$/$K_2$/$K_3$ formulas. Note that the dynamic pressure ratio is *not* applied as a separate scaling factor — the local Mach correction to $K_1$/$K_2$/$K_3$ already accounts for the post-shock flow state, and multiplying again by $q_\text{local}/q_\infty$ would constitute a double correction (see Section 8.4.4).
 
 Between Mach 1.0 and 1.1, the shock geometry corrections are linearly blended toward freestream values to eliminate the step discontinuity when shock geometry first activates.
 

@@ -1462,7 +1462,93 @@ angle of attack experiences enormous aerodynamic resistance due to the
 cross-flow component.
 
 
-### 6.6 Drag Budget Summary
+### 6.6 Axial Drag Conversion
+
+The drag coefficient $C_D$ computed by the drag calculator represents the total drag force referenced to the body cross-section area. In the 6-DOF equations of motion, this must be converted to an axial force coefficient $C_{D,\text{axial}}$ that accounts for the geometric projection of drag at nonzero angle of attack. The conversion is:
+
+$$C_{D,\text{axial}} = f(\alpha) \cdot C_D$$
+
+where $f(\alpha)$ is a piecewise polynomial multiplier:
+
+- For $0 \leq \alpha < 17°$: $f$ increases from 1.0 to 1.3 via a degree-3 polynomial with zero derivatives at both endpoints (C1-continuous).
+- For $17° \leq \alpha \leq 90°$: $f$ decreases from 1.3 to 0 via a degree-4 polynomial with zero derivatives at both endpoints and zero second derivative at $\alpha = 90°$.
+
+The multiplier peaks at $\alpha = 17°$, reflecting the maximum axial force projection that occurs when the drag vector is most aligned with the body axis. At $\alpha = 90°$ (broadside), the axial component of drag is zero — all drag acts as normal force.
+
+For $\alpha > 90°$ (backward flight during tumbling), the function is reflected about $90°$ and the sign is negated: $C_{D,\text{axial}} = -f(\pi - \alpha) \cdot C_D$. This correctly models the thrust-like axial force that a backwards-flying body experiences from drag.
+
+
+### 6.7 Forward-Facing Step Drag
+
+When a body component has a larger fore radius than the aft radius of the upstream component (e.g., a payload section wider than the body tube), the resulting forward-facing step creates additional pressure drag at transonic and supersonic speeds. This is modeled using the ESDU 66011 approach.
+
+#### 6.7.1 Step Geometry
+
+The step face is an annular ring with area:
+
+$$A_\text{step} = \pi (r_\text{fore}^2 - r_\text{upstream}^2)$$
+
+where $r_\text{fore}$ is the fore radius of the downstream component and $r_\text{upstream}$ is the aft radius of the upstream component. The step height is $h = r_\text{fore} - r_\text{upstream}$.
+
+#### 6.7.2 Step Face Drag
+
+The stagnation pressure coefficient on the step face is computed from the normal shock pressure ratio at the local Mach number. The step face drag is:
+
+$$C_{D,\text{step}} = C_{p,\text{stag}} \cdot \frac{A_\text{step}}{S_\text{ref}}$$
+
+#### 6.7.3 Reattachment Recovery Drag
+
+Behind the step, the separated flow reattaches over a recovery length of approximately $3h$. The SBLI plateau pressure coefficient acts over this recovery region:
+
+$$C_{p,\text{plateau}} = 4.2 \sqrt{\frac{2 C_f}{\sqrt{M^2 - 1}}}$$
+
+The recovery drag is:
+
+$$C_{D,\text{recovery}} = 0.6 \cdot C_{p,\text{plateau}} \cdot \frac{2\pi r_\text{fore} \cdot 3h}{S_\text{ref}}$$
+
+The 0.6 factor accounts for the pressure recovery being incomplete over the reattachment region. The plateau pressure is capped at $C_{p,\text{plateau}} \leq 2.0$ and the $M^2 - 1$ term is guarded with a floor of 0.04 (see Section 9.5.4) to prevent singularities near Mach 1.
+
+#### 6.7.4 Transonic Activation
+
+The step drag is zero below $M = 0.95$ (no flow separation from forward-facing steps at subsonic speeds) and reaches full value at $M = 1.1$, with a C1-continuous smoothstep blend between these bounds:
+
+$$w(t) = 3t^2 - 2t^3, \quad t = \frac{M - 0.95}{0.15}$$
+
+
+### 6.8 Fin Shock-Boundary Layer Interaction
+
+At supersonic speeds ($M > 1.2$), the oblique shock from the fin leading edge can interact with the boundary layer on the fin surface, causing flow separation that reduces the effective aerodynamic chord and adds a plateau pressure drag increment. The model uses the free-interaction theory of Chapman, Kuehn, and Larson (NACA Report 1356, 1958).
+
+#### 6.8.1 Separation Criterion
+
+The fin leading-edge wedge angle and resulting shock pressure coefficient are:
+
+$$\theta_\text{fin} = \arctan\!\left(\frac{t}{2c}\right), \qquad C_{p,\text{shock}} = \frac{2\theta_\text{fin}}{\beta}$$
+
+where $t$ is fin thickness, $c$ is MAC, and $\beta = \sqrt{M^2 - 1}$. Flow separation occurs when $C_{p,\text{shock}}$ exceeds the critical pressure coefficient:
+
+$$C_{p,\text{crit}} = 3.5 \sqrt{\frac{C_f}{\sqrt{M^2 - 1}}}$$
+
+where $C_f = 0.027/Re_x^{1/7}$ is the local skin friction from the 1/7th power law. The separation check is skipped for $Re_x < 10^4$ (boundary layer too thin for meaningful SBLI).
+
+#### 6.8.2 Effective Chord Reduction
+
+When separation occurs, the separation length $L_\text{sep}$ is computed from the free-interaction formula (see Section 9.5.4), and the effective aerodynamic chord is reduced:
+
+$$c_\text{eff} = \max(c - L_\text{sep},\; 0.1c)$$
+
+The 10% floor ensures that a minimum aerodynamic chord is always retained. The reduced chord affects the fin planform area used in the CNa calculation.
+
+#### 6.8.3 SBLI Pressure Drag
+
+The separated region produces a plateau pressure drag increment:
+
+$$C_{D,\text{SBLI}} = \frac{C_{p,\text{plateau}} \cdot L_\text{sep} \cdot s \cdot n}{S_\text{ref}}$$
+
+where $s$ is the fin span, $n$ is the number of fins, and $C_{p,\text{plateau}}$ is the Chapman-Kuehn-Larson plateau pressure coefficient (equal to $C_{p,\text{crit}}$ from the same free-interaction theory).
+
+
+### 6.9 Drag Budget Summary
 
 The following tables present the complete drag budget for a representative
 sounding rocket: 10-degree conical nose (fineness ratio $f = 2.84$), cylindrical
