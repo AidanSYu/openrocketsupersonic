@@ -345,12 +345,7 @@ public class RASAeroCommonConstants {
         // NOTE: the RASAero surface finishes are not really the same as the OpenRocket surface finishes. There are some
         // approximations here.
         if (FINISH_SMOOTH.equals(surfaceFinish)) {
-            // RASAero "Smooth (Zero Roughness)" means "use the baseline correlation as-is",
-            // which assumes a painted airframe — not a literal optical mirror. Mapping to
-            // MIRROR (0 μm) caused a ~35% friction shortfall on every subsonic benchmark
-            // rocket imported from RASAero. OPTIMUM (5 μm, "Optimum paint") is the closest
-            // physical equivalent to RASAero's baseline assumption.
-            return ExternalComponent.Finish.OPTIMUM;
+            return ExternalComponent.Finish.MIRROR;
         } else if (FINISH_POLISHED.equals(surfaceFinish)) {
             return ExternalComponent.Finish.FINISHPOLISHED;
         } else if (FINISH_SHEET_METAL.equals(surfaceFinish)) {

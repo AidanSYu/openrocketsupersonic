@@ -5,31 +5,25 @@ import info.openrocket.core.file.DocumentLoadingContext;
 import info.openrocket.core.file.rasaero.RASAeroCommonConstants;
 import info.openrocket.core.file.simplesax.ElementHandler;
 import info.openrocket.core.rocketcomponent.BodyTube;
+import info.openrocket.core.rocketcomponent.PodSet;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.rocketcomponent.Transition;
+import info.openrocket.core.rocketcomponent.position.AxialMethod;
+import info.openrocket.core.rocketcomponent.position.RadiusMethod;
 import org.xml.sax.SAXException;
 
 import java.util.HashMap;
 
 /**
- * A handler for the boattail element in a RASAero CDX1 file.
- *
- * <p>A boattail is an OpenRocket {@link Transition} appended directly after the
- * last {@link BodyTube} in the parent stage. The previous implementation wrapped
- * the Transition in an inline PodSet child of the BodyTube, ostensibly to support
- * recessed boattails (BoattailOffset ≠ 0). However:
- * <ul>
- *   <li>BoattailOffset is never parsed by any import handler and was always 0 in
- *       practice, so the PodSet wrapper provided no benefit.
- *   <li>The PodSet topology placed the Transition outside the main body chain,
- *       causing {@link info.openrocket.core.aerodynamics.ShockGeometry} to miss
- *       the rear compression, leading to Cm blow-up and trajectory divergence on
- *       rockets with aggressive boat-tails (e.g. Proteus 6, −92% apogee error).
- *   <li>{@code SymmetricComponent.getNextSymmetricComponent()} also did not
- *       traverse into the pod, causing base-drag double-counting on the BodyTube.
- * </ul>
- * The fix: add the Transition as a direct child of the parent stage (sibling of
- * the BodyTube), which is the standard OpenRocket topology for a boat-tail.
+ * A handler for the boattail element RASAero.
+ * A boattail is just an OpenRocket transition, but because it can be recessed
+ * in next symmetric components
+ * (e.g. a body tube), we will add the boattail using an inline pod set to the
+ * previous component.
+ * In case the previous component is a nose cone, we will first add a phantom
+ * body tube and then add the pod to
+ * that body tube. I know, not the most elegant solution, but it grants us the
+ * best cross-compatibility with RASAero.
  *
  * @author Sibo Van Gool <sibo.vangool@hotmail.com>
  */
@@ -39,9 +33,9 @@ public class BoattailHandler extends TransitionHandler {
      * Constructor
      *
      * @param context  current document loading context
-     * @param parent   parent component (sustainer/stage) to add this new component to
+     * @param parent   parent component to add this new component to
      * @param warnings warning set to add import warnings to
-     * @throws IllegalArgumentException if the parent component is null or has no children
+     * @throws IllegalArgumentException if the parent component is null
      */
     public BoattailHandler(DocumentLoadingContext context, RocketComponent parent, WarningSet warnings)
             throws IllegalArgumentException {
@@ -54,20 +48,37 @@ public class BoattailHandler extends TransitionHandler {
             throw new IllegalArgumentException("The parent component of a boattail must have at least one child.");
         }
 
-        // Add the Transition directly to the parent stage as a sibling after the
-        // last body tube. This keeps it in the main body chain so that ShockGeometry,
-        // getNextSymmetricComponent(), and base-drag chaining all see it correctly.
+        // Pod to add the boattail to
+        PodSet pod = new PodSet();
+        pod.setInstanceCount(1);
+        pod.setRadius(RadiusMethod.FREE, 0);
+        pod.setName("Boattail pod");
+        pod.setComment(
+                "Because boattails in RASAero can be recessed, we will add the boattail using an inline pod set to the previous component.");
+
+        // Add the pod to the parent's last child, or to a phantom tube if the last
+        // child is a nose cone/transition
         RocketComponent lastChild = parent.getChild(parent.getChildCount() - 1);
         if (lastChild instanceof BodyTube) {
-            parent.addChild(this.transition);
+            lastChild.addChild(pod);
+            pod.setAxialMethod(AxialMethod.TOP);
+            pod.setAxialOffset(lastChild.getLength());
         } else if (lastChild instanceof Transition) {
-            // Boattail after another transition — still a direct sibling.
-            parent.addChild(this.transition);
+            BodyTube phantomBodyTube = new BodyTube();
+            phantomBodyTube.setLength(0);
+            phantomBodyTube.setOuterRadiusAutomatic(true);
+            phantomBodyTube.setName("Boattail phantom tube");
+            ColorHandler.applyRASAeroColor(phantomBodyTube, null); // Set the color to the default RASAero color
+            parent.addChild(phantomBodyTube);
+            phantomBodyTube.addChild(pod);
+            pod.setAxialMethod(AxialMethod.TOP);
+            pod.setAxialOffset(0);
         } else {
             throw new IllegalArgumentException(
-                    "Cannot add boattail after component of type " + lastChild.getClass().getName());
+                    "Cannot add boattail after component of type " + parent.getClass().getName());
         }
 
+        pod.addChild(this.transition);
         this.transition.setAftRadiusAutomatic(false);
         this.transition.setShapeType(Transition.Shape.CONICAL); // RASAero only supports conical boattails
         this.transition.setName("Boattail");

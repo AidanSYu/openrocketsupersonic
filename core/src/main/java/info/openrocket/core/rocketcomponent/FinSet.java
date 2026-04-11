@@ -962,13 +962,48 @@ public abstract class FinSet extends ExternalComponent
 
 	public CoordinateIF getFinFront() {
 		final double xFinFront = this.getAxialFront();
-		final SymmetricComponent symmetricParent = (SymmetricComponent)this.getParent();
-		if( null == symmetricParent){
-			return new Coordinate( 0, 0);
-		}else{
-			final double yFinFront = symmetricParent.getRadius( xFinFront );
+		final RocketComponent parent = this.getParent();
+		if (parent == null) {
+			return new Coordinate(0, 0);
+		}
+
+		// Normal case: fin is mounted directly on a body tube / transition.
+		if (parent instanceof SymmetricComponent) {
+			final SymmetricComponent symmetricParent = (SymmetricComponent) parent;
+			final double yFinFront = symmetricParent.getRadius(xFinFront);
 			return new Coordinate(xFinFront, yFinFront);
 		}
+
+		// Fin is mounted on a ComponentAssembly (PodSet / FinCan / stage).
+		// Walk the assembly's children to find the SymmetricComponent that
+		// contains the root-chord leading edge, then read the local radius.
+		// Without this fallback the raw (SymmetricComponent) cast would throw
+		// a ClassCastException — or, historically, silently return a zero
+		// body radius and collapse the fin-body interference factor K_T,
+		// tanking fin CNa for any rocket using PodSet/FinCan (see Torrent).
+		if (parent instanceof ComponentAssembly) {
+			for (RocketComponent child : parent.getChildren()) {
+				if (!(child instanceof SymmetricComponent)) {
+					continue;
+				}
+				final SymmetricComponent sc = (SymmetricComponent) child;
+				final double xLocal = xFinFront - child.getAxialOffset();
+				if (xLocal >= -1.0e-9 && xLocal <= sc.getLength() + 1.0e-9) {
+					final double yFinFront = sc.getRadius(MathUtil.clamp(xLocal, 0, sc.getLength()));
+					return new Coordinate(xFinFront, yFinFront);
+				}
+			}
+			// No symmetric child spans the fin root — fall back to the first
+			// SymmetricComponent's aft radius (approximates a pod of uniform
+			// diameter) rather than returning zero.
+			for (RocketComponent child : parent.getChildren()) {
+				if (child instanceof SymmetricComponent) {
+					return new Coordinate(xFinFront, ((SymmetricComponent) child).getAftRadius());
+				}
+			}
+		}
+
+		return new Coordinate(0, 0);
 	}
 	
 	@Override

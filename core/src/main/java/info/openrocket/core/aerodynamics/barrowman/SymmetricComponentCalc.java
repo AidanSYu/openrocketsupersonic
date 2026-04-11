@@ -1129,13 +1129,15 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 		double maxDeriv = 3.0 * firstValue / riseWidth;
 		firstDeriv = Math.min(firstDeriv, maxDeriv);
 
-		// Subsonic form drag floor: stagnation pressure contribution at the nose tip.
-		// At M=0, a nose cone has nonzero pressure drag from the stagnation region.
-		// The original OpenRocket model used cdMach0 = 0.8*sin²(φ) as the M=0 anchor,
-		// fitted through a power-law to the first transonic data point. We restore this
-		// floor here so subsonic rockets see the correct subsonic pressure drag.
-		double cdMach0 = 0.8 * sinphi * sinphi;
-		if (cdMach0 < 0.001) cdMach0 = 0;  // negligible for very sharp/tangent noses
+		// No subsonic pressure-drag floor. Prior revisions tried two forms of a
+		// "nose M=0 anchor" (a 0.03-0.04 constant and a 0.8*sin²(φ) power-law); both
+		// were net-negative on the SimVReal benchmark because they added drag on top
+		// of the analytical subsonic pressure-drag which is already ~0 for slender
+		// ogives/cones at M<Mdd. The stagnation region contributes ~Cp_stag*A_tip /
+		// A_ref which is O(1e-4) for a realistic tip diameter and is absorbed into
+		// the friction term anyway. Any genuine residual subsonic form drag belongs
+		// in protuberance/excrescence/Hoerner-form-factor modeling, not here.
+		double cdMach0 = 0;
 
 		// C1-continuous cubic: (mdd, cdMach0, slope=0) → (firstMach, firstValue, slope=firstDeriv)
 		PolyInterpolator riseInterp = new PolyInterpolator(
