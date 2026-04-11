@@ -109,7 +109,8 @@ public class ArrayUtils {
 		double[] x = range(0, stop, dt);
 
 		double sum = 0.0;
-		for (int i = 1; i < x.length; i++) {
+		int limit = Math.min(x.length, y.length);
+		for (int i = 1; i < limit; i++) {
 			double temp = (x[i] - x[i - 1]) * (y[i] + y[i - 1]);
 			if (!Double.isNaN(temp)) {
 				sum += temp;

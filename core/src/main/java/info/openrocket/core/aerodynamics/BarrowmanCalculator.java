@@ -25,6 +25,7 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 
 	private final StabilityCalculator stabilityCalculator;
 	private final DragCalculator dragCalculator;
+	private int nanWarningCount = 0;
 
 	public BarrowmanCalculator() {
 		this(new BarrowmanStabilityCalculator(), new BarrowmanDragCalculator());
@@ -90,25 +91,37 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 				continue;
 			}
 
+			// ComponentAssembly entries (PodSet, stages) get their CN/CM from the
+			// stability pass but never have drag fields written by the drag calc,
+			// so baseCD/pressureCD/frictionCD default to NaN. Zero them silently
+			// instead of logging — real NaN on an aerodynamic component should
+			// stand out, not be drowned out by a per-assembly false positive.
+			boolean isAssembly = comp instanceof ComponentAssembly;
+
+			boolean hasNaN = false;
 			if (forces.getCP().isNaN()) {
-				logger.warn("Non-finite CP detected for component {}, defaulting to zero", comp);
 				forces.setCP(Coordinate.ZERO);
+				if (!isAssembly) hasNaN = true;
 			}
 			if (!Double.isFinite(forces.getBaseCD())) {
-				logger.warn("Non-finite baseCD={} for component {}, defaulting to zero", forces.getBaseCD(), comp);
 				forces.setBaseCD(0);
+				if (!isAssembly) hasNaN = true;
 			}
 			if (!Double.isFinite(forces.getPressureCD())) {
-				logger.warn("Non-finite pressureCD={} for component {}, defaulting to zero", forces.getPressureCD(), comp);
 				forces.setPressureCD(0);
+				if (!isAssembly) hasNaN = true;
 			}
 			if (!Double.isFinite(forces.getFrictionCD())) {
-				logger.warn("Non-finite frictionCD={} for component {}, defaulting to zero", forces.getFrictionCD(), comp);
 				forces.setFrictionCD(0);
+				if (!isAssembly) hasNaN = true;
 			}
 			if (!Double.isFinite(forces.getOverrideCD())) {
-				logger.warn("Non-finite overrideCD={} for component {}, defaulting to zero", forces.getOverrideCD(), comp);
 				forces.setOverrideCD(0);
+				if (!isAssembly) hasNaN = true;
+			}
+			if (hasNaN && nanWarningCount < 5) {
+				logger.warn("Non-finite aero coefficients for component {} (further warnings suppressed)", comp);
+				nanWarningCount++;
 			}
 
 			double cd = forces.getBaseCD() + forces.getPressureCD() + forces.getFrictionCD() + forces.getOverrideCD();
@@ -203,14 +216,18 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 	 * Catches NaN, Infinity, and extreme values from transonic singularities
 	 * or other numerical issues in the component calculators.
 	 */
-	private static void sanitizeForces(AerodynamicForces forces, FlightConditions conditions,
+	// Per-instance counter so each simulation run gets independent clamp logging.
+	// Previously static, which meant Byrum (first in benchmark) consumed all 3 log
+	// slots and Proteus 6's destabilizing Cm clamps fired silently.
+	private int sanitizeWarningCount = 0;
+
+	private void sanitizeForces(AerodynamicForces forces, FlightConditions conditions,
 			WarningSet warnings) {
 		boolean clamped = false;
 
 		// Sanitize drag coefficients
 		double cd = forces.getCD();
 		if (!Double.isFinite(cd) || cd > MAX_REASONABLE_CD) {
-			logger.warn("Non-finite or extreme CD={} at M={}, clamping to {}", cd, conditions.getMach(), MAX_REASONABLE_CD);
 			forces.setCD(MAX_REASONABLE_CD);
 			forces.setCDaxial(MAX_REASONABLE_CD);
 			clamped = true;
@@ -218,7 +235,6 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 
 		double cdAxial = forces.getCDaxial();
 		if (!Double.isFinite(cdAxial) || Math.abs(cdAxial) > MAX_REASONABLE_CD) {
-			logger.warn("Non-finite or extreme CDaxial={} at M={}, clamping", cdAxial, conditions.getMach());
 			forces.setCDaxial(Math.copySign(MAX_REASONABLE_CD, cdAxial));
 			clamped = true;
 		}
@@ -226,28 +242,37 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 		// Sanitize normal force coefficient
 		double cn = forces.getCN();
 		if (!Double.isFinite(cn) || Math.abs(cn) > MAX_REASONABLE_CN) {
-			logger.warn("Non-finite or extreme CN={} at M={}, clamping", cn, conditions.getMach());
 			forces.setCN(Math.copySign(MAX_REASONABLE_CN, Double.isFinite(cn) ? cn : 0));
 			clamped = true;
 		}
 
 		// Sanitize pitching moment
+		// Extreme Cm values (e.g., 262 at M=0.06 from NaN rail guide propagation)
+		// cause trajectory divergence. Physically, |Cm| > 50 is unphysical for any
+		// rocket geometry and indicates a numerical blow-up.
 		double cm = forces.getCm();
-		if (!Double.isFinite(cm)) {
-			logger.warn("Non-finite Cm={} at M={}, zeroing", cm, conditions.getMach());
-			forces.setCm(0);
+		if (!Double.isFinite(cm) || Math.abs(cm) > 50.0) {
+			if (!Double.isFinite(cm)) {
+				forces.setCm(0);
+			} else {
+				forces.setCm(Math.copySign(50.0, cm));
+			}
 			clamped = true;
 		}
 
 		// Sanitize side force
 		double cside = forces.getCside();
 		if (!Double.isFinite(cside)) {
-			logger.warn("Non-finite Cside={} at M={}, zeroing", cside, conditions.getMach());
 			forces.setCside(0);
 			clamped = true;
 		}
 
 		if (clamped) {
+			if (sanitizeWarningCount < 3) {
+				logger.warn("Clamped aero coefficients at M={} (CD={}, CN={}, Cm={}); further warnings suppressed",
+						conditions.getMach(), cd, cn, cm);
+				sanitizeWarningCount++;
+			}
 			warnings.add(Warning.FORCE_COEFFICIENT_CLAMPED);
 		}
 	}

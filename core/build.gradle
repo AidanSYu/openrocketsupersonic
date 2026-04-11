@@ -240,6 +240,13 @@ processResources {
     }
 }
 
+// Redirect test binary output to temp directory to avoid VS Code file-locking
+// the output.bin in the build directory on Windows.
+tasks.withType(Test).configureEach {
+    reports.junitXml.outputLocation = layout.buildDirectory.dir("test-results/test")
+    binaryResultsDirectory = layout.buildDirectory.dir("tmp/test-binary")
+}
+
 clean.dependsOn([externalComponentsDelete])
 //compileJava.dependsOn([externalComponentsCopy])
 processResources.dependsOn([externalComponentsCopy])

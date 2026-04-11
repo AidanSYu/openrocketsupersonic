@@ -22,6 +22,7 @@ import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.rocketcomponent.SymmetricComponent;
 import info.openrocket.core.rocketcomponent.Transition;
 import info.openrocket.core.rocketcomponent.position.AxialMethod;
+import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.util.MathUtil;
 import info.openrocket.core.util.PolyInterpolator;
 import info.openrocket.core.util.Reflection;
@@ -126,6 +127,21 @@ public class BarrowmanDragCalculator implements DragCalculator {
 			WarningSet warnings) {
 		ensureCalcMap(configuration);
 		WarningSet actualWarnings = (warnings != null) ? warnings : ignoreWarningSet;
+
+		// Initialize per-component drag fields to 0 so components that don't
+		// contribute to a given term (e.g. a nose cone has no base drag because
+		// its aft radius matches the next body tube) don't leave the field at
+		// its default NaN. Without this, getForceAnalysis()'s sanitize loop
+		// spuriously fires "Non-finite aero coefficients" warnings for every
+		// component that doesn't happen to receive a write from the loops below.
+		if (componentForces != null) {
+			for (AerodynamicForces f : componentForces.values()) {
+				if (!Double.isFinite(f.getFrictionCD())) f.setFrictionCD(0);
+				if (!Double.isFinite(f.getPressureCD())) f.setPressureCD(0);
+				if (!Double.isFinite(f.getBaseCD())) f.setBaseCD(0);
+				if (!Double.isFinite(f.getOverrideCD())) f.setOverrideCD(0);
+			}
+		}
 
 		double frictionCD = calculateFrictionCD(configuration, conditions, componentForces, actualWarnings);
 		double pressureCD = calculatePressureCD(configuration, conditions, componentForces, actualWarnings);
@@ -265,14 +281,33 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		}
 
 		if (maxR < 1e-9) maxR = 1e-9;
-		double fB = (maxX - minX + 0.0001) / maxR;
-		double correction = (1 + 1.0 / (2 * fB));
+		// Hoerner streamlined body form factor for bodies of revolution.
+		// Reference: Hoerner "Fluid Dynamic Drag" (1965), Ch. 6 Eq. 6-21
+		// FF = 1 + 1.5/(L/d)^1.5 + 7/(L/d)^3
+		// This accounts for pressure gradient effects on the boundary layer
+		// that increase friction drag beyond flat-plate values.
+		// Note: Hoerner also has a non-streamlined formula (1 + 60/f^3 + 0.0025*f)
+		// which gives higher corrections, but it over-corrects for supersonic rockets
+		// where the Eckert reference temperature method already accounts for
+		// compressibility effects on friction. The streamlined formula is more
+		// appropriate for the rocket geometries we're modeling.
+		double totalLength = maxX - minX + 0.0001;
+		double ld = totalLength / (2.0 * maxR); // fineness ratio L/d
+		double correction = 1.0 + 1.5 / Math.pow(ld, 1.5) + 7.0 / Math.pow(ld, 3.0);
 
 		// Phase 8c: Boundary layer transition correction
-		double totalLength = maxX - minX;
 		double velocity = conditions.getVelocity();
 		double kinematicViscosity = conditions.getAtmosphericConditions().getKinematicViscosity();
 		double fLam = laminarFraction(mach, totalLength, velocity, kinematicViscosity);
+		// Real painted HPR airframes (paint, couplers, fin fillets, launch lugs) trip
+		// the boundary layer within inches. Only "perfect finish" rockets can sustain
+		// extended laminar flow; otherwise cap the laminar fraction to a small value.
+		// Without this cap the Michel-criterion Re_tr = 3e6 produces ~17% friction
+		// haircut on typical HPR airframes at low Mach — a systematic subsonic drag
+		// deficit visible in the SimVReal benchmark overshoot cluster.
+		if (!configuration.getRocket().isPerfectFinish()) {
+			fLam = Math.min(fLam, 0.05);
+		}
 		double transitionFactor = 1.0 - 0.6 * fLam;
 
 		if (forceMap != null) {
@@ -503,6 +538,77 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		return total;
 	}
 
+	/**
+	 * Find the effective "next" radius for base-drag accounting when
+	 * {@link SymmetricComponent#getNextSymmetricComponent()} fails to traverse
+	 * into coaxial PodSets. Two topologies are handled:
+	 *
+	 * <p><b>Abutting topology</b> (e.g. Qu8k): a downstream component's <em>fore</em>
+	 * face sits at {@code s}'s aft face. Returns that component's fore radius.
+	 *
+	 * <p><b>Sleeve topology</b> (e.g. DontDebate fin can): a larger-OD component
+	 * <em>overlaps</em> the aft section of {@code s} — its own aft face coincides
+	 * with {@code s}'s aft face while its fore face is upstream. Physically,
+	 * {@code s}'s base is entirely hidden inside the sleeve, so base drag should
+	 * be suppressed. Returns {@code s.getAftRadius()} in that case (drives the
+	 * {@code nextRadius < aftRadius} guard to false, zeroing the phantom base).
+	 *
+	 * @return the effective next-component radius, or 0 if nothing qualifies.
+	 */
+	private double findAbuttingDownstreamRadius(SymmetricComponent s,
+			ArrayList<InstanceContext> sContexts, InstanceMap imap,
+			FlightConfiguration configuration) {
+		if (sContexts == null || sContexts.isEmpty()) return 0;
+
+		// Use the first instance of s to locate its aft face.
+		InstanceContext sCtx = sContexts.get(0);
+		CoordinateIF sLoc = sCtx.getLocation();
+		double sAftX = sLoc.getX() + s.getLength();
+		double sY = sLoc.getY();
+		double sZ = sLoc.getZ();
+
+		final double X_TOL = 1.0e-4;      // 0.1 mm tolerance
+		final double AXIS_TOL = 1.0e-4;   // 0.1 mm coaxial tolerance
+
+		double bestRadius = 0;
+		for (Map.Entry<RocketComponent, ArrayList<InstanceContext>> e2 : imap.entrySet()) {
+			RocketComponent c2 = e2.getKey();
+			if (c2 == s || !(c2 instanceof SymmetricComponent)) continue;
+			if (!configuration.isComponentActive(c2)) continue;
+
+			SymmetricComponent other = (SymmetricComponent) c2;
+			for (InstanceContext ctx : e2.getValue()) {
+				CoordinateIF loc = ctx.getLocation();
+				// Coaxial with s?
+				if (Math.abs(loc.getY() - sY) > AXIS_TOL
+						|| Math.abs(loc.getZ() - sZ) > AXIS_TOL) {
+					continue;
+				}
+
+				// --- Abutting topology: other's fore face at our aft face ---
+				if (Math.abs(loc.getX() - sAftX) <= X_TOL) {
+					double r = other.getForeRadius();
+					if (r > bestRadius) {
+						bestRadius = r;
+					}
+					continue;
+				}
+
+				// --- Sleeve topology: other's aft face coincides with our aft face,
+				//     and it overlaps us (fore face is upstream). If the sleeve's aft
+				//     radius covers our aft radius, our base is fully hidden — suppress it.
+				double otherAftX = loc.getX() + other.getLength();
+				if (Math.abs(otherAftX - sAftX) <= X_TOL
+						&& loc.getX() < sAftX - X_TOL
+						&& other.getAftRadius() >= s.getAftRadius() - X_TOL) {
+					// Return full suppression immediately — no need to search further.
+					return s.getAftRadius();
+				}
+			}
+		}
+		return bestRadius;
+	}
+
 	private double calculateBaseCD(FlightConfiguration configuration, FlightConditions conditions,
 			Map<RocketComponent, AerodynamicForces> forceMap, WarningSet warningSet) {
 		ensureCalcMap(configuration);
@@ -549,6 +655,23 @@ public class BarrowmanDragCalculator implements DragCalculator {
 					nextRadius = nextComponent.getForeRadius();
 				} else {
 					nextRadius = 0.0;
+				}
+
+				// SymmetricComponent.getNextSymmetricComponent() does not traverse into
+				// PodSets whose children abut this component at its aft face (only
+				// flush-with-front pods are detected). Rockets that place the fin can
+				// or boat-tail in an aft-abutting coaxial PodSet (e.g. DontDebate,
+				// Qu8k) therefore end up charging a full phantom base on the parent
+				// body tube AND another base on the pod-hosted tube — roughly doubling
+				// the supersonic base drag. Patch that up here by searching the active
+				// instance map for any coaxial SymmetricComponent whose fore face sits
+				// at this component's aft X.
+				if (nextRadius < aftRadius) {
+					double abuttingRadius = findAbuttingDownstreamRadius(
+							s, entry.getValue(), imap, configuration);
+					if (abuttingRadius > nextRadius) {
+						nextRadius = abuttingRadius;
+					}
 				}
 
 				if (nextRadius < aftRadius) {

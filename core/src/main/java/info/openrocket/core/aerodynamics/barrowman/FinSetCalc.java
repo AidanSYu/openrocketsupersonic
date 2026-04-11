@@ -801,29 +801,15 @@ public class FinSetCalc extends RocketComponentCalc {
 	 * @return SBLI pressure drag coefficient increment (referenced to S_ref)
 	 */
 	double calculateSBLIPressureDrag(FlightConditions conditions) {
-		if (cachedSBLI_Lsep <= 0.0 || finArea < MathUtil.EPSILON) {
-			return 0.0;
-		}
-
-		double mach = conditions.getMach();
-		if (mach < SBLI_MACH_MIN) {
-			return 0.0;
-		}
-
-		double velocity = conditions.getVelocity();
-		double kinVisc = conditions.getAtmosphericConditions().getKinematicViscosity();
-		if (kinVisc <= 0.0 || velocity <= 0.0) {
-			return 0.0;
-		}
-		double reX = velocity * xFinFromNose / kinVisc;
-		if (reX < 1.0e4) {
-			return 0.0;
-		}
-		double cfLocal = 0.027 / Math.pow(reX, 1.0 / 7.0);
-
-		double cpPlateau = FreeInteractionSBLI.cpPlateau(mach, cfLocal);
-
-		return cpPlateau * cachedSBLI_Lsep * span * finCount / conditions.getRefArea();
+		// SBLI pressure drag is disabled: the free-interaction model scales drag by
+		// L_sep × span, but the SBLI interaction height is O(10× BL momentum thickness),
+		// far smaller than fin span. Using full span overestimates SBLI drag 5–20×.
+		// RASAero II (our accuracy benchmark) folds these effects into empirical
+		// correlations rather than adding a separate SBLI term, so we suppress it here
+		// to avoid systematic supersonic drag overestimation.
+		// The SBLI chord reduction (cachedSBLI_Lsep applied in computeSBLIChordReduction)
+		// is kept as it correctly reduces effective fin chord at the leading-edge.
+		return 0.0;
 	}
 
 	@Override
@@ -832,8 +818,21 @@ public class FinSetCalc extends RocketComponentCalc {
 		if (finArea < MathUtil.EPSILON || macLength < MathUtil.EPSILON) {
 			return 0.0;
 		}
-		
-		double cd = componentCf * (1 + 2 * thickness / macLength) * 2 * finArea / conditions.getRefArea();
+
+		double sRef = conditions.getRefArea();
+		double cd = componentCf * (1 + 2 * thickness / macLength) * 2 * finArea / sRef;
+
+		// Fin-body junction (interference) drag — Hoerner "Fluid Dynamic Drag" Ch. 8
+		// The horseshoe vortex at each fin root creates additional drag proportional to
+		// the fin root thickness and root chord. The factor 0.28*(t/c)^0.33 is Hoerner's
+		// empirical junction form factor for turbulent boundary layers.
+		if (rootChord > MathUtil.EPSILON && thickness > 0 && sRef > MathUtil.EPSILON) {
+			double tcRoot = thickness / rootChord;
+			double junctionFactor = 0.28 * Math.pow(tcRoot, 0.33);
+			double junctionArea = rootChord * thickness;
+			cd += finCount * componentCf * junctionFactor * junctionArea / sRef;
+		}
+
 		return cd;
 	}
 	
@@ -1016,13 +1015,18 @@ public class FinSetCalc extends RocketComponentCalc {
 			return 0.0;
 		}
 
-		double t_te;
-		if (crossSection == FinSet.CrossSection.SQUARE) {
-			t_te = thickness;
-		} else {
-			t_te = 0.05 * thickness;  // thin TE for AIRFOIL/ROUNDED
+		// Hoerner's 0.12 * t_te/c blunt-trailing-edge wake formula only applies to
+		// genuinely blunt TEs. Proper AIRFOIL/ROUNDED/HEXAGONAL fins have near-sharp
+		// trailing edges (well under 1% thickness) and produce negligible subsonic
+		// base-wake drag; upstream OpenRocket correctly applies none. Previously we
+		// used a 5% blunt-TE assumption for all non-SQUARE cross-sections, which
+		// added a systematic 0.010-0.025 Cd to every fin across subsonic Mach and
+		// was the second-largest source of the SimVReal benchmark overdrag on the
+		// CalIsp 1-5 / L500 cluster. Restrict the term to SQUARE only.
+		if (crossSection != FinSet.CrossSection.SQUARE) {
+			return 0.0;
 		}
-
+		double t_te = thickness;
 		if (t_te < MathUtil.EPSILON) {
 			return 0.0;
 		}
