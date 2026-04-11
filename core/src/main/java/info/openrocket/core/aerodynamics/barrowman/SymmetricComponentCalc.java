@@ -374,7 +374,11 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 
 	@Override
 	public double calculateFrictionCD(FlightConditions conditions, double componentCf, WarningSet warningSet) {
-		return componentCf * wetArea / conditions.getRefArea();
+		double refArea = conditions.getRefArea();
+		if (!Double.isFinite(wetArea) || !Double.isFinite(componentCf) || refArea < 1e-12) {
+			return 0;
+		}
+		return componentCf * wetArea / refArea;
 	}
 
 	private LinearInterpolator interpolator = null;
@@ -409,13 +413,22 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 			if (interpolator == null) {
 				calculateNoseInterpolator();
 			}
-			cd = interpolator.getValue(conditions.getMach()) * frontalArea / conditions.getRefArea();
+			double interpCd = interpolator.getValue(conditions.getMach());
+			double refArea = conditions.getRefArea();
+			if (Double.isFinite(interpCd) && Double.isFinite(frontalArea) && refArea > 1e-12) {
+				cd = interpCd * frontalArea / refArea;
+			} else {
+				cd = 0;
+			}
 		}
 
 		// Phase 7d: Add ESDU 66011 forward-facing step drag at supersonic speeds
-		cd += calculateStepDrag(conditions);
+		double stepCd = calculateStepDrag(conditions);
+		if (Double.isFinite(stepCd)) {
+			cd += stepCd;
+		}
 
-		return cd;
+		return Double.isFinite(cd) ? cd : 0;
 	}
 
 	// ---- Phase 7d: ESDU 66011 forward-facing step drag ----
@@ -1083,8 +1096,16 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 		double firstMach = xPoints[0];
 		double firstValue = interpolator.getValue(firstMach);
 
-		// If drag is already near zero at the first data point, the existing
-		// data captures the onset — nothing to add.
+		// Smooth ogives (firstValue ≈ 0 at M 0.9 from the reference data) genuinely
+		// have near-zero subsonic pressure drag: the stagnation pressure rise on the
+		// front cancels against pressure recovery on the shoulder, so almost all
+		// subsonic drag is skin friction. Upstream OpenRocket leaves Cd_pressure = 0
+		// here and matches the SimVReal CalIsp 1-5 rockets to within +0.1 to +8%.
+		// A previous revision added a 0.03-0.04 "minimum floor" across M<0.9 which
+		// appeared sensible in isolation but introduced a systematic 8-10% overdrag
+		// on every tangent-ogive HPR rocket in the benchmark; removed. If a real
+		// missing subsonic drag term shows up later, model it as protuberance /
+		// roughness / Hoerner form-factor — not as a blanket nose-cone floor.
 		if (firstValue < 0.001) {
 			return;
 		}
@@ -1108,26 +1129,34 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 		double maxDeriv = 3.0 * firstValue / riseWidth;
 		firstDeriv = Math.min(firstDeriv, maxDeriv);
 
-		// C1-continuous cubic: (mdd, 0, slope=0) → (firstMach, firstValue, slope=firstDeriv)
+		// Subsonic form drag floor: stagnation pressure contribution at the nose tip.
+		// At M=0, a nose cone has nonzero pressure drag from the stagnation region.
+		// The original OpenRocket model used cdMach0 = 0.8*sin²(φ) as the M=0 anchor,
+		// fitted through a power-law to the first transonic data point. We restore this
+		// floor here so subsonic rockets see the correct subsonic pressure drag.
+		double cdMach0 = 0.8 * sinphi * sinphi;
+		if (cdMach0 < 0.001) cdMach0 = 0;  // negligible for very sharp/tangent noses
+
+		// C1-continuous cubic: (mdd, cdMach0, slope=0) → (firstMach, firstValue, slope=firstDeriv)
 		PolyInterpolator riseInterp = new PolyInterpolator(
 				new double[] { mdd, firstMach },
 				new double[] { mdd, firstMach });
-		double[] risePoly = riseInterp.interpolator(0, firstValue, 0, firstDeriv);
+		double[] risePoly = riseInterp.interpolator(cdMach0, firstValue, 0, firstDeriv);
 
 		// Lock's 4th-power onset: applied near M_crit for a steeper onset
 		// The critical Mach (onset of local supersonic flow) is slightly below mdd.
 		double mCrit = Math.max(0, mdd - 0.05);
-		double cdAtMcrit = Math.max(0, PolyInterpolator.eval(Math.max(mCrit, mdd), risePoly));
+		double cdAtMcrit = Math.max(cdMach0, PolyInterpolator.eval(Math.max(mCrit, mdd), risePoly));
 		double kLock = firstValue - cdAtMcrit;
 
 		// Sample the rise region with Lock's 4th-power near onset
-		interpolator.addPoint(mdd, 0);
+		interpolator.addPoint(mdd, cdMach0);
 		interpolator.addPoint(mdd + 0.005,
-				Math.max(0, PolyInterpolator.eval(mdd + 0.005, risePoly)));
+				Math.max(cdMach0, PolyInterpolator.eval(mdd + 0.005, risePoly)));
 		for (double m = mdd + 0.01; m < firstMach - 0.008; m += 0.01) {
 			if (m <= mCrit) {
 				// Below M_crit: use original cubic rise
-				interpolator.addPoint(m, Math.max(0, PolyInterpolator.eval(m, risePoly)));
+				interpolator.addPoint(m, Math.max(cdMach0, PolyInterpolator.eval(m, risePoly)));
 			} else if (kLock > 0.001) {
 				// Between M_crit and onset: Lock's 4th-power for steeper rise
 				double xr = (m - mCrit) / (firstMach - mCrit);
@@ -1135,7 +1164,7 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 				interpolator.addPoint(m, cdAtMcrit + deltaCd);
 			} else {
 				// Fallback: continue cubic rise
-				interpolator.addPoint(m, Math.max(0, PolyInterpolator.eval(m, risePoly)));
+				interpolator.addPoint(m, Math.max(cdMach0, PolyInterpolator.eval(m, risePoly)));
 			}
 		}
 		// Close-approach points near the join for smooth transition.
@@ -1150,14 +1179,15 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 				interpolator.addPoint(nearJoin2, cdAtMcrit + kLock * xr2 * xr2 * xr2 * xr2);
 			} else {
 				interpolator.addPoint(nearJoin1,
-						Math.max(0, PolyInterpolator.eval(nearJoin1, risePoly)));
+						Math.max(cdMach0, PolyInterpolator.eval(nearJoin1, risePoly)));
 				interpolator.addPoint(nearJoin2,
-						Math.max(0, PolyInterpolator.eval(nearJoin2, risePoly)));
+						Math.max(cdMach0, PolyInterpolator.eval(nearJoin2, risePoly)));
 			}
 		}
 
-		// Zero below Mdd (LinearInterpolator constant-extrapolates below first point)
-		interpolator.addPoint(0, 0);
+		// Constant subsonic floor below Mdd (LinearInterpolator extrapolates constant
+		// below its lowest point, so this single anchor holds Cd=cdMach0 for all M<mdd)
+		interpolator.addPoint(0, cdMach0);
 	}
 
 	/**

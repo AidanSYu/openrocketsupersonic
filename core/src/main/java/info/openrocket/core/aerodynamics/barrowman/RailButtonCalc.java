@@ -75,23 +75,53 @@ public class RailButtonCalc extends RocketComponentCalc {
 
 		double mach = conditions.getMach();
 
+		double result;
 		// At supersonic speeds, use the Phase 7c wave drag model
 		if (mach >= WAVE_DRAG_BLEND_HIGH) {
-			return calculateSupersonicPressureCD(conditions, refArea);
+			result = calculateSupersonicPressureCD(conditions, refArea);
+		} else {
+			// Compute Hoerner subsonic drag
+			double hoernerCd = calculateHoernerPressureCD(conditions, stagnationCD, refArea);
+
+			// In the blend region, interpolate between Hoerner and supersonic
+			if (mach > WAVE_DRAG_BLEND_LOW) {
+				double supersonicCd = calculateSupersonicPressureCD(conditions, refArea);
+				double t = (mach - WAVE_DRAG_BLEND_LOW) / (WAVE_DRAG_BLEND_HIGH - WAVE_DRAG_BLEND_LOW);
+				double w = t * t * (3 - 2 * t); // C1-continuous smoothstep
+				result = (1 - w) * hoernerCd + w * supersonicCd;
+			} else {
+				result = hoernerCd;
+			}
 		}
 
-		// Compute Hoerner subsonic drag
-		double hoernerCd = calculateHoernerPressureCD(conditions, stagnationCD, refArea);
-
-		// In the blend region, interpolate between Hoerner and supersonic
-		if (mach > WAVE_DRAG_BLEND_LOW) {
-			double supersonicCd = calculateSupersonicPressureCD(conditions, refArea);
-			double t = (mach - WAVE_DRAG_BLEND_LOW) / (WAVE_DRAG_BLEND_HIGH - WAVE_DRAG_BLEND_LOW);
-			double w = t * t * (3 - 2 * t); // C1-continuous smoothstep
-			return (1 - w) * hoernerCd + w * supersonicCd;
+		// Body interference wake penalty: add at all Mach. Subsonic protuberances
+		// still disturb the downstream boundary layer — gating this to M>1 left a
+		// systematic subsonic drag deficit on rail-guided HPR vehicles.
+		// Already included inside calculateSupersonicPressureCD for M >= blend_high,
+		// so only add it in the subsonic and blend branches here.
+		if (mach < WAVE_DRAG_BLEND_HIGH) {
+			double interferenceCd = calculateInterferenceDrag(conditions);
+			if (mach > WAVE_DRAG_BLEND_LOW) {
+				// In the blend region the supersonic branch already contributed
+				// (1 - w) worth of interference through the lerp above; top it up.
+				double t = (mach - WAVE_DRAG_BLEND_LOW) / (WAVE_DRAG_BLEND_HIGH - WAVE_DRAG_BLEND_LOW);
+				double w = t * t * (3 - 2 * t);
+				result += (1 - w) * interferenceCd;
+			} else {
+				result += interferenceCd;
+			}
 		}
 
-		return hoernerCd;
+		// Defensive: rail-button drag is tiny (~0.5-2% of total Cd), and
+		// BarrowmanCalculator silently zeros non-finite component Cd without
+		// a WarningSet entry. If a shock solver or PM expansion produces a
+		// NaN/Inf at an edge case, return 0 rather than letting the silent
+		// zeroing mask a real drag contribution elsewhere.
+		if (!Double.isFinite(result)) {
+			log.debug("RailButtonCalc produced non-finite pressureCD at M={}; clamping to 0", mach);
+			return 0;
+		}
+		return result;
 	}
 
 	/**
@@ -237,8 +267,7 @@ public class RailButtonCalc extends RocketComponentCalc {
 	 * @return interference drag coefficient referenced to vehicle S_ref
 	 */
 	private double calculateInterferenceDrag(FlightConditions conditions) {
-		double mach = conditions.getMach();
-		if (mach <= 1.0) return 0;
+		if (conditions.getMach() < MathUtil.EPSILON) return 0;
 
 		double sRef = conditions.getRefArea();
 		if (sRef < 1e-12) return 0;

@@ -1761,11 +1761,12 @@ along rays from the apex of the cone.
 \centering
 \begin{tikzpicture}[font=\small, >=Latex]
 \coordinate (A) at (0,0);
-\draw[->, thick] (-0.3,0) -- (5.5,0) node[below] {axis of symmetry};
-\draw[thick] (A) -- (18:4.2) node[right] {cone surface ($\theta_c$)};
-\draw[thick, dashed] (A) -- (42:3.6) node[above, sloped, pos=0.6] {conical shock ($\beta_{\mathrm{cone}}$)};
-\node[align=left, anchor=west] at (0.15,1.65) {$M_1$ freestream\\post-shock $M_2$ varies\\along rays};
-\node[align=center, font=\scriptsize] at (2.85,-1.05) {3D relief: $\beta_{\mathrm{cone}} < \beta_{\mathrm{wedge}}$ for same $\theta_c$, $M_1$};
+% Extra left margin so annotations do not overlap the shock or cone
+\draw[->, thick] (-1.15,0) -- (5.5,0) node[below] {axis of symmetry};
+\draw[thick] (A) -- (18:4.2) node[pos=0.9, below right, inner sep=1pt] {\scriptsize cone surface ($\theta_c$)};
+\draw[thick, dashed] (A) -- (42:3.6) node[pos=0.7, above left, sloped, inner sep=1pt] {\scriptsize conical shock ($\beta_{\mathrm{cone}}$)};
+\node[align=left, anchor=north west, text width=2.6cm, inner sep=1pt] at (-1.1,1.75) {$M_1$ freestream\\post-shock $M_2$ varies\\along rays};
+\node[align=center, font=\scriptsize, text width=7.2cm] at (2.65,-1.35) {3D relief:\\$\beta_{\mathrm{cone}} < \beta_{\mathrm{wedge}}$ for the same $\theta_c$, $M_1$};
 \end{tikzpicture}
 \caption{Schematic conical shock and axisymmetric ``3D relief'' relative to a wedge at the same half-angle.}
 \label{fig:conical-shock-relief}

@@ -62,8 +62,8 @@ public class SupersonicBaselineTest {
 	 */
 	@ParameterizedTest(name = "Cone-Cylinder CD at M{0}")
 	@CsvSource({
-			"0.3,  0.303597",
-			"0.5,  0.358370",
+			"0.3,  0.412511",
+			"0.5,  0.429127",
 			"0.9,  0.482754",
 			"1.1,  0.696012",
 			"1.5,  0.450111",
@@ -78,8 +78,8 @@ public class SupersonicBaselineTest {
 
 	@ParameterizedTest(name = "Ogive-Cylinder CD at M{0}")
 	@CsvSource({
-			"0.3,  0.310111",
-			"0.5,  0.366172",
+			"0.3,  0.436712",
+			"0.5,  0.453169",
 			"0.9,  0.481411",
 			"1.1,  0.544110",
 			"1.5,  0.352605",
@@ -94,7 +94,7 @@ public class SupersonicBaselineTest {
 
 	@ParameterizedTest(name = "Cone-Cylinder-Fins CD at M{0}")
 	@CsvSource({
-			"0.3,  0.545927",
+			"0.3,  0.666307",
 			"0.5,  0.660039",
 			"0.9,  0.772317",
 			"1.1,  1.007036",
@@ -110,8 +110,8 @@ public class SupersonicBaselineTest {
 
 	@ParameterizedTest(name = "Ogive-Boattail-Fins CD at M{0}")
 	@CsvSource({
-			"0.3,  0.450690",
-			"0.5,  0.508586",
+			"0.3,  0.580737",
+			"0.5,  0.593828",
 			"0.9,  0.588382",
 			"1.1,  0.679698",
 			"1.5,  0.561085",
@@ -126,8 +126,8 @@ public class SupersonicBaselineTest {
 
 	@ParameterizedTest(name = "VonKarman-Fins CD at M{0}")
 	@CsvSource({
-			"0.3,  0.328014",
-			"0.5,  0.401862",
+			"0.3,  0.462336",
+			"0.5,  0.492205",
 			"0.9,  0.659554",
 			"1.1,  0.729573",
 			"1.5,  0.627805",
