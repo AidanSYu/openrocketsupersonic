@@ -128,8 +128,18 @@ public class SimulationHandler extends AbstractElementHandler {
             rocket.setSelectedConfiguration(fcid);
         }
 
+        // RASAero's SustainerIgnitionDelay is measured from liftoff.
+        // ORP's IgnitionEvent.BURNOUT delay is measured from when the booster burns out.
+        // Convert by subtracting the booster1 burn time so that M_sustainer fires at the
+        // correct absolute time (= sustainerIgnitionDelay seconds after liftoff).
+        Double correctedSustainerDelay = sustainerIgnitionDelay;
+        if (sustainerIgnitionDelay != null && booster1Engine != null && Boolean.TRUE.equals(includeBooster1)) {
+            double boosterBurnTime = booster1Engine.getBurnTime();
+            correctedSustainerDelay = Math.max(0.0, sustainerIgnitionDelay - boosterBurnTime);
+        }
+
         // Add motors to the rocket
-        MotorMount sustainerMount = addMotorToStage(0, sustainerEngine, sustainerIgnitionDelay, fcid, true, warnings);
+        MotorMount sustainerMount = addMotorToStage(0, sustainerEngine, correctedSustainerDelay, fcid, true, warnings);
         MotorMount booster1Mount = addMotorToStage(1, booster1Engine, booster1IgnitionDelay, fcid, includeBooster1,
                 warnings);
         MotorMount booster2Mount = addMotorToStage(2, booster2Engine, 0.0, fcid, includeBooster2, warnings);

@@ -316,8 +316,11 @@ public class RASAeroCommonConstants {
         } else if (CROSS_SECTION_SUBSONIC_NACA.equals(crossSection)) {
             return FinSet.CrossSection.AIRFOIL;
         } else if (CROSS_SECTION_HEXAGONAL.equals(crossSection)) {
-            // Hexagonal (double-wedge/diamond) is closest to Square in OpenRocket
-            return FinSet.CrossSection.SQUARE;
+            // Hexagonal = double-wedge: sharp LE and TE with a flat midsection.
+            // Maps to the HEXAGONAL cross-section which uses zero LE bluntness drag
+            // and correct Ackeret thickness wave drag (not the blunt normal-shock
+            // stagnation that SQUARE would apply — worth ~0.15 Cd error at M 3).
+            return FinSet.CrossSection.HEXAGONAL;
         } else {
             String msg = "Unknown fin cross section: " + crossSection + ", defaulting to Airfoil.";
             warnings.add(msg);
@@ -333,6 +336,8 @@ public class RASAeroCommonConstants {
             return CROSS_SECTION_ROUNDED;
         } else if (FinSet.CrossSection.AIRFOIL.equals(crossSection)) {
             return CROSS_SECTION_SUBSONIC_NACA;
+        } else if (FinSet.CrossSection.HEXAGONAL.equals(crossSection)) {
+            return CROSS_SECTION_HEXAGONAL;
         } else {
             String msg = "Unknown fin cross section: " + crossSection + ".";
             warnings.add(msg);
@@ -345,7 +350,12 @@ public class RASAeroCommonConstants {
         // NOTE: the RASAero surface finishes are not really the same as the OpenRocket surface finishes. There are some
         // approximations here.
         if (FINISH_SMOOTH.equals(surfaceFinish)) {
-            return ExternalComponent.Finish.MIRROR;
+            // RASAero "Smooth (Zero Roughness)" means "use the baseline turbulent correlation
+            // as-is", which assumes a clean painted airframe — not a literal optical mirror.
+            // Mapping to MIRROR (0 μm roughness) caused a ~35% friction shortfall on every
+            // subsonic benchmark rocket imported from RASAero. OPTIMUM (5 μm, "Optimum paint")
+            // is the closest physical equivalent to RASAero's baseline friction assumption.
+            return ExternalComponent.Finish.OPTIMUM;
         } else if (FINISH_POLISHED.equals(surfaceFinish)) {
             return ExternalComponent.Finish.FINISHPOLISHED;
         } else if (FINISH_SHEET_METAL.equals(surfaceFinish)) {

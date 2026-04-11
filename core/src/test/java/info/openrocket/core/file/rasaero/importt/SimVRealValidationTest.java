@@ -153,6 +153,7 @@ public class SimVRealValidationTest extends BaseTestCase {
             result.maxVelMs = data.getMaxVelocity();
             result.maxVelFtS = result.maxVelMs / FOOT_TO_METER;
             result.flightTimeS = data.getFlightTime();
+            result.flightData = data;
             result.simulated = true;
 
             // Collect simulation warnings
@@ -299,6 +300,49 @@ public class SimVRealValidationTest extends BaseTestCase {
     }
 
     @Test
+    public void testProteus6() {
+        // Supersonic M~2.94: P9381, 6" dia, actual=85067ft, RASAero=81499ft
+        // 3-fin hexagonal airfoil, 28.5:1 fineness ratio, conical nose, 1" boattail
+        SimResult r = importAndSimulate("Proteus6.CDX1");
+        reportResult(r, 85067, 81499);
+        // Print stability trace to diagnose divergence
+        if (r.simulated && r.flightData != null) {
+            printStabilityTrace(r.flightData);
+        }
+        assertSimulated(r);
+    }
+
+    private void printStabilityTrace(info.openrocket.core.simulation.FlightData data) {
+        info.openrocket.core.simulation.FlightDataBranch branch = data.getBranch(0);
+        if (branch == null) return;
+        java.util.List<Double> times = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_TIME);
+        java.util.List<Double> aoas = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_AOA);
+        java.util.List<Double> cps = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_CP_LOCATION);
+        java.util.List<Double> cgs = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_CG_LOCATION);
+        java.util.List<Double> stabs = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_STABILITY);
+        java.util.List<Double> vels = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_VELOCITY_TOTAL);
+        if (times == null) return;
+        System.out.println("\n--- Proteus6 stability trace (every 0.5s + AoA>5deg) ---");
+        System.out.printf("%-7s %-8s %-9s %-9s %-8s %-8s%n", "t(s)", "AoA(deg)", "CP(m)", "CG(m)", "SM(cal)", "V(m/s)");
+        double lastPrintedTime = -1;
+        for (int i = 0; i < times.size(); i++) {
+            double t = times.get(i);
+            double aoa = aoas != null && i < aoas.size() ? Math.toDegrees(aoas.get(i)) : Double.NaN;
+            double cp = cps != null && i < cps.size() ? cps.get(i) : Double.NaN;
+            double cg = cgs != null && i < cgs.size() ? cgs.get(i) : Double.NaN;
+            double stab = stabs != null && i < stabs.size() ? stabs.get(i) : Double.NaN;
+            double vel = vels != null && i < vels.size() ? vels.get(i) : Double.NaN;
+            boolean highAoA = !Double.isNaN(aoa) && aoa > 5;
+            boolean timeStep = (t - lastPrintedTime) >= 0.5;
+            if (timeStep || highAoA) {
+                System.out.printf("%-7.3f %-8.2f %-9.4f %-9.4f %-8.3f %-8.2f%n",
+                    t, aoa, cp, cg, stab, vel);
+                if (timeStep) lastPrintedTime = t;
+            }
+        }
+    }
+
+    @Test
     public void testCalIsp1() {
         SimResult r = importAndSimulate("CalIsp1.CDX1");
         // CalIsp data needs to be extracted from CDX1
@@ -428,5 +472,6 @@ public class SimVRealValidationTest extends BaseTestCase {
         String error = "";
         String warnings = "";
         String simWarnings = "";
+        FlightData flightData = null;
     }
 }

@@ -212,6 +212,22 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 	private static final double MAX_REASONABLE_CN = 100.0;
 
 	/**
+	 * Maximum physically reasonable raw pitching moment coefficient Cm.
+	 * Cm = CN * xCP / refLen; for a slender rocket with fineness ratio L/D = 50
+	 * and CN = MAX_REASONABLE_CN, Cm_max ~ 100 * 0.75 * 50 = 3750.
+	 * Only values above this constant indicate a numerical blow-up (NaN propagation
+	 * producing a huge finite Cm rather than the expected Infinity/NaN).
+	 *
+	 * IMPORTANT: The old limit of 50 was catastrophically wrong for slender rockets
+	 * (e.g. Proteus 6, L/D ≈ 28.5), where the physical Cm about the nose is ~105.
+	 * Clamping to 50 inverted the stability sign, causing the rocket to tumble.
+	 * The correct check for aerodynamic stability is Cm_at_CG = Cm - CN*xCG/refLen,
+	 * computed in the flight stepper — that quantity is naturally small (O(CN * SM))
+	 * for any stable rocket, regardless of fineness ratio.
+	 */
+	private static final double MAX_REASONABLE_CM = MAX_REASONABLE_CN * 50.0; // 5000
+
+	/**
 	 * Sanitize aerodynamic force coefficients to prevent simulation divergence.
 	 * Catches NaN, Infinity, and extreme values from transonic singularities
 	 * or other numerical issues in the component calculators.
@@ -246,17 +262,15 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 			clamped = true;
 		}
 
-		// Sanitize pitching moment
-		// Extreme Cm values (e.g., 262 at M=0.06 from NaN rail guide propagation)
-		// cause trajectory divergence. Physically, |Cm| > 50 is unphysical for any
-		// rocket geometry and indicates a numerical blow-up.
+		// Sanitize pitching moment.
+		// Only zero out non-finite (NaN/Infinity) values; the raw Cm about the
+		// nose is legitimately large for slender rockets (see MAX_REASONABLE_CM).
 		double cm = forces.getCm();
-		if (!Double.isFinite(cm) || Math.abs(cm) > 50.0) {
-			if (!Double.isFinite(cm)) {
-				forces.setCm(0);
-			} else {
-				forces.setCm(Math.copySign(50.0, cm));
-			}
+		if (!Double.isFinite(cm)) {
+			forces.setCm(0);
+			clamped = true;
+		} else if (Math.abs(cm) > MAX_REASONABLE_CM) {
+			forces.setCm(Math.copySign(MAX_REASONABLE_CM, cm));
 			clamped = true;
 		}
 

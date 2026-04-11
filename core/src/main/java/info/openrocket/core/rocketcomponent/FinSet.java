@@ -52,7 +52,10 @@ public abstract class FinSet extends ExternalComponent
 		//// Rounded
 		ROUNDED(trans.get("FinSet.CrossSection.ROUNDED"), 0.99),
 		//// Airfoil
-		AIRFOIL(trans.get("FinSet.CrossSection.AIRFOIL"), 0.85);
+		AIRFOIL(trans.get("FinSet.CrossSection.AIRFOIL"), 0.85),
+		//// Hexagonal (double-wedge): sharp LE and TE, flat parallel midsection.
+		//// Standard supersonic fin profile; RASAero "Hexagonal" maps to this.
+		HEXAGONAL(trans.get("FinSet.CrossSection.HEXAGONAL"), 0.80);
 		
 		private final String name;
 		private final double volume;
