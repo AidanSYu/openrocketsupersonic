@@ -19,5 +19,21 @@ public abstract class SurfaceFinishHandler {
                 ((ExternalComponent) component).setFinish(surfaceFinish);
             }
         }
+
+        // Plumb the RASAero surface finish into Rocket.setPerfectFinish() so the
+        // boundary-layer transition model (laminar fraction) uses the right cap.
+        // Without this, every CDX1 import defaulted to perfectFinish=false and
+        // hit the 5 %-laminar cap in BarrowmanDragCalculator — systematically
+        // over-predicting friction drag on clean / competition rockets that
+        // RASAero labels "Smooth (Zero Roughness)" or "Polished".
+        //
+        // Mapping: only the three smoothest RASAero finishes count as "perfect"
+        // in the OR sense. "Smooth Paint" is a real painted airframe that will
+        // trip the boundary layer within inches, so it stays non-perfect and
+        // keeps the turbulent cap.
+        boolean perfect = RASAeroCommonConstants.FINISH_SMOOTH.equals(finish)
+                || RASAeroCommonConstants.FINISH_POLISHED.equals(finish)
+                || RASAeroCommonConstants.FINISH_SHEET_METAL.equals(finish);
+        rocket.setPerfectFinish(perfect);
     }
 }

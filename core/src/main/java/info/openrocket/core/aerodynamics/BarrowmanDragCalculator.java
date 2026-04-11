@@ -539,21 +539,20 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	}
 
 	/**
-	 * Find the effective "next" radius for base-drag accounting when
-	 * {@link SymmetricComponent#getNextSymmetricComponent()} fails to traverse
-	 * into coaxial PodSets. Two topologies are handled:
+	 * Find the largest fore radius of any active, coaxial SymmetricComponent whose
+	 * fore face abuts the aft face of {@code s}. Used to patch up base-drag
+	 * accounting for fin cans or boat-tails hosted in coaxial PodSets that
+	 * {@link SymmetricComponent#getNextSymmetricComponent()} does not detect.
 	 *
-	 * <p><b>Abutting topology</b> (e.g. Qu8k): a downstream component's <em>fore</em>
-	 * face sits at {@code s}'s aft face. Returns that component's fore radius.
+	 * <p>Handles the <b>abutting topology</b> (e.g. Qu8k, IonDrive) where the
+	 * downstream component's fore face sits exactly at {@code s}'s aft face.
 	 *
-	 * <p><b>Sleeve topology</b> (e.g. DontDebate fin can): a larger-OD component
-	 * <em>overlaps</em> the aft section of {@code s} — its own aft face coincides
-	 * with {@code s}'s aft face while its fore face is upstream. Physically,
-	 * {@code s}'s base is entirely hidden inside the sleeve, so base drag should
-	 * be suppressed. Returns {@code s.getAftRadius()} in that case (drives the
-	 * {@code nextRadius < aftRadius} guard to false, zeroing the phantom base).
+	 * <p>Note: the <b>sleeve topology</b> (e.g. DontDebate fin can) where a larger-OD
+	 * component overlaps the aft section of {@code s} is intentionally deferred until
+	 * fin-can step drag is also modelled, to avoid a net drag-accounting regression
+	 * from fixing only the base-drag double-count.
 	 *
-	 * @return the effective next-component radius, or 0 if nothing qualifies.
+	 * @return the abutting fore radius, or 0 if nothing abuts.
 	 */
 	private double findAbuttingDownstreamRadius(SymmetricComponent s,
 			ArrayList<InstanceContext> sContexts, InstanceMap imap,
@@ -567,7 +566,7 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		double sY = sLoc.getY();
 		double sZ = sLoc.getZ();
 
-		final double X_TOL = 1.0e-4;      // 0.1 mm tolerance
+		final double X_TOL = 1.0e-4;      // 0.1 mm abutment tolerance
 		final double AXIS_TOL = 1.0e-4;   // 0.1 mm coaxial tolerance
 
 		double bestRadius = 0;
@@ -584,25 +583,13 @@ public class BarrowmanDragCalculator implements DragCalculator {
 						|| Math.abs(loc.getZ() - sZ) > AXIS_TOL) {
 					continue;
 				}
-
-				// --- Abutting topology: other's fore face at our aft face ---
-				if (Math.abs(loc.getX() - sAftX) <= X_TOL) {
-					double r = other.getForeRadius();
-					if (r > bestRadius) {
-						bestRadius = r;
-					}
+				// Fore face at our aft face?
+				if (Math.abs(loc.getX() - sAftX) > X_TOL) {
 					continue;
 				}
-
-				// --- Sleeve topology: other's aft face coincides with our aft face,
-				//     and it overlaps us (fore face is upstream). If the sleeve's aft
-				//     radius covers our aft radius, our base is fully hidden — suppress it.
-				double otherAftX = loc.getX() + other.getLength();
-				if (Math.abs(otherAftX - sAftX) <= X_TOL
-						&& loc.getX() < sAftX - X_TOL
-						&& other.getAftRadius() >= s.getAftRadius() - X_TOL) {
-					// Return full suppression immediately — no need to search further.
-					return s.getAftRadius();
+				double r = other.getForeRadius();
+				if (r > bestRadius) {
+					bestRadius = r;
 				}
 			}
 		}
