@@ -319,6 +319,24 @@ public class CDX1ImportDiagnosticTest extends BaseTestCase {
         diagnoseRocket(doc, exp);
     }
 
+    @Test
+    public void testProteus6Import() throws Exception {
+        CDX1Expected exp = new CDX1Expected();
+        exp.name = "Proteus6";
+        exp.noseLengthIn = 28.5; exp.noseDiameterIn = 6; exp.noseShape = "Conical";
+        exp.bodyLengthIn = 141.5; exp.bodyDiameterIn = 6;
+        exp.finCount = 3; exp.finChordIn = 10.1; exp.finSpanIn = 9; exp.finThicknessIn = 0.1875;
+        exp.motorDesignation = "P9381";
+        exp.launchWtLb = 186.7; exp.cgIn = 111;
+        exp.altitudeFt = 3933; exp.tempF = 80; exp.rodLengthFt = 1.5;
+        exp.rasAeroAltFt = 81499; exp.rasAeroMaxVelFtS = 3063;
+        exp.actualAltFt = 85067;
+
+        String path = findSimvrealPath("Proteus6.CDX1");
+        OpenRocketDocument doc = importCDX1(path);
+        diagnoseRocket(doc, exp);
+    }
+
     /**
      * Find CDX1 files in the simvreal directory.
      * Searches relative to the project root.

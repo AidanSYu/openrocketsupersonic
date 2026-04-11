@@ -852,6 +852,9 @@ public class FinSetCalc extends RocketComponentCalc {
 		// For AIRFOIL/ROUNDED: empirical round-LE formula (Prandtl-Glauert subsonic,
 		// empirical supersonic correlation). Referenced to span * thickness area.
 		// For SQUARE: stagnation coefficient (normal shock at blunt leading edge).
+		// For HEXAGONAL: sharp double-wedge LE — oblique shock drag is negligible for
+		//   the thin wedge angles typical of supersonic fin stock (< 5°), so cd_LE = 0.
+		//   The thickness wave drag is captured by the Ackeret term below.
 		if (crossSection == FinSet.CrossSection.AIRFOIL ||
 				crossSection == FinSet.CrossSection.ROUNDED) {
 
@@ -866,6 +869,8 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		} else if (crossSection == FinSet.CrossSection.SQUARE) {
 			cd = stagnationCD;
+		} else if (crossSection == FinSet.CrossSection.HEXAGONAL) {
+			cd = 0; // sharp wedge LE: no bluntness drag
 		} else {
 			throw new UnsupportedOperationException("Unsupported fin profile: " + crossSection);
 		}
@@ -882,10 +887,12 @@ public class FinSetCalc extends RocketComponentCalc {
 		// where tau = t/c (thickness ratio) and beta = sqrt(M^2 - 1).
 		// Referenced to fin planform area (one-sided).
 		//
-		// Applies to AIRFOIL and ROUNDED cross-sections whose thickness profiles
-		// generate oblique-shock wave drag. SQUARE fins are excluded because their
-		// flat surfaces produce zero Ackeret wave drag; the stagnation term above
-		// already captures the SQUARE leading-edge normal-shock drag.
+		// Applies to AIRFOIL, ROUNDED, and HEXAGONAL cross-sections whose tapered
+		// thickness profiles generate oblique-shock wave drag. SQUARE fins are
+		// excluded because their flat surfaces produce zero Ackeret wave drag; the
+		// stagnation term above already captures the SQUARE leading-edge normal-shock
+		// drag. HEXAGONAL (double-wedge) has near-zero LE drag (handled above) but
+		// the full Ackeret thickness wave drag applies.
 		//
 		// Blended C1-continuously from zero at M = WAVE_DRAG_LOW to the exact
 		// Ackeret value at M = WAVE_DRAG_HIGH via a cubic Hermite spline, matching
@@ -893,7 +900,8 @@ public class FinSetCalc extends RocketComponentCalc {
 		//
 		// See: Anderson, "Fundamentals of Aerodynamics", Ch. 15; NACA TN-1428.
 		if ((crossSection == FinSet.CrossSection.AIRFOIL ||
-				 crossSection == FinSet.CrossSection.ROUNDED) &&
+				 crossSection == FinSet.CrossSection.ROUNDED ||
+				 crossSection == FinSet.CrossSection.HEXAGONAL) &&
 				macLength > MathUtil.EPSILON && thickness > 0) {
 
 			double tau = thickness / macLength; // fin thickness ratio t/c
@@ -991,7 +999,7 @@ public class FinSetCalc extends RocketComponentCalc {
 		} else if (crossSection == FinSet.CrossSection.ROUNDED) {
 			cd = baseCD / 2;
 		}
-		// Airfoil assumed to have zero base drag
+		// AIRFOIL and HEXAGONAL (double-wedge) assumed to have zero base drag (sharp TE)
 
 		// Scale to correct reference area
 		cd *= span * thickness / conditions.getRefArea();

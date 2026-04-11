@@ -854,4 +854,201 @@ public class SimVRealBenchmarkTest {
         }
         System.out.println("=".repeat(90));
     }
+
+    /**
+     * MESOS 293K flight validation.
+     *
+     * Real flight (GPS):  293,488 ft AGL
+     * RASAero II (smooth): 289,789 ft  (-1.26%)
+     * Max real velocity:    4,047 ft/s  (Mach 4.18)
+     *
+     * 2-stage rocket: O4374 (KIP) booster + M787 (KIP) sustainer.
+     * Custom motors must be pre-loaded from simvreal/Docs/Mesos/ .eng files.
+     */
+    @Test
+    void testMesosFlight() throws Exception {
+        final double REAL_APOGEE_FT    = 293_488.0;   // GPS AGL
+        final double RASAERO_APOGEE_FT = 289_789.0;   // RASAero II smooth paint postflight
+        final double REAL_MAX_VEL_FPS  =   4_047.0;   // accelerometer + GPS
+        final double FT_TO_M = 0.3048;
+
+        // ---- locate MESOS directory ----
+        String[] mesosDirCandidates = {
+                "simvreal/Docs/Mesos",
+                "c:/Code/OpenRocket Plus/simvreal/Docs/Mesos",
+        };
+        File mesosDir = null;
+        for (String p : mesosDirCandidates) {
+            File d = new File(p);
+            if (d.exists()) { mesosDir = d; break; }
+        }
+        if (mesosDir == null) {
+            System.out.println("SKIP testMesosFlight: simvreal/Docs/Mesos directory not found.");
+            return;
+        }
+
+        // ---- pre-load custom KIP motors ----
+        String[] motorFiles = { "M787_Expanded_Nozzle_Sea_Level.eng", "O4374_Sea_Level.eng" };
+        for (String mf : motorFiles) {
+            File engFile = new File(mesosDir, mf);
+            if (!engFile.exists()) {
+                System.out.println("SKIP testMesosFlight: motor file not found: " + mf);
+                return;
+            }
+            try (InputStream is = new FileInputStream(engFile)) {
+                RASPMotorLoader loader = new RASPMotorLoader();
+                List<ThrustCurveMotor.Builder> builders = loader.load(is, mf);
+                int loaded = 0;
+                for (ThrustCurveMotor.Builder b : builders) {
+                    try {
+                        RASAeroMotorsLoader.addMotorToCache(b.build());
+                        loaded++;
+                    } catch (Exception ignored) {}
+                }
+                System.out.println("  Loaded " + loaded + " motor(s) from " + mf);
+            } catch (Exception e) {
+                System.out.println("SKIP testMesosFlight: failed to load " + mf + ": " + e.getMessage());
+                return;
+            }
+        }
+
+        // ---- load CDX1 ----
+        File cdx1 = new File(mesosDir, "MESOS 293K Flight.CDX1");
+        assertTrue(cdx1.exists(), "MESOS CDX1 not found at " + cdx1.getAbsolutePath());
+
+        GeneralRocketLoader loader = new GeneralRocketLoader(cdx1);
+        OpenRocketDocument doc = loader.load();
+        Rocket rocket = doc.getRocket();
+        FlightConfiguration config = rocket.getSelectedConfiguration();
+
+        // ---- print imported geometry ----
+        System.out.println();
+        System.out.println("=".repeat(90));
+        System.out.println("MESOS 293K — CDX1 Import Geometry");
+        System.out.println("=".repeat(90));
+        System.out.printf("  Stages in config: %d%n", config.getStageCount());
+        System.out.printf("  Has motors:       %b%n", config.hasMotors());
+        final double INM = 0.0254;
+        for (RocketComponent comp : rocket) {
+            double lenIn  = comp.getLength() / INM;
+            double posIn  = comp.getPosition().getX() / INM;
+            System.out.printf("  %-35s  len=%7.3f in  pos=%7.3f in%n",
+                    comp.getClass().getSimpleName() + " [" + comp.getName() + "]", lenIn, posIn);
+        }
+
+        // ---- run simulation ----
+        List<Simulation> sims = doc.getSimulations();
+        assertFalse(sims.isEmpty(), "No simulations found in MESOS CDX1");
+        Simulation sim = sims.get(0);
+
+        // Print launch conditions as imported
+        var opts = sim.getOptions();
+        System.out.println();
+        System.out.printf("  Launch alt:    %.0f m (%.0f ft)%n",
+                opts.getLaunchAltitude(), opts.getLaunchAltitude() / FT_TO_M);
+        System.out.printf("  Launch temp:   %.1f K  (%.1f °F)%n",
+                opts.getLaunchTemperature(), (opts.getLaunchTemperature() - 273.15) * 9.0/5.0 + 32);
+        System.out.printf("  Rod angle:     %.2f°%n", Math.toDegrees(opts.getLaunchRodAngle()));
+        System.out.printf("  Rod length:    %.2f m%n", opts.getLaunchRodLength());
+
+        opts.setTimeStep(0.05);
+        opts.setMaximumStepAngle(Math.toRadians(3));
+
+        Thread simThread = new Thread(() -> {
+            try { sim.simulate(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        });
+        simThread.start();
+        simThread.join(180_000);  // 3 min timeout (high-altitude 2-stage)
+        if (simThread.isAlive()) {
+            simThread.interrupt();
+            fail("MESOS simulation timed out after 180s");
+        }
+
+        FlightData data = sim.getSimulatedData();
+        assertNotNull(data, "No flight data produced");
+        assertTrue(data.getBranchCount() > 0, "No flight branches in data");
+
+        double orpApogeeFt  = data.getMaxAltitude() * 3.28084;
+        double orpMaxVelFps = data.getMaxVelocity() * 3.28084;
+        double orpMaxMach   = data.getMaxMachNumber();
+
+        double rasError = 100.0 * (RASAERO_APOGEE_FT - REAL_APOGEE_FT)  / REAL_APOGEE_FT;
+        double orpError = 100.0 * (orpApogeeFt        - REAL_APOGEE_FT)  / REAL_APOGEE_FT;
+        double deltaVsRas = 100.0 * (orpApogeeFt      - RASAERO_APOGEE_FT) / RASAERO_APOGEE_FT;
+        double velError = 100.0 * (orpMaxVelFps        - REAL_MAX_VEL_FPS)  / REAL_MAX_VEL_FPS;
+
+        System.out.println();
+        System.out.println("=".repeat(90));
+        System.out.println("MESOS 293K — Simulation Results");
+        System.out.println("=".repeat(90));
+        System.out.printf("  %-25s  %10s  %10s  %10s%n", "", "Real", "RASAero II", "ORP");
+        System.out.printf("  %-25s  %10.0f  %10.0f  %10.0f ft%n",
+                "Apogee (AGL):", REAL_APOGEE_FT, RASAERO_APOGEE_FT, orpApogeeFt);
+        System.out.printf("  %-25s  %10.0f  %10s  %10.0f ft/s%n",
+                "Max velocity:", REAL_MAX_VEL_FPS, "4095", orpMaxVelFps);
+        System.out.printf("  %-25s  %10.2f  %10s  %10.2f%n",
+                "Max Mach:", 4.18, "4.23", orpMaxMach);
+        System.out.println();
+        System.out.printf("  Apogee errors:   RASAero=%+.2f%%  ORP=%+.2f%%  ORP vs RASAero=%+.2f%%%n",
+                rasError, orpError, deltaVsRas);
+        System.out.printf("  Velocity error:  ORP=%+.2f%%%n", velError);
+        System.out.println();
+
+        // ---- per-branch event log (diagnose staging / TUMBLE issues) ----
+        System.out.printf("  Branches: %d  |  Total flight time: %.1fs%n",
+                data.getBranchCount(), data.getFlightTime());
+        for (int bi = 0; bi < data.getBranchCount(); bi++) {
+            var branch = data.getBranch(bi);
+            List<Double> times = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_TIME);
+            List<Double> alts  = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_ALTITUDE);
+            List<Double> cps   = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_CP_LOCATION);
+            List<Double> cgs   = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_CG_LOCATION);
+            List<Double> machs = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_MACH_NUMBER);
+            double branchMaxAlt = (alts  != null && !alts.isEmpty())
+                    ? alts.stream().mapToDouble(Double::doubleValue).max().orElse(0) * 3.28084 : 0;
+            double tStart = (times != null && !times.isEmpty()) ? times.get(0) : Double.NaN;
+            double tEnd   = (times != null && !times.isEmpty()) ? times.get(times.size()-1) : Double.NaN;
+            System.out.printf("  Branch[%d] t=%.2f..%.2fs  maxAlt=%.0f ft%n",
+                    bi, tStart, tEnd, branchMaxAlt);
+            // Print key flight events
+            for (var evt : branch.getEvents()) {
+                System.out.printf("    [t=%.3fs] %s%n", evt.getTime(), evt.getType());
+            }
+            // Print CP & CG: every 5s normally, every 0.5s during M787 burn (t=15-21s)
+            if (times != null && cps != null && cgs != null && machs != null) {
+                System.out.printf("    %-8s %-8s %-10s %-10s %-8s%n",
+                        "t(s)", "Mach", "CG(in)", "CP(in)", "margin(in)");
+                double prevPrintT = -999;
+                for (int i = 0; i < times.size(); i++) {
+                    double t  = times.get(i);
+                    // Fine resolution during sustainer burn, coarse otherwise
+                    double interval = (t >= 14.5 && t <= 22.0) ? 0.4 : 4.9;
+                    if (t - prevPrintT < interval) continue;
+                    prevPrintT = t;
+                    double cp   = (cps.size()   > i) ? cps.get(i)   : Double.NaN;
+                    double cg   = (cgs.size()   > i) ? cgs.get(i)   : Double.NaN;
+                    double mach = (machs.size() > i) ? machs.get(i) : Double.NaN;
+                    double cpIn = cp / 0.0254;
+                    double cgIn = cg / 0.0254;
+                    System.out.printf("    %-8.2f %-8.3f %-10.1f %-10.1f %-8.1f%n",
+                            t, mach, cgIn, cpIn, cpIn - cgIn);
+                }
+            }
+        }
+
+        // Warn on simulated warnings
+        var warnings = sim.getSimulatedWarnings();
+        if (warnings != null && !warnings.isEmpty()) {
+            System.out.println("  Simulation warnings:");
+            warnings.forEach(w -> System.out.println("    " + w));
+        }
+        System.out.println("=".repeat(90));
+
+        // --- assertions ---
+        assertTrue(orpApogeeFt > 100_000,
+                String.format("ORP apogee %.0f ft is too low (expected ~290K ft, staging timing fix applied)",
+                        orpApogeeFt));
+        System.out.printf("  RESULT: ORP error vs real = %+.2f%%  (RASAero = %+.2f%%)%n", orpError, rasError);
+    }
 }
