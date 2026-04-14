@@ -70,7 +70,14 @@ public class BoosterHandler extends BodyTubeHandler {
             throws SAXException {
         super.endHandler(element, attributes, content, warnings);
         this.bodyTube.setName(this.boosterStage.getName() + " Body Tube");
-        this.bodyTube.setOuterRadiusAutomatic(false);
+        // Re-set the booster's explicit OD from the CDX1.  BodyTubeHandler.endHandler()
+        // calls setOuterRadiusAutomatic(true) which makes OR inherit the sustainer's radius
+        // (the previous symmetric component in the body chain). We must override it here
+        // with the booster's own diameter; setOuterRadius() also clears auto-mode.
+        if (diameter != null && diameter > 0) {
+            this.bodyTube.setOuterRadius(
+                    diameter / 2.0 / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH);
+        }
 
         // Add shoulder (transition) if it exists
         if (shoulderLength > 0) {

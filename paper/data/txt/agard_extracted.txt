@@ -1,0 +1,2639 @@
+
+
+--- PAGE 2 ---
+%7^      t \~i..yypy 
+AEDC-TR-70-100   C-^~ 
+(#271975 
+AN INVESTIGATION OF THE AERODYNAMIC 
+CHARACTERISTICS OF THE AGARD MODEL B 
+FOR MACH NUMBERS FROM 0.2 TO 1.0 
+s   Air*»109'' 
+K&D^  Jjii'_   n0o4 
+S-40600-73-C-0004 
+C. F. Anderson 
+ARO, Inc. 
+..    ,     „i^b-» app.ov«! Vor «>blicplease 
+May 1970 
+Jffi'yJ*- 
+PROPULSION WIND TUNNEL FACILITY 
+ARNOLD ENGINEERING DEVELOPMENT CENTER 
+AIR FORCE SYSTEMS COMMAND 
+ARNOLD AIR FORCE STATION, TENNESSEE 
+
+
+--- PAGE 4 ---
+AEDC-TR-70-100 
+AN INVESTIGATION OF THE AERODYNAMIC 
+CHARACTERISTICS OF  THE AGARD MODEL B 
+FOR MACH NUMBERS FROM 0.2 TO  1.0 
+C. F. Anderson 
+ARO,  Inc. 
+This document has been approved for public release 
+its distribution js,unlimjted. fkis A-4: - 
+This docume 
+each 
+national 
+Mars] 
+ville/Alabama 
+
+
+--- PAGE 6 ---
+AEDC-TR-70-100 
+ABSTRACT 
+A test was conducted in the Aerodynamic Wind Tunnel (4T) of 
+the Propulsion "Wind Tunnel Facility to determine the aerodynamic 
+characteristics of the AGARD Model B calibration model at Mach 
+numbers from 0. 2 to 1.0 for angles of attack from -4 to +24 deg. 
+The tunnel blockage of the model at zero angle of attack was 0. 15 
+percent.   The data showed no evidence of tunnel interference and 
+are considered to be interference free.    The data agreed with 
+other published data obtained at Mach numbers above 0.7.   The 
+curves of lift coefficient and pitching moment were found to be 
+nonlinear near zero lift at Mach numbers below 1.0.   Therefore, 
+the lift curve slope and the neutral-point location should be used 
+with caution when comparing data. 
+This documenMs^ibject to speciaf\export controls and 
+each   transfnittal   tb   foreign ygovermnents j0r   fpreigny 
+nation?« may be made only with prior aßßKJva] of wASA 
+Marshall Space FlighV Carter (S&E-AERO-DIR), Phrllts- 
+ville, Alabama 35812/ 
+ill 
+
+
+--- PAGE 7 ---
+AEDC-TR-70-100 
+CONTENTS 
+Page 
+ABSTRACT  iii 
+NOMENCLATURE  vi 
+I.   INTRODUCTION  1 
+II.    APPARATUS 
+2.1 Tunnel 4T Description  1 
+2. 2   Test Article  2 
+2. 3   Instrumentation  2 
+III. TEST DESCRIPTION 
+3. 1   Test Conditions and Procedures  2 
+3.2 Precision of Measurements  3 
+IV. RESULTS  3 
+V.   CONCLUSIONS  5 
+REFERENCES  
+ 5 
+APPENDIXES 
+I.   ILLUSTRATIONS 
+Figure 
+1. 
+2. 
+3. 
+4. 
+5, 
+6. 
+7. 
+8. 
+Location of Tunnel 4T  9 
+Dimensions of AGARD Model B  10 
+Model Base and Sting Details  11 
+Installation of AGARD Model B in the 4-Ft Transonic 
+Wind Tunnel  12 
+Photograph of Model Installation  13 
+Variation of Reynolds Number with Mach Number  ... 14 
+Lift Coefficient as a Function of Angle of Attack 
+a. M00 = 0.2to0.5  15 
+b. M»-0.6 to 1.0  16 
+Lift Coefficient as a Function of Drag Coefficient 
+a. M0O = 0.2to0.5  17 
+b. M0O = 0.6tol.0  18 
+
+
+--- PAGE 8 ---
+AEDC-TR-70-100 
+Figure Page 
+9.     Lift Coefficient as a Function of Pitching-Moment 
+Coefficient 
+a. M«, = 0.2 to 0.5         19 
+b. M.- 0.6 to 1.0        20 
+10. Tunnel 4T Flow Angularity         21 
+11. Variation of Forebody Drag Coefficient with Mach Num- 
+ber at Zero Lift Coefficient        22 
+12. Variation of Base Drag Coefficient with Mach Number 
+at Zero Lift Coefficient         22 
+13. Variation of Lift Curve Slope with Mach Number at Zero 
+Lift Coefficient        23 
+14. Variation of Neutral Point with Mach Number at Zero 
+Lift Coefficient         23 
+II.    TABLES 
+1. Aerodynamic Data         24 
+NOMENCLATURE 
+Ab Model base area, 0.02086 ft2 
+CA Axial-force coefficient,  F^/q^S 
+CA,b Base axial-force coefficient (Pa> " ^f—) 
+CA, F Forebody axial-force coefficient,  CA ~ CA b 
+CD, b Base drag coefficient,  CA, b cos a 
+CD F Forebody drag coefficient,  CA p cos a + CN sin a 
+CL, F Forebody lift coefficient CN COS a - CA p sin a 
+CL# Lift curve slope at Cj_, = 0 (dCL/da) 
+Cm Pitching-moment coefficient,   Mm/q Sc 
+CN Normal-force coefficient,  Fpj/q S 
+c Mean aerodynamic chord,  0.3762 ft 
+VI 
+
+
+--- PAGE 9 ---
+AEDC-TR-70-100 
+D Body diameter,  0.163 ft 
+FA Axial force, lb 
+Fpj Normal force, lb 
+Mm. Pitching moment about the quarter chord point of 
+the mean aerodynamic chord, ft-lb 
+Mm Free-stream Mach number 
+Pb Model base pressure,  psfa 
+Pt Free-stream stagnation pressure,  psfa 
+p^ Free-stream static pressure,  psfa 
+q,,, Free-stream dynamic pressure,  psf 
+Re Unit Reynolds number, per ft 
+S Model wing area, 0.1841 ft2 
+TÄ Free-stream static temperature,  °R 
+XNP Neutral-point location (dCm/dCL at Cj_, = 0). body 
+diameters measured from model nose 
+a Model angle of attack, deg 
+Vll 
+
+
+--- PAGE 10 ---
+AEDC-TR-70-100 
+SECTION I 
+INTRODUCTION 
+An internationally adopted standard model consisting of a fuselage 
+and wing and designated by the AGARD Wind Tunnel Group as Model B 
+has been used as a standard of comparison between wind tunnels to 
+verify the capabilities of the various wind tunnels to provide accurate 
+test information in the transonic Mach number range.   The model has 
+been tested in a number of different wind tunnels (Ref.  1) at Mach 
+numbers above 0. 70; however,  data have not been obtained at Mach 
+numbers below 0. 70 or at angles of attack above 12 deg.   Therefore, 
+the present investigation was conducted in the Aerodynamic Wind 
+Tunnel (4T) for the purpose of extending the Mach number and angle- 
+of-attack range of the aerodynamic characteristics of the AGARD 
+Model B.   Six-component aerodynamic force and moment data were 
+obtained at Mach numbers of 0. 20 to 1. 0 at model angles of attack 
+from -4 to 24 deg. 
+SECTION II 
+APPARATUS 
+2.1 TUNNEL 4T DESCRIPTION 
+The Aerodynamic Wind Tunnel (4T) is located within the quadrangle 
+of the Propulsion Wind Tunnel (16S) as shown in Fig.  1, Appendix I. 
+Tunnel 4T is a closed-loop,  continuous flow tunnel with a Mach number 
+range of 0.1 to 1. 3, a stagnation pressure range from 300 to 1700 psfa, 
+and a stagnation temperature range from 80 to!130°F.    The test section 
+is'equipped with variable porosity walls with an available porosity range 
+from 0- to 10-percent open area.   The removal of air through the per- 
+forated walls is normally accomplished with a single plenum evacuation 
+system (PES) machine pumping on a plenum chamber surrounding the 
+test section; however, this PES machine was out of service at the time 
+this test was run,  and' plenum pumping was accomplished by diffuser 
+flap suction.   The maximum Mach number that can be achieved with dif- 
+fuser flap suction is 1.0.   A complete description of Tunnel 4T can be 
+found in Ref.  2. 
+
+
+--- PAGE 11 ---
+AEDC TR-70-100 
+2.2 TEST ARTICLE 
+The AGARD Calibration Model B is an ogive-cylinder with a delta 
+wing.    The specifications for the model are presented in Ref.  3.    The 
+basic dimensions of the model are given in Fig. 2, and the base and 
+sting details are shown in Fig. 3.    Details of the model installation 
+in Tunnel 4T are shown in Figs. 4 and 5.   The tunnel blockage with 
+the model at zero angle of attack was 0.15 percent. 
+2.3 INSTRUMENTATION 
+Model forces were measured with a six-component,  internal, 
+strain-gage balance.   The base pressure was measured by two 5-psi 
+precision pressure balance transducers referenced to the plenum 
+static pressure.   Location of the two base pressure measurements 
+is shown in Fig. 3.   The dynamic outputs of the balance were monitor- 
+ed with an oscillograph to prevent overloading of the balance. 
+SECTION III 
+TEST DESCRIPTION 
+3.1 TEST CONDITIONS AND PROCEDURES 
+Six-component force and moment data were obtained at angles of 
+attack from -4 to +24 deg at Mach numbers from 0.2 to 1.0.   The 
+angle-of-attack range was reduced at higher Mach numbers to avoid 
+exceeding the balance design load limits.    The tunnel stagnation pres 
+sure was maintained at 3000 psfa and a stagnation temperature of 
+100°F'for all Mach numbers.   The resulting Reynolds number varia 
+tion with Mach number is presented in Fig. 6.    Data were also 
+obtained at a stagnation pressure of 3700 psfa at a Mach number of 
+0.40 to check the effects of Reynolds number variation.   The differ- 
+ences between the data obtained at the higher stagnation pressure 
+and the data obtained at a stagnation pressure of 3000 psfa were less 
+than the probable error in the aerodynamic coefficients.   Therefore, 
+only data obtained at a stagnation pressure of 3000 psfa are presented 
+in Appendix I of this report.   All data were obtained with natural 
+transition.   The data were obtained with parallel test section walls 
+set at a porosity of 6 percent at all Mach numbers except for M0 =1.0, 
+where the porosity was 1.5 percent. 
+
+
+--- PAGE 12 ---
+AEDC-TR-70-100 
+3.2 PRECISION OF MEASUREMENTS 
+The uncertainties in the data which can be attributed to instrumenta- 
+tion errors and data acquisition techniques are presented below.    The 
+uncertainties were determined for a confidence level of 95 percent. 
+Mach Number 
+0.2 
+0.6 
+1.0 
+CL, F 
+±0.0165 
+±0.0025 
+±0.0013 
+Cm 
+±0.0080 
+±0.0011 
+±0.0006 
+CD,F 
+±0.0115 
+±0.0026 
+±0.0021 
+CD,b 
+±0.0026 
+±0.0008 
+±0.0004 
+M. 
+±0.002 
+±0.002 
+±0.002 
+a,  deg 
+0. 10 
+0. 10 
+0. 10 
+SECTION IV 
+RESULTS 
+The lift, drag, and pitching-moment characteristics of the AGARD 
+Model B were obtained at Mach numbers from 0.2 to 1.0 and at angles 
+of attack from -4 to +24 deg.    The force and moment data are present- 
+ed in Figs. 7 through 9.   The data have been corrected for an apparent 
+flow angularity to make the lift coefficient zero at zero angle of at- 
+tack.    The model was not run inverted to confirm this flow angularity; 
+however,  at Mach numbers from 0. 7 to 1.0, the apparent flow angu- 
+larity agrees with that determined by running another model upright 
+and inverted (Ref.  4).    The flow angularity corrections are presented 
+in Fig.  10.   An attempt was made to obtain data at an angle of attack 
+of 26 deg; however, the model exhibited severe buffeting at this 
+angle of attack and data could not be obtained. 
+The variation of forebody drag coefficient with Mach number at 
+zero lift coefficient is presented in Fig.  11.   Data obtained with the 
+same model at 0.01-percent blockage (Ref. 5) have been included for 
+comparison at Mach numbers above 0.7.    From this comparison 
+it may be concluded that there are no significant differences between 
+the two sets of data. 
+
+
+--- PAGE 13 ---
+AEDC-TR-70-100 
+The variation of the base drag coefficient with Mach number at 
+zero lift coefficient is presented in Fig.  12.    The data indicate 
+excellent agreement with the data presented in   Ref. 5 except at 
+Ma, = 1.0 where the present data show a lower drag coefficient. 
+The variation of the lift curve slope with Mach number is 
+presented in Fig.  13.    Data from Refs.  1 and 5 are also presented 
+for comparison at Mach numbers above 0.7.    The data from Ref. 1 
+were obtained by averaging the data from tests in eight different 
+wind tunnels.   The data obtained in the present test agree very well 
+with the data from Ref.  1;   however, the results are quite different 
+from those reported in Ref. 5.   It should be noted that the non- 
+linearity of the lift curve near zero lift allows considerable vari- 
+ation in determining the slope of the lift curve.   In Ref. 5, and 
+many of the tests reported in Ref.  1,  data were taken at large 
+increments of angle of attack and the points faired with a straight 
+line because the variations were considered to be within the accuracy 
+of the measurements.   Re-examination of the data of some of these 
+tests revealed that the nonlinearity of the lift curve slope was 
+probably present;   however,  insufficient data had been taken to 
+define the nonlinearity.   If the lift coefficients presented in Fig. 7 
+were faired with a straight line for angles of attack between -4 and 
++4 deg, the lift curve slope would show much better agreement with 
+the data presented in Ref. 5.   Therefore,  it is concluded that the 
+differences in lift curve slope between the present data and Ref. 5 
+are the result of the way the curves are drawn and the accuracy 
+of the data. 
+The variation of the neutral point" with Mach number at zero 
+lift coefficient is presented in Fig.  14.    The data are compared 
+with curves from Refs. 1 and 5.   The neutral point is essentially 
+invariant with Mach number for Mach numbers below 0.8 and shifts 
+aft for Mach numbers between 0. 8 and 1.0.   The present data 
+agree fairly well with Ref.  1 data; however, marked differences 
+between the present data and the data of Ref. 5 are shown. 
+The aerodynamic coefficients are also presented in tabular 
+form in Table I of Appendix II. 
+
+
+--- PAGE 14 ---
+AEDC-TR-70-100 
+SECTION V 
+CONCLUSIONS 
+The following conclusions have been drawn from the results 
+obtained: 
+1. The data showed no evidence of tunnel interference. 
+2. The data showed good agreement with the summary reference 
+data compiled from, data obtained in a number of different 
+tunnels at Mach numbers above 0.7. 
+3. The differences between the data obtained in Tunnel 16T 
+and Tunnel 4T can be attributed to nonlinearities in the 
+curves of CL and Cm.    These nonlinearities were not 
+detected in the earlier report because of an insufficient 
+number of data points at angles of attack between -4 
+and +4 deg. 
+REFERENCES 
+1. "A Review of Measurements on AGARD Calibration Models." 
+AGARDograph 64,  November 1961. 
+2. "Propulsion Wind Tunnel Facility,  Vol. 5."   Test Facilities 
+Handbook (Eighth Edition).   Arnold Engineering Develop- 
+ment Center,  December 1969 (AD863646). 
+3. "Specifications for AGARD Wind Tunnel Calibration Models." 
+AGARD Memorandum AG-4/M3,  August 1955. 
+4. Jacocks, J. L.    "An Evaluation of Interference Effects on 
+a Lifting Model in the AEDC-PWT 4-Ft Transonic 
+Tunnel."   AEDC-TR-70-72, to be published. 
+5. Milillo,  J.  R.    "Transonic Tests of an AGARD Model B and 
+a Modified Model C at 0.01-Percent Blockage.'1 
+AEDC-TN-58-48 (AD161050),  August 1958. 
+
+
+--- PAGE 15 ---
+AEDC-TR-70-100 
+APPENDIXES 
+I. ILLUSTRATIONS 
+II. TABLE 
+
+
+--- PAGE 21 ---
+AEDC-TR-70-100 
+o 
+06 
+M 
+• 
+m 
+tr 
+«4 
+Z 
+3    ■ 
+Z 
+CO o 
+-I iz 
+>- 
+Ul 
+o 
+0.2 
+0.4 0.6 Q6 
+MACH NUMBER 
+l,0 
+Fig. 6 Variation of Reynolds Number with Mach Number 
+14 
+
+
+--- PAGE 28 ---
+Q5 
+UJ 
+o 
+< 
+_l 
+ID 
+< 
+O 
+-0.5 
+-I.Q Q2 
+_Q_ 
+0 
+0 CORRECTION FOR PRESENT DATA 
+1 RANGE OF DATA FROM REF 4 
+O 
+Ö 
+0 
+6 
+6   o  " 
+0.3 
+0.4 
+0.5 0.6 0.7 
+MACH NUMBER 
+0.8 
+0.9 
+1.0 
+Fig. 10 Tunnel 4T Flow Angularity 
+D 
+O 
+
+
+--- PAGE 29 ---
+AEDC-TR-70-100 
+ÜL 
+a 
+o 
+£0.04 
+Uj 
+o 
+iZ 
+UJ o 
+o 
+< 
+Q 
+>- 
+Q o 
+m 
+UJ 
+s 
+0.02 
+ REFERENCE 5 
+/ 
+/ 
+f                     ^*^m mm m» • hr^^WCX 
+0.2 
+0.4 
+0.6 0.8 
+MACH NUMBER 
+1.0 
+1.2 
+Fig. 11  Variation of Forebody Drag Coefficient with Mach Number at 
+Zero Lift Coefficient 
+c?0.04 
+UJ 
+o 
+u. 
+u. 
+UJ 
+O 
+o o 
+< 
+ce o 
+ui 
+CO 
+< 
+CD 
+0.02 
+0.6 0.8 
+MACH NUMBER 
+Fig. 12 Variation of Base Drag Coefficient with Mach Number at Zero Lift Coefficient 
+22 
+
+
+--- PAGE 30 ---
+AEDC-TR-70-100 
+0.6 0.8 
+MACH NUMBER 
+Fig. 13 Variation of Lift Curve Slope with Mach Number at Zero Lift Coefficient 
+to 
+(- 
+UJ 
+6.0 
+a 
+& z 
+X 
+H" 5.5 
+5 
+a. 
+< 
+or 
+^   5.0 
+3       02 
+  REFERENCE   I 
+  REFERENCE 5 
+**P 
+r5""""
+8  
+0.4 
+0.6 OB 
+MACH NUMBER 
+I.O 
+\2 
+Fig. 14 Variation of Neutral Point with Mach Number at Zero Lift Coefficient 
+23 
+
+
+--- PAGE 31 ---
+AEDC-TR-70-100 
+TABLE I 
+AERODYNAMIC DATA 
+a 
+CL,F 
+CD 
+CD,F 
+CD,b 
+C m 
+-0.37 -0.0142 
+0.0258 
+0.0095 
+0.0164 
+0.0040 
+-4.41 -0.2049 
+0.0386 
+0.0245 
+0.0142 
+n.0103 
+-3.86 -n.1755 
+0.0359 
+0.0214 
+0.P145 
+0.0133 
+-3.37 -0.1573 
+0.0333 
+n.0201 
+0.0132 
+O.C099 
+-2.87 -0.1236 
+0.0305 
+0.0184 
+0.0121 
+0.0129 
+-2.36 -n.lf)39 
+0.0294 
+0.0162 
+0. 0132 
+n.0106 
+-1.ÖÖ -0.0915 
+0.0296 
+0.0165 
+0.0131 
+O.0OH5 
+-1.37 -0.0608 
+0.0275 
+0.0127 
+O.0149 
+n.0028 
+-0.84 -0 .0340 
+0.0260 
+0.0110 
+n.0150 
+O.G052 
+-0.37 -0.0151 
+0.0259 
+0.0111 
+0.014fc 
+0.0052 
+0.13 
+0.0027 
+0.0256 
+0.0124 
+0.0132 
+0.0034 
+n.64 
+0.0288 
+0.0260 
+0.0113 
+0.0147 -0.0036 
+1.21 
+0 .0606 
+0.0274 
+0.0148 
+0.0126 - n. 0 0 3 0 
+1.69 
+0.0 785 
+0.0275 
+0.0149 
+0.0326 -O.0O25 
+2.17 
+0.0 9 90 
+0.0279 
+0.0144 
+0.0135 -0.0051 
+2.65 
+0 .116 4 
+n . 0 3 0 7 
+0.0183 
+0.0125 -0.0070 
+3.16 
+0.1439 
+0.0320 
+0.0195 
+0.0125 - 0. 0 0 A 9 
+3.66 
+0.1574 
+0.0339 
+0.0211 
+0.0128 -0.0074 
+4.63 
+0.2082 
+0.0402 
+0.0280 
+0.0122 -0.0083 
+5.63 
+0.2649 
+0.0494 
+0.0305 
+0.0189 -0.0112 
+7.65 
+0.3560 
+0.0687 
+0.0499 
+0.0189 -n.0176 
+9.65 
+0.4629 
+0.0981 
+U.0799 
+0.0182 -n.0102 
+11.64 
+0.5548 
+0.1339 
+0.1163 
+0.G176 -O.OI85 
+13.72 
+0.6478 
+0.1764 
+0.1539 
+0.0225 -0-0216 
+15.72 
+0.7316 
+0.2212 
+0.1590 
+0.0223 -0.C283 
+17.71 
+n.«28o 
+0.2777 
+n.2537 
+0.0240 -0 .0316 
+19.73 
+0.9409 
+0.3485 
+0.3249 
+0.0?37 -0.0358 
+21.73 
+1.0219 
+0.4156 
+0.3518 
+0.023b -0.0428 
+23.74 
+1.1282 
+0.5002 
+0.4761 
+0.0240 -0.0442 
+15.71 
+[1.7366 
+0.2234 
+0.1596 
+0.02 35 -0.0284 
+7.68 
+0.3564 
+0.0701 
+0.0520 
+0.0181 -O.0177 
+-0.37 -0.0131 
+0.0279 
+M     = 
+00 
+0.0144 
+0.20 
+0.0135 
+0.C051 
+24 
+
+
+--- PAGE 32 ---
+AEDC TR-70-100 
+TABLE I  (Continued) 
+a 
+CL,F 
+CD 
+CD,F 
+CD,b 
+C m 
+-3.22 -0.1452 
+0.0327 
+0.0239 
+o.ocse n.0121 
+-2.21 -0.0946 
+O.0292 
+0.0155 
+n.0137 
+n.fl097 
+-1.21 -0.05Ö9 
+0.0272 
+0.0116 
+0.O156 
+O.C063 
+-0.20 -0.0123 
+n.D262 
+11 . 01 2 2 
+0.013c 
+n.0052 
+0.81 
+0.0406 
+0.0262 
+0.0124 
+0.013b -n.0012 
+1.81 
+0.0^40 
+0.0280 
+() . 01 4 b 
+0.0133 -n.n032 
+2.82 
+0.1276 
+0.0308 
+0.0171 
+0.0136 -O.0036 
+3.«2 
+0.1727 
+0.0351 
+0.0216 
+0.0135 -0 .0070 
+5.83 
+0.2617 
+0.04«1 
+0.0240 
+0.0141 -0.0124 
+7.85 
+0.36Ö1 
+0.0716 
+0.0550 
+0.0165 -0.0174 
+9.86 
+0.4641 
+0.0997 
+0 . 0 fc 11 
+0.0186 -O.0210 
+11.87 
+0.5631 
+0.136b 
+0.1153 
+0.0 215 -0 .0204 
+13.90 
+0.6569 
+0.1797 
+0.1573 
+0.0224 -0.0240 
+15.91 
+fl.7566 
+0.2306 
+n.2C7ti 
+P.0 2?« -0.0253 
+17.92 
+0.8422 
+0.2b44 
+0.2591 
+0.0252 -n.03?6 
+19.93 
+0.93pd 
+0.3469 
+0.3231 
+0.0237 -0 . 0414 
+Ü1.94 
+1,0?9ä 
+0.4206 
+0.3956 
+0.0250 -0.0449 
+Ü3.95 
+1 .1.24a 
+0.5015 
+fl.4755 
+0.0261 -n . 0545 
+15.90 
+0.7595 
+0.2314 
+0.2074 
+0.0240 -0.0259 
+7.85 
+0.3656 
+0.0707 
+n . 054t! 
+0.0160 -0.0151 
+-0.20 -C.0077 
+0.0263 
+M  = 
+as 
+0.0120 
+0.25 
+0.0144 
+0 . 0033 
+25 
+
+
+--- PAGE 33 ---
+AEDC-TR-70-100 
+TABLE I (Continued) 
+a 
+CL,F 
+CD 
+CD,F 
+CD,b 
+C m 
+-0.09 -o.noib 
+0.0247 
+0.0134 
+0.0113 
+0.0042 
+-4.0b -0.1Ü79 
+0.0356 
+0.0221 
+0.0135 
+n.0140 
+-3.60 -0.1617 
+0.0325 
+0.0191 
+0.0134 
+0.0144 
+-3.07 -11.1360 
+0.0302 
+0.0144 
+0.015b 
+0.0131 
+-2.07 -0.0Ö92 
+0.0272 
+0.0135 
+0.0137 
+0.0100 
+-1.56 -0.0720 
+0.0265 
+0.0137 
+0.0126 
+0.0082 
+-1.04 -0.0453 
+0.0256 
+0.0117 
+0.0138 
+n.0080 
+-0.59 -0.0284 
+0.0247 
+0.0113 
+0.0134 
+n.005i 
+-0.05 -0.0040 
+0.0252 
+0.0119 
+0.0134 
+0 -n035 
+0.43 
+0.0226 
+0.0250 
+0.0106 
+0.0144 
+. . -.115 
+0.9b 
+0.0417 
+0.0254 
+0.0121 
+0.0133 -0 -.008 
+1.42 
+0.0646 
+0.0262 
+0.0122 
+0.0140 -O.L000 
+2.02 
+O.ObÖä 
+0.0271 
+0.0133 
+0.013b -0.0034 
+2.50 
+0.1097 
+0.0284 
+0.0141 
+0.0143 -0.0056 
+2.96 
+0.1310 
+0.0305 
+0.0165 
+0.0140 -0.005Ö 
+3.45 
+0.1543 
+0.0323 
+0.0181 
+0.0143 -0.0048 
+3.9b 
+0.17Ö7 
+0.034b 
+0.020* 
+0.0140 -0.0079 
+4.95 
+0.2280 
+0.0416 
+0.0282 
+0.0134 -0.0109 
+6.03 
+0.2bib 
+0.0503 
+0.0382 
+0.0121 -0.0114 
+7.94 
+0.3809 
+0.0726 
+0.0564 
+0.0162 -0.0162 
+10.01 
+0.4800 
+0.1029 
+0.0fc47 
+0.0181 -0.0174 
+12.04 
+0.5689 
+0.1391 
+0.117b 
+0.0213 -0.0171 
+14.02 
+0.6653 
+n.ibib 
+0.1589 
+0.0229 -0.0226 
+16.13 
+0.7649 
+0.2337 
+0.2102 C0235 -0.0269 
+18.09 
+O.bööo 
+0.2936 
+0.2691 
+0.0245 -0.0327 
+20.12 
+0.9626 
+0.3598 
+0.3359 
+0.02 39 -0.0394 
+Ü2.1b 
+1.0373 
+0.426b 
+0.402S 
+0.0239 -0.0472 
+24.20 
+1.1076 
+0.4990 
+0.4752 
+0.0237 -0.0563 
+16.0b 
+0.7680 
+0.2341 
+0.2107 
+0.0233 -0.028Q 
+.7,99 0.3bn 
+0.0724 
+0.055b 
+0.0166 -0.0154 
+-0.09 -O.OOlb 
+0.024b 
+M  - 
+as 
+0.0111 
+0.30 
+0.0137 
+0.0039 
+26 
+
+
+--- PAGE 34 ---
+AEDC-TR-70-100 
+TABLE I (Continued) 
+a 
+CT „ 
+n 
+CL „ 
+CL ^ 
+C 
+L,F 
+D 
+D,F 
+D,b 
+m 
+-4.01 -0.1879 
+0 .0358 
+n.0210 
+0 . n 1 4 b 
+0.0201 
+-3.50 -0.1562 
+0, .0325 
+0.0192 
+0.0133 
+0.0182 
+-3.0(1 -0.1362 
+o, .0303 
+0.0169 
+0.03 34 
+0.0148 
+-2.4y -0.1160 
+0, .0287 
+0.0150 
+0.0137 
+0.0145 
+-1.99 -0.0895 
+o. 
+.0273 
+0.0132 
+0.0141 
+n.0138 
+-1.48 -n.n6öi 
+0 .0263 
+0.0129 
+0.0134 
+fl.0l08 
+-0.98 -0.0446 
+p. .0258 
+0.0119 
+0.0139 
+0.G101 
+-0.47 -0.0200 
+6, .0250 
+0.0111 
+0.0139 
+0.0097 
+0.03 
+0.0010 
+o, .0252 
+0.0118 
+0.0135 
+0.0066 
+0.54 
+0.0249 
+0 , .0251 
+I).0115 
+0.0136 
+0.0039 
+1.56 
+0.0691 
+0, .0263 
+0.0130 
+0.0134 
+0.0011 
+2.05 
+0.0862 
+0, .0270 
+0.0136 
+0.0134 -0.0012 
+2.57 
+0.1132 
+0, .0286 
+0.0153 
+0.0133 -0.0030 
+3.06 
+0.1336 
+0, ,0301 
+0.0170 
+0.0131 -0.0022 
+3.5Ö 
+0.1589 
+o, .0322 
+0.0185 
+0.0137 -0.0036 
+4.0Ö 
+0.1ÖJ3 
+0, .0340 
+0.0212 
+0.0136 -0.0043 
+5.10 
+0.2349 
+0. ,0423 
+0.0284 
+0.0139 -0.0079 
+6.10 
+0.2781 
+0, ,0500 
+0.0354 
+0.0145 - n. 0 10 0 
+Ö.13 
+0.3952 
+0, ,0756 
+0.0586 
+0.0171 -n.0152 
+10.16 
+0.4888 
+0, ,1057 
+0.0C79 
+0.0179 -0.0163 
+12.18 
+0.5788 
+0, ,1423 
+0.1-217 
+0.0206 -0.0165 
+14.19 
+0.6709 
+0, ,1847 
+0.1630 
+0.0217 -0.0213 
+16.22 
+0.7746 
+0, 2372 
+0.2136 
+0.0236 -0.0263 
+8.13 
+0.3904 
+0. ,0749 
+0.0592 
+0.0157 -0.0149 
+0.03 
+0.0013 
+o. 0247 
+M  - 
+0.0116 
+0.35 
+0.0131 
+0.0064 
+27 
+
+
+--- PAGE 35 ---
+AEDC-TR-70-100 
+TABLE I  (Continued) 
+a 
+C. „ 
+n 
+CL „ 
+c„ ._ 
+C 
+L,F 
+D 
+D,F 
+D,b 
+m 
+-0.0b -0.0026 
+0.0251 
+0.0109 
+0.0143 
+n.0056 
+-4.10 -0.1887 
+0.0353 
+11.0212 
+0.0141 
+0.0164 
+-3.55 -0. 161b 
+0.0325 
+0.0191 
+0.0134 
+0.0159 
+-3.12 -0.1415 
+0.0305 
+0.0170 
+0.0135 
+0.0147 
+-2.62 -O.llbo 
+0.02b9 
+0.0154 
+0.0134 
+0.0137 
+-2.11 -0.0927 
+0.0271 
+0.0129 
+0.0142 
+n.0121 
+-1.64 -0.0736 
+0.0 2 66 
+0.0129 
+0.013b 
+n.oini 
+-1.06 -0.047b 
+0.0256 
+0.0114 
+0.0141 
+0.0094 
+-0.56 -0.0264 
+0.0252 
+0.0111 
+0.0141 
+0.0066 
+-o.io -0.0052 
+0.0254 
+0.0121 
+0.0133 
+0.0045 
+0.44 
+0.0216 
+0.0255 
+0.0121 
+0.0133 
+n.P031 
+0.9b 
+0.043Ö 
+0.0263 
+0.0120 
+0.0143 
+n.ooib 
+1.4b 
+0. 0661 
+0.026b 
+n.0132 
+0.0136 
+P.0004 
+1.9b 
+0.0b55 
+0.0275 
+0.0139 
+0.0136 -0.001b 
+2.52 
+0.1109 
+n.0284 
+0.0147 
+0.0136 -n.0036 
+2.9b 
+0.1340 
+0.0299 
+0.0162 
+0.0137 -0 . 0042 
+3.56 
+0.1633 
+0.0325 
+0.01Ö7 
+0.013b -0.0059 
+3.99 
+o.iboo 
+0.0346 
+0.0201 
+0.0146 -O.0O61 
+5.02 
+0.2352 
+0.0421 
+0.0285 
+0.0136 -n . 0084 
+5.93 
+0.2822 
+0.049b 
+0.0352 
+0.0346 -n.0125 
+8.04 
+0.3962 
+0.0750 
+0.0590 
+0.0160 -0.0176 
+10.ÜÖ 
+0.4b93 
+0.1051 
+0.0b65 
+0.01Ö7 -n.0l82 
+12.20 
+0.5916 
+0.1451 
+Dv12 39 
+0.0212 -0.0183 
+14.13 
+0.6b32 
+0.1Ö70 
+0.3657 
+0.0213 -0.0230 
+16.24 
+0.7b93 
+0.2421 
+0.2192 
+0.0225 -0.0271 
+lb.20 
+O.ÖÖ5b 
+0.3003 
+0.2772 
+0.0232 -0.0342 
+kO.29 
+0.9799 
+0.3674 
+0.3434 
+0.0241 -0.0420 
+22. 3() 
+1.0587 
+0.4365 
+0.4125 
+0.0240 -0.0474 
+Ü4.36 
+1.1327 
+0.5123 
+n.4b74 
+0.024fc -O.0577 
+16.1b 
+0-7b40 
+0.2395 
+0.2173 
+0.0222 -0.0299 
+b.03 
+0.3914 
+0.0743 
+0.0575 
+0.0164 -0.0160 
+-0.0b -0.005b 
+0.0253 
+M  = 
+00 
+0.0114 
+0.40 
+0.0139 
+0.004b 
+28 
+
+
+--- PAGE 36 ---
+AE DC-TR-70-100 
+TABLE I  (Continued) 
+a 
+cT „ 
+c 
+c 
+c 
+c 
+L,F 
+D 
+D,F 
+D,b 
+m 
+-0.13 -0.0069 
+0.0260 
+0.0126 
+0.0133 
+0.0065 
+-4.24 -0.1930 
+0.0368 
+0.0226 
+0.0141 
+0.0166 
+-3.68 -0.167b 
+0.0337 
+0.0193 
+0.0143 
+n.0157 
+-3.1» -0.1454 
+0.0315 
+0.0174 
+0.0141 
+0.0144 
+-2.71 -0.1219 
+0.0296 
+0.0157 
+0.0139 
+n.0136 
+-2.17 -0.0962 
+0.0283 
+0.0143 
+0.0340 
+O.0123 
+-1.62 -0.0736 
+0.0273 
+0.0134 
+0.0139 
+n.0121 
+-1.14 -0.050Ö 
+0.0267 
+0.0130 
+0.0137 
+0.0097 
+-0.65 -0.0303 
+0.0262 
+0.0125 
+0.0137 
+0.0075 
+-0.15 -0.0092 
+0.0262 
+0.0127 
+0.0135 
+0.0058 
+0.3Ö 
+0.0184 
+0.0263 
+0.0130 
+0.0133 
+0.0 0 33 
+0.95 
+0.0431 
+0.0272 
+0.0137 
+0.0134 
+O.0015 
+1.46 
+0.0642 
+0.0279 
+0.0144 
+0.0135 
+n.ooil 
+1.95 
+0.0860 
+0.0287 
+0.0152 
+0.0135 -0.0009 
+2.42 
+0.1087 
+0.0295 
+0.0158 
+0.0137 -0-0020 
+2.95 
+0.1359 
+0.0308 
+0.0171 
+0.0137 -0.0043 
+3.48 
+0.1609 
+0.0331 
+0.0189 
+0.0141 -0.0051 
+4.08 
+0.1922 
+0.0366 
+0.0226 
+0.0139 -0.0077 
+4.99 
+0.2429 
+0.0432 
+0.028K 
+0.0144 -0.0099 
+6.(16 
+0.2981 
+0.0527 
+0.0380 
+0.0147 -0.0133 
+8.10 
+0.4049 
+0.0773 
+0.0612 
+O.O160 -n.0200 
+10.08 
+0.5025 
+0.1UÖ1 
+0.0892 
+0.0190 -0.0208 
+12.14 
+0.5914 
+0.1450 .0.1245 
+0.0205 -0-0191 
+14.21 
+0.7012 
+0.1929 
+0.1716 
+0.0213 -0.0251 
+16.26 
+0.8018 
+0.2465 
+0.2245 
+0.0221 -0.0308 
+18.29 
+0.9009 
+0.3076 
+0.2*51 
+0.0225 -0.0363 
+20.36 
+0.9979 
+0.3770 
+0.3535 
+0.0234 -0.0433 
+22.36 
+1.083« 
+0.4496 
+0.4253 
+0.0243 -0.0522 
+24.44 
+1.1549 
+0.5251 
+0.5000 
+0.0251 -0.0594 
+16.lä 
+0.7988 
+0.2442 
+0.2220 
+0.0223 -0.0304 
+8.07 
+0.4044 
+0.0766 
+0.0601 
+0.0165 -0.0193 
+-0.13 -0.0054 
+0.0254 
+M  - 
+00 
+0.0120 
+0.50 
+0.0134 
+0.0058 
+29 
+
+
+--- PAGE 37 ---
+AEDC-TR-70-100 
+TABLE I  (Continued) 
+a 
+°L,F 
+CD 
+CD,F 
+CD,b 
+C m 
+-4.41 -0.2089 
+0.0394 
+0.0241 
+0.0152 
+0.0167 
+-3.8b -0.1810 
+0.0359 
+0.0212 
+0.0146 
+0.0164 
+-3.35 -0.1567 
+0.0335 
+0.0186 
+0.0149 
+0.0158 
+-2.87 -0.1310 
+0.0312 
+0.0164 
+0.0147 
+0.0141 
+-2.32 -0.1061 
+0.0296 
+0.0149 
+0.0147 
+0.0120 
+-1.85 -0.0826 
+0.0283 
+0.013Ö 
+0.0144 
+n.oiio 
+-1.37 -0.0620 
+0.027Ö 
+0.0132 
+0.0145 
+n.oioo 
+-0.Ö0 -0.0352 
+0.0273 
+o.ni?e 
+0.0145 
+n.oo8o 
+-0.31 -0.0146 
+0.0271 
+0.0126 
+0.0146 
+0.0063 
+0.22 
+0.0102 
+0.0271 
+0.012a 
+0.01«3 
+n.0037 
+0.75 
+0.033a 
+0.0277 
+0.0135 
+0.0143 
+n.oois 
+1.26 
+0.0564 
+0.0284 
+0.0141 
+0.0143 
+0.0005 
+1.73 
+0.0790 
+0.0291 
+0.0149 
+0.0142 -0.0006 
+2.25 
+0.1039 
+0.0303 
+0.0164 
+0.0139 -0.0025 
+2.Ö1 
+0.1335 
+0.0322 
+0.0178 
+0.0143 -0.0045 
+3.34 
+0.1618 
+0.0344 
+0.0200 
+0.0345 -0.C063 
+3.84 
+0.1Ö75 
+0.036Ö 
+0.0220 
+0.0146 -0.0082 
+4.85 
+0.2419 
+0.0440 
+0.0287 
+0.0153 -o.oiio 
+5.86 
+0.2946 
+0.0526 
+0.0375 
+0.0151 -0.0148 
+7.92 
+0.404Ö 
+0.0773 
+0.0604 
+0.0169 -n.0226 
+10.03 
+0.5124 
+0.1104 
+0.0507 
+0.0197 -0.0229 
+12.11 
+0.6042 
+0.1483 
+0.1270 
+0.0213 -0.0215 
+14.15 
+0.712a 
+0.1963 
+0.1743 
+0.0220 -0.0287 
+16.23 
+0.81Ö9 
+0.2526 
+0.2304 
+0.0222 -n.0343- 
+10.29 
+0.9170 
+0.3147 
+0.2S07 
+0.0239 -0.0411 
+20.39 
+1.0215 
+0.3Ö81 
+0.3641 
+0.0240 -0.0483 
+16.24 
+0.8191 
+0.2525 
+0.2297 
+0.0229 -0.0336 
+7.96 
+0.4U°4 
+0.0779 
+0.0606 
+0.0173 -0.0222 
+-0.30 -0.0140 
+0.0268 
+M  - 
+00 
+0.0125 
+0.60 
+0.0143 
+0.0064 
+30 
+
+
+--- PAGE 38 ---
+AEDC-TR-70-100 
+TABLE I  (Continued) 
+a 
+CL,F 
+CD 
+CD,F 
+CD,b 
+C ra 
+-4.45 -0.2170 
+0.039b 
+0.0250 
+0.0148 
+0.P209 
+-3.90 -0.1886 
+0.0364 
+0.0214 
+0.0150 
+0.0190 
+-3.45 -0.1655 
+0.0339 
+0.0188 
+0.0151 
+0.0170 
+-2.6b -0.1356 
+0.0313 
+0.0164 
+0.0145 
+0.0157 
+-2.40 -0.1126 
+0.0297 
+0.0151 
+0.0146 
+0.0132 
+-1.8b -0.0857 
+0.0284 
+0.0137 
+0.0146 
+O.0116 
+-1.37 -0.0609 
+0.0274 
+0.0129 
+0.0145 
+0.0094 
+-0.8l -0.0362 
+0.0271 
+0.012b 
+0.0143 
+n.0075 
+-0.29 -0.0125 
+0.0269 
+0.0127 
+0.0142 
+0.0059 
+0.22 
+0.0105 
+0.0270 
+0.0126 
+0.0145 
+n.0039 
+0.8o 
+0.0374 
+0.0276 
+0.0133 
+0.0143 
+0.0015 
+1.27 
+0.0586 
+0.0282 
+n.0139 
+0.0143 -O.0002 
+1.8l 
+0.085b 
+0.0291 
+0.0147 
+0.0145 -0.0023 
+2.2b 
+0.1112 
+0.0305 
+0.0161 
+0.0144 -P.0046 
+2.«1 
+0.1414 
+0.0324 
+0.0179 
+0.0145 -0.0065 
+3.33 
+0.1685 
+0.0346 
+0.0201 
+0.0145 -0.0083 
+3.89 
+0.1981 
+0.0375 
+0.022« 
+0.01*7 -0.0104 
+4.67 
+0.2504 
+0.0444 
+0.0293 
+0.0151 -n.0141 
+5.9b 
+0.3132 
+0.0548 
+0.0393 
+0.0155 -0.018b 
+7.97 
+0.4235 
+0.0801 
+0.0626 
+0.0175 -0.0270 
+10.0b 
+0.5378 
+0.1153 
+0.0955 
+0.019b -0.0319 
+12.17 
+0.6389 
+0.1560 
+0.1347 
+0.0213 -0.0331 
+14.24 
+0.7328 
+0.2027 
+0.1^04 
+0.0223 -0.0345 
+16.3b 
+0.8459 
+0.2630 
+0.2395 
+0.0235 -0.0415 
+18.4b 
+0.9460 
+0.3285 
+0.3C43 
+0.0242 -0.0498 
+20.61 
+1.0457 
+0.4028 
+0.3779 
+0.0245 -0.0606 
+16.36 
+0.8443 
+0.2623 
+n.238b 
+0.0235 -0.0416 
+8.03 
+0.4266 
+n.obio 
+0.0632 
+0.0178 -0.0276 
+-0.30 -0.0131 
+0.0269 
+M     = 
+00 
+0.0126 
+0.70 
+0.0143 
+0.0055 
+31 
+
+
+--- PAGE 39 ---
+AEDC TR70-100 
+TABLE I (Continued) 
+a 
+°L,P 
+CD 
+CD,F 
+CD,b 
+C m 
+-4.48 -0.2309 
+0.0421 
+0.0264 
+0.0157 
+0.0238 
+-3.92 -0.1999 
+0.0383 
+0.0227 
+0.0156 
+n.0208 
+-3.43 -0.1738 
+0.0354 
+0.0201 
+0.0154 
+0.C16 9 
+-2.bö -0.1432 
+0.0328 
+0.0177 
+0.Ü151 
+0.0165 
+-2.37 -0.1164 
+0.0308 
+0.0156 
+0.0152 
+O.0136 
+-1.Ö1 -0.0855 
+0.0294 
+0.0144 
+0.0150 
+0.0107 
+-1.31 -0.0613 
+0.0285 
+0.0136 
+0.0149 
+0.0091 
+-Ü.ÖÖ -0.0414 
+0.0282 
+0.0133 
+0.0149 
+n.oo7i 
+-0.28 -0.0132 
+0.0280 
+0.0132 
+0.014a 
+0 .0050 
+0.22 
+0. 0106 
+0.0280 
+0.0132 
+0.0348 
+0.0030 
+0.72 
+0.0352 
+0.0285 
+0.0137 
+0.0148 
+0.0010 
+1.2Ö 
+0.0617 
+0.0292 
+0.0144 
+0.0148 -0.0020 
+1.Ö0 
+0.0899 
+0.0303 
+0.0155 
+0.0348 -0.0044 
+2.31 
+0.1195 
+0.0318 
+0.0170 
+0.0148 -0.0070 
+2.85 
+0.1481 
+0.0339 
+0.0190 
+0.0149 -n.oioo 
+3.31 
+0.1741 
+0.0361 
+0.0210 
+0.0150 -n.0116 
+3.85 
+0.2043 
+0.0391 
+0.0239 
+0.0152 -0.0137 
+4.97 
+0.2668 
+0.0473 
+0.0316 
+0.0157 -0.0189 
+6.no 
+0.3276 
+0.0577 
+0.0414 
+0.0163 -0.0251 
+8.H7 
+0.4492 
+0.0859 
+0.0676 
+n.0183 -0.0363 
+10.14 
+0.e>670 
+0.1226 
+0.1022 
+0.0204 -0.0444 
+12.23 
+0.6743 
+0.1657 
+0.1438 
+0.0219 -0.0468 
+14.37 
+0.7677 
+0.2154 
+0.1922 
+0.0232 -O.0487 
+16.52 
+0.8747 
+0.2760 
+0.2516 
+0.0244 -0.0554 
+18.56 
+0.9702 
+0.3406 
+0.3154 
+0.0252 -0.0675 
+8.05 
+0.4495 
+0.0857 
+0.0671 
+0.0186 -n.0372 
+-0.31 -0.0143 
+0.0278 
+M  = 
+as 
+0.0129 
+0.80 
+0.0150 
+0.0046 
+32 
+
+
+--- PAGE 40 ---
+AEDC-TR-70-100 
+TABLE I (Continued) 
+a 
+CL,F 
+CD 
+CD,F 
+CD,b 
+C 
+ra 
+-4.54 -0.2505 
+0.0445 
+0.0285 
+0.0160 
+0.0304 
+-3.97 -0.2178 
+0.0402 
+0.0244 
+0.0158 
+0.0266 
+-3.43 -0.1863 
+0.0367 
+0.0210 
+0.0157 
+0-0232 
+-2.94 -0.1564 
+0.0341 
+0.0184 
+0.0156 
+0.0198 
+-2.45 -fl.1273 
+0.031« 
+0.0162 
+0.0155 
+0.0164 
+-1.Ö9 -0.0963 
+0.0300 
+0.0145 
+0.0156 
+0.0131 
+-1.3b -0,0684 
+0.0290 
+0.0135 
+0.0155 
+0.0095 
+-0.Ö3 -0.0414 
+0.0284 
+0.0131 
+0.0153 
+0.0071 
+-0.30 -0.0151 
+0.0282 
+0.0131 
+0.0151 
+0.0042 
+0.20 
+0.0095 
+0.0282 
+0.0132 
+0.0150 
+n.0016 
+0.75 
+0.0378 
+0.028Ö 
+0.0136 
+0.0152 -O.00O7 
+1.34 
+0.0682 
+0.0296 
+0.01^5 
+0.0152 -0.0042 
+1.81 
+0.0965 
+0.0308 
+0.0156 
+0.0152 -0.0076 
+2.30 
+0.1264 
+0.0324 
+0.0169 
+0.0155 -0.0105 
+2.8a 
+0.1586 
+0.0348 
+0.0192 
+0.0156 -0.0148 
+3.38 
+0.1892 
+0.0376 
+0.0219 
+0.0157 -0.0173 
+3.90 
+0.2194 
+0.0408 
+0.0250 
+0.0158 -0.0207 
+4.96 
+0.2835 
+0.0494 
+0.0330 
+0.0164 -0.0277 
+6.05 
+0.3533 
+0.0614 
+0.0444 
+0.0170 -fl.0376 
+7.06 
+0.4182 
+0.0753 
+0.0574 
+0.0179 -0.0460 
+8.13 
+0.4851 
+0.0927 
+0.0734 
+0.0192 -0.0548 
+10.26 
+0.6113 
+0.1332 
+0.1121 
+0.0212 -0.0683 
+12.36 
+0.7297 
+0.1813 
+0.1583 
+0.0230 -0.0798 
+14.49 
+0.7956 
+0.2265 
+0.2025 
+0.0240 -0.0705 
+16.59 
+0.9151 
+0.2914 
+0.2661 
+0.0252 -0.0907 
+18.65 
+0.9881 
+0.3500 
+0.3235 
+0.0265 -0.0954 
+8.12 
+0.4Ö75 
+0.0929 
+0.0737 
+0.0193 -0.0564 
+-0.32 -0.0152 
+0.0282 
+M  - i 
+00 
+0.0128 
+0.90 
+0.0153 
+0.0036 
+33 
+
+
+--- PAGE 41 ---
+AEDC-TR-70-100 
+TABLE I (Continued) 
+a 
+CL,F 
+CD 
+CD,F 
+CD,b 
+m 
+-4.60 -0.2705 
+0.0481 
+0.0312 
+0.0169 
+0.0421 
+-4.05 -0.2371 
+0.0437 
+0.026a 
+0.0169 
+0.0374 
+-3.51 -0.2042 
+0.0397 
+0.0231 
+0.0166 
+0.0330 
+-2.96 -0.16Ö5 
+0.0363 
+0.0198 
+0.0164 
+0.0268 
+-2.49 -(1.1385 
+0.0340 
+0.0176 
+0.0164 
+0.0221 
+-1.96 -0.1069 
+0.0319 
+n.oisfc 
+0.0161 
+0.0173 
+-1.41 -0.0756 
+0.0307 
+0.0146 
+0.0361 
+0.0121 
+-0.90 -0.0457 
+0..0299 
+0.0141 
+0.0159 
+n.0085 
+-0.37 -0.0193 
+0.0296 
+0.0135 
+0.0161 
+n.0054 
+0.19 
+0.0103 
+0.0297 
+0.0141 
+0.0156 
+fl.0024 
+0.6b 
+0.0352 
+0.0299 
+0.0141 
+0.0159 -0.0003 
+1.22 
+0.0645 
+0.0309 
+0.0146 
+0.0162 -O.P033 
+1.77 
+0.0998 
+0.0321 
+0.0159 
+0.0162 -n.0082 
+2.2Ö 
+0.1315 
+0.0340 
+0.0180 
+0.0160 -n.oi3i 
+2.82 
+0.1659 
+0.0364 
+0.0205 
+0.0159 -0.0183 
+3.31 
+0.1969 
+0.0394 
+0.0231 
+0.0162 -0.0229 
+3.89 
+0.2338 
+0.0434 
+0.0266 
+0.0166 -0.0279 
+4.95 
+0.300Ö 
+0.0528 
+0.0359 
+0.0169 -0.0383 
+6.06 
+0.3740 
+0.0660 
+0.0483 
+0.0177 -0.0520 
+8.10 
+0.505a 
+0.0981 
+0.0782 
+0.0199 -0.073Ö 
+10.26 
+0.6289 
+0.1396 
+0.1177 
+0.0219 -0.0871 
+12.34 
+0.7466 
+0.1Ö77 
+0.1646 
+0.0231 -0.1008 
+14.47 
+0.8G09 
+0.2444 
+0.2193 
+0.0251 -0.1122 
+16.55 
+0.9284 
+0.2957 
+0.2696 
+0.0261 -0.1050 
+8.09 
+0.5077 
+0.0999 
+0.0794 
+0.0205 -0.0784 
+-0.37 -0.0176 
+0.0295 
+M  - 
+00 
+0.0145 
+0.95 
+0.0150 
+0.0045 
+34 
+
+
+--- PAGE 42 ---
+AEDC-TR-70-100 
+TABLE I (Continued) 
+a 
+^ 
+CD 
+cn,F 
+CD,b 
+C 
+m 
+-4.50 -0.2632 
+0.0565 
+0.0378 
+0.0187 
+0.0438 
+-4.01 -0.2347 
+0.0530 
+0. 0 3 3 7 
+0.0194 
+fl.0391 
+-3.47 -0.2017 
+0.0492 
+0.0295 
+0.0196 
+0.0339 
+-2.46 -0.3376 
+0.0440 
+0.0243 
+0.0197 
+n.0238 
+-1.91 -0.1036 
+0.0407 
+0.0229 
+0.0178 
+0.0188 
+-1.37 -0.O758 
+0.0401 
+0.0212 
+O.OI8S 
+0.0147 
+-0.85 -0.0467 
+0.0397 
+0.0209 
+0.0188 
+0.0107 
+-0.32 -0.0169 
+0.0393 
+0.0204 
+0.0188 
+0.0056 
+0.21 
+0.0127 
+0.0390 
+0.0201 
+0.0189 
+0.0015 
+0.74 
+0.0405 
+0.0395 
+0.0209 
+0.0186 -0.0028 
+1.27 
+0.0723 
+0.0405 
+0.0218 
+0.0187 -0.0074 
+1.80 
+0.1050 
+0.0419 
+0.0233 
+0.0186 -0.0125 
+2.31 
+0.136a 
+0.0435 
+0.0247 
+0.0188 -0.0179 
+2.85 
+0.1705 
+0.0463 
+0.0275 
+0.0188 -0.0234 
+3.38 
+0.2050 
+0.0491 
+0.0304 
+0.0187 -0.0292 
+3.92 
+0.2387 
+0.0527 
+0.0337 
+0.0190 -0.0342 
+4.93 
+0.3016 
+0.0623 
+0.0428 
+0.0195 -0.0441 
+6.r,4 
+0.3711 
+0.0754 
+0.0542 
+0.0212 -0.0556 
+8.12 
+0.5000 
+0.1083 
+0.0841 
+0.0242 -0.0767 
+10.25 
+0.624a 
+0.1510 
+0.1239 
+0.0270 -0.0949 
+12.35 
+0.7452 
+0.2015 
+0.1711 
+0.0304 -0.1124 
+14.4« 
+0.8695 
+0.2632 
+0.2280 
+0.0351 -0.1330 
+16.62 
+0.9885 
+0.3311 
+0.2939 
+0.0372 -0.1526 
+18.75 
+1.0961 
+0.4074 
+0.3686 
+0.0388 -0.1606 
+8.15 
+0.5026 
+P.Uli 
+0.0853 
+0.0258 -0.0774 
+-0.32 -0.0166 
+0.0397 
+M     - 
+00 
+0.0213 
+1.0 
+0.0185 
+O.0055 
+35 
+
+
+--- PAGE 43 ---
+AEDC-TR-70-100 
+TABLE I (Concluded) 
+a 
+CL,F 
+°D 
+CD,F 
+Vb 
+C m 
+-4.14 -0.1874 
+0.0376 
+0.0233 
+0.0143 
+0.0166 
+-3.64 -0.1642 
+0.0351 
+0.0203 
+0.014b 
+0.0155 
+-3.12 -0.1400 
+0.0326 
+0.0181 
+0.0145 
+0.0146 
+-2.62 -0.1161 
+0.0307 
+0.0168 
+0.0139 
+0.0135 
+-2.11 -0.0931 
+0.0293 
+0.0149 
+0.0144 
+0.0129 
+-1.60 -0.0685 
+0.0284 
+0.0143 
+0.0141 
+0.0111 
+-0.57 -0.0251 
+0.0274 
+0.0136 
+0.0337 
+0.0080 
+-o.ob -0.0023 
+0.0272 
+0.0131 . 0.0341 
+0.0066 
+0.44 
+0.0198 
+0.0273 
+0.0132 
+0.0141 
+0.0056 
+0.94 
+0.038b 
+0.0278 
+0.013« 
+0.0140 
+n.no45 
+1.46 
+0.0616 
+0.0285 
+0.0148 
+0.0137 
+p.0018 
+1.98 
+0.0Ö45 
+0.0294 
+0.0157 
+0.0137 
+n.0005 
+2.46 
+0.1115 
+0.0305 
+0.0165 
+0.0140 -0.0008 
+2.98 
+0.1336 
+0.0319 
+0.0177 
+0.0141 -n.oo20 
+3.47 
+0.1573 
+0.0339 
+0.0195 
+0.0143 -n.0030 
+3.99 
+0.1Ö1Ö 
+0.0368 
+0.0226 
+0.0142 -0.0037 
+5.02 
+0.2346 
+0.0442 
+0.029b 
+0.0144 -O.0065 
+6.04 
+0.2933 
+0.0537 
+0.0286 
+0.0152 -0.0103 
+8.07 
+0.3961 
+0.0776 
+0.0599 
+0.0176 -0.0153 
+10.11 
+0.4946 
+0.1084 
+0.0883 
+0.0200 -0.0143 
+12.15 
+0.5846 
+0.1446 
+0.1235 
+0.0211 -0.0170 
+14.19 
+0.6915 
+0.1911 
+0.1691 
+0.0219 -0.0213 
+16.23 
+0.7885 
+0.2429 
+0.2205 
+0.0224 -0.0257 
+18.29 
+0.8955 
+O.3060 
+0.2831 
+0.0228 -0.0316 
+20.31 
+0.9914 
+0.3740 
+0.3503 
+0.0236 -0.0378 
+16.23 
+0.7953 
+0.2450 
+0.2226 
+0.0224 -0.0261 
+Ö.07 
+0.3969 
+0.0775 
+0.0601 
+0.0174 -0.0152 
+-0.0« -0.0031 
+0.0269 
+0.0127 
+0.0142 
+0.0063 
+Moo -0.40,   pt   = 3700 psfa 
+36 
+
+
+--- PAGE 44 ---
+UNCLASSIFIED 
+SecurityClassification 
+DOCUMENT CONTROL DATA -R&D 
+(Security classification of title, body of abstract and Indexing annotation must be entered when the overall report la claealtled) 
+I. ORIGINATING ACTIVITY (Corporate author) 
+Arnold Engineering Development Center 
+ARO, Inc., Operating Contractor 
+Arnold Air Force Station, Tennessee 
+2a. REPORT SECURITY   CLASSIFICATION 
+UNCLASSIFIED 
+26.   GROUP 
+N/A 
+3.   REPORT  TITLE 
+AN INVESTIGATION OF THE AERODYNAMIC CHARACTERISTICS OF THE AGARD 
+MODEL B FOR MACH NUMBERS FROM 0.2 TO 1.0 
+4. DESCRIPTIVE NOTES (Type of report and Inclusive dates) 
+Final Report - November 18, 1969 
+5- AUTHORISI (Flrei name, middle Initial, lael name) 
+This document has been approved torj^ic rel^s« 
+its ^istributipnjs unlimited. ,(rfK ^Lc^S 
+C.   F.   Anderson,   ARO,    Inc, 
+6-   REPORT DATE 
+May   1970 
+7a.   TOTAL 
+76.   NO.  OF  REFS 
+5 
+•a.   CONTRACT OR  GRANT NO. 
+F40600-69-C-0001 
+b. PROJECT NO. 
+Program Element 921E 
+»a.  ORIGINATOR'S  REPORT NUMBER(S) 
+AEDC-TR-70-100 
+Bb. OTHER REPORT NOI9I (Any other numbers that may be aeelgned 
+thle report) 
+d. 
+N/A 
+10.  DISTRIBUTION ST 
+each 
+only w 
+DIR) 
+II-  SURj=LEMENTARY  NOTES 
+Available  in  DDC 
+12.  SPONSORING MILITARY   ACTIVITY 
+NASA Marshall Space Flight Center 
+(S&E-AERO-DIR), Huntsville, Alabama 
+35812 
+13. ABSTRACT 
+A test was conducted in the Aerodynamic Wind Tunnel (4T) of the 
+Propulsion Wind Tunnel Facility to determine the aerodynamic charac- 
+teristics of the AGARD Model B calibration model at Mach numbers from 
+0.2 to 1.0 for angles of attack from -4 to +24 deg.  The tunnel blockage 
+of the model at zero angle of attack was 0.15 percent.  The data showed 
+no evidence of tunnel interference and are considered to be interference 
+free.  The data agreed with other published data obtained at Mach num- 
+bers above 0.7.  The curves of lift coefficient and pitching moment 
+were found to be nonlinear near zero lift at Mach numbers below 1.0. 
+Therefore, the lift curve slope and the neutral-point location should 
+be used with caution when comparing data. 
+This dotuimenVt is subject\to speciaL^g5cport controls anc 
+transmittal to foreign government^or ttoreign/nationa] 
+be mfade only With prior aWov^r of NASA Mansnall VSpaee 
+Center (S&E-AIi^RO^aiR), HuntsVille, Alaba*a-^35812. 
+DD ,^„1473 
+UNCLASSIFIED 
+Security Classification 

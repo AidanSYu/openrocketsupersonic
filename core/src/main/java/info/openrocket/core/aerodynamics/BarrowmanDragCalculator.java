@@ -244,11 +244,13 @@ public class BarrowmanDragCalculator implements DragCalculator {
 
 			double componentCf;
 			if (configuration.getRocket().isPerfectFinish()) {
-				if ((Re > 1.0e6) && (roughnessLimited[finish.ordinal()] > Cf)) {
-					componentCf = roughnessLimited[finish.ordinal()];
-				} else {
-					componentCf = Cf;
-				}
+				// "Perfect finish" is reserved for unusually smooth, carefully-prepared
+				// airframes that can sustain natural transition. In that regime the mixed
+				// laminar/turbulent smooth-plate Cf from calculateFrictionCoefficient()
+				// already captures the dominant physics. Applying the old fully-rough
+				// turbulent floor here overwhelms the laminar benefit and over-predicts
+				// drag on polished calibration models such as AGARD-B.
+				componentCf = Cf;
 			} else {
 				componentCf = Math.max(Cf, roughnessLimited[finish.ordinal()]);
 			}
@@ -295,20 +297,27 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		double ld = totalLength / (2.0 * maxR); // fineness ratio L/d
 		double correction = 1.0 + 1.5 / Math.pow(ld, 1.5) + 7.0 / Math.pow(ld, 3.0);
 
-		// Phase 8c: Boundary layer transition correction
-		double velocity = conditions.getVelocity();
-		double kinematicViscosity = conditions.getAtmosphericConditions().getKinematicViscosity();
-		double fLam = laminarFraction(mach, totalLength, velocity, kinematicViscosity);
-		// Real painted HPR airframes (paint, couplers, fin fillets, launch lugs) trip
-		// the boundary layer within inches. Only "perfect finish" rockets can sustain
-		// extended laminar flow; otherwise cap the laminar fraction to a small value.
-		// Without this cap the Michel-criterion Re_tr = 3e6 produces ~17% friction
-		// haircut on typical HPR airframes at low Mach — a systematic subsonic drag
-		// deficit visible in the SimVReal benchmark overshoot cluster.
+		// Phase 8c: Boundary layer transition correction.
+		//
+		// Perfect-finish rockets now account for transition inside
+		// calculateFrictionCoefficient() using a mixed laminar/turbulent smooth-plate
+		// average Cf, so applying the old heuristic factor here would double-count the
+		// laminar reduction. Keep the pragmatic HPR cap-and-factor only for ordinary
+		// rockets, where surface discontinuities trip transition almost immediately.
+		double transitionFactor = 1.0;
 		if (!configuration.getRocket().isPerfectFinish()) {
+			double velocity = conditions.getVelocity();
+			double kinematicViscosity = conditions.getAtmosphericConditions().getKinematicViscosity();
+			double fLam = laminarFraction(mach, totalLength, velocity, kinematicViscosity);
+			// Real painted HPR airframes (paint, couplers, fin fillets, launch lugs) trip
+			// the boundary layer within inches. Only "perfect finish" rockets can sustain
+			// extended laminar flow; otherwise cap the laminar fraction to a small value.
+			// Without this cap the Michel-criterion Re_tr = 3e6 produces ~17% friction
+			// haircut on typical HPR airframes at low Mach — a systematic subsonic drag
+			// deficit visible in the SimVReal benchmark overshoot cluster.
 			fLam = Math.min(fLam, 0.05);
+			transitionFactor = 1.0 - 0.6 * fLam;
 		}
-		double transitionFactor = 1.0 - 0.6 * fLam;
 
 		if (forceMap != null) {
 			for (Map.Entry<RocketComponent, AerodynamicForces> entry : forceMap.entrySet()) {
@@ -355,25 +364,28 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	 */
 	private double calculateFrictionCoefficient(FlightConfiguration configuration, double mach, double Re, double T_e) {
 		boolean perfectFinish = configuration.getRocket().isPerfectFinish();
-		double CfBase = incompressibleCf(Re, perfectFinish);
+		double CfBase = perfectFinish
+				? smoothFinishTransitionCf(Re, transitionReynoldsNumber(mach))
+				: incompressibleCf(Re, false);
 		double CfSubsonic = CfBase * subsonicCfCorrection(mach, Re, perfectFinish);
 
 		if (mach <= 0.9) {
 			return CfSubsonic;
 		}
 
-		// Eckert reference temperature method
-		double T_star = calculateReferenceTemperature(mach, T_e);
-		double ReStar = calculateEckertReynolds(Re, T_e, T_star);
-		double CfEckert = incompressibleCf(ReStar, perfectFinish) * (T_e / T_star);
+		// Van Driest II compressible transformation (NASA TN D-6945, Hopkins 1972).
+		// Supersedes the Eckert reference-temperature method for M > 1.
+		// Hopkins & Inouye (1971 AIAA J.) showed Van Driest II gives the best
+		// agreement with experimental data across M 1.5-9.
+		double CfSupersonic = vanDriestIICf(mach, Re, T_e);
 
 		if (mach >= 1.1) {
-			return CfEckert;
+			return CfSupersonic;
 		}
 
 		// Linear blend through transonic (M 0.9–1.1)
 		double t = (mach - 0.9) / 0.2;
-		return CfSubsonic * (1.0 - t) + CfEckert * t;
+		return CfSubsonic * (1.0 - t) + CfSupersonic * t;
 	}
 
 	/**
@@ -398,6 +410,33 @@ public class BarrowmanDragCalculator implements DragCalculator {
 				return 1.0 / pow2(1.50 * Math.log(Re) - 5.6);
 			}
 		}
+	}
+
+	/**
+	 * Average incompressible skin-friction coefficient for a smooth plate with
+	 * natural transition at {@code Re_transition}.
+	 * <p>
+	 * For {@code Re <= Re_transition}, the boundary layer stays laminar over the
+	 * full length and the Blasius average applies. Above transition, use the
+	 * classical mixed flat-plate relation:
+	 * <pre>
+	 * Cf = 0.074 / Re^0.2 - A / Re
+	 * A = 0.074 * Re_tr^0.8 - 1.328 * sqrt(Re_tr)
+	 * </pre>
+	 * which reduces to the well-known {@code -1742/Re} correction when
+	 * {@code Re_tr = 5e5}.
+	 */
+	static double smoothFinishTransitionCf(double Re, double reTransition) {
+		if (Re < 1.0e4) {
+			return 1.33e-2;
+		}
+		if (reTransition <= 1.0e4 || Re <= reTransition) {
+			return 1.328 / MathUtil.safeSqrt(Re);
+		}
+
+		double a = 0.074 * Math.pow(reTransition, 0.8) - 1.328 * Math.sqrt(reTransition);
+		double cf = 0.074 / Math.pow(Re, 0.2) - a / Re;
+		return Math.max(cf, 1.0e-6);
 	}
 
 	/**
@@ -462,6 +501,123 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		double viscosityRatio = Math.pow(tempRatio, 1.5)
 				* (T_e + S_SUTHERLAND) / (T_star + S_SUTHERLAND);
 		return Re * densityRatio / viscosityRatio;
+	}
+
+	// ==================== Van Driest II Method ====================
+	// NASA TN D-6945, Hopkins (1972), Eqs. 1-18.
+	// Van Driest II transformation: maps compressible BL to incompressible
+	// via Fc, Ftheta, Fx transformation functions. Recovery factor r = 0.88.
+
+	/** Van Driest II recovery factor (TN D-6945 recommends 0.88, not 1.0). */
+	private static final double VD2_RECOVERY = 0.88;
+
+	/**
+	 * Compressible local skin-friction coefficient via Van Driest II transformation.
+	 * <p>
+	 * Reference: Hopkins, E.J., "Charts for Predicting Turbulent Skin Friction
+	 * from the Van Driest Method (II)," NASA TN D-6945, October 1972.
+	 * <p>
+	 * The method transforms the compressible Re to an equivalent incompressible Re,
+	 * solves the Schoenherr (Karman-Schoenherr) formula for incompressible Cf,
+	 * then transforms back. Validated against experimental data at M 1.5-9
+	 * (Hopkins & Inouye, 1971 AIAA J.).
+	 *
+	 * @param mach edge Mach number (must be > 0)
+	 * @param reX  length Reynolds number
+	 * @param te   edge static temperature (K)
+	 * @return local compressible skin-friction coefficient
+	 */
+	static double vanDriestIICf(double mach, double reX, double te) {
+		if (mach < 0.01 || reX < 1e3) {
+			// At very low Mach, VD-II degenerates; use incompressible directly
+			return incompressibleCf(reX, false);
+		}
+
+		// Adiabatic wall temperature: Tw = Te * (1 + r*(gamma-1)/2 * M^2)
+		double tw = te * (1.0 + VD2_RECOVERY * 0.2 * mach * mach);
+
+		// Transformation function Fc (Eqs. 8, 12-17)
+		double Fc = computeVD2Fc(mach, tw / te);
+
+		// Transformation function Ftheta (Eq. 10) using Sutherland viscosity
+		double Ftheta = computeVD2Ftheta(te, tw);
+
+		// Fx = Ftheta / Fc (Eq. 11)
+		double Fx = Ftheta / Fc;
+
+		// Transform to incompressible Re: Re_bar_x = Fx * Re_x (Eq. 7)
+		double reBarX = Fx * reX;
+		if (reBarX < 1e3) reBarX = 1e3;
+
+		// Solve Schoenherr for incompressible average CF (Eq. 1)
+		double cfBarAvg = solveSchoenherrCF(reBarX);
+
+		// Local from average (Eq. 2)
+		double cfBarLocal = 0.242 * cfBarAvg / (0.242 + 0.8686 * Math.sqrt(cfBarAvg));
+
+		// Transform back to compressible: Cf = Cf_bar / Fc (Eq. 4)
+		return cfBarLocal / Fc;
+	}
+
+	/**
+	 * Van Driest II skin-friction transformation function Fc (Eq. 8).
+	 * Fc = r*m / (arcsin(alpha) + arcsin(beta))^2
+	 */
+	private static double computeVD2Fc(double mach, double twTe) {
+		double m = 0.2 * mach * mach;  // Eq. (17)
+		double F = twTe;                // Eq. (16)
+		double A = Math.sqrt(VD2_RECOVERY * m / F); // Eq. (14)
+		double B = (1.0 + VD2_RECOVERY * m - F) / F; // Eq. (15)
+
+		double disc = Math.sqrt(4.0 * A * A + B * B);
+		double alpha = (2.0 * A * A - B) / disc; // Eq. (12)
+		double beta = B / disc;                    // Eq. (13)
+
+		// Clamp to [-1, 1] for arcsin safety
+		alpha = Math.max(-1.0, Math.min(1.0, alpha));
+		beta = Math.max(-1.0, Math.min(1.0, beta));
+
+		double denom = Math.asin(alpha) + Math.asin(beta);
+		if (Math.abs(denom) < 1e-10) {
+			// Degenerate case (M → 0): Fc → 1
+			return 1.0;
+		}
+		return VD2_RECOVERY * m / (denom * denom);
+	}
+
+	/**
+	 * Van Driest II momentum-thickness Re transformation Ftheta (Eq. 10).
+	 * Uses Sutherland viscosity for the mu_e/mu_w ratio.
+	 */
+	private static double computeVD2Ftheta(double te, double tw) {
+		// Viscosity ratio via Sutherland's law
+		double muRatio = Math.pow(te / tw, 1.5) * (tw + S_SUTHERLAND) / (te + S_SUTHERLAND);
+		// Keyes correction factors from Eq. (10)
+		double keyesFactor_w = 1.0 + 122e-5 / tw;
+		double keyesFactor_e = 1.0 + 122e-5 / te;
+		return muRatio * Math.sqrt(te / tw) * keyesFactor_w / keyesFactor_e;
+	}
+
+	/**
+	 * Solve the Schoenherr (Karman-Schoenherr) implicit formula for average Cf.
+	 * Eq. (1): 0.242 / sqrt(CF) = log10(Re_x * CF)
+	 * Uses Newton-Raphson iteration.
+	 */
+	private static double solveSchoenherrCF(double reX) {
+		// Initial guess from Schultz-Grunow approximation
+		double cf = 0.455 / Math.pow(Math.log10(reX), 2.58);
+		for (int i = 0; i < 50; i++) {
+			double sqrtCf = Math.sqrt(cf);
+			double lhs = 0.242 / sqrtCf;
+			double rhs = Math.log10(reX * cf);
+			double residual = lhs - rhs;
+			double dRes = -0.121 / (cf * sqrtCf) - 1.0 / (cf * Math.log(10));
+			double delta = residual / dRes;
+			cf -= delta;
+			if (cf < 1e-8) cf = 1e-8;
+			if (Math.abs(delta) < 1e-12) break;
+		}
+		return cf;
 	}
 
 	private double calculateRoughnessCorrection(double mach) {
@@ -608,6 +764,34 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		// The exhaust plume fills part of the base region, reducing base pressure drag.
 		double powerOnMultiplier = computePowerOnBaseDragMultiplier(conditions);
 		base *= powerOnMultiplier;
+
+		// Chapman (1950) NACA TN 2137 laminar base drag correction.
+		//
+		// For "perfect finish" rockets, where the surface is smooth enough for the
+		// boundary layer to remain laminar over a significant fraction of the body,
+		// the Devan-Ashwood turbulent correlation overestimates base drag at high Mach
+		// (MAPE 44% vs TN 3393 laminar data). The Chapman laminar formula
+		// Cpb_lam = C_LAM / (M² × √Re_L) correctly captures the faster Mach decay
+		// of laminar base pressure (laminar BL → less shear-layer mixing → lower
+		// base suction than turbulent).
+		//
+		// The correction is blended by the local laminar fraction: a fully laminar
+		// body uses Chapman exclusively; a partially laminar body interpolates.
+		// For non-perfect-finish rockets the laminar fraction is negligibly small
+		// (turbulent trip from surface roughness) so this path is never activated.
+		if (configuration.getRocket().isPerfectFinish() && mach > ChapmanKorstBaseDrag.LAM_BLEND_LOW) {
+			double velocity = conditions.getVelocity();
+			double nu = conditions.getAtmosphericConditions().getKinematicViscosity();
+			double L = configuration.getLengthAerodynamic();
+			if (L > 1e-4 && velocity > 1e-3 && nu > 1e-10) {
+				double reL = velocity * L / nu;
+				double fLam = laminarFraction(mach, L, velocity, nu);
+				if (fLam > 0.01) {
+					double baseLam = ChapmanKorstBaseDrag.blendedLaminarBaseDrag(mach, reL);
+					base = fLam * baseLam + (1.0 - fLam) * base;
+				}
+			}
+		}
 
 		// TODO Phase 6b: Apply power-on base drag correction when thrust status is available.
 		// Currently the drag calculator does not receive real-time thrust information.

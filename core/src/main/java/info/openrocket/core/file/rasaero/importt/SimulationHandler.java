@@ -13,6 +13,7 @@ import info.openrocket.core.motor.Motor;
 import info.openrocket.core.motor.MotorConfiguration;
 import info.openrocket.core.motor.ThrustCurveMotor;
 import info.openrocket.core.rocketcomponent.AxialStage;
+import info.openrocket.core.rocketcomponent.BodyTube;
 import info.openrocket.core.rocketcomponent.FlightConfigurationId;
 import info.openrocket.core.rocketcomponent.MotorMount;
 import info.openrocket.core.rocketcomponent.Rocket;
@@ -221,17 +222,25 @@ public class SimulationHandler extends AbstractElementHandler {
     }
 
     /**
-     * Returns the furthest back motor mount in the stage.
-     * 
-     * @param stageNr stage number
-     * @return furthest back motor mount of the stage
+     * Returns the furthest-aft {@link BodyTube} in the stage that should receive
+     * RASAero sustainer/booster motors.
+     * <p>
+     * Every {@link BodyTube} implements {@link MotorMount}, so a naive
+     * {@code instanceof MotorMount} scan picks the wrong tube once a CDX1
+     * {@code FinCan} is imported as a sibling body tube (see {@link FinCanHandler}):
+     * the fin-can sleeve would incorrectly host the main motor instead of the
+     * primary airframe tube.
      */
     private MotorMount getMotorMountForStage(int stageNr) {
         AxialStage stage = (AxialStage) rocket.getChild(stageNr);
-        for (int i = stage.getChildCount() - 1; i > 0; i--) {
+        for (int i = stage.getChildCount() - 1; i >= 0; i--) {
             RocketComponent component = stage.getChild(i);
-            if (component instanceof MotorMount) {
-                return (MotorMount) component;
+            if (component instanceof BodyTube) {
+                BodyTube bt = (BodyTube) component;
+                if ("Fin Can".equals(bt.getName())) {
+                    continue;
+                }
+                return bt;
             }
         }
         return null;

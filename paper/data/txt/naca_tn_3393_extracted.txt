@@ -1,0 +1,1747 @@
+--- PAGE 1 ---
+., . 
+; AS c 
+NATIONAL ADVISORY COMMITTEE 
+FOR AERONAUTICS 
+TECHNICAL NOTE 3393 
+AN EXPERIMENTAL INVESTIGATION OF THE BASE PRESSURE 
+CHARACTERIST ICS OF NONLJFTING BODIES OF 
+REVOLUTION AT MACH NUMBERS 
+FROM 2.73 TO 4.98 
+By John O. Reller, Jr., and Frank M. Hamaker 
+Ames Aeronautical Laborator y 
+Moffett Field, Calif. 
+Washington 
+March 1955 
+MAR 30 
+--- PAGE 2 ---
+
+--- PAGE 3 ---
+lQ 
+NATIONAL ADVISORY COMMITTEE FOR AERONAUTICS 
+TECHNICAL NOTE 3393 
+AN EXPERIMENTAL INVESTIGATION OF THE BASE PRESSURE 
+CHARACTERISTICS OF NONLIFTING BODIES OF 
+REVOLUTION AT MACH NUMBERS 
+FROM 2.73 TO 4.981 
+By John O. Reller, Jr., and Frank M. Hamaker 
+SUMMARY 
+An investigation was undertaken in the Ames 10-by 14-inch super­
+sonic wind tunnel to determine so.me of the base pressure characteristics 
+of related bodies of revolution at zero angle of attack. The basic body 
+shape used in this investigation was a 10-caliber tangent ogive nose 
+section combined with a cylindrical afterbody . Other related shapes 
+tested differed in that they had either a blunt-nosed profile or a boat­
+tailed afterbody. Model fineness ratios were varied from 3.12 to 10 by 
+changing afterbody length. Tests were conducted at free-stream Mach 
+numbers from 2.73 to 4.98 over a Reynolds number range, based on body 
+length, from 0.6 X 106 to 8.8 X 106• 
+In general, the base pressure coefficient decreased with increasing 
+Reynolds number and increased with increasing free-stream Mach number 
+and fineness ratio. In the particul ar case of an ogive-cylinder model 
+of fineness ratio 5 with laminar -boundary -layer flow at a Reynolds number 
+of 4 X 106, it was found that the base pressure coefficient was about 
+60 percent of the limiting value (represented by a vacuum) over the Mach 
+number range of the tests. A decrease in the base pressure coefficie nt, 
+which became more pronounced with increasin g Mach number, accompanied 
+natural transition from laminar-to turbulent -boundary-layer flow in the 
+region of the base. This result is in contrast to that obtained at lower 
+supersonic Mach numbers where an increase in base pressure coefficient 
+has been found to accompany transition. 
+The effect on the measured base pressure of the nose-profile shapes 
+investigated was found to be negligible for an afterbody length of 7 body 
+diameters . With turbulent -boundary -layer flow over a body of fineness 
+ISupersedes recently declassified NACA RM A52E20 by John O. Reller, Jro, 
+and Frank M. Hamaker , 1952. 
+--- PAGE 4 ---
+2 NACA TN 3393 
+ratio 7, the substitution of a 6-caliber ogival boattail (base diameter 
+equals 0.604 maximum diameter) for the cylindrical afterbody resulted in 
+an increase in the base pressure coefficient of approximately 75 percent 
+at a Mach number of 1.50 (as determined from tests in the Ames 1-by 
+3-foot supersonic wind tunnel) but only about 22 percent at a Mach number 
+of 4.48. Corresponding values for laminar flow were 36 and 28 percent, 
+respectively. 
+INTRODUCTION 
+The pressure acting on the base of a body moving at supersonic 
+speeds may be of considerable practical importance since it can produce 
+base drag amounting to more than one-half of the total drag of the body. 
+Early attempts to predict the base pressure on bodies of revolution in 
+supersonic flow were made by Lorenz, Gabeaud, and von Karman (see 
+references 1, 2, and 3, respectively). It is now recognized, however, 
+(see, e.g., reference 4) that these methods are generally inadequate 
+because they do not account for effects of body shape on the inviscid 
+flow in the region approaching the base nor do they account for the 
+effects of viscosity. The more recent results of Hill (reference 5) 
+are similar to those obtained in reference 3 and would appear to be 
+unsatisfactory for these same reasons. 
+Semi empirical theories of base pressure for bodies of revolution 
+have been developed by Cope (reference 6) and Chapman (reference 4). 
+In contrast with the preceding investigations, these methods attempt to 
+include not only the effects of Mach number but also the effects of 
+viscosity by considering the influence of the boundary-layer flow in 
+the region of the base. Cope's method is designed to predict base 
+pressures, provided that, in addition to free-stream conditions, the 
+thickness and type of the boundary layer at the base and the distance 
+from the base to the trailing shock wave are known. Because of the 
+numerous assumptions and approximations that are made in developing this 
+method, however, it is, according to Cope, no more than a first approxi­
+mation. The method provides only a qualitative prediction of the base 
+pressures of bodies of revolution at low supersonic Mach numbers. 
+Chapman's method, on the other hand, is essentially a means of 
+correlating experimental data at a given Mach number, and, as such, 
+requires the use of fewer simplifying assumptions in its development. 
+If the necessary experimental constants are known from a previous corre­
+lation, it has been found that the method can be used to predict, with 
+reasonable accuracy, the base pressures for similar bodies of revolution 
+at low supersonic airspeeds. .. 
+--- PAGE 5 ---
+NACA TN 3393 
+It is evident then, that at present an adequate knowledge of the 
+base pressure phenomenon remains strongly dependent on results of 
+experiments. A large amount of base pressure data are available from 
+both wind-tunnel and free-flight tests at low supersonic airspeeds. 
+At high supersonic speeds, however, only a limited amount of data are 
+available, and the accuracy of the proposed methods of references 4 
+and 6 for either correlating or predicting base pressures has not been 
+verified. 
+The primary purpose of this investigation is to determine experi­
+mentally the variation of base pressure with Reynolds number at high 
+supersonic Mach numbers. To this end, several related, nonlifting 
+bodies of revolution have been investigated at Mach numbers from 2.73 
+to 4.98 and Reynolds numbers (based on body length) varying from 3 
+about 0.6 X 106 to 8.8 X 106 in the Ames 10-by 14-inch supersonic wind 
+tunnel. 
+NOTATION 
+d maximum model diameter 
+ds model support diameter 
+I length of model 
+Is length of model support 
+M Mach number 
+P static pressure 
+base pressure coefficient referred to free-etream 
+conditions 
+Pb1 base pressure coefficient referred to conditions just 
+ahead of the base (pt~~l) 
+q dynamic pressure (~U2) 
+--- PAGE 6 ---
+4 
+r 
+Re 
+u 
+x 
+r 
+€ 
+p 
+a 
+b 
+o 
+1 
+2 NACA TN 3393 
+local radius of body 
+Reynolds number based on model length 
+resultant velocity 
+axial distance from the body vertex 
+ratio of specific heat at constant pressure to specific 
+heat at constant volume 
+correction parameter, defined by equation (2) 
+density 
+Subscripts 
+stagnation conditions 
+conditions at base 
+conditions in free stream 
+conditions just ahead of base 
+conditions on surface of extended afterbody 
+APPARATUS AND TEST PROCEDURE 
+Wind-Tunnel. and Auxiliary Equipment 
+This investigation was conducted in the Ames lO-by l4-inch super­
+sonic wind tunnel. The tunnel is of the closed-throat, continuous-flow 
+type and consists of a deLaval nozzle followed by a test section and a 
+converging-diverging diffuser. Details of the wind tunnel can be found 
+in reference 7. A simple shadowgraph system was employed to identify 
+the type of boundary-l.ayer flow. McLeod type gages, each of which was 
+equipped with a trap containing dry ice and acetone to remove condensable 
+vapors, were used to measure pressures. 
+--- PAGE 7 ---
+NACA TN 3393 5 
+Models 
+The majority of the bodies tested were ogive cylinders with 
+10-caliber tangent ogival noses and cylindrical afterbodies of l-inch 
+diameter; the over-all fineness ratios varied from 3.12 to 10 (see 
+models 1 through 4, fig. l(a)). A 1-1/2-inch-diameter model of fineness 
+ratio 5 was also tested, primarily for the purpose of measuring the 
+pressure distribution across the base. This model (model 5) and its 
+special support are shown in figure l(b). 
+A small amount of data was obtained with models that had noses 
+of fineness ratiO 3 defined by the equation r = 0.219 X3/4• (This 
+shape is approximately that of a body for minimum drag for an lid 
+of 3, as pointed out in reference 7.) These noses were faired into 
+l-inch-diameter cylindrical afterbodies (see models 6 and 7 in 
+fig.l(c)) . One additional ogive-cylinder model with a boattailed 
+afterbody was also tested (see fig. l(c) showing model 8; d = 1.25 in., 
+base diameter = 0.604d). Data obtained on these models were used to 
+evaluate some of the effects of nose and afterbody shape on base 
+pressure. 
+Model number 2 (lid = 5) was used with supports of various lengths 
+and diameters (see fig. 2) to evaluate the effect of support interfer ­
+ence on measured base pressure. 
+The quality of model surface finish may influence the measured 
+base pressure through its effect on boundary -layer development. The 
+test models had, therefore, a general surface finish of about 10 micro­
+inches (average deviation from the mean surface). 
+Test Procedure 
+Operating conditions. -For this investigation the wind tunnel was 
+operated at Mach numbers from 2.73 to 4.98, with a maximum reservoir 
+pressure of b atmospheres absolute and reservoir temperatures between 
+500 F and 700 F. The absolute humidity of the air supplied to the 
+tunnel was maintained between 1.5 X 10-5 and 5.0 X 10-5 pounds of water 
+per pound of air. The Reynolds number of the flow at Mach numbers of 
+2.73 and 4.98 was approximately 8.2 X 106 per foot and 2.1 X 106 per 
+foot, respectively. At intermediate Mach numbers a range of Reynolds 
+numbers was available with the maximum range of 3.6 X 106 to 8.6 X 106 
+per foot occurring at a Mach number of 4.03. 
+--- PAGE 8 ---
+6 NACA TN 3393 
+Methods of promoting a turbulent boundary layer.- In an attempt to 
+extend the range of Reynolds numbers at which a turbulent boundary layer 
+would occur, several types of turbulence-promoting devices were investi ­
+gated. Tests were conducted with rings of 0.005-and O.OlO-inch-diameter 
+wire and salt bands of various widths, located both near the vertex and 
+at the shoulder of a model. A lampblack coating on the nose of a model 
+was also tried. Several of the turbulence -promoting devices are 
+illustrated in figure 3. It was found that a salt band of approximately 
+O.020-inch thickness and 1/2-inch width, located 1/4 inch from the 
+vertex of a model, was the only device that was effective in causing the 
+boundary layer to become turbulent for the complete range of Mach numbers 
+and Reynolds numbers of this investigation. With this device, the 
+transition point was fixed at the location of the roughness. The salt­
+band roughness was therefore used as the turbulence -promoting device in 
+the majority of tests. Some turbulent-boundary-layer data were obtained 
+for model 8 with a O.005-inch-diameter wire ring located close to the 
+vertex. The effectiveness of this device in promoting turbulence was 
+limited to the higher test Reynolds numbers at Mach numbers beiow 4.5. 
+INTERPRETATION AND REDUCTION OF THE DATA 
+Boundary-Layer Identification 
+A representative series of shadowgraph pictures for both laminar­
+and turburlent-boundary -layer flow is shown in figure 4. Laminar ­
+boundary-layer flow is identified by the characteristic light line that 
+is apparent near the model surface and that extends downstream from the 
+base. Turbulent -boundary -layer flow, on the other hand, is identified 
+by a diffused light region adjacent to the surface and a lack of detail 
+in the expansion region behind the base. The type of boundary -layer 
+flow is also indicated by the location of the trailing shock wave behind 
+the model. For turbulent flow this shock wave stands closer to the base 
+than for laminar flow at the same Mach number and Reynolds number. 
+It is necessary to specify the conditions under which the base 
+pressure data of this report correspond to those for laminar-, 
+transitional-, and turbulent -boundary-layer flow in the region of the 
+base. The data correspond to laminar-boundary-layer flow when the 
+laminar appearance of the flow (identified by the characteristic light 
+line) persists downstream of the base to the location of the trailing 
+shock wave. Similarly, in every case of turbulent -boundary -layer flOW, 
+transition started at least 3-to 4-base diameters upstream of the base. 
+Data that were measured under conditions that fall between these two 
+limits are considered to be representative of transitional -boundary ­
+layer flow. 
+----- -------- ---------------------------- ------~ 
+--- PAGE 9 ---
+NACA TN 3393 7 
+Support Interference 
+Models were supported in the wind tunnel by a cylindrical rod extend­
+ing from the base. Since this configuration is significantly different 
+from a body with an unobstructed base, the measured values of base 
+pressure may be considerably altered . Tests were conducted over the 
+entire Mach number and Reynolds number range to determine the extent of 
+the influence of both support length and support diameter on the base 
+pressure. Typical results are shown in figures 5 and 6. On the basis 
+of these results it seems reasonable to assume that with a ds/d ratio 
+of 0.40 or less and an lsld ratio of 8, the measured base pressure is 
+essentially free of support interference . Because of the varying loads 
+encountered in the base pressure tests, it was necessary to use dsld 
+ratios as great as 0.625 and Isld ratios as low as 6. Therefore it was 
+often necessary to apply corrections, based on the results of this inves­
+tigation, to the measured base pressure coefficients that are presented 
+in the following discussion. The effects of support interference and the 
+correction method are considered in more detail in appendix A. 
+Condensation in the Air Stream 
+As a result of the large flow expansion that takes place in the 
+nozzle of a high supersonic -speed wind tunnel, extremely low static 
+temperatures are realized in the flow passing through the test section . 
+At a settling chamber temperature of about 600 F, the existing situation 
+in the Ames 10-by 14-inch supersonic wind tunnel, the static temperature 
+in the free stream falls below the liquefaction temperature at Mach 
+numbers somewhat in excess of 4.0. Consequently, as has been shown in 
+reference 8, at these Mach numbers a portion of the air in the wind tunnel 
+will enter the condensed phase and thus the properties of the stream will 
+be altered . As discussed in appendix B, this phenomenon affects both 
+the boundary -layer flow and the flow field outside of the boundary layer. 
+It is shown in appendix B that, for the purposes of these tests, these 
+influences on the boundary layer can be neglected, but that the alteration 
+of the expansion process in the flow downstream of the base may increase 
+the base pressure coefficient by as much as 12 percent at the highest 
+test Mach number. (This corresponds to an increase in the base pressure 
+relative to the free-stream static pressure.) Since the method used to 
+evaluate this effect of condensation is only approximate, the basic data 
+of the present report are presented both as corrected and uncorrected 
+for condensation effects . 
+--- PAGE 10 ---
+-- -----
+8 NACA TN 3393 
+Effect of Transition -Promoting Device 
+To obtain turbulent boundary layers on a representative number of 
+models at several Reynolds numbers, it was necessary, as previously 
+discussed, to locate a transition -promoting device close to the vertex 
+of each model. However, this device caused a systematic change in the 
+base pressures . This fact is demonstrated for models 4 and 5 in 
+figure ( where a comparison is made of the base pressures obtained with 
+natural transition to a turbulent boundary layer with those obtained 
+with fixed transition to a turbulent boundary layer resulting from the 
+use of the artificial roughness . It can be seen that the base pressure 
+coefficient measured with fixed transition was from about ( to 11 percent 
+higher. Shadowgraph pictures showed, correspondingly, an increase in 
+boundary-layer thickness which, it is believed, would account for the 
+greatest percentage of the observed difference . This difference in base 
+pressure coefficient, in other words, is attributed primarily to effects 
+of the artificial roughness on the turbulent boundary layer rather than 
+to effects of the artificial roughness on the flow field outside the 
+boundary layer. In certain qualitative respects the use of an artificia l 
+transition -promoting device would appear to be analogous, then, to test­
+ing with a model of greater length on which the turbulent boundary layer 
+had developed to a greater thickness . At present, however, insufficient 
+data are available to permit a general correction to be made for this 
+effect. Thus, although the relative variations of the base pressure 
+coefficient with Reynolds number and Mach number for the turbulent 
+boundary layer with fixed transition are believed representative, the 
+actual values of case pressure coefficient are probably high by as much 
+as 10 percent. Unless specifically stated otherwise, all base pressure 
+data with turbulent -boundary-layer flow that are subsequently presented 
+in this report were obtained with the use of a transition-promoting 
+device. 
+PRECISION OF THE DATA 
+Pressure Measurement 
+The operational plus the reading error of the McLeod pressure gages 
+varied from ±2-1/2 percent to ±1/2 percent at the lowest and highest 
+measured pressures, respectively . The rate of leakage into the pressure ­
+measuring systems introduced an uncertainty of less than 1/2 percent . 
+Reservoir pressure was determined to within ±l-percent accuracy, while 
+free-stream static and dynamic pressures were obtained from wind-tunnel 
+calibration data which are also accurate to within ±l percent at all 
+test Mach numbers. 
+--- PAGE 11 ---
+2Q 
+NACA TN 3393 9 
+Pressure Gradients in the Test Section 
+The free-stream static and dynamic pressures used in the reduction 
+of these data are those which exist on the center line of the wind tunnel 
+(tunnel empty) in the plane of the base of the test model. Since the 
+vertices of all models were located at the same station in the test 
+section, the position of the plane of the base of the different models 
+varied as much as 7 inches along the axis. Within this distance, the 
+maximum variation of Mach number is ±1.2 percent of the mean value (see 
+reference 7). Maximum errors in base pressure coefficient less than 
+±2 percent are therefore introduced by relating these data to the effec­
+tive test Mach number. At Mach number 4.48, a weak pressure discontin ­
+uity intersected the axis close enough to the base of the longest model 
+to influence the base pressure . The error from this source was estimated 
+to cause an increase in Pb of less than 3 percent . 
+Summation of Errors 
+The various sources of uncertainty in the measured base pressures 
+and the corresponding maximum and probable errors that could be introduced 
+into the absolute values of the base pressure coefficients are listed in 
+the following table. The maximum error would result if all possible 
+errors that are known to exist were to accumUla te. The probable error, 
+that is the root-mean-square value of the errors from the several sources, 
+would more nearly result if, as is usually the case, the errors were 
+partially compensating. 
+Error in Pb Error in Pb 
+at Mo = 2·73 at ~ = 4.98 
+Pressure measurement ±3 percent ±4-1/2 percent 
+Pressure gradient in 
+test section ±2 percent ±2 percent ----
+Maximum error ±5 percent ±~1/2 percent 
+Probable error ±3-1/2 percent ±5 percent 
+--- PAGE 12 ---
+10 NACA TI 3393 
+RESULTS AND DISCUSSION 
+Variation of Pressure Over the Base 
+The results of the investigation to determine the variation of 
+pressure over the base of a body of revolution at high supersonic Mach 
+numbers are shown in figure 8. Base pressures on model 5 were measured 
+on the model support at the base of the model as well as along two radial 
+lines on the base, one in the horizontal plane and the other in the 
+vertical plane of the wind tunnel. Although pressures were determined 
+over a range of Reynolds numbers at each Mach number, only representative 
+data are presented. In general, it is observed that changes in pressure 
+coefficient with radial location are small. The differences, at the 
+lower Mach numbers, between pressures in the vertical and horizontal 
+planes are attributed to pressure gradients in the tunnel air stream in 
+the corresponding directions normal to the tunnel center line. These 
+differences are increased in the case of turbulent flow due to a partial 
+deterioration of the artificial roughness that was not discovered until 
+completion of the tests. It is noted that in all cases, however, these 
+differences are small, and that the pressure measured on the model support 
+represents a reasonably good average value. The base pressure data to 
+be discussed subsequently were therefore obtained at this location . 
+Variation of Base Pressure With Reynolds Number 
+Constant body fineness ratio.-Base pressure coefficients for the 
+lid = 5, ogive-cylinder combination are presented as a function of 
+Reynolds number in figure 9 for laminar -boundary -layer flow. These 
+coefficients, uncorrected for condensation in the expansion region down­
+stream of the model, are shown in figure 9(a), while those corrected for 
+condensation by the approximate method discussed in appendix B are shown 
+in figure 9(b).2 As would be expected, the base pressure coefficient 
+decreases (corresponding to decreasing base pressure relative to free­
+stream pressure) with increasing Reynolds number. It is clear that in 
+general, however, the effect of Reynolds number on the coefficient 
+decreases as the free-stream Mach number increases . For example, at 
+Mo = 3.49 an increase of Reynolds number from 3 X 106 to 4.5 X 106 
+changes the coefficient about 20 percent, while at Mo = 4.48 a similar 
+increase of Reynolds number results in a change of only about 5 percent. 
+2It will be noted that the trends and relative magnitudes of the 
+corrected data are essentially the same as those for the uncorrected 
+data. This property is characteristic of all data to be presented ; 
+hence the discussion of results may generally be considered to apply 
+to both types of data. 
+--- PAGE 13 ---
+NACA TN 3393 11 
+Data are presented in figure 10 for turbulent -boundary -layer flow. 
+It can be seen that the variation of pressure coefficient with Reynolds 
+number is similar for all Mach numbers above 2.73. It is also evident 
+from a comparison with figure 9 that the effect of Reynolds number is 
+somewhat less at lower Mach numbers than for the laminar boundary layer, 
+which agrees with the results of other investig ators. However, at 
+Mo = 4.48 and 4.98, the converse is true as seen in figures 9 and 10. 
+At a Mach number of 2.73 the base pressure coefficient increases slightly 
+with increasing Reynolds number. A similar effect has been observed at 
+Mo = 1.5 and 2.0 with turbulent -boundary -layer flow and reported in 
+reference 4. 
+Influence of body fineness ratio.-Base pressur e coefficients for 
+ogive-cylinder models of fineness ratios 3.12 to 10 are presented as a 
+function of Reynolds number in figure 11 for laminar-boundary-layer flow. 
+It can be seen that the variations of pressure coefficient with Reynolds 
+number, for a given Mach number, are generally similar for the different 
+lid ratios tested. As would be expected, the base pressure coefficient 
+at a constant Reynolds number and Mach number increases with increasing 
+body fineness ratio. This variation can be attributed, in part, to the 
+increase in pressure recovery on the cylindrical afterbody just ahead of 
+the base, with increasing fineness ratio. However, it may also be attri­
+buted in part to the increase in boundary -layer thickness at the base 
+(d = const.) with increasing fineness ratio. 
+Similar data are presented in figure 12 for turbulent -boundary-layer 
+flow. Again it can be seen that the variation with Reynolds number 
+(at a constant Mo) is similar for the lid ratios tested, and that the 
+base pressure coefficient (at constant Re and Mo) increases with increas ­
+ing fineness ratio as for the case previously discussed. A correlation 
+of these data by the method of reference 4 is presented in a later section. 
+Boundary-layer transition.-The variation of base pressure coeffi­
+ciE.nt with Reynolds number for laminar-, transitional -, and turbulent­
+~o·2,~a ry-layer flow for the fineness ratio 5 ogive-cylinder models 
+(r .. oj.o.::..s 2 and 5) is presented in figure 13. The data in the low Reynolds 
+:·iu~,tc r range 'ilere obtained from figure 9, while the dashed lines in the 
+nigh Peynolds number range were obtained by extrapolation from the curves 
+of figure 10.3 Also shown in figure 13 are the data of figure 7, at Mach 
+r.umber 3 .~9, for fully developed turbulent -boundary -layer flow resulti ng 
+from natural boundary-layer transition . The onset of transition, that is, 
+those conditions for which the transition point in the boundary-layer flow 
+first moves to a position upstream of the trailing shock wave, was found 
+irc these tests to occur at Reynolds numbers between approximately 4 X 106 
+,-,-cd 5 X loB. 
+31t viill be recalled that the data of figure 10 were obtained with fixed 
+~ransition resultin G from the use of an artificial roughness. 
+--- PAGE 14 ---
+12 NACA TN 3393 
+It c~n be seen that a decrease of base pressure coefficient occurs in 
+the Reynolds number range of transition at Mach numbers above 2.73. This 
+effect becomes more pronounced as the Mach number increases, varying from 
+approximately 15 percent (turbulent flow with fixed transition as compared 
+to laminar flow) at Mo = 3.49 to 50 percent at Mo = 4.48. The change 
+of base pressure coefficient with natural boundary -layer transition appears 
+to be even larger. For example, at Mo = 3.49 the decrease is approxi ­
+mately 26 percent . From the previous discussion of the effect on base 
+pressure coefficient of the transition -promoting deVice, it follows that 
+the difference between turbulent flow with fixed and natural transition 
+would be of similar magnitude at the other test Mach numbers . Thus, with 
+natural boundary -layer development it appears that a decrease of base 
+pressure coefficient occurs with transition for the entire Mach number 
+range of the present tests. In contrast with these results, comparative 
+data at Mo = 1.5 and Mo = 2.0 for a 200 cone-cylinder model of lid = 5, 
+taken from reference 4, show an increase in base pressure coefficient in 
+the Reynolds number· range of transition .4 The reasons for this change 
+of base pressure behavior with increasing Mach number are at present not 
+completely understood; a partial verification of the phenomenon, however , 
+is obtained from a consideration of the physical characteristics of the 
+flow pa.ttern downstream of the base. In particular, a difference in the 
+location of the trailing shock wave, relative to the base, with laminar -
+as compared to turbulent-boundary -layer flow (at the same Mo and Re) is 
+shown in the shadowgraph pictures of the present tests. In every case 
+(see, e.g., fig. 4) the trailing shock wave stands closer to the base for 
+turbulent flow than for laminar , with the difference increasing as the 
+Mach number is increased . In general, then, it would be expected that 
+for the turbulent case a greater flow expansion occurs around the corner 
+of the base and thus a lower pressure is transmitted into the dead-air 
+region. On the other hand, photogra phs at Me = 1.5 (see fig. 21 of 
+reference 9) for a similar ogive-cylinder body indicate that the shock 
+wave stands somewhat closer to the base for laminar than for turbulen t 
+flow. General agreement is thus apparent between these limited observa ­
+tions and the trends shown in figure 13 of the present report. 
+Effect of Nose and Afterbody Shapes 
+For the study of nose-shape effects , base pressure data were obtained 
+with models having ogival noses and the slightly blunt noses for minimum 
+pressure drag (given lid) at high supersonic airspeeds. The base pressure 
+coefficients obtained with both laminar -and turbulent -boundary-layer flow 
+in the region of the bases of these bodies are presented in figure 14.5 
+4Although this body shape is not identical to the lid = 5 model used in 
+the present tests, the indicated variations of the base pressure coeffi­
+cient with Reynolds number are representative of the established trends 
+at low supersonic Mach numbers. 
+50nly data corrected for condensation are presented in this and subsequent 
+figures . Uncorrected data are related to these data in the manner dis­
+cussed previously. 
+--- PAGE 15 ---
+NACA TN 3393 13 
+It is seen that base pressure coefficients with laminar flow (fig. 14(a)) 
+for the blunt-nosed body of lid = 3.12 are about 4 percent less than 
+those for the corresponding ogival-nosed body at Mach numbers from 2.7 to 
+5.0 and a constant Reynolds number of 2.5 X 106• With turbulent -boundary ­
+layer flow (fig. 14(b)), a similar result is observe d for these bodies; 
+for example , the base pressure coefficients for the blunt-nosed body vary 
+from 7 percent less to about 3 percent less than those for the correspond­
+ing ogive as the Mach number increases from 2.7 to 4.5. It is seen, on 
+the other hand, that when a cylindrical afterbody is added to these bodies 
+to increase their over-all lid to 10, no measurable effect of nose shape 
+on base pressure coefficient is observed. That there is a reduction in 
+this effect is not surprising, since it would be expected that with 
+increasing afterbody length flow conditions in the region of the base 
+(both within and outside the boundary layer) would become less sensiti ve 
+to nose shape. It is interesting to note, however, that with the two 
+different noses employed, the effect is essential ly zero for an after­
+body length of only 7 diameters . 
+Effects of boattailing were studied with model 8. A comparison of 
+the base pressure coefficients for this body and the coeffic ients for 
+the corresponding unboattailed body is shown in figure 15.6 Also shown 
+in figure 15 are data obtained with similar models in the Ames 1-by 
+3-foot supersonic wind tunnel at Me = 1.5 and 2.0. Some of these data 
+are unpublished; the remainder are interpolated from data of references 4) 
+9, and 10. It is evident that the boattailed body consistently has the 
+higher base pressures at Mach numbers from 1.5 to 4.5 for both laminar ­
+and turbulent-boundary -layer flow in the region of the base, The effect 
+of this amount of boattailing is observed to decrease markedly ) however) 
+with increasing Mach number. For example, in the case of turbulent ­
+boundary-layer flow (see fig. 15(b)) boattailing increases the base 
+pressure coefficient by 75 percent at Mo = 1.5, while at Mo = 4.5 it 
+increases the coefficient by only 22 percent; corresponding values for 
+laminar -boundary -layer flow are 36 percent and 28 percent) respectively. 
+The results of reference II, at a Mach number of 3.25, are in substan ­
+tial agreement with those of figure 15. 
+Variation of Base Pressure with Mach Number 
+Base pressure coefficients for a body of fineness ratio 5 (model 2) 
+with both laminar -boundary -layer flow and artific ially induced turbulent ­
+boundary-layer flow are presented as a function of free-stream Mach number 
+in figure 16. The results were obtained from a cross plot of the data in 
+figures 9 and 10. The limiting curve of base pressure coefficient (i.e., 
+for a vacuum at the base) is shown for comparison. For the Mach number 
+6Results presented here were determined from cross plots of the data in 
+figures 11 and 12 and similar figures for the boattailed body. Where 
+necessary , the base pressure coefficient for model 3 was obtained by 
+linear interpolation from the data of models I, 2) and 4. 
+--- PAGE 16 ---
+14 NACA TN 3393 
+range of the present tests, it can be seen that the base pressure coeffi­
+cient for laminar flow is about 60 percent of the limiting value. With 
+an artificially induced turbulent boundary layer, the coefficient is 
+smaller , increasing from about 62 percent to 82 percent of the limiting 
+value as the ¥~ch number is increased from 2.73 to 4.48. It is also 
+interesting to note from a comparison of the high Mach number data of 
+the present tests and the low Mach number results as interpolated from 
+data of reference 4 that the same base pressure coefficients would appar­
+ently be obtained with both laminar -boundary -layer flow and artificially 
+induced turbulent -boundary -layer flow at a Mach number of about 2.5. 
+With natural transition to turbulent -boundary -layer flow, this Mach 
+number would probably be slightly less. These results are, of course, 
+consistent with those discussed previousl y in connection with figure 13. 
+The ratio of base pressure to free-stream static pressure is plotted 
+as a function of free-stream Mach number in figure 17. The base pressur e 
+data are the same as those shown in figure 16, but are replotte d in this 
+form to expand the scale of the variation in the high Mach number range 
+where the base pressure coefficient decreases to small magnitude . The 
+base pressure ratio for laminar -boundary -layer flow remains relatively 
+constant throughout the Mach number range of the present tests, in con­
+trast with the trend indicated at lower supersonic Mach numbers by the 
+data of reference 4. With turbulent flow the base pressur e ratio 
+decreases markedly up to Mo = 4, but relativel y slowly thereaftero 
+With regard to these indicated trends, the semiempirical method of 
+Cope (reference 6) yields results that are in only qualitative agreement 
+with the laminar base pressure curve of figure 17. For turbulent ­
+boundary -layer flow this method fails to predict the observed variation 
+of base pressure with free-stream Mach numberj in fact, values similar 
+to those for laminar flow were obtainedo As a result, the intersection 
+of the laminar and turbulent curves that would be indicated in figures lC 
+and 17 is not apparent from the analysis of reference 6. 
+Correlation of Base Pressure Data 
+A method of correlating base pressure data has been suggested by 
+Chapman in reference 40 It is assumed in the correlat ion that the base 
+pressure is primarily dependent upon the conditions just upstream of the 
+base. Therefore, the measured base pressure coefficient Pb, which is 
+referred to free-stream conditions, must be related to the coeffic ient 
+Pb1 based on conditions just ahead of the base. The relationshi p 
+between Pb and Pb1 is given in reference 4 as: 
+(1) 
+--- PAGE 17 ---
+I'JACA TN 3393 15 
+€ = (Mo
+22 _ 1)P2 __ 2_ (1 + 2'-1 Mo 2) 6ra 
+\" yMo2 2 Pa (2 ) 
+and 6Pa is the loss in total pressure through the nose s~ock wave. 
+The paramete r P2 is considered to be a correction to Pb for the 
+effects of profile shape and, as used herein, is defined as the press~~e 
+coefficient (P2-PO)/Qo which would exist on the surface of a hypothetical 
+cylindrical extension of the body at a point midl{ay behreen the actual 
+base and trailing shock wave. 
+In equation (I), Pb1 is considered to be indepf'ndent of body sh~pe 
+for a given Mach number approaching the base. Since this J.1ach number 
+varies somewhat for different l/d ratios, an addition 1 correction) 
+(jPb oM (M1-Mo), to Pb1 is necessary to enable a direct comparison to be 
+made between various body shapes (see reference 4). The resultant 
+equation 
+was then used in the present correlation . Numerical values of the 
+pressure coefficient P2 were taken frOTIl reference 12. The values of 
+Pb1 obtained from this equation were, as suggested in reference 4, 
+correlated by plottin g them as a function of the parameters l/(d&) 
+and l/[d(Re) 1/5], Hhich are appro;~iTJill.tely proportional to bOlilldary­
+layer thickness for laminar -and tur"Uule: .rl:.-bow1dc..ry -layer floi·!, resuec­
+tively. 
+The data of figures 11 and 12 are presented in this form in fig­
+ure 18. For comparison , similar curves from reference 4 at Mach num­
+bers 1.53 and 2.00 are also shown. For both laminar -and turbulent ­
+boundary -layer flow, the variation of Pb1 with the boundary -layer 
+parameters at each of the higher Mach numbers cannot, in contrast vrith 
+the low Mach number data of reference 4, be completely represented by 
+the single mean curve that is shown. In fact, for the present range of 
+variables, it is apparent that the par meters do not bring the data for 
+different fineness ratios into agreement . At a constant value of llach 
+number and fineness ratio, a large part of the higher ~lach number data 
+indicate , as shown by the short dashed lines in figure 18, a local slope 
+that is appreciably greater than the slope of the mean curve. Thus on 
+the basis of the experimental evidence available here) the usefulness 
+of the method of base pressure correlation of reference 4 appears to be 
+diminished at Mach numbers in excess of about 3. 
+--- PAGE 18 ---
+16 NACA TN 3393 
+CONCLUSIONS 
+A wind-tunnel investig ation was conducted to determine some of the 
+base pressure character istics of several related bodies of revolution 
+at zero angle of attack and free-stream Mach numbers from 2.73 to 4.98. 
+In general, it was found that the base pressure coefficient increased 
+with increasing free-stream Mach number and body fineness ratio and 
+decreased with increasing Reynolds number, with either laminar -or 
+turbulent -boundary-layer flow. 
+The following specific conclusions are drawn from the results of 
+this investigation : 
+1. The base pressure coefficient is higher with laminar -than with 
+turbulent -boundary -layer flow at Mach numbers above approximately 2.5. 
+20 A decrease of the base pressure coefficient occurs with natural 
+transition from laminar -to turbu1ent -boundary -layer flow at Reynolds 
+numbers from 4.0 X 106 to 6.0 X lae; this effect becomes more pronounced 
+with increasing Mach number. At Me = 3.49 on a body of fineness 
+ratio 5 the decrease was approximately 26 percent . 
+3. With laminar -boundary -layer flow the variation of the base 
+pressure coefficient with Reynolds number becomes less pronounced as the 
+Mach number is increased . 
+4. A change of afterbody from a cylindrical shape to one with 
+boattailing causes an increase in the base pressure coeffici ent. For 
+turbulent -boundary -layer flow over a body with a 6-caliber ogival boattail 
+(base diameter equals 0.604 maximum diameter) this effect decreased 
+markedly with increasing Mach number from 75 percent at Me = 1.5 to 
+22 percent at Me = 4.48. 
+5. For an afterbody length of about 7 body diameters, the effect 
+of nose profile shape on base pressure was found to be negligible for 
+the nose shapes tested. 
+6. The semiempirical method of Cope is inadequate for predicting 
+base pressures in the Mach number range of these tests, while the cor­
+responding method of Chapman provides at most only an approximate corre­
+lation of experimental data at Mach numbers above about 3. 
+Ames Aeronaut ical Laboratory 
+Nationa l Advisory Committee for Aeronautics 
+Moffett Field, Calif., May 20, 1952 
+--- PAGE 19 ---
+Q 
+NACA TN 3393 17 
+APPENDIX A 
+SUPPORT INTERFERENCE 
+The effects on base pressure of both support length and diameter 
+were investigated over the entire Mach number and Reynolds number range, 
+using model 2. Typical effects of support length for a constant 
+diameter (ds/d = 0.375) are illustrated in figure 5.~ \lith a laminar 
+boundary layer little change in base pressure coefficient is indicated 
+from Mo = 2.73 to Mo = 4.48 for an unobstructed support length greater 
+than 4 base diameters . At Mo = 4.98, however, this coefficient is 
+significantly altered for support lengths less than 6 base diameters, 
+and may be slightly altered for support lengths up to 8 diameters . With 
+turbulent -boundary -layer flow there is no appreciable change in the base 
+pressure coefficient for support lengths greater than 4 base diameters 
+over the range of Mach numbers . A comparison is made in figure 5 with 
+similar data at Mo = 2.90 from reference 4. 
+Typical variations of base pressure coefficient with support 
+diameter are presented in figure 6. A constant support length-to-base­
+diameter ratio of 6 was used. With a laminar boundary layer at test 
+Mach numbers above 2.73 there is no significant change in base pressure 
+coefficient for support -to-base-diameter ratios less than 0.40. At 
+Mo = 2.73, however, support interference persists to the lowest ds/d 
+ratio tested, although the effect is relatively small at ds/d ratios 
+below 0.40. On the basis of these results, it seems reasonable to 
+assume that no significant variation of base pressure coefficient for 
+laminar -boundary -layer flow will occur at ds/d ratios between 0.40 
+and O. For turbulent -boundary -layer flow at Mo = 4.03 and 4.48 there 
+is a negligible change of the coefficient for support -to-base-diameter 
+ratios less than 0.50. At the remaining Mach numbers the base pressure 
+coefficient varies to some extent over the entire range of diameter 
+ratios tested. However, at Mo = 3.49 and 4.98 this variation is small, 
+indicating, for example, that ~ is approaching a limiting value in 
+the former case for ds/d ratios less than 0.40. (Comparable data from 
+reference 4 are observed to show a similar trend of Fb with the ratio 
+ds/d at a Mach number of 2.90.) In general, then, it seems reasonable 
+to assume that with turbulent -boundary -layer flow at Mach numbers above 
+about 3.0, little change of the base pressure coefficient occurs at ds/d 
+ratios between 0.40 and O. At Mo = 2.73 the variation of Pb with the 
+ds/d ratio does not approach a limiting value; however, the free-flight 
+LThe data in this and the subsequent figure are not corrected for 
+condensation, since trends only are discussed and absolute values are 
+not essential. 
+--- PAGE 20 ---
+18 
+data from reference 132 and the data from reference 
+ure 6(b) indicate that the values of Pb at dsld 
+do not differ appreciably from that at dsld of O. NACA TN 3393 
+4 shown in fig­
+from 0.25 to 0.375 
+In view of the results of this support-tnterference investigation, 
+support lengths of at least 6 base diameters were used in all subsequent 
+tests. Support diameters were held to a minimum consistent with strength 
+requirements, with dsld varying from 0.375 to 0.625 for the shortest 
+and longest models tested, respectively. Measured base pressure coeffi­
+cients were adjusted, using data represented by figures 5 and 6, to 
+an 2s/d ratio of 8 and a dsld ratio of 0.375 to obtain data that 
+are assumed to be essentially free of support interference effects. 
+No evaluation was made of the effects of support interference on 
+the measured base pressures of the boattailed model. However, since a 
+support with 2s/d = 13 was used, the data presented in figure 5 
+indicate that these base pressures are free of support-length interfer­
+ence. An investigation of support dimensions for a boattail model of 
+similar shape with laminar-boundary-layer flow (reference 9) showed that 
+at Me = 1.5 interference effects are negligible with a support of 
+approximately the same relative diameter (ds/d = 0.35) as that used but 
+of shorter relative length (2s/d = 7). It is thus indicated, in view 
+of the results presented in figure 6, that these pressures are also 
+relatively free of support-diameter effects. 
+2The free-flight body of reference 13 was a 200 cone-cylinder combination 
+of 2/d = 5 instead of an ogive cylinder, but calculations show that 
+the conditions on the model surfaces near the base are such that the 
+base pressures of the two models should be closely comparable. 
+--- PAGE 21 ---
+NACA TN 3393 19 
+APPENDIX B 
+CONDENSATION IN THE AIR STREAM 
+An investigation of the condensation of air in supersonic flow has 
+been reported in reference 8. It was shown experimentally that conden­
+sation occurs at free-stream Mach numbers above 4.4 in the Ames 10-by 
+14-inch supersonic wind tunnel. Therefore, the relationships given in 
+appendix C of the reference report (applying when the air stream contains 
+a small amount of condensed air) were used to determine the effective 
+test Mach numbers 4.48 and 4.98 of the present report. The methods of 
+reference 8 were also used to evaluate the effect of condensation upon 
+the measured data of the present report. It was shown therein that the 
+properties of the flow approaching the base of a body of revolution 
+(outside the boundary layer) are approximately those that would exist at 
+the same Mach number in a stream that was free of condensation . It was 
+also shown that re-evaporation of the condensed phase occurs in the 
+high temperature boundary-layer region of a test model. This may reduce 
+the surface temperature by as much as 300 F (Me = 4.98). Reference 11 
+indicates, however, that a surface temperature change of this magnitude 
+will alter the base pressure by only about 1.5 percent. As a first 
+approximation, therefore, the effects of condensation on the flow 
+approaching the base, both inside and outside the boundary layer, may be 
+considered negligibly small. 
+Condensation phenomena can, however , have an appreciable effect on 
+flow in the expansion region downstream of the base. The amount of 
+condensation that exists in this region can exceed that of the free 
+stream as a result of the relatively high local Mach numbers and hence 
+low static temperatures which occur. A static pressure rise is associ­
+ated, of course, with this increased condensation and, in all likelihood , 
+will be transmitted through the adjacent dead-air space to the base. 
+An estimate of this rise in pressure was obtained graphically from a 
+diagram similar to.that shown in figure 3 of reference 8, in combination 
+with calculated flow conditions approaching the base and the measured 
+base pressures . One simplifying assumption was made; namely, that the 
+process of condensation does not require an appreciable time interval 
+or, in other words, that saturation or subsaturation conditions exist 
+at every point in the flow. Based on this analysis , condensation effects 
+on base pressure were found to occur at free-stream Mach numbers as 
+low as 3.49. As would be expected, the maximum pressure rise occurred 
+at the highest test Mach number, causing a change of about 12 percent in 
+the measured base pressure coefficient. In view of the appreciable 
+magnitude of this pressure change, it was considered desirable to present 
+not only measured base pressure data but also the data corrected for the 
+pressure rise. This is done throughout much of the present report and, 
+although the correction is approximate, it may be looked upon as a maximum 
+correction , inasmuch as saturat ion flow conditions were assumed . 
+--- PAGE 22 ---
+20 NACA TN 3393 
+REFERENCES 
+1. Lorenz, H.: Der Geschosswiderstand. Physikalische Zeitschrift, 
+vol. 18, 1917, p. 209; vol. 29, 1928, p. 437. 
+2. Gabeaud: Base Pressures at Supersonic Velocities . Jour. Aero. Sci., 
+vol. 16, no. 10, Oct. 1949, p. 638. 
+3. von K~r~n , Th., and Moore, N. B.: 
+Moving at Supersonic Velocities. 
+pp. 303-310. The Resistance of Slender Bodies 
+Trans. of ASME, vol. 54, 1932, 
+4. Chapman, Dean R.: An Analysis of Base Pressure at Supersonic 
+Velocities and Comparison with Experiment . NACA TN 2137, 1950. 
+5. Hill, Freeman K.: Base Pressures at Supersonic Velocities. Jour. 
+Aero. Sci., vol. 17, no. 3, Mar. 1950, pp. 185-187. 
+6. Cope, W. F.: The Effect of Reynolds Number on the Base Pressure of 
+Projectiles. NPL Eng. Div. 63/44, Jan. 1945. 
+7. Eggers, A. J., Jr., Dennis, David H., and Resnikoff, Meyer M.: 
+Bodies of Revolution for Minimum Drag at High Supersonic Airspeeds. 
+NACA RM A5lK27, 1952. 
+8. Hansen, C. Frederick, and Nothwang , George J.: Condensation of Air 
+in Supersonic Wind Tunnels and Its Effects on Flow About Models. 
+NACA TN 2690, 1952. 
+9. Chapman, Dean R., and Perkins, Edward W.: 
+of the Effects of Viscosity on the Drag 
+of Revolution at a Mach Number of 1.5. 
+(Formerly NACA RM A7A31a) Experimental Investigation 
+and Base Pressure of Bodies 
+NACA Rep. 1036, 1951. 
+10. Perkins , Edward W.: Experimental Investigation of the Effects of 
+Support Interference on the Drag of Bodies of Revolution at a 
+Mach Number of 1.5. NACA TN 2292, 1951. 
+11. Kurzweg, H. H.: The Base Pressure Measurements of Heated, Cooled, 
+and Boat-Tailed Models at Mach Numbers 1.5 to 5.0. Proceedings of 
+the Bureau of Ordnance Symposium on Aerobal1istics , NAVORD 
+Rep. 1651, Nov. 16-17, 1950, pp. 119-142. 
+12~ Rossow, Vernon J.: Applicability of the Hypersonic Similarity Rule 
+to Pressure Distributions Which Include the Effects of Rotation 
+for Bodies of Revolution at Zero Angle of Attack. NACA TN 2399, 
+1951. 
+13. Charters, A. C., and Turetsky, R. A.: Determinat ion of Base Pressure 
+from Free-Flight Data. Aberdeen Ballistic Res. Lab. Rep. No. 653, 
+Mar. 30, 1948. 
+--- PAGE 23 ---
+NACA TN 3393 21 
+Model I, l/d = 3,/2 
+Model 2, //d = 50 
+Model 3, //d = 70 
+Model 4, //d = 10.0 
+~v 
+A-16013.1 
+(a) Ogive-cylinder models. 
+Figure 1.-Models used in base pressure investigation. 
+--- PAGE 24 ---
+Model 5, l/d = 5.0 
+~ A-16012.1 
+(b) Pressure gradient model and support. 
+Figure 1,-Continued, [\) 
+[\) 
+~ (") 
+~ 
+t-3 2': 
+w 
+W \0 
+W 
+--- PAGE 25 ---
+NACA TN 3393 23 
+Model 6, l/d:: 3.12 
+Model 7, l/d:: 10.0 
+Model 8, l/d:: 7.0 
+~ A-16016.1 
+(c) MOdels used to study effects of nose shape and boattailing. 
+Figure 1.-Concluded •. 
+--- PAGE 26 ---
+24 NACA TN 3393 
+Vd:2 
+Vd: 3 
+Vd=4 
+~/d: 5 
+~/d: 6 
+~/d: 8 
+I'MCHES 11, I ,21, I ,31, I ,"I 
+~ A-16ulS.l 
+(a) Supports of various lengths~ ds/d = 0.375. 
+Figure 2.-Model supports used to study effect of support interference. 
+--- PAGE 27 ---
+4Q 
+NACA TN 3393 25 
+c{/d = 0. 75 
+c{/d:: 0.625 
+c{/d:: 0.50 
+1/d:: 0438 
+c{/d :: 0.375 
+~/d :: 0.313 
+c{/d :: 0.25 
+~ 
+A-16014.1 
+(b) Supports of various diameters ) Is/d 6.0. 
+Figure 2.-Concluded. 
+--- PAGE 28 ---
+~ OOIO-inch-wire ring 
+A-16u17.2 ~ 
+Solt bond Lomp block 
+Figure 3.-Typical model with several boundary-layer-tra nsition promoting devices. f\) 
+0'. 
+~ 
+(") ;p 
+1-3 
+~ 
+w w 
+\D w 
+--- PAGE 29 ---
+NACA TN 3393 
+(a) Laminar boundary layer. 
+(b) Turbulent boundary layer, fixed transition. 
+Figure 4.-Shadowgraph pictures of flow around the base of a typical 
+modelj Mo = 3.49, Re = 4.45 X 106. 27 
+--- PAGE 30 ---
+28 NACA TN 3393 
+(c) Laminar boundary layer. 
+(d) Turbulent boundary layer, fixed transition. 
+Figure 4. -Concludedj Mo = 4.48, Re = 1.75 X 106• 
+--- PAGE 31 ---
+NACA TN 3393 29 
+-.14 
+(lCl -.12 
+....:-c:: 
+.~ -.10 
+.~ 
+~ 
+Cb -.08 a 
+Cb 
+~ -.06 
+CI) 
+CI) 
+~ -.04 ~ 
+Cb 
+~ -.02 
+CQ ~ --/' .,-
+-----v 
+00 1.0 2.0 3.0 40 5.0 6.0 7.0 8.0 9.0 lao 110 
+Ratio of support length to model diameter 
+(a) Laminar boundary layer. 
+-.14 Present tests 
+~ -.12 c:::::::::=J 
+OQive-cylinder 
+....:-...... r . l/d 65 c:: 
+.~ -JO 
+.~ 
+~ 
+Cb -.08 0 
+(,) I 
+I M" Rex10-6 
+/ 02.73 3.2 
+I 03.49 4.3 
+I 04.03 3.6 
+~ -.06 ::s <14.48 28 
+v 4.98 .9 
+CI) 
+CI) Reference 4 
+~ -.04 ~ c5 Mo = 2.90 
+Cb 
+~ -.02 Ql /' -/ ~ 1 I 
+00 /.0 20 3.0 4.0 5.0 6.0 7.0 80 9.0 lao 110 
+Ratio of support length to model diameter 
+(b) Turbulent boundary layer. 
+Figure 5. -Effect of support length on base pressure; ds/d;: 0375 
+(uncorrected for condensation). 
+--- PAGE 32 ---
+30 NACA TN 3393 
+-.14 
+~ -.12 
+...: 
+c::: 
+.~ -.10 .~ 
+~ ...... ~ --V ro--. 
+.......... " 
+III -.08 C,) 
+~ n 
+~ ~ ~ '-'"""-
+III 
+~ -.06 
+<I) 
+<I) 
+~ -.04 ~ "'-n 
+"' .-"--0 .v............, 
+......... 
+"-
+~ 
+III \I) 
+~ -.02 I / r---~~ 
+00 .2 .4 .6 .8 /.0 
+Ratio of support diameter to model diameter, cfs/d 
+(a) Laminar boundary layer. 
+-.14 
+Cl~ -.12 
+~ 
+c::: 
+.~ -.10 
+.~ 
+~ ...... 
+III -.08 C,) --Present tests 
+~ r- ..::::::::==J ~ Oqive-cylinder 
+~ p-- l/d =5 
+• ~ V Mo Rex10·6 
+02.73 3.2 
+:::J 3.49 43 
+-a-0-::-f--CJ- -04.03 3.6 
+<4f1.8 2.8 
+~ 
+'(;1-f-o. '74.98 .9 
+~ -.06 ::s 
+<I) <I) -0_ Reference 4 
+<::==:J 
+<l-. Oqive -cylinder 
+~ -.04 ~ l/d = 5 
+(f 2.90 75 
+III 
+<I) 
+~ -.02 '" -v-Reference 13 
+'V <:::::::::D 
+//d = 5 
+.2.73 4.0 
+o o .2 .4 .6 .8 /.0 
+Ratio of support diameter to model diameter, ds/d 
+(b) Turbulent boundary layer. ~ 
+Figure 6.-Effect of support diameter on base pressure; !s/d=6 
+(uncorrected for condensation) 
+--- PAGE 33 ---
+Q.:~ 
+........ 
+~ ..... . (.) .;:: ..... 
+IV 
+~ (.) 
+~ 
+~ 
+~ 
+~ 
+IV 
+~ 
+Q:) -,/2 
+-./0 
+-.08 
+-.06 
+-.04 
+-.02 
+o o M. { 2.73 
+3.49 { 
+4.03 
+-r--
+4.48 ~ 
+I 2 3 , 
+0 
+• f--' '-'----
+... 
+-~ . 
+- -v ... 
+-<:r---I""ir---J-... 
+~ I 
+[J< I l/d=5 I Ogive cylinder with I 
+o <: I l/d =10 natural transition 
+-< I l/d =5 Ogive cylinder with 
+I l/d =10 fixed transition -< ~ 
+4 5 6 7 8 9 lOx 106 
+Reynolds number ~ Re 
+Figure 7.-Comparison of the base pressure with turbulent-boundary -Iayer flow for natural and artificially 
+induced transition. ~ o 
+;I> 
+r3 
+~ 
+w 
+W 
+\D 
+W 
+W 
+f-' 
+--- PAGE 34 ---
+Q.~ , .. 
+c: 
+.~ 
+.~ 
+~ '­~ 
+(;) 
+~ 
+~ 
+~ 
+~ 
+~ 
+~ 
+~ 
+Q;:j -./ .. 
+Mo ---- 2.73 (--) ) .)--
+-./ I Re = 4.85 x 106 
+< I 
+-./ ~ l/d =5 
+o Horizontal 
+• Vertical 
+-.0 ~ 
+-.0, 7 
+3.49 ---.i '" ..lJ---
+-.0 f' Re = 4.62 x 106 
+Radius of--
+-.0. • model support 
+)' 
+Re = 4.13 x 106 
+4.03 • _ .. - i v -.0. 
+-.0. 1-
+Re = 4.32 x 106 
+4.48 ... I I <C_ 
+"l 
+-.03 I 
+Re = 136 x 106 
+4.98 ~ I 2 I .Y-
+- --v -.020 20 40 60 BO 100 Q.~ 
+..... .. 
+~ .... 
+.~ 
+~ 
+~ 
+(;) 
+~ 
+~ :::s 
+~ 
+~ 
+~ 
+~ 
+~ 
+Q;:j -./ '! 
+-J / 
+-./ ') 
+-.0 ~ 
+-.0 ~ 
+-.0 "1' 
+-.0 , 
+-.0, 5" 
+-.0. 
+-.0. j 
+-.020 Mo 
+2.73 ~ ~ -.' 
+Re = 5.14 x 106 
+3.49 --- ---.-
+Radius of ---Re = 6.83 x 106 
+model support 
+...... -4.03 -
+Re = 5.72 x 106 
+. ... 4.48 <C " 
+Re = 4.25 x 106 
+4.98 
+Re = 2.14 x 106 
+I I 20 40 60 80 100 LA.> 
+f\) 
+~ o 
+Orifice locotionl percent body radius Orifice locationl percent body radius : 
+(a)Laminar boundary layer. (b)Turbulent boundary layer. ~ ~ 
+Figure B.-Variation of bose pressure coefficient with radial /ocCltion (uncorrected for condensation) ~ 
+LA.> 
+, 
+--- PAGE 35 ---
+5Q 
+:. NACA TN 3393 
+-.14 ,...---' .. 
+(toCl -.12 
+-...:-c:: 
+.~ -.10 .U 
+~ -..;: 
+Q) 
+() -.08 u 
+~ ::) -.06 <I) 
+<I) 
+~ -.04 
+Q) 
+<I) 
+~ -.02 -4J 
+-.14 
+~oCl -.12 
+...: 
+c:: -.10 .~ 
+.~ 
+~ -.08 Cb () 
+U 
+~ ::s -.06 
+<I) 
+<I) 
+~ ct -.04 
+Q) ~ 
+~ Ql -.02 ~ -~ -
+~ ~ 
+, 
+.,.-¥ ,.-
+~ . ~ 
+<1-... = .'" 
+-~ 4 - 8 
+Reynolds nut;"'! ..... /. /7:" 
+(0) Uncorrected for condel. ~7!1tiOn. 
+&./ 
+,.". 
+.~ ~o-o I--V 
+~ ~ 
+----... 
+~v--
+~ <1 
+.<1$ ~ 
+4 6 8 
+Reynolds number, Re 
+(b)Corrected for condensation. 33 
+Mo 
+0 213 
+0 3.49 
+<> 4.03 
+<I 4.48 
+'" 4.98 
+<==J 
+//d=5 
+Figure 9. -Variation of bose pressure coefficient with Reynolds number at 
+Mach numbers from 2.73 to 498 for laminar-boundary -layer flow. 
+--- PAGE 36 ---
+34 NACA TN 3393 
+-J4 
+~~ -.12 ....... 
+~ 
+.~ 
+--fO .(,) 
+<t::: -....: -"fY.\. ro-
+Cb c -.08 (,) ----,J!" i!;I 
+~ -.06 ::::; 
+Ct) 
+Ct) 
+~ -.04 t:t 
+Cb 
+Ct) 
+~ -.02 ,..~ -v "" 
+_<l'tr <-'"'" 
+A' 
+~ V 
+2 4 6 8 
+Reynolds number, Re 
+(0) Uncorrected for condensation. 
+-.14 
+Q..q -J2 
+....:-
+~ -"Cl(.). --0--
+.~ -.10 .(,) 
+<t::: -....: 
+Cb -.08 c (,) 
+~ -.06 ::::; 
+Ct) 
+Ct) '" -"--
+~ I.---c-v ~ 
+,......-c<' -' ~ . 
+Cb "--.04 t:t 
+Cb 
+~ -.02 Ql J!' V Mo 
+C 273,] 0349 o 4'03 Present tests, ~ 
+. l/d=5 
+<l4.48 ~ 
+<;7 4.98 
+2 4 6 8 10xlc? 
+Reynolds number, Re 
+(b) Corrected for condensation. 
+Figure IO-Variation of bose pressure coefficient with Reynolds number at 
+Mach numbers from 2.73 to 4.98 for turbu/ent-boundary -Iayer flow. 
+--- PAGE 37 ---
+NACA TN 3393 
+-./ 4 
+-.1. '2 0 ~~ --~ 
+-.t 0 
+,., 
+0 -.0 
+-.06 ~ =2.73 
+-.08 
+-.06 ~ V ~ 
+/ 
+-.04 
+-.02 
+Q...~ 0 
+,-' Mo =349 
+c::::: -.08 .~ 
+.~ 
+~ -.06 III C) 
+~ 
+~ -.04 
+~ .~ ~ . ,......rr 
+...< 
+II) 
+II) -.02 ~ 
+c::t 
+III 0 
+~ Q:) -.06 Mo =4.03 
+-.04 
+-.02 
+0 
+Mo = 4.48 
+-.0 
+-.0 6 
+I I I 4 c l/d 
+...,,-.i:J o <:::J 3./2 
+-.0. c <l o <===:J 5.0 
+<l 0< I 7.0 
+<3< 1/00 
+00 2 4 6 8 IOxl06 
+Reynolds number, Re 
+Mo=4.98 ~ 
+(a) Uncorrected for condensation . 
+Figure II.-Variation of base pressure coefficient with Reynolds number for several 
+fineness ratios; laminar-boundary -Iayer flow. 35 
+--- PAGE 38 ---
+-./4 
+-./. '2 
+-.~ '0 
+ID 
+U -.0 
+-.06 
+-.08 
+-.06 
+-.04 
+-.02 
+o 
+-.08 
+~ 
+~ -.0 1£ 'V 
+~ 
+~ -.0 
+Q) 
+~ Q5 -.0 2 
+C 
+-.0 6 
+-.0 ..., 
+-.Q '2 
+o 
+-.06 
+-.04 
+-.02 
+00 0 ~ I-
+..... r-
+Mo = 2.73 
+~ ~ ~ 
+-" 
+Mo =3.49 
+-.. ~ ~ r 
+0 
+-4 , 
+Mo = 4.03 
+"-
+'" 
+Mo = 4.48 
+I I I 
+-'Qr-
+<0 
+<3 o <::::l 
+o <==J 0<: I 
+<1<:: 246 8 
+Reynolds number, Re 
+Mo = 4.98 
+(b) Corrected f@r condensation . 
+Figure II.-Concluded NACA TN 3393 
+I 
+l/d 
+3./2 
+5.0 
+7.0 
+I /0.0 
+--- PAGE 39 ---
+NACA TN 3393 
+-./4 
+-.12 ~ 
+-0--
+-./0 
+-.08 
+-.06 
+-.04 ~=213 
+-.lO'.--------.-..------,-,----,---,-----r----,-----,,--, 
+-.08'~_l_--I-_l_--I-_+_~¥==F= t=*---j 
+-.061---+--+--+--+--f--+--+--+--+----l 
+~04L--L-~~-~ M-o-=~3-.4-9~-L-~~--~ 
+-.08 
+-.06 
+-.04 
+-.02 
+o 
+-.08 
+-.06 
+-.04 
+-.02 
+o r--; V 
+~? ' ~ .--':" I-
+tWo = 4.03 
+-r.r.n kr-L-l-
+i-
+Mo = 4.48 
+-'06r---.--.- ----.--.---r----.---.,-----,- --.-----, 
+~04~~~--~--4---+-~---L--~--~~~ 1~~ 
+o <:::J 3./2 
+-.02~ _+---+- ---t-__t----l 0 <=::::::J 5.00 
+<! <.:::===:::J /0.00 
+00 2 4 6 8 IOxl06 
+Reynolds number, Re 
+Mo=4.98 ~ 
+(a)Uncorrected for condensation. 
+Figure IE-Variation of base pressure coefficient with Reynolds number for 
+several fineness ratios; turbulent-boundary-Iayer flow. 37 
+--- PAGE 40 ---
+NACA TN 3393 
+-./4 
+~ 
+-.1. '2 -o(D. 
+t"-
+O -./ 
+,,-, 
+0 -.0 
+-.06 Mo =2.73 
+-./0 ~ '-
+/" -'" -.08 
+-.06 
+-.04 Mo=3.49 
+...c:r-'. . 
+~ I"""""~ 
+-<--
+I 
+-.04 
+-.02 
+o Mo =4.03 
+-.08 
+-.0 6 ~ -,-.-::;:::: ----'t" 
+-.0 4 
+'2 -.0 
+0 
+Mo = 4.48 
+-.06 
+-.04 I I I I 
+'lft ,.,JP'" '" I/d 
+<l o <::::J 3.12 
+-.02 ::J <::::::=::J 5.00 
+<J <:....... I /0.00 
+00 2 4 6 8 IOxl06 
+Reynolds number; Re 
+Mo =4.98 ~ 
+(b) Corrected for condensation . 
+Figure 12.-Concluded 
+--- PAGE 41 ---
+.. NACA TN 3393 
+-.24 
+-.20 
+-./6 
+-.12 
+Q..~ 
+.....:-
+~ 
+.~ 
+.~ 
+:::: -.08 
+III c 
+~ 
+III 
+~ -.04 II) 
+II) 
+~ 
+~ 
+III 
+~ Ql -.12 
+-.08 
+-.04 / 
+{"-
+..". o Laminar boundary layer 
+[I Transitional boundary layer 
+• Turbulent boundary layer 
+1/ ~ with natural transition 
+"" A(, <:::=:J //d = 5 
+"----1.5v 
+'" .::... 
+Ref 4 y "\ -
+/ 200 
+/ "-
+Laminar region Turbulent region 
+~ O' f-
+....... ~ 2.73-~-I-__ ----
+/ 3.49-~ •• no ---IJ r'" 
+1J=l 
+.iJ....... ASJD-
+'" 
+I 
+I 
+, 403 
+I "'r" --
+-to 
+~ "7 r--~---
+~ . )--(j<:>' 
+4.48-V 
+~ L <I 
+~ 
+~---~ 
+~ 4.98 
+~ 
+I I 
+2 4 6 8 
+Reynolds number, Re 
+Figure 13. -Variation of base pressure coefficient with Reynolds number 
+for different types of boundory layer flow (corrected for condensation) 39 
+--- PAGE 42 ---
+40 NACA TN 3393 
+tjl -./4 
+I 
+\ -,/2 Q... 
+....... 
+c::: 
+.~ -./0 
+.~ 
+~ ..... 
+III -.08 0 
+~ 
+III 
+~ -.06 <t) 
+~ 
+"" ~ -.04 
+III \ \ 
+'\ \ 
+1\ 
+'~ '\ Vacuum limit I'-r-2/rMo') 
+~ 
+.~ "'" ~ ( 
+~~ "'" ~ Re=25xlas~ .~ ~ 
+-....:t f:::=-
+~ III -.02 
+CJ.o 2.0 3.0 4.0 5.0 6.0 
+Mach number, Mo 
+(0) Laminar boundary layer. 
+-./4 
+-,/2 
+Q.. • 
+....... 
+c::: -./0 
+.~ 
+.~ 
+:::: -.08 III 0 
+~ 
+III 
+~ -.06 
+<t) 
+~ -.04 ~ 
+III 
+~ 
+Q:l -.02 
+~.o l/d Nose shape 
+0<:] 3.12 Ogive • <:: I 1000 
+o <:::::J 3.12 "/4 r·0.219x ~ • c:::::::::: I 10.00 I 
+2.0 3.0 4.0 5.0 6.0 
+Mach number, Mo 
+(b) Turbulent boundary layer. 
+Figure 14. -Variation of bose pressure coefficient with Mach number 
+for several nose shapes (corrected for condensation) 
+--- PAGE 43 ---
+6Q 
+NACA TN 3393 
+-.24 
+-.2 0 
+-.I 6 
+-.I 2 
+ICJ v -.0 
+-.0 4 
+qo 
+-.24 
+...:' 
+~ -.2 ..... '0 
+.~ 
+~ -.I 
+<:) 
+~ 6 
+~ -.I 2 
+~ 
+~ -.0 0 0 
+~ 
+Cb 
+tg -.0 
+CQ A ..,. 
+a zo 41 
+Present tests <::..... I \ --Model 3 
+0' From Ref. 4 Ogive-cylinder 
+!/d-7 
+Vacuum limit \ 0 From Ref. 9 
+f-2/rM/) - -Present tests <:: :J 
+Ogive-cylinder :,-
+"'-Model8 with boaffail 
+0 From Ref 9 //d=7 0'1' d From Ref. /0 
+~ ~ I"'--. 
+~ -.......... "-~ r--- ......... t-- r-------t--
+2.0 3.0 4.0 5.0 6 o 
+Mach number, Mo 
+(0) Laminar boundary layer, Re = 3.0 x 106 
+Present tests <: I 
+1\ Model 3 
+cf From Ref 4 Ogive-cylinde r 
+0 From Ref. 9 //d= 7 
+Vacuum limit \ - -Present tests ;> <:: ") f-2/rMo') 0 From Ref 9 
+cf From unpublished Ogive-cylinde r 
+~ data NACA Ames with boattail 
+l( 1-by 3-foot //d = 7 
+SSWT 
+............. ~ ............... ......... 
+""' ~ ~ -------'-r---(0 El --....:., ----~ 1 20 30 40 5.0 60 
+Mach number, Mo 
+(b) Turbulent boundary layer, Re = 5.0 x 106 
+Figure /5.-Comparison of base pressure coefficient with and without 
+boattailing (corrected for condensation). 
+--- PAGE 44 ---
+-.36 \ 
+-.32 
+Cl~ -.28 
+........... 
+c::: 
+.~ -.24 
+.(.) 
+~ -....: 
+Cb 
+<;:) 
+<.l -.20 
+Cb 
+~ 
+~ -.16 
+~ 
+~ 
+Cb 
+~ -.12 
+~ 
+-.08 
+-.04 Model 2. l/d = 5. Re = 4.0 x 106 
+1\ o Laminar l/d = 5, Re = 4.0 x 106 \ from Ref 4 • T(Jrb(Jlen t 
+\ 
+~ Vacuum '";,11 
+r:> f-2/rMo) 
+( \ 
+.~ 
+T(Jrb(Jlent ~ ~ ~ ~ 
+............ ~ r--::: I---Laminar r---r----I--- t---
+-~ 00 1.0 20 3.0 4.0 5.0 6.0 
+Macn numbet; Mo 
+Figure 16.-variation of base pressure coefficient witn Macn number (corrected for condensation). +" [\) 
+~ 
+~ 
+t-3 
+~ 
+LA.> 
+LA.> \0 
+LA.> 
+--- PAGE 45 ---
+~o 
+"­
+~--
+(t, ... 
+~ 
+~ 
+~ 
+.~ ..... 
+~ 
+CI) 
+§ 
+(t, 
+~ 
+CI) 
+I 
+(t, 
+(t, 
+~ " (t, 
+~ 
+~ 
+~ 
+~ 
+~ .80 
+• 
+0 
+.60 4~ 
+40 
+.20 
+00 [0 2.0 I 
+Model 2, l/d = 5, Re = 4.0 x 106 
+o Laminar 6 l/d = 5, Re = 4.0 x 10 , I 
+• Turbulent from Ref.4 
+~ rLaminar 
+~ / -
+~ r Turbulent 
+r--
+~ 
+3.0 4.0 5.0 6.0 
+Mach number, Mo 
+Figure 17.-Varlatlon of the ratio of base pressure to free-stream static pressure (p. /p ) with 
+Mach number (corrected for condensation/. b 0 2: 
+;J> o 
+;J> 
+t-3 2: 
+w 
+W \0 
+'.Al 
+-I="" 
+W 
+--- PAGE 46 ---
+44 NACA TN 3393 
+-.24 
+-./ Mo I l/d = 3.1~ 5.0, Present 1.53 ~ <- 7.0 and / .0 tests 
+2 " <-I l/d = 7.0 and Ref. 4 7.3 
+~ c:::::::::r:=J l/d = 5.0, 6.0 Ref. 4 
+0 and 90 
+\ ~ 2.00 " on "-... .., 
+""" ~ ~ ~ ~ Ref. 4 
+'-..... 6 ~ ........ ~ 
+4 '" "'" ~ 
+2.73 ~ ~ ~ 0 
+0 ~ 
+'" "'" "--.2 
+-.2 
+-./ 
+-./ 
+-./ 
+~oQ'" -,/2 
+.n 0 -.0 
+3.49 ............. ~ 
+6 ..... 0 ~ 
+1:.J,.'<:? u.:.., 5~ 4.03 ~ '0 l/d 
+~.::s 
+4.48 ..... 0." ~ ;:----.".--4 .~ . 
+«J«J<,f' . . . 
+-G ';{ -.0 
+-.0 
+4.98 5."L 
+Vl v 
+I~ Vl Vl 
+" -.0. ~ 
+U o .002 .004 .006 I 
+.008 .010 
+l/(d VRe) 
+(0) Laminar boundary layer. 
+Flgure/B.-8ose pressure data correlation (corrected for condensation). 
+--- PAGE 47 ---
+Q 
+NACA TN 3393 
+-.2 4 
+<:::::::=::J l/d = 3.12,5.0, Present tests 
+and 10.0 
+<::::==:J l/d = 3.3, 4.3, 10, Ref 4 
+Dnd 13 
+0 -=:::::::::r=:: l/d = 4.0, 5.0, 6.0 Ref. 4 
+and 9.0 -.2 
+-.I -:----.4C, --r---E! 6 ----~ 2.00 Ref. 4 
+/' 
+2 
+0 ..a 2.73 
+0 
+~t: "1OGn. 3.49 
+'" "8 .... 
+8 1<->' -"'-.. ~ 
+:'" ~o-"" 4.03 '0, 0(>, -£:>. , -<) -'V-_ I-_<>-
+\ <J~ 4.48 -.0 
+'>:J~ r.\. 
+["' .... "'q- , l/d 3.12 5.0 10.0 
+4.98 ..,. -.0 .... vt7, 
+Yl 
+~ I I 
+·24 .32 .40 .48 .64 
+I 
+!/!ff(Re)$J 
+(b) Turbulent boundary layer. 
+Figure 18 -Concluded 
+• 
+NACA-Langley -3-29-55 -1000 

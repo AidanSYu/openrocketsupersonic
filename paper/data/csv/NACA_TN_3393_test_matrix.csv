@@ -1,0 +1,9 @@
+Mach,Re_millions,boundary_layer,source_figure,source_page,notes
+2.73,4.0,laminar,Figure 16 / 9(b),44,"Laminar, condensation-corrected. Text: 'about 60 percent of the limiting value'."
+2.73,4.0,turbulent (fixed roughness),Figure 16 / 10(b),44,"Turbulent fixed transition, condensation-corrected. Text: 62% at M=2.73."
+3.49,5.0,laminar,Figure 16 / 9(b),44,"Laminar, condensation-corrected. Fig 9(b) at Re=5e6 shows slight decline from M=2.73."
+3.49,5.0,turbulent (fixed roughness),Figure 16 / 10(b),44,"Turbulent fixed transition, condensation-corrected. Fig 10(b) interpolated at Re=5e6."
+4.03,6.0,laminar,Figure 16 / 9(b),44,"Laminar, condensation-corrected. Fig 9(b) at Re=6e6 shows continued decline."
+4.03,6.0,turbulent (fixed roughness),Figure 16 / 10(b),44,"Turbulent fixed transition, condensation-corrected. Fig 10(b) interpolated at Re=6e6."
+4.48,6.0,laminar,Figure 16 / 9(b),44,"Laminar, condensation-corrected. Fig 9(b) at Re=6e6, highest Mach."
+4.48,6.0,turbulent (fixed roughness),Figure 16 / 10(b),44,"Turbulent fixed transition, condensation-corrected. Explicitly stated as ~82%."

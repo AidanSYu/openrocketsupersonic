@@ -7,31 +7,75 @@ import static info.openrocket.core.models.atmosphere.AtmosphericConditions.GAMMA
 /**
  * Chapman-Korst base drag model for supersonic flow.
  * <p>
- * Computes base pressure coefficient from boundary layer edge conditions
- * using the Chapman-Korst dead-air region theory with ESDU 77021 parametric
- * corrections for boundary layer thickness effects.
- * <p>
- * The model is applicable for M &gt; 1.3 where the base flow is fully
- * supersonic. Below M 1.3, the existing Devan-Ashwood correlation should be
- * used, with a C1-continuous blend in the overlap region M 1.2-1.4.
+ * Provides two supersonic base-drag models:
+ * <ol>
+ *   <li><b>Turbulent</b> (Chapman-Korst / ESDU 77021): computes base pressure
+ *       coefficient from boundary layer edge conditions using the Chapman-Korst
+ *       dead-air region theory with ESDU 77021 parametric corrections for BL
+ *       thickness effects. Blends with Devan-Ashwood at M 1.2-1.4.</li>
+	 *   <li><b>Laminar</b> (Chapman 1950, NACA TN 2137): empirical correlation
+ *       Cpb_lam = C_LAM / (M² × √Re_L), fitted to NACA TN 3393 laminar data
+ *       (Reller &amp; Hamaker 1955, 4 points M 2.73-4.48). For perfect-finish
+ *       rockets where the boundary layer stays laminar to the base. MAPE ≈ 4.4 %
+ *       vs 44 % for Devan-Ashwood on the same laminar data.
+ *       Blends with Devan-Ashwood at M 1.3-2.5.</li>
+ * </ol>
  * <p>
  * References:
  * <ul>
- *   <li>Chapman, D.R. (1951). "An analysis of base pressure at supersonic velocities
- *       and comparison with experiment". NACA Report 1051.</li>
+ *   <li>Chapman, D.R. (1950). "An analysis of base pressure at supersonic velocities
+ *       and comparison with experiment". NACA TN 2137.</li>
  *   <li>Korst, H.H. (1956). "A theory for base pressures in transonic and supersonic
  *       flow". J. Applied Mechanics, 23, 593-600.</li>
  *   <li>ESDU 77021 (1977). "Drag of a simple body at supersonic speeds: base drag".</li>
+ *   <li>Reller &amp; Hamaker (1955). "An experimental investigation of the base pressure
+ *       characteristics of nonlifting bodies of revolution at Mach numbers from
+ *       2.73 to 4.98". NACA TN 3393.</li>
  *   <li>Hoerner, S.F. (1965). "Fluid-Dynamic Drag", Ch. 3.</li>
  * </ul>
  */
 public class ChapmanKorstBaseDrag {
 
-	/** Lower Mach of the blend region between Devan-Ashwood and Chapman-Korst. */
+	/** Lower Mach of the blend region between Devan-Ashwood and Chapman-Korst (turbulent). */
 	static final double BLEND_LOW = 1.2;
 
-	/** Upper Mach of the blend region between Devan-Ashwood and Chapman-Korst. */
+	/** Upper Mach of the blend region between Devan-Ashwood and Chapman-Korst (turbulent). */
 	static final double BLEND_HIGH = 1.4;
+
+	// ──────────────────────────────────────────────────────────────────────────
+	// Laminar base drag — Chapman (1950) NACA TN 2137
+	// ──────────────────────────────────────────────────────────────────────────
+
+	/**
+	 * Empirical constant for the Chapman (1950) laminar base pressure correlation.
+	 * <p>
+	 * The formula Cpb_lam = C_LAM / (M² × √Re_L) is fitted to NACA TN 3393
+	 * condensation-corrected laminar data (Reller &amp; Hamaker 1955), four points
+	 * at M 2.73-4.48 and Re 4-6 × 10⁶. Geometric-mean fit; MAPE ≈ 4.4 %.
+	 * <p>
+	 * Physical derivation: for a laminar free shear layer the base pressure deficit
+	 * Δp/p_inf ∝ 1/√Re_L (viscous mixing momentum deficit), and normalizing by the
+	 * freestream dynamic pressure q_inf = γ/2 × p_inf × M² introduces the 1/M²
+	 * factor. The constant 1870 encodes the laminar shear-layer mixing efficiency
+	 * and compressibility factors specific to the cylindrical afterbody geometry of
+	 * TN 3393 (10-caliber tangent ogive + cylinder, l/d = 5).
+	 */
+	static final double C_LAM_SUPERSONIC = 1870.0;
+
+	/**
+	 * Lower Mach of the transition from Devan-Ashwood to the Chapman laminar formula.
+	 * Below this Mach, the laminar/turbulent base pressure difference is not yet
+	 * established at the base — use Devan-Ashwood regardless of BL state.
+	 */
+	static final double LAM_BLEND_LOW = 1.3;   // = BarrowmanDragCalculator.BASE_BLEND_HIGH
+
+	/**
+	 * Upper Mach of the transition to the full Chapman laminar formula.
+	 * At this Mach the laminar correction is fully applied when the BL is laminar.
+	 * Chosen to be just below the lowest validated data point (M = 2.73) so that
+	 * the formula is only used where it has experimental support.
+	 */
+	static final double LAM_BLEND_HIGH = 2.5;
 
 	/**
 	 * Minimum BL thickness ratio to prevent division by zero.
@@ -190,6 +234,81 @@ public class ChapmanKorstBaseDrag {
 	private static double devanAshwoodCpBase(double mach) {
 		return BarrowmanDragCalculator.calculateBaseCD(mach);
 	}
+
+	// ──────────────────────────────────────────────────────────────────────────
+	// Laminar base drag methods
+	// ──────────────────────────────────────────────────────────────────────────
+
+	/**
+	 * Chapman (1950, NACA TN 2137) laminar base drag coefficient for a cylindrical afterbody
+	 * with a fully laminar boundary layer.
+	 * <p>
+	 * Formula: Cpb_lam = C_LAM / (M² × √Re_L)
+	 * <p>
+	 * Physical basis: in laminar supersonic base flow the free shear layer has
+	 * low momentum (thin laminar BL) so the base region expands strongly toward
+	 * lower pressure than a turbulent afterbody. The Re^(−1/2) dependence follows
+	 * from laminar mixing theory; the M^(−2) dependence comes from normalizing
+	 * the base pressure deficit by freestream dynamic pressure.
+	 * <p>
+	 * Validated against NACA TN 3393 laminar data: 4 points, M 2.73-4.48,
+	 * Re 4-6 × 10⁶; MAPE ≈ 4.4 % vs 44 % for Devan-Ashwood.
+	 * <p>
+	 * Returns Devan-Ashwood when M ≤ 1.0 or Re_L is degenerate.
+	 *
+	 * @param mach freestream Mach number
+	 * @param reL  body-length Reynolds number (ρ V L / μ)
+	 * @return laminar base drag coefficient referenced to base area (positive)
+	 */
+	public static double laminarBaseDragCoefficient(double mach, double reL) {
+		if (mach <= 1.0 || reL < 1e4) {
+			return BarrowmanDragCalculator.calculateBaseCD(mach);
+		}
+		double cd = C_LAM_SUPERSONIC / (mach * mach * Math.sqrt(reL));
+		// Physical upper bound: base pressure cannot fall below ambient (Cpb = 0)
+		// nor below a value consistent with a nearly-vacuum base (2/(γM²)).
+		// The formula is empirically validated above Re~4e6; clamp to avoid
+		// unphysical blow-up at very low Re.
+		double vacuumLimit = 2.0 / (1.4 * mach * mach);
+		return Math.min(cd, vacuumLimit);
+	}
+
+	/**
+	 * Blended laminar base drag coefficient.
+	 * <p>
+	 * Smoothly transitions from the Devan-Ashwood turbulent correlation at
+	 * M = {@link #LAM_BLEND_LOW} (1.3) to the full Chapman laminar formula at
+	 * M = {@link #LAM_BLEND_HIGH} (2.5). Below 1.3, returns Devan-Ashwood.
+	 * Above 2.5, returns the full Chapman laminar value.
+	 * <p>
+	 * This is the base drag for a <em>fully laminar</em> boundary layer.
+	 * Partial laminar flow is handled by the caller blending this result with
+	 * the turbulent (Devan-Ashwood) value weighted by the laminar fraction.
+	 *
+	 * @param mach freestream Mach number
+	 * @param reL  body-length Reynolds number
+	 * @return laminar base drag coefficient (positive, referenced to base area)
+	 */
+	public static double blendedLaminarBaseDrag(double mach, double reL) {
+		if (mach <= LAM_BLEND_LOW) {
+			return BarrowmanDragCalculator.calculateBaseCD(mach);
+		}
+
+		double lamDrag = laminarBaseDragCoefficient(mach, reL);
+
+		if (mach >= LAM_BLEND_HIGH) {
+			return lamDrag;
+		}
+
+		double t = (mach - LAM_BLEND_LOW) / (LAM_BLEND_HIGH - LAM_BLEND_LOW);
+		double s = smoothstep(t);
+		double turbDrag = BarrowmanDragCalculator.calculateBaseCD(mach);
+		return turbDrag * (1.0 - s) + lamDrag * s;
+	}
+
+	// ──────────────────────────────────────────────────────────────────────────
+	// Private helpers
+	// ──────────────────────────────────────────────────────────────────────────
 
 	/**
 	 * Hermite smoothstep: 3t^2 - 2t^3, zero derivative at endpoints.

@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import info.openrocket.core.aerodynamics.FlightConditions;
 import info.openrocket.core.document.OpenRocketDocument;
@@ -53,7 +54,12 @@ import info.openrocket.core.startup.OpenRocketCore;
  *
  * Goal: close the gap between ORP and RASAero, using real flight data
  * as tiebreaker when they disagree.
+ *
+ * <p>ResourceLock: prevents concurrent execution with SupersonicBaselineTest, whose
+ * testDCdDMachBounded is a 7-minute CPU hog that causes these long-running flight
+ * simulations to time out when they run simultaneously.
  */
+@ResourceLock("AERO_CPU_HEAVY")
 public class SimVRealBenchmarkTest {
 
     /** Path to SimVReal CDX1 files, relative to project root */
@@ -959,10 +965,10 @@ public class SimVRealBenchmarkTest {
             catch (Exception e) { throw new RuntimeException(e); }
         });
         simThread.start();
-        simThread.join(180_000);  // 3 min timeout (high-altitude 2-stage)
+        simThread.join(900_000);  // 15 min timeout (high-altitude 2-stage; ~6 min under heavy test-suite GC load)
         if (simThread.isAlive()) {
             simThread.interrupt();
-            fail("MESOS simulation timed out after 180s");
+            fail("MESOS simulation timed out after 900s");
         }
 
         FlightData data = sim.getSimulatedData();
@@ -1050,5 +1056,229 @@ public class SimVRealBenchmarkTest {
                 String.format("ORP apogee %.0f ft is too low (expected ~290K ft, staging timing fix applied)",
                         orpApogeeFt));
         System.out.printf("  RESULT: ORP error vs real = %+.2f%%  (RASAero = %+.2f%%)%n", orpError, rasError);
+    }
+
+    /**
+     * Trajectory trace test for Kline-Rogers L500 (supersonic single stage).
+     *
+     * Real:    24,771 ft    (optical)
+     * RASAero: 26,509 ft  (+7.0%)  MaxVel=2229 ft/s (Mach ~2.0)
+     * ORP:     ~31,900 ft (+28.8%)
+     *
+     * Prints a per-timestep trace of the L500 flight so we can see whether
+     * the over-prediction is due to over-thrust, under-drag, under-mass, or coning.
+     */
+    @Test
+    void testL500TrajectoryTrace() throws Exception {
+        final double FT_TO_M = 0.3048;
+        final double REAL_APOGEE_FT    = 24_771.0;
+        final double RASAERO_APOGEE_FT = 26_509.0;
+        final double RASAERO_MAXVEL_FPS = 2_229.373;
+
+        // Locate CDX1
+        File cdx1 = null;
+        for (String base : new String[]{SIMVREAL_DIR, "c:/Code/OpenRocket Plus/" + SIMVREAL_DIR}) {
+            File f = new File(base, "L500Roc.CDX1");
+            if (f.exists()) { cdx1 = f; break; }
+        }
+        assertNotNull(cdx1, "L500Roc.CDX1 not found");
+
+        GeneralRocketLoader loader = new GeneralRocketLoader(cdx1);
+        OpenRocketDocument doc = loader.load();
+        Rocket rocket = doc.getRocket();
+        FlightConfiguration config = rocket.getSelectedConfiguration();
+
+        System.out.println();
+        System.out.println("=".repeat(100));
+        System.out.println("L500 Trajectory Trace — Kline-Rogers USXRL-89");
+        System.out.println("=".repeat(100));
+        System.out.printf("  Stages: %d  hasMotors: %b%n", config.getStageCount(), config.hasMotors());
+        final double INM = 0.0254;
+        for (RocketComponent comp : rocket) {
+            double lenIn = comp.getLength() / INM;
+            double posIn = comp.getPosition().getX() / INM;
+            System.out.printf("  %-35s  len=%7.3f in  pos=%7.3f in%n",
+                    comp.getClass().getSimpleName() + " [" + comp.getName() + "]", lenIn, posIn);
+        }
+
+        // Print initial mass (dry + wet)
+        RigidBody launchBody = MassCalculator.calculateLaunch(config);
+        System.out.printf("  Launch mass: %.4f kg (%.3f lb)%n",
+                launchBody.getMass(), launchBody.getMass() * 2.20462);
+        RigidBody structureBody = MassCalculator.calculateStructure(config);
+        System.out.printf("  Structure mass: %.4f kg (%.3f lb)%n",
+                structureBody.getMass(), structureBody.getMass() * 2.20462);
+        double propellantMass = launchBody.getMass() - structureBody.getMass();
+        System.out.printf("  Propellant mass (launch-structure): %.4f kg (%.3f lb)%n",
+                propellantMass, propellantMass * 2.20462);
+
+        List<Simulation> sims = doc.getSimulations();
+        assertFalse(sims.isEmpty(), "No sims in L500 CDX1");
+        Simulation sim = sims.get(0);
+        var opts = sim.getOptions();
+        System.out.printf("  Launch alt: %.1f m (%.0f ft)  temp=%.1f K  rodAngle=%.2f deg%n",
+                opts.getLaunchAltitude(), opts.getLaunchAltitude()/FT_TO_M,
+                opts.getLaunchTemperature(), Math.toDegrees(opts.getLaunchRodAngle()));
+        opts.setTimeStep(0.05);
+
+        Thread simThread = new Thread(() -> {
+            try { sim.simulate(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        });
+        simThread.start();
+        simThread.join(600_000);
+        if (simThread.isAlive()) { simThread.interrupt(); fail("L500 sim timeout"); }
+
+        FlightData data = sim.getSimulatedData();
+        assertNotNull(data);
+        assertTrue(data.getBranchCount() > 0);
+
+        double orpApogeeFt = data.getMaxAltitude() * 3.28084;
+        double orpMaxVelFps = data.getMaxVelocity() * 3.28084;
+        double orpMaxMach = data.getMaxMachNumber();
+        System.out.println();
+        System.out.printf("  Real apogee:    %8.0f ft%n", REAL_APOGEE_FT);
+        System.out.printf("  RASAero apogee: %8.0f ft   RASAero MaxVel: %.0f ft/s (~M2.0)%n",
+                RASAERO_APOGEE_FT, RASAERO_MAXVEL_FPS);
+        System.out.printf("  ORP apogee:     %8.0f ft   ORP MaxVel:     %.0f ft/s  (Max Mach %.3f)%n",
+                orpApogeeFt, orpMaxVelFps, orpMaxMach);
+        System.out.printf("  Velocity delta vs RASAero: %+.1f ft/s (%+.1f%%)%n",
+                orpMaxVelFps - RASAERO_MAXVEL_FPS,
+                100.0 * (orpMaxVelFps - RASAERO_MAXVEL_FPS) / RASAERO_MAXVEL_FPS);
+
+        var branch = data.getBranch(0);
+        List<Double> times = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_TIME);
+        List<Double> alts  = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_ALTITUDE);
+        List<Double> vels  = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_VELOCITY_TOTAL);
+        List<Double> vzs   = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_VELOCITY_Z);
+        List<Double> machs = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_MACH_NUMBER);
+        List<Double> cds   = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_DRAG_COEFF);
+        List<Double> drags = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_DRAG_FORCE);
+        List<Double> thrusts = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_THRUST_FORCE);
+        List<Double> masses = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_MASS);
+        List<Double> gravs = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_GRAVITY);
+        List<Double> aoas  = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_AOA);
+        List<Double> pitchRates = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_PITCH_RATE);
+
+        if (times == null) { System.out.println("  NO TRAJECTORY DATA"); return; }
+
+        // Find burnout (thrust goes to zero) and apogee index
+        int burnoutIdx = -1;
+        for (int i = 1; i < times.size(); i++) {
+            double th = (thrusts != null && i < thrusts.size()) ? thrusts.get(i) : 0;
+            double thPrev = (thrusts != null && i-1 < thrusts.size()) ? thrusts.get(i-1) : 0;
+            if (thPrev > 1.0 && th < 0.5) { burnoutIdx = i; break; }
+        }
+        int apogeeIdx = 0;
+        double maxAlt = -1e9;
+        for (int i = 0; i < alts.size(); i++) {
+            if (alts.get(i) > maxAlt) { maxAlt = alts.get(i); apogeeIdx = i; }
+        }
+
+        // Print trace
+        System.out.println();
+        System.out.printf("  %-7s %-9s %-9s %-7s %-7s %-8s %-8s %-9s %-7s %-7s %-7s%n",
+                "t(s)", "alt(ft)", "V(ft/s)", "Mach", "Cd", "Fdrag(N)", "Thr(N)", "m(kg)", "g(m/s2)", "AoA(d)", "pitR(d/s)");
+        double prevPrintT = -999;
+        for (int i = 0; i < times.size(); i++) {
+            double t = times.get(i);
+            boolean inBurn = (burnoutIdx < 0) || (i <= burnoutIdx);
+            double interval = inBurn ? 0.1 : 0.5;
+            if (t - prevPrintT < interval - 1e-6 && i != apogeeIdx && i != burnoutIdx) continue;
+            prevPrintT = t;
+            double alt = alts.get(i);
+            double v = (vels != null && i < vels.size()) ? vels.get(i) : Double.NaN;
+            double mach = (machs != null && i < machs.size()) ? machs.get(i) : Double.NaN;
+            double cd = (cds != null && i < cds.size()) ? cds.get(i) : Double.NaN;
+            double fd = (drags != null && i < drags.size()) ? drags.get(i) : Double.NaN;
+            double th = (thrusts != null && i < thrusts.size()) ? thrusts.get(i) : Double.NaN;
+            double m = (masses != null && i < masses.size()) ? masses.get(i) : Double.NaN;
+            double g = (gravs != null && i < gravs.size()) ? gravs.get(i) : Double.NaN;
+            double aoa = (aoas != null && i < aoas.size()) ? Math.toDegrees(aoas.get(i)) : Double.NaN;
+            double pr = (pitchRates != null && i < pitchRates.size()) ? Math.toDegrees(pitchRates.get(i)) : Double.NaN;
+            String marker = "";
+            if (i == burnoutIdx) marker = " <-- BURNOUT";
+            if (i == apogeeIdx) marker = " <-- APOGEE";
+            System.out.printf("  %-7.2f %-9.0f %-9.0f %-7.3f %-7.3f %-8.1f %-8.1f %-9.4f %-7.3f %-7.2f %-7.2f%s%n",
+                    t, alt*3.28084, v*3.28084, mach, cd, fd, th, m, g, aoa, pr, marker);
+        }
+
+        // Compute key metrics
+        System.out.println();
+        System.out.println("-".repeat(100));
+        if (burnoutIdx > 0) {
+            double tBO = times.get(burnoutIdx);
+            double altBO = alts.get(burnoutIdx);
+            double vBO = vels.get(burnoutIdx);
+            double massBO = masses.get(burnoutIdx);
+            double machBO = machs.get(burnoutIdx);
+            double keBO = 0.5 * massBO * vBO * vBO;
+
+            // Find peak vel and its index (usually just before burnout)
+            double peakV = 0; int peakVIdx = 0;
+            for (int i = 0; i < vels.size(); i++) {
+                if (vels.get(i) > peakV) { peakV = vels.get(i); peakVIdx = i; }
+            }
+
+            System.out.printf("  Burnout:     t=%.2fs  alt=%.0f ft  V=%.1f m/s (%.0f ft/s)  M=%.3f  m=%.4f kg  KE=%.0f J%n",
+                    tBO, altBO*3.28084, vBO, vBO*3.28084, machBO, massBO, keBO);
+            System.out.printf("  Peak vel:    t=%.2fs  V=%.1f m/s (%.0f ft/s)  M=%.3f  alt=%.0f ft%n",
+                    times.get(peakVIdx), peakV, peakV*3.28084, machs.get(peakVIdx), alts.get(peakVIdx)*3.28084);
+
+            double tApogee = times.get(apogeeIdx);
+            double altApogee = alts.get(apogeeIdx);
+            double coastTime = tApogee - tBO;
+            double dAlt = altApogee - altBO;
+            double avgG = 9.81;
+            if (gravs != null) {
+                double sg = 0; int ng = 0;
+                for (int i = burnoutIdx; i <= apogeeIdx && i < gravs.size(); i++) {
+                    sg += gravs.get(i); ng++;
+                }
+                if (ng > 0) avgG = sg/ng;
+            }
+            double gravityPE = massBO * avgG * dAlt;  // PE gained
+            double dragEnergy = keBO - gravityPE;      // KE - PE = drag energy dissipated
+            // Drag impulse estimate
+            double dragImpulse = 0;
+            if (drags != null) {
+                for (int i = burnoutIdx; i < apogeeIdx && i+1 < times.size() && i+1 < drags.size(); i++) {
+                    dragImpulse += 0.5 * (drags.get(i) + drags.get(i+1)) * (times.get(i+1) - times.get(i));
+                }
+            }
+
+            System.out.printf("  Apogee:      t=%.2fs  alt=%.0f ft  dAlt(coast)=%.0f ft  coastTime=%.2fs%n",
+                    tApogee, altApogee*3.28084, dAlt*3.28084, coastTime);
+            System.out.printf("  KE@burnout:  %10.0f J%n", keBO);
+            System.out.printf("  PE gain:     %10.0f J  (= m*g*dh, avgG=%.3f)%n", gravityPE, avgG);
+            System.out.printf("  Drag energy: %10.0f J  (KE-PE = drag dissipated during coast)%n", dragEnergy);
+            System.out.printf("  Drag frac:   %.1f%% of KE@burnout lost to drag (rest to gravity PE)%n",
+                    100.0 * dragEnergy / keBO);
+            System.out.printf("  Drag impulse (coast): %.1f N*s%n", dragImpulse);
+            System.out.printf("  Gravity impulse (coast): %.1f N*s%n", massBO * avgG * coastTime);
+
+            // Thrust / impulse integration over burn phase
+            double totalImpulse = 0;
+            double peakThrust = 0;
+            for (int i = 1; i <= burnoutIdx && i < times.size() && i < thrusts.size(); i++) {
+                double dt = times.get(i) - times.get(i-1);
+                totalImpulse += 0.5 * (thrusts.get(i) + thrusts.get(i-1)) * dt;
+                if (thrusts.get(i) > peakThrust) peakThrust = thrusts.get(i);
+            }
+            System.out.printf("  Total impulse (thrust integrated): %.1f N*s  (L500 rasp.eng ~3269 N*s)%n",
+                    totalImpulse);
+            System.out.printf("  Peak thrust: %.1f N%n", peakThrust);
+
+            // Average Cd during coast
+            if (cds != null) {
+                double sumCd = 0; int nCd = 0;
+                for (int i = burnoutIdx; i <= apogeeIdx && i < cds.size(); i++) {
+                    if (cds.get(i) > 0 && cds.get(i) < 5) { sumCd += cds.get(i); nCd++; }
+                }
+                System.out.printf("  Avg Cd during coast: %.4f  (n=%d)%n",
+                        nCd > 0 ? sumCd/nCd : Double.NaN, nCd);
+            }
+        }
+        System.out.println("=".repeat(100));
     }
 }

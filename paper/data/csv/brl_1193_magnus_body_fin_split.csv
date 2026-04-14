@@ -1,0 +1,215 @@
+# BRL Report 1193, Platou (1963) - "The Magnus Force on a Finned Body"
+# Digitized from Figures 5-8: Magnus force coefficient Cf vs angle of attack
+# Configurations: bare body (no fins) and finned body (body+fins total)
+# Two nose shapes tested: spike nose and cone nose (30-deg half-angle)
+# Body: 6.647 cal long, 2.0 inch diameter, 4 fins with span = body diameter
+# Cf = f / (0.5 * rho * U^2 * pi/4 * d^2 * omega*d/(2U))
+# Positive Cf is to left looking upstream; positive alpha is nose up
+# Data accuracy ~25% per report (p.14) due to yaw gage sensitivity limitations
+# NOTE: fin-alone Magnus = finned_body - bare_body (fin force opposes body force)
+#
+# Key finding (p.14): "The Magnus force on the fins acts in the opposite direction
+# from that on the body, and with the fin configuration tested the fin force is in
+# general larger than the body force."
+#
+Mach,Re_x1e6,nose_shape,config,alpha_deg,Cf_magnus,CT_cg_magnus
+# ---- Figure 5: M=1.75, Re=0.71e6 ----
+# Spike nose, bare body
+1.75,0.71,spike,bare_body,-5,-0.08,0.05
+1.75,0.71,spike,bare_body,-4,-0.06,0.03
+1.75,0.71,spike,bare_body,-3,-0.05,0.02
+1.75,0.71,spike,bare_body,-2,-0.03,0.01
+1.75,0.71,spike,bare_body,-1,-0.02,0.00
+1.75,0.71,spike,bare_body,0,0.00,0.00
+1.75,0.71,spike,bare_body,1,0.02,0.00
+1.75,0.71,spike,bare_body,2,0.04,-0.02
+1.75,0.71,spike,bare_body,3,0.08,-0.04
+1.75,0.71,spike,bare_body,4,0.12,-0.06
+1.75,0.71,spike,bare_body,5,0.18,-0.08
+# Spike nose, finned body
+1.75,0.71,spike,finned_body,-5,0.05,-0.10
+1.75,0.71,spike,finned_body,-4,0.04,-0.08
+1.75,0.71,spike,finned_body,-3,0.02,-0.04
+1.75,0.71,spike,finned_body,-2,0.01,-0.02
+1.75,0.71,spike,finned_body,-1,0.00,-0.01
+1.75,0.71,spike,finned_body,0,0.00,0.00
+1.75,0.71,spike,finned_body,1,-0.01,0.02
+1.75,0.71,spike,finned_body,2,-0.02,0.08
+1.75,0.71,spike,finned_body,3,-0.02,0.20
+1.75,0.71,spike,finned_body,4,-0.02,0.45
+1.75,0.71,spike,finned_body,5,-0.01,0.60
+# Cone nose, bare body
+1.75,0.71,cone,bare_body,-5,-0.12,0.05
+1.75,0.71,cone,bare_body,-4,-0.08,0.04
+1.75,0.71,cone,bare_body,-3,-0.05,0.02
+1.75,0.71,cone,bare_body,-2,-0.03,0.01
+1.75,0.71,cone,bare_body,-1,-0.01,0.00
+1.75,0.71,cone,bare_body,0,0.00,0.00
+1.75,0.71,cone,bare_body,1,0.02,0.00
+1.75,0.71,cone,bare_body,2,0.04,-0.02
+1.75,0.71,cone,bare_body,3,0.08,-0.04
+1.75,0.71,cone,bare_body,4,0.13,-0.06
+1.75,0.71,cone,bare_body,5,0.18,-0.08
+1.75,0.71,cone,bare_body,6,0.22,-0.10
+# Cone nose, finned body
+1.75,0.71,cone,finned_body,-5,0.08,-0.15
+1.75,0.71,cone,finned_body,-4,0.06,-0.10
+1.75,0.71,cone,finned_body,-3,0.04,-0.05
+1.75,0.71,cone,finned_body,-2,0.02,-0.02
+1.75,0.71,cone,finned_body,-1,0.01,-0.01
+1.75,0.71,cone,finned_body,0,0.00,0.00
+1.75,0.71,cone,finned_body,1,-0.01,0.02
+1.75,0.71,cone,finned_body,2,-0.02,0.10
+1.75,0.71,cone,finned_body,3,-0.03,0.30
+1.75,0.71,cone,finned_body,4,-0.04,0.55
+1.75,0.71,cone,finned_body,5,-0.04,0.80
+1.75,0.71,cone,finned_body,6,-0.03,0.95
+# ---- Figure 6: M=2.0, Re=0.65e6 ----
+# Spike nose, bare body
+2.00,0.65,spike,bare_body,-5,-0.06,0.04
+2.00,0.65,spike,bare_body,-4,-0.04,0.02
+2.00,0.65,spike,bare_body,-3,-0.02,0.01
+2.00,0.65,spike,bare_body,-2,-0.01,0.00
+2.00,0.65,spike,bare_body,-1,-0.01,0.00
+2.00,0.65,spike,bare_body,0,0.00,0.00
+2.00,0.65,spike,bare_body,1,0.02,0.00
+2.00,0.65,spike,bare_body,2,0.05,-0.02
+2.00,0.65,spike,bare_body,3,0.10,-0.04
+2.00,0.65,spike,bare_body,4,0.15,-0.06
+2.00,0.65,spike,bare_body,5,0.22,-0.10
+# Spike nose, finned body
+2.00,0.65,spike,finned_body,-5,0.12,-0.30
+2.00,0.65,spike,finned_body,-4,0.10,-0.20
+2.00,0.65,spike,finned_body,-3,0.05,-0.10
+2.00,0.65,spike,finned_body,-2,0.02,-0.04
+2.00,0.65,spike,finned_body,-1,0.01,-0.01
+2.00,0.65,spike,finned_body,0,0.00,0.00
+2.00,0.65,spike,finned_body,1,-0.02,0.05
+2.00,0.65,spike,finned_body,2,-0.05,0.20
+2.00,0.65,spike,finned_body,3,-0.06,0.40
+2.00,0.65,spike,finned_body,4,-0.05,0.70
+2.00,0.65,spike,finned_body,5,-0.04,1.00
+# Cone nose, bare body
+2.00,0.65,cone,bare_body,-5,-0.12,0.50
+2.00,0.65,cone,bare_body,-4,-0.08,0.35
+2.00,0.65,cone,bare_body,-3,-0.05,0.20
+2.00,0.65,cone,bare_body,-2,-0.02,0.08
+2.00,0.65,cone,bare_body,-1,-0.01,0.02
+2.00,0.65,cone,bare_body,0,0.00,0.00
+2.00,0.65,cone,bare_body,1,0.02,-0.05
+2.00,0.65,cone,bare_body,2,0.06,-0.12
+2.00,0.65,cone,bare_body,3,0.12,-0.22
+2.00,0.65,cone,bare_body,4,0.22,-0.30
+2.00,0.65,cone,bare_body,5,0.35,-0.40
+2.00,0.65,cone,bare_body,6,0.45,-0.50
+# Cone nose, finned body
+2.00,0.65,cone,finned_body,-5,0.10,-0.50
+2.00,0.65,cone,finned_body,-4,0.06,-0.30
+2.00,0.65,cone,finned_body,-3,0.03,-0.15
+2.00,0.65,cone,finned_body,-2,0.01,-0.05
+2.00,0.65,cone,finned_body,-1,0.00,-0.02
+2.00,0.65,cone,finned_body,0,0.00,0.00
+2.00,0.65,cone,finned_body,1,-0.02,0.08
+2.00,0.65,cone,finned_body,2,-0.05,0.20
+2.00,0.65,cone,finned_body,3,-0.10,0.40
+2.00,0.65,cone,finned_body,4,-0.15,0.65
+2.00,0.65,cone,finned_body,5,-0.12,0.80
+2.00,0.65,cone,finned_body,6,-0.08,0.85
+# ---- Figure 7: M=3.02, Re=0.65e6 ----
+# Spike nose, bare body
+3.02,0.65,spike,bare_body,-5,-0.02,0.02
+3.02,0.65,spike,bare_body,-4,-0.01,0.01
+3.02,0.65,spike,bare_body,-3,-0.01,0.00
+3.02,0.65,spike,bare_body,-2,0.00,0.00
+3.02,0.65,spike,bare_body,-1,0.00,0.00
+3.02,0.65,spike,bare_body,0,0.00,0.00
+3.02,0.65,spike,bare_body,1,0.01,0.00
+3.02,0.65,spike,bare_body,2,0.03,-0.02
+3.02,0.65,spike,bare_body,3,0.06,-0.04
+3.02,0.65,spike,bare_body,4,0.10,-0.06
+3.02,0.65,spike,bare_body,5,0.15,-0.08
+# Spike nose, finned body
+3.02,0.65,spike,finned_body,-5,0.08,-0.50
+3.02,0.65,spike,finned_body,-4,0.08,-0.35
+3.02,0.65,spike,finned_body,-3,0.04,-0.15
+3.02,0.65,spike,finned_body,-2,0.02,-0.05
+3.02,0.65,spike,finned_body,-1,0.01,-0.02
+3.02,0.65,spike,finned_body,0,0.00,0.00
+3.02,0.65,spike,finned_body,1,-0.01,0.05
+3.02,0.65,spike,finned_body,2,-0.03,0.20
+3.02,0.65,spike,finned_body,3,-0.05,0.45
+3.02,0.65,spike,finned_body,4,-0.05,0.70
+3.02,0.65,spike,finned_body,5,-0.05,0.80
+# Cone nose, bare body
+3.02,0.65,cone,bare_body,-5,-0.02,0.02
+3.02,0.65,cone,bare_body,-4,-0.01,0.01
+3.02,0.65,cone,bare_body,-3,-0.01,0.00
+3.02,0.65,cone,bare_body,-2,0.00,0.00
+3.02,0.65,cone,bare_body,-1,0.00,0.00
+3.02,0.65,cone,bare_body,0,0.00,0.00
+3.02,0.65,cone,bare_body,1,0.01,0.00
+3.02,0.65,cone,bare_body,2,0.04,-0.02
+3.02,0.65,cone,bare_body,3,0.08,-0.04
+3.02,0.65,cone,bare_body,4,0.13,-0.06
+3.02,0.65,cone,bare_body,5,0.18,-0.08
+# Cone nose, finned body
+3.02,0.65,cone,finned_body,-5,0.05,-0.25
+3.02,0.65,cone,finned_body,-4,0.04,-0.15
+3.02,0.65,cone,finned_body,-3,0.02,-0.08
+3.02,0.65,cone,finned_body,-2,0.01,-0.03
+3.02,0.65,cone,finned_body,-1,0.00,-0.01
+3.02,0.65,cone,finned_body,0,0.00,0.00
+3.02,0.65,cone,finned_body,1,-0.01,0.05
+3.02,0.65,cone,finned_body,2,-0.02,0.15
+3.02,0.65,cone,finned_body,3,-0.02,0.35
+3.02,0.65,cone,finned_body,4,0.00,0.50
+3.02,0.65,cone,finned_body,5,0.02,0.55
+# ---- Figure 8: M=4.0, Re=0.65e6 ----
+# Spike nose, bare body
+4.00,0.65,spike,bare_body,-5,-0.02,0.02
+4.00,0.65,spike,bare_body,-4,-0.01,0.01
+4.00,0.65,spike,bare_body,-3,-0.01,0.00
+4.00,0.65,spike,bare_body,-2,0.00,0.00
+4.00,0.65,spike,bare_body,-1,0.00,0.00
+4.00,0.65,spike,bare_body,0,0.00,0.00
+4.00,0.65,spike,bare_body,1,0.01,0.00
+4.00,0.65,spike,bare_body,2,0.03,-0.01
+4.00,0.65,spike,bare_body,3,0.06,-0.03
+4.00,0.65,spike,bare_body,4,0.10,-0.05
+4.00,0.65,spike,bare_body,5,0.15,-0.08
+# Spike nose, finned body
+4.00,0.65,spike,finned_body,-5,0.08,-0.30
+4.00,0.65,spike,finned_body,-4,0.05,-0.20
+4.00,0.65,spike,finned_body,-3,0.03,-0.10
+4.00,0.65,spike,finned_body,-2,0.01,-0.03
+4.00,0.65,spike,finned_body,-1,0.00,-0.01
+4.00,0.65,spike,finned_body,0,0.00,0.00
+4.00,0.65,spike,finned_body,1,-0.01,0.05
+4.00,0.65,spike,finned_body,2,-0.03,0.15
+4.00,0.65,spike,finned_body,3,-0.05,0.35
+4.00,0.65,spike,finned_body,4,-0.05,0.45
+4.00,0.65,spike,finned_body,5,-0.04,0.50
+# Cone nose, bare body
+4.00,0.65,cone,bare_body,-5,-0.02,0.02
+4.00,0.65,cone,bare_body,-4,-0.01,0.01
+4.00,0.65,cone,bare_body,-3,-0.01,0.00
+4.00,0.65,cone,bare_body,-2,0.00,0.00
+4.00,0.65,cone,bare_body,-1,0.00,0.00
+4.00,0.65,cone,bare_body,0,0.00,0.00
+4.00,0.65,cone,bare_body,1,0.01,0.00
+4.00,0.65,cone,bare_body,2,0.03,-0.02
+4.00,0.65,cone,bare_body,3,0.06,-0.04
+4.00,0.65,cone,bare_body,4,0.10,-0.06
+4.00,0.65,cone,bare_body,5,0.15,-0.08
+# Cone nose, finned body
+4.00,0.65,cone,finned_body,-5,0.05,-0.50
+4.00,0.65,cone,finned_body,-4,0.03,-0.30
+4.00,0.65,cone,finned_body,-3,0.02,-0.15
+4.00,0.65,cone,finned_body,-2,0.01,-0.05
+4.00,0.65,cone,finned_body,-1,0.00,-0.02
+4.00,0.65,cone,finned_body,0,0.00,0.00
+4.00,0.65,cone,finned_body,1,-0.01,0.08
+4.00,0.65,cone,finned_body,2,-0.03,0.20
+4.00,0.65,cone,finned_body,3,-0.04,0.40
+4.00,0.65,cone,finned_body,4,-0.02,0.50
+4.00,0.65,cone,finned_body,5,0.01,0.45

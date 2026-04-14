@@ -1,0 +1,20 @@
+# Source: AEDC-TR-70-100 (Anderson, ARO Inc., May 1970)
+# Model: AGARD Calibration Model B  (ogive-cylinder + delta wing)
+# Tunnel: 4T Propulsion Wind Tunnel, Arnold AFS TN
+# Condition: row nearest α = 0 from main angle-of-attack sweep
+# Stagnation pressure: 3000 psfa  (except M=0.40_check: 3700 psfa)
+# Reference area S = 0.1841 ft²   Model base area Ab = 0.02086 ft²
+# C_D_total = C_D_F + C_D_b   (verified for every row)
+Mach,alpha_deg,C_L_F,C_D_total,C_D_F,C_D_b,C_m
+0.20,0.13,0.0027,0.0256,0.0124,0.0132,0.0034
+0.25,-0.20,-0.0123,0.0262,0.0122,0.0138,0.0052
+0.30,-0.09,-0.0018,0.0247,0.0134,0.0113,0.0042
+0.35,0.03,0.0010,0.0252,0.0118,0.0135,0.0066
+0.40,-0.08,-0.0026,0.0251,0.0109,0.0143,0.0056
+0.50,-0.13,-0.0069,0.0260,0.0126,0.0133,0.0065
+0.60,0.22,0.0102,0.0271,0.0128,0.0143,0.0037
+0.70,0.22,0.0105,0.0270,0.0126,0.0145,0.0039
+0.80,0.22,0.0106,0.0280,0.0132,0.0148,0.0030
+0.90,0.20,0.0095,0.0282,0.0132,0.0150,0.0016
+0.95,0.19,0.0103,0.0297,0.0141,0.0156,0.0024
+1.00,0.21,0.0127,0.0390,0.0201,0.0189,0.0015

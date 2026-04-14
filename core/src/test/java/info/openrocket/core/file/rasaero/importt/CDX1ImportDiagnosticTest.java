@@ -252,7 +252,8 @@ public class CDX1ImportDiagnosticTest extends BaseTestCase {
         CDX1Expected exp = new CDX1Expected();
         exp.name = "Torrent";
         exp.noseLengthIn = 20; exp.noseDiameterIn = 4; exp.noseShape = "Conical";
-        exp.bodyLengthIn = 89.5; exp.bodyDiameterIn = 4;
+        // Body tube is shortened by finCan(7") + shoulder(0.05") = 7.05": 89.5 - 7.05 = 82.45"
+        exp.bodyLengthIn = 82.45; exp.bodyDiameterIn = 4;
         exp.finCount = 3; exp.finChordIn = 8.25; exp.finSpanIn = 5; exp.finThicknessIn = 0.125;
         exp.motorDesignation = "M1850GG";
         exp.launchWtLb = 29.13; exp.cgIn = 66.5;
@@ -270,7 +271,8 @@ public class CDX1ImportDiagnosticTest extends BaseTestCase {
         CDX1Expected exp = new CDX1Expected();
         exp.name = "Qu8k";
         exp.noseLengthIn = 42; exp.noseDiameterIn = 8; exp.noseShape = "Conical";
-        exp.bodyLengthIn = 124; exp.bodyDiameterIn = 8;
+        // Body tube is shortened by finCan(24") + shoulder(0.75") = 24.75": 124 - 24.75 = 99.25"
+        exp.bodyLengthIn = 99.25; exp.bodyDiameterIn = 8;
         exp.finCount = 4; exp.finChordIn = 22; exp.finSpanIn = 7.5; exp.finThicknessIn = 0.25;
         exp.motorDesignation = "Q18000";
         exp.launchWtLb = 314.5; exp.cgIn = 110;
@@ -288,7 +290,8 @@ public class CDX1ImportDiagnosticTest extends BaseTestCase {
         CDX1Expected exp = new CDX1Expected();
         exp.name = "Full Metal Jacket 1";
         exp.noseLengthIn = 16; exp.noseDiameterIn = 4; exp.noseShape = "Tangent Ogive";
-        exp.bodyLengthIn = 116.3125; exp.bodyDiameterIn = 4;
+        // Body tube is shortened by finCan(14.5") + shoulder(0.2415") = 14.7415": 116.3125 - 14.7415 = 101.571"
+        exp.bodyLengthIn = 101.571; exp.bodyDiameterIn = 4;
         exp.finCount = 3; exp.finChordIn = 12.5; exp.finSpanIn = 4.4; exp.finThicknessIn = 0.125;
         exp.motorDesignation = "O10000";
         exp.launchWtLb = 70; exp.cgIn = 86;
@@ -335,6 +338,95 @@ public class CDX1ImportDiagnosticTest extends BaseTestCase {
         String path = findSimvrealPath("Proteus6.CDX1");
         OpenRocketDocument doc = importCDX1(path);
         diagnoseRocket(doc, exp);
+    }
+
+    @Test
+    public void testMesosDragBreakdown() throws Exception {
+        // Load Kip custom motors
+        SimVRealValidationTest.loadMotorsIntoRASAeroCache("simvreal/Docs/Mesos/M787_Expanded_Nozzle_Sea_Level.eng");
+        SimVRealValidationTest.loadMotorsIntoRASAeroCache("simvreal/Docs/Mesos/O4374_Sea_Level.eng");
+        SimVRealValidationTest.loadMotorsIntoRASAeroCache("c:/Code/OpenRocket Plus/simvreal/Docs/Mesos/M787_Expanded_Nozzle_Sea_Level.eng");
+        SimVRealValidationTest.loadMotorsIntoRASAeroCache("c:/Code/OpenRocket Plus/simvreal/Docs/Mesos/O4374_Sea_Level.eng");
+
+        String path = "c:/Code/OpenRocket Plus/simvreal/Docs/Mesos/MESOS 293K Flight.CDX1";
+        OpenRocketDocument doc = importCDX1(path);
+        Rocket rocket = doc.getRocket();
+
+        // Print component tree
+        System.out.println("\n=== MESOS Component Tree ===");
+        for (int s = 0; s < rocket.getChildCount(); s++) {
+            AxialStage stage = (AxialStage) rocket.getChild(s);
+            System.out.println("Stage[" + s + "] " + stage.getName());
+            printTree(stage, "  ");
+        }
+
+        // Aero sweep at key Mach numbers
+        double[] machs = {0.05, 0.1, 0.3, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0};
+        info.openrocket.core.aerodynamics.BarrowmanCalculator calc =
+                new info.openrocket.core.aerodynamics.BarrowmanCalculator();
+
+        System.out.println("\n=== MESOS CD Sweep ===");
+        System.out.printf("%-6s  %-8s  %-8s  %-8s%n", "Mach", "CD_total", "CN", "Cm");
+        System.out.println("-------  --------  --------  --------");
+        for (double mach : machs) {
+            info.openrocket.core.rocketcomponent.FlightConfiguration config =
+                    rocket.getSelectedConfiguration();
+            info.openrocket.core.aerodynamics.FlightConditions conditions =
+                    new info.openrocket.core.aerodynamics.FlightConditions(config);
+            conditions.setMach(mach);
+            conditions.setAOA(Math.toRadians(0.0));
+            info.openrocket.core.logging.WarningSet warnings = new info.openrocket.core.logging.WarningSet();
+
+            info.openrocket.core.aerodynamics.AerodynamicForces total =
+                    calc.getAerodynamicForces(config, conditions, warnings);
+            System.out.printf("%-6.2f  %-8.4f  %-8.4f  %-8.4f%n",
+                    mach, total.getCD(), total.getCN(), total.getCm());
+        }
+
+        // Per-component breakdown at M=0.05 and M=2.0
+        for (double mach : new double[]{0.05, 0.5, 2.0}) {
+            info.openrocket.core.rocketcomponent.FlightConfiguration config =
+                    rocket.getSelectedConfiguration();
+            info.openrocket.core.aerodynamics.FlightConditions conditions =
+                    new info.openrocket.core.aerodynamics.FlightConditions(config);
+            conditions.setMach(mach);
+            conditions.setAOA(Math.toRadians(2.0));
+            info.openrocket.core.logging.WarningSet warnings = new info.openrocket.core.logging.WarningSet();
+
+            java.util.Map<info.openrocket.core.rocketcomponent.RocketComponent,
+                    info.openrocket.core.aerodynamics.AerodynamicForces> forceMap =
+                    calc.getForceAnalysis(config, conditions, warnings);
+
+            System.out.println("\n--- Per-component at M=" + mach + " ---");
+            System.out.printf("%-35s  %-8s  %-8s  %-8s  %-8s%n",
+                    "Component", "CD", "CDf", "CDp", "CNa");
+            for (var entry : forceMap.entrySet()) {
+                info.openrocket.core.aerodynamics.AerodynamicForces f = entry.getValue();
+                if (f != null && (f.getCD() > 0.001 || Math.abs(f.getCN()) > 0.001)) {
+                    System.out.printf("%-35s  %-8.4f  %-8.4f  %-8.4f  %-8.4f%n",
+                            entry.getKey().getName(),
+                            f.getCD(), f.getFrictionCD(), f.getPressureCD(), f.getCN());
+                }
+            }
+        }
+    }
+
+    private void printTree(info.openrocket.core.rocketcomponent.RocketComponent comp, String indent) {
+        for (int i = 0; i < comp.getChildCount(); i++) {
+            info.openrocket.core.rocketcomponent.RocketComponent child = comp.getChild(i);
+            String detail = "";
+            if (child instanceof BodyTube bt) {
+                detail = String.format(" L=%.3fm R=%.3fm", bt.getLength(), bt.getOuterRadius());
+            } else if (child instanceof info.openrocket.core.rocketcomponent.Transition t) {
+                detail = String.format(" L=%.3fm foreR=%.3fm aftR=%.3fm", t.getLength(), t.getForeRadius(), t.getAftRadius());
+            } else if (child instanceof info.openrocket.core.rocketcomponent.NoseCone nc) {
+                detail = String.format(" L=%.3fm R=%.3fm", nc.getLength(), nc.getBaseRadius());
+            } else if (child instanceof info.openrocket.core.rocketcomponent.TrapezoidFinSet fs) {
+                detail = String.format(" n=%d chord=%.3fm span=%.3fm", fs.getFinCount(), fs.getRootChord(), fs.getHeight());
+            }
+            System.out.println(indent + child.getClass().getSimpleName() + " \"" + child.getName() + "\"" + detail);
+            printTree(child, indent + "  ");
+        }
     }
 
     /**

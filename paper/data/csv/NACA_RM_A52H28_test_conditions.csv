@@ -1,0 +1,10 @@
+Mach,Re_x1e6_avg,Re_x1e6_range,Tunnel_No,notes
+1.24,2.42,+/-0.14,1,single published family point
+1.44,1.17,+/-0.01,1,lower-Re condition reported in source text
+1.44,3.14,+/-0.20,1,higher-Re condition reported in source text
+1.54,4.10,+/-0.10,2,not digitized in current sparse benchmark
+1.96,4.14,+/-0.12,2,not digitized in current sparse benchmark
+1.99,2.01,+/-0.01,1,single published family point
+2.86,4.00,+/-0.10,2,single published LV-ogive point
+3.06,4.00,+/-0.19,2,single published family point
+3.67,3.45,+/-0.07,2,single published family point

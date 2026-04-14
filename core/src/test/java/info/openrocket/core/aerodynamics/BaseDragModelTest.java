@@ -279,6 +279,73 @@ public class BaseDragModelTest {
 						mach, cd, low, high));
 	}
 
+	// ==================== NACA TN 3393 External Benchmark ====================
+
+	/**
+	 * Validation gate: turbulent base drag matches NACA TN 3393 figure-digitized data.
+	 * <p>
+	 * Source: Reller & Hamaker (1955), "An Experimental Investigation of the
+	 * Base Pressure Characteristics of Nonlifting Bodies of Revolution at Mach
+	 * Numbers from 2.73 to 4.98", NACA TN 3393, Figures 9(b)/10(b)/16.
+	 * <p>
+	 * The Devan-Ashwood model is turbulent-calibrated. At these Mach numbers the
+	 * turbulent data should agree within ~25% (MAPE ≈ 16%).
+	 * <p>
+	 * Laminar data diverges substantially (MAPE ≈ 44%) because the thinner
+	 * laminar boundary layer produces a different wake reattachment structure.
+	 * This is a known and documented limitation (see VALIDATION_MATRIX.md
+	 * de-scope list). Chapman (1951) NACA Report 1051 would be needed to model
+	 * laminar base pressure accurately.
+	 */
+	@ParameterizedTest(name = "TN 3393 turbulent Cpb at M{0}: predicted within {2}% of observed {1}")
+	@CsvSource({
+			// Mach, TN3393_Cpb (turbulent fixed roughness), max_pct_error
+			"2.73,  0.1188,  30",
+			"3.49,  0.0798,  15",
+			"4.03,  0.0660,  20",
+			"4.48,  0.0584,  30",
+	})
+	public void testTN3393TurbulentAgreement(double mach, double tn3393Cpb, double maxPctError) {
+		double predicted = BarrowmanDragCalculator.calculateBaseCD(mach);
+		double pctError = Math.abs(predicted - tn3393Cpb) / tn3393Cpb * 100.0;
+		assertTrue(pctError <= maxPctError,
+				String.format("Base CD at M=%.2f: predicted=%.4f, TN3393=%.4f, error=%.1f%% (limit %.0f%%)",
+						mach, predicted, tn3393Cpb, pctError, maxPctError));
+	}
+
+	/**
+	 * Documents the known laminar divergence: Devan-Ashwood is calibrated to
+	 * turbulent boundary layer data and diverges from laminar TN 3393 data.
+	 * <p>
+	 * The divergence pattern is Mach-dependent:
+	 * - At M=2.73: model underpredicts (laminar BL produces higher base drag
+	 *   because thinner BL lets less mass fill the wake recirculation zone).
+	 * - At M>3.5: model overpredicts (laminar BL thins further; expansion-fan
+	 *   base flow structure changes character).
+	 * <p>
+	 * This test PASSES when the divergence magnitude is within expected bounds,
+	 * confirming the limitation is documented and bounded.
+	 */
+	@ParameterizedTest(name = "TN 3393 laminar divergence documented at M{0}")
+	@CsvSource({
+			// Mach, TN3393_Cpb (laminar), max_abs_pct_error
+			"2.73,  0.1150,  30",
+			"3.49,  0.0680,  25",
+			"4.03,  0.0493,  60",
+			"4.48,  0.0391,  90",
+	})
+	public void testTN3393LaminarDivergenceDocumented(double mach, double tn3393Cpb, double maxAbsPct) {
+		double predicted = BarrowmanDragCalculator.calculateBaseCD(mach);
+		double pctError = (predicted - tn3393Cpb) / tn3393Cpb * 100.0;
+
+		// The divergence magnitude should be within known bounds
+		assertTrue(Math.abs(pctError) <= maxAbsPct,
+				String.format("Laminar divergence at M=%.2f: predicted=%.4f, TN3393=%.4f, error=%.1f%% (limit ±%.0f%%)",
+						mach, predicted, tn3393Cpb, pctError, maxAbsPct));
+	}
+
+	// ==================== High Mach Asymptote ====================
+
 	/**
 	 * Verify that base drag asymptotes to a nonzero constant at high Mach,
 	 * matching the Newtonian limit for base pressure.

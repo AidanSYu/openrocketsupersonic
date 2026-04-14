@@ -1,0 +1,11 @@
+Mach,AoA_deg,C_N,C_P,X_CP_d,source_id,notes
+0.6,0.0,0.078,,1.15,"fig5a,fig5b","Subsonic; CNα from Fig 5(a), xCP/d from Fig 5(b)."
+0.8,0.0,0.081,,1.25,"fig5a,fig5b","Subsonic; CNα and xCP/d from Figs 5(a,b)."
+0.9,0.0,0.083,,1.28,"fig5a,fig5b",Near-sonic; curves steepen here.
+1.2,0.0,0.072,,1.05,"fig5a,fig5b",Supersonic; sharp dip in CNα post-sonic.
+1.5,0.0,0.063,,0.92,"fig5a,fig5b",Supersonic; CNα continues to decrease.
+2.0,0.0,0.055,,0.72,"fig5a,fig5b",Supersonic; CP moving aft steadily.
+3.0,0.0,0.05,,0.58,"fig5a,fig5b",High supersonic; flattening of the CNα curve.
+4.06,0.0,0.048,,0.55,"fig5a,fig5b",From 1×3 SSWT data; Re lower.
+5.11,0.0,0.047,,0.54,"fig5a,fig5b",High Mach; Re = 0.35e6/d. Fin effectiveness declining.
+5.82,0.0,0.046,,0.53,"fig5a,fig5b",Highest Mach tested; Re = 0.18e6/d.

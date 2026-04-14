@@ -1,0 +1,9 @@
+Mach,boundary_layer,observed_Cpb,predicted_baseCD,error_abs,error_pct,notes
+2.73,laminar,0.1150079643015278,0.089646,-0.025361964301527803,-22.052354769999948,"Laminar, condensation-corrected. Text: 'about 60 percent of the limiting value'."
+2.73,turbulent (fixed roughness),0.1188415631115788,0.089646,-0.029195563111578796,-24.56679493870967,"Turbulent fixed transition, condensation-corrected. Text: 62% at M=2.73."
+3.49,laminar,0.0680266523732505,0.079271,0.011244347626749487,16.52932671896552,"Laminar, condensation-corrected. Fig 9(b) at Re=5e6 shows slight decline from M=2.73."
+3.49,turbulent (fixed roughness),0.0797553855410523,0.079271,-0.000484385541052304,-0.6073389749999735,"Turbulent fixed transition, condensation-corrected. Fig 10(b) interpolated at Re=5e6."
+4.03,laminar,0.0492583539089582,0.074975,0.025716646091041802,52.207684687500155,"Laminar, condensation-corrected. Fig 9(b) at Re=6e6 shows continued decline."
+4.03,turbulent (fixed roughness),0.0659710096994976,0.074975,0.009003990300502404,13.648404566666764,"Turbulent fixed transition, condensation-corrected. Fig 10(b) interpolated at Re=6e6."
+4.48,laminar,0.0391479136297376,0.072803,0.033655086370262405,85.96904215272733,"Laminar, condensation-corrected. Fig 9(b) at Re=6e6, highest Mach."
+4.48,turbulent (fixed roughness),0.0583659803206996,0.072803,0.01443701967930041,24.735333151219763,"Turbulent fixed transition, condensation-corrected. Explicitly stated as ~82%."

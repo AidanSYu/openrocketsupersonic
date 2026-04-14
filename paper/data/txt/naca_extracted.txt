@@ -1,0 +1,6091 @@
+
+
+--- PAGE 1 ---
+<
+0
+_,'_tASSI[ P, -',i i:,,q',iCHANGED
+TO_
+,°,._..._..
+......._/_"
+NACA
+RESEARCH MEMORANDUM
+INVESTIGATION
+OF
+THE
+DRAG
+OF
+VARIOUS
+AXIALLY
+SYMMETRIC
+NOSE
+SHAPES
+OF
+FINENESS
+RATIO
+3
+FOR
+MACH
+NUMBERS
+FROM
+1.24
+TO
+3.67
+By
+Edward
+W.
+Perkins
+and
+Leland
+H. "Jorgensen
+Ames
+Aeronautical
+Laboratory
+Moffett Field, Calif.
+C LA_SI_IED
+DOCUMENT
+T_S
+m.m_erCml
+¢ontaln_
+informl.tlon
+I_ffec£_
+the
+N_Uozml
+Defense
+of the
+Un_
+States
+w_thin
+the meaP/=_
+of
+the
+esplon_._
+L_ws,
+Title
+18, U.S.C.,
+Sees.
+79_
+and
+794,
+the
+translrdsslon
+o_- reveb_tlon
+of
+which
+L_, an>,
+manner
+to
+unauthorized
+persoI_ is prohibited
+by l_w.
+NATIONAL
+ADVISORY
+COMMITTEE
+FOR A£RONAUTICS
+WASHI
+NGTON
+November
+6,
+1952
+:I
+/
+
+
+--- PAGE 3 ---
+1B
+NAC 
+CONFIDENTIAL
+NATIONAL
+ADVISORY
+COMMITTEE
+FOR
+AERONAUTICS
+RESEARCH
+MEMORANDUM
+INVESTIGATION
+OF
+THE
+DRAG
+OF
+VARIOUS
+AXIALLY
+SYMMETRIC
+NOSE
+SHAPES
+OF
+FINENESS
+RATIO
+3
+FOR
+MACH
+N_RS
+FROM
+1.24
+TO
+3.67
+By
+Edward
+W.
+Perkins
+and
+Leland
+H.
+Jorgensen
+SUMMARY
+Foredrag
+measurements
+have
+been
+made
+at
+zero
+angle
+of
+attack
+for
+a
+series
+of
+fineness
+ratio
+3
+nose
+shapes.
+The
+models
+included
+various
+theoretically
+derived
+minimum
+drag
+shapes,
+hemispherically
+blunted
+cones,
+and
+other
+more
+common
+profiles.
+Pressure-distribution
+measure-
+ments
+for
+a
+series
+of
+hemispherically
+blunted
+cones
+were
+also
+obtained.
+The
+Mach
+number
+and
+Reynolds
+number
+ranges
+of
+the
+test
+were
+1.2h
+to
+3.67
+and
+2 X
+i0 e
+to
+4 X
+i0 s
+(based
+on
+model
+length),
+respectively.
+Of
+the
+models
+tested,
+the
+paraboloid
+of
+revolution
+had
+the
+least
+foredrag
+below
+a
+Mach
+number
+of
+1.5,
+and
+the
+theoretically
+minimum
+drag
+shape
+for
+a
+given
+length
+and
+diameter
+based
+upon
+Newton's
+impact
+theory
+had
+the
+least
+foredrag
+above
+a
+Mach
+number
+of
+1.5.
+The
+theoretical
+shapes
+for
+minimum
+pressure
+drag
+for
+the
+auxiliary
+conditions
+of
+given
+length
+and
+diameter
+or
+given
+diameter
+and
+volume
+derived
+by
+yon
+K_rm_n
+and
+by
+Haack
+do
+not
+have
+less
+drag
+than
+all
+other
+possible
+shapes
+having
+identical
+values
+of
+the
+same
+parameters.
+No
+model
+had
+the
+least
+fore-
+drag
+for
+the
+complete
+Mach
+number
+range.
+Wherever
+possible,
+theoretical
+values
+of
+the
+foredrag
+based
+upon
+the
+sum
+of
+the
+theoretical
+skin-
+friction
+drag
+and
+the
+theoretical
+wave
+drag
+were
+calculated
+for
+compari-
+son
+with
+the
+experimental
+results.
+The
+results
+for
+the
+series
+of
+hemispherically
+blunted
+cones
+have
+important
+practical
+significance
+since
+it
+was
+found
+that
+the
+diameter
+of
+the
+hemispherical
+tip
+may
+be
+quite
+large
+without
+markedly
+increasing
+the
+foredrag
+over
+that
+of
+a
+sharp
+pointed
+cone
+of
+the
+same
+fineness
+ratio.
+In
+fact,
+for
+a
+fixed
+fineness
+ratio
+of
+3,
+the
+foredrag
+is
+reduced
+somewhat
+by
+a
+small
+degree
+of
+blunting,
+although
+for
+a
+fixed
+cone
+angle
+blunting
+always
+increased
+the
+drag.
+An
+empirical
+expression,
+CONFIDENTIAL
+
+
+--- PAGE 4 ---
+2
+CONFIDENTIAL
+NACA
+RM
+A52H25
+applicable
+for
+free-stream
+Mach
+numbers
+greater
+than
+2,
+is
+developed
+for
+calculating
+the
+wave
+drag
+of
+the
+series
+of
+hemispherically
+blunted
+cones.
+INTRODUCTION
+The
+allied
+problems
+of
+predicting
+the
+drag
+of
+bodies
+of
+revolution
+and
+of
+minimizing
+the
+drag
+by
+proper
+shaping
+of
+the
+body
+have
+been
+the
+objects
+of
+numerous
+theoretical
+investigations.
+With
+regard
+to
+the
+problem
+of
+predicting
+the
+drag,
+that
+part
+of
+the
+drag
+which
+has
+thus
+far
+proved
+most
+amenable
+to
+theoretical
+calculation
+is
+the
+wave
+drag.
+For
+pointed
+bodies
+of
+revolution
+at
+Mach
+numbers
+sufficiently
+high
+for
+shock-wave
+attachment,
+the
+wave
+drag
+may
+be
+calculated
+by
+either
+perturbation
+theory
+or
+by
+the
+method
+of
+characteristics.
+For
+highly
+blunted
+nose
+shapes,
+such
+as
+those
+generally
+required
+for
+radar
+homing
+devices,
+there
+is
+no
+adequate
+theoretical
+method
+for
+predicting
+the
+pressure
+distribution
+and
+drag.
+Therefore,
+at
+present,
+experimental
+results
+must
+be
+relied
+upon
+for
+this
+information.
+The
+first
+part
+of
+the
+present
+investigation
+is
+a
+study
+of
+the
+pres-
+sure
+distribution
+and
+foredrag
+of
+a
+series
+of
+hemispherically
+blunted
+cones.
+These
+shapes
+have
+been
+considered
+since
+the
+ideal
+housing
+of
+radar
+seeker
+equipment
+appears
+to
+be
+a
+hemispherically
+shaped
+dome
+of
+uniform
+material.
+Although
+it
+might
+seem
+that
+the
+use
+of
+such
+a blunt
+nose
+would
+result
+in
+a
+high
+drag
+penalty,
+preliminary
+estimates
+I
+have
+indicated
+that
+the
+drag
+of
+a
+nose
+shape
+consisting
+of
+a
+hemispherical
+surface
+faired
+into
+an
+expanding
+conical
+surface
+can
+be
+less
+than
+that
+of
+a
+sharp
+cone
+of
+the
+same
+length-to-diameter
+ratio.
+The
+results
+of
+preliminary
+estimates
+of
+the
+variation
+of
+drag
+with
+the
+ratio
+of
+hemi-
+spherical
+tip
+diameter
+to
+base
+diameter
+for
+fineness
+ratio
+3
+(refer-
+ence
+i)
+have
+indicated
+that
+a
+small
+reduction
+in
+drag
+can
+be
+realized
+at
+all
+supersonic
+Mach
+numbers.
+Perhaps
+more
+important
+than
+the
+reduction
+in
+drag
+is
+the
+indication
+that
+a
+relatively
+large
+hemispheri-
+cal
+tip
+can
+be
+used
+without
+incurring
+any
+drag
+increase
+above
+that
+of
+a
+sharp-nosed
+cone
+of
+the
+same
+fineness
+ratio.
+In
+order
+to
+verify
+these
+predictions
+and
+to
+provide
+quantitative
+drag
+data,
+the
+present
+investigation
+and
+an
+investigation
+in
+the
+Ames
+supersonic
+free-flight
+wind
+tunnel
+were
+undertaken.
+The
+results
+of
+the
+latter
+tests
+were
+reported
+in
+reference
+2.
+iThese
+preliminary
+estimates
+were
+made
+by
+summing
+the
+experimentally
+determined
+wave
+drag
+of
+the
+hemispherical
+nose
+and
+the
+theoretical
+pressure
+drag
+of
+the
+conical
+afterbody,
+assuming
+that
+the
+pressure
+on
+the
+surface
+of
+the
+conical
+afterbody
+was
+the
+same
+as
+that
+for
+a
+sharp
+cone
+of
+the
+same
+slope.
+CONFIDENTIAL
+
+
+--- PAGE 5 ---
+NACARMA52H25J
+CONFIDENTIAL
+3
+The second phase of the investigation
+is a study of minimumdrag
+nose shapes.
+Theoretical
+approaches have thus far been directed
+toward
+the minimization
+of the wave drag only.
+Von K_rm_m(reference
+3)
+developed an integral
+equation for
+the wave drag of slender bodies of
+revolution
+at moderate Machnumbers.
+Using this
+equation,
+he derived
+a minimumdrag nose shape (commonlyreferred
+to as the Karmanogive)
+for a given length and diameter.
+Subsequently_ Haaek (reference
+4)
+and others
+(references
+5 and 6) have used the K_rm_nintegral
+equation
+in developing minimumdrag shapes for
+other auxiliary
+conditions,
+such
+as given length and volume or given volume and diameter°
+Through the
+use of the K_rm_nintegral
+equation as the basis for
+these derivations,
+the apparently unnecessary yet simplifying
+assumption of zero slope
+of the meridian at the base has been imposed.
+This restriction
+is
+pointed
+out by Ward in reference 7, wherein he showsthat
+his more
+general expression for wave drag reduces to that
+obtained by yon K_rm_n
+for
+the special
+case of a body having zero slope at the base.
+In a
+recent paper (reference
+8) Ferrari
+developed a minimumdrag nose
+shape for
+a given length and diameter which has a finite
+slope of the
+meridian at the base.
+For the high supersonic Machnumberrange_
+minimumdrag shapes based upon Newton's law of resistance
+have recently
+been derived by Eggers_ Dennis, and Resnikoff
+(reference
+9).
+These
+shapes differ
+appreciably
+from comparable optimum shapes for
+low
+supersonic Machm_nbers_although the theoretical
+optimum shapes in
+both instances have blunt
+noses when the length is fixed
+and sharp
+noses whenthe length is allowed to vary.
+Due to the basic assumptions in the derivation
+of the K_rm_n
+integral
+equation,
+it
+may be expected that
+the shapes resulting
+from
+the use of this
+equation are theoretically
+optimum from a minimumdrag
+standpoint
+only for
+large fineness ratios
+and low supersonic Mach
+numbers.
+In contrast_
+the shapes resulting
+from the Newtonlan theory
+maybe expected to be optimum only at high supersonic Machnumbers°
+However, for
+low fineness ratio
+shapes at moderate Machnumbers, it
+is
+impossible to say a priori
+which of the theoretically
+optimum shapes will
+have the lesser wave drag_ or in fact
+if
+either
+of the theories
+is
+capable of predicting
+the least-drag
+profile.
+Oneof the purposes of
+the present investigation
+is,
+therefore,
+to comparethe experimental
+foredrags of these theoretically
+optimum shapes and of other more
+commonprofiles
+for an intermediate
+fineness ratio
+over a wide Mach
+numberrange.
+To this
+end a series
+of fineness ratio
+3 models have
+been tested
+in the Machnumberrange from 1.24 to 3.67.
+SYMBOLS
+A
+model base area, square inches
+CONFIDENTIAL
+
+
+--- PAGE 6 ---
+4
+CONFIDENTIAL
+NACARMA52H28
+_total
+drag - base drag)
+CDF
+foredrag
+coefficient
+based
+on
+base
+area
+"q_A"
+foredrag
+coefficient
+based
+on
+volume
+to
+the
+--_power
+total
+drag
+- base
+drag_
+CDW
+wave
+drag
+c°efficient
+( wavedrag)qOA
+d
+hemisphere
+diameter,
+inches
+D
+model
+base
+diameter,
+inches
+K
+similarity
+parameter
+_L_D
+)
+L
+model
+lengttl,
+inches
+Mo
+free-stream
+Mach
+number
+pressure
+coefficient
+(1p-p°
+P
+,,'--_
+,2
+P_
+cone
+pressure
+coefficient
+_
+P_-Po_
+%
+/
+p
+local
+static
+pressure,
+pounds
+per
+square
+inch
+Po.
+free-stream
+static
+pressure_
+pounds
+per
+square
+inch
+Pt
+pitot
+total-head
+pressure,
+pounds
+per
+square
+inch
+p_
+cone
+static
+pressure,
+pounds
+per
+square
+inch
+qo
+free-stream
+dyuamic
+pressure
+_
+PoMoa_
+, pounds
+per
+square
+inch
+r
+model
+local
+radius,
+inches
+R
+model
+base
+radius,
+inches
+Re
+free-stream
+Reynolds
+number
+based
+on
+body
+length
+V
+model
+volume,
+cubic
+inches
+CONFIDENTIAL
+
+
+--- PAGE 7 ---
+NACARMA52H28
+CONFIDENTIAL
+5
+X
+(L
+7
+e
+axial
+distance
+from
+the
+nose,
+inches
+angle
+of
+attack,
+degrees
+ratio
+of
+specific
+heats
+of
+air,
+taken
+as
+1.40
+circumferential
+angle
+of
+hemisphere
+measured
+from
+the
+upstream
+stagnation
+point,
+degrees
+cone
+half
+angle,
+degrees
+APPARATUS
+AND
+TESTS
+The
+experimental
+investigation
+was
+conducted
+in
+the
+Ames
+i-
+by
+3-foot
+supersonic
+wind
+tunnels
+No.
+i and
+No.
+2.
+Both
+tunnels
+are
+equipped
+with
+flexible
+top
+and
+bottom
+plates
+for
+varying
+the
+Mach
+number.
+Tunnel
+No.
+i
+is
+a
+single-return,
+continuous-operation,
+variable-pressure
+wind
+tunnel
+with
+a
+maximum
+Mach
+number
+of
+2.2.
+Tunnel
+No.
+2
+is
+an
+intermittent-
+operation,
+nonreturn,
+variable-pressure
+wind
+tunnel
+with
+a maximum
+Mach
+number
+of
+3.8.
+Models
+Sketches
+of
+the
+models
+tested,
+including
+dimensions,
+specified
+parameters,
+and
+defining
+equations,
+are
+presented
+in
+figure
+1.
+For
+the
+series
+of
+hemispherically
+blunted
+cones
+shown
+in
+figure
+l(a)
+the
+length-
+to-diameter
+ratio
+of
+3
+is
+constant,
+and
+the
+cone
+angle
+is
+decreased
+as
+the
+bluntness
+(ratio
+of
+hemisphere
+diameter
+to
+base
+diameter)
+is
+increased.
+For
+the
+series
+in
+figure
+l(b)
+the
+base
+diameter
+and
+cone
+angle
+are
+constant,
+and
+the
+length
+decreases
+with
+increase
+in
+bluntness.
+The
+family
+of
+fineness
+ratio
+3 models
+defined
+by
+the
+equation
+r=R(X/L)
+n
+is
+shown
+in
+figure
+l(c).
+For
+length
+and
+base
+diameter
+specified,
+the
+profiles
+of
+the
+hypersonic
+optimum
+(Newtonian)
+nose
+and
+the
+nose
+developed
+by
+Ferrari
+(reference
+8)
+can
+both
+be
+very
+closely
+approximated
+by
+the
+above
+equation
+for
+n
+=
+3/4.
+(See
+fig.
+2.)
+Since
+the
+3/4-power
+nose
+is
+a
+reasonable
+approximation
+to
+these
+theoretically
+derived
+optimum
+shapes,
+it
+alone
+has
+been
+tested
+and
+is
+referred
+to
+throughout
+the
+report
+as
+the
+hypersonic
+optimum
+nose.
+Fineness
+ratio
+3 models
+of
+the
+minimum
+drag
+shapes
+based
+upon
+the
+work
+of
+von
+K_rm_n
+and
+subsequently
+Haack
+are
+shown
+in
+figure
+l(d)o
+For
+any
+two
+specified
+parameters
+such
+as
+length
+and
+diameter,
+length
+and
+volume,
+or
+diameter
+and
+volume,
+these
+are
+the
+theoretical
+optimum
+nose
+CONFIDENTIAL
+
+
+--- PAGE 8 ---
+C017FIDENTIAL
+NACA RM A52H28
+shapes
+and
+for
+convenience
+have
+been
+designated
+as
+the
+L-D,
+L-V,
+and
+D-U
+"Haack"
+noses.
+A
+similar
+designation
+has
+been
+used
+for
+the
+circular-arc
+tangent
+ogive
+and
+cone
+shown
+in
+figure
+l(e).
+The
+L-V
+ogive
+has
+the
+same
+length
+and
+volume
+as
+the
+L-V
+Haack
+model,
+and
+the
+D-V
+cone
+has
+the
+same
+diameter
+and
+volt,me
+as
+the
+D-V
+Haack
+model.
+Also
+shown
+in
+figR_re
+l(e)
+is
+a
+fineness
+ratio
+3 ellipsoid.
+Except
+for
+the
+pressure-distribution
+models,
+all
+the
+nose
+shapes
+were
+constructed
+of
+duralumin.
+The
+30-
+and
+50-percent
+hemispherically
+blunted
+cone
+pressure-distribution
+models
+(models
+4p
+and
+5P)
+were
+cast
+of
+tin
+and
+bismuth,
+and
+the
+hemisphere-cylinder
+pressure-distribution
+model
+(model
+6p)
+was
+constructed
+of
+steel.
+All
+models,
+both
+force
+and
+pressure
+distribution,
+were
+sting
+supported
+from
+the
+rear.
+Test
+Conditions
+The
+minimum
+foredrag
+(zero
+angle
+of
+attack)
+of
+each
+force
+model
+was
+determined
+for
+the
+Mach
+number
+range
+of
+1.24
+to
+3.67.
+Due
+to
+the
+operating
+characteristics
+of
+the
+tunnels,
+it
+was
+not
+possible
+to
+main-
+tain
+a
+constant
+Reynolds
+number
+throughout
+the
+Mach
+number
+range;
+how-
+ever,
+an
+attempt
+was
+made
+to
+keep
+the
+Reynolds
+number
+constant
+for
+all
+models
+at
+each
+Mach
+number.
+In
+the
+following
+table
+the
+average
+Reynolds
+number
+(based
+on
+model
+length)
+and
+its
+limit
+of
+variation
+for
+all
+models
+tested
+at
+each
+Mach
+number
+are
+l_sted:
+Mo
+Re
+×
+I0 -6
+Tunnel
+No.
+1.24
+2.42
++
+0.14
+1
+1.44
+1.17
++
+O.O1
+1
+3.14
++
+0.20
+1.54
+4.10
+-+ 0.i0
+2
+1.96
+4.14
++
+0.12
+2
+1.99
+2.01
++
+0.01
+i
+2.86
+4.00
++
+0.i0
+2
+3.06
+4.00
++
+0.19
+2
+3.67
+3.45
++
+0.07
+2
+The
+pressure-distribution
+tests
+were
+all
+made
+in
+tunnel
+No.
+2
+at
+Mach
+numbers
+of
+1.5,
+2,
+3,
+and
+3.7
+and
+at
+an
+average
+Reynolds
+n_mber
+of
+about
+4
+×
+i06.
+CO_IDENTIAi
+
+
+--- PAGE 10 ---
+8
+CONFIDENTIAL
+NACARMA52H28
+The variation
+of the free-stream Machnumberover the length of
+each model tested was less than ±0.01 for
+all
+test
+Machnumbers.
+The
+uncertainty
+in the Machnumberat a given point
+in the stream is ±0.003.
+The magnitude of the calculated
+uncertainty
+in the drag coefficient
+appears rather
+large relative
+to the observed scatter
+of the data.
+Drag
+coefficients
+for
+repeated tests
+generally
+agreed within
+±0.002.
+It
+is
+therefore
+believed
+that
+the drags of models relative
+to one another are
+sufficiently
+accurate for
+comparative purposes, although the absolute
+magnitudes of the drag coefficients
+for
+the models at a particular
+Mach
+numbermaybe in error
+by the magnitude of the uncertainty.
+THEORETICAL
+CONSIDERATIONS
+WaveDrag
+With the exception of someof the very bluntest
+models (models ii,
+12, and 18) the wave drag of each model was either
+calculated
+by
+theoretical
+methods or was estimated from existing
+experimental results.
+Values for
+the wave drag of the cone and the tangent ogive were obtained
+from the exact Taylor-Maccoll
+theory
+(references
+lO and ll)
+and the
+method of characteristics
+(reference
+12), respectively.
+For the
+theoretical
+optimum nose shapes the second-order theory by Van Dykewas
+used.
+The exact procedure employed in using the second-order theory
+was that
+given in reference 13, in which the approximate boundary
+conditions
+at the body surface are used in the calculation
+of the
+perturbation
+velocities_
+and the exact pressure relation
+is used to
+evaluate the pressure coefficients.
+2
+The method presented therein
+is
+strictly
+applicable
+to sharp-nosed bodies of revolution
+at Machnumbers
+less than that
+at which the Machcone becomestangent to the model
+vertex.
+Since the theoretical
+optimumnose shapes for which the length
+is fixed
+(models 10, 13, and 14) have infinite
+slopes at their
+vertices
+(yet maybe considered sharp for most practical
+purposes),
+an approxima-
+tion
+to the shape at the vertex was madeto enable use of the theory.
+The blunt
+tip
+was replaced by a short conical
+section tangent to the
+original
+contour.
+The cone angle, and hence the point
+of tangeney, was
+selected so that
+the cone half-angle
+did not exceed 94 percent of the
+Machangle.
+In the subsequent integrations
+for
+the wave drag from the
+resulting
+pressure distributions,
+the data were plotted
+as
+rP versus r
+so that the curves could be smoothly faired
+through the origin.
+Although no rigorous
+method is available
+for
+calculating
+the wave
+drag of the hemispherically
+blunted
+conical
+noses, a method of estimat-
+ing
+the
+wave
+drag
+was
+suggested
+in
+references
+1
+and
+2.
+It
+was
+proposed
+21n
+the
+application
+of
+this
+method
+a
+first-order
+solution
+is
+necessarily
+obtained.
+CONFIDENTIAL
+
+
+--- PAGE 11 ---
+_B
+NACARMA52H28
+CONFIDENTIAL
+9
+that
+the wave drag of the hemispherical
+tip,
+which could be obtained
+from existing
+experimental data, be added to the pressure drag of the
+conical
+portion
+of the nose, based upon the assumption that
+the pressure
+on the conical
+surface would be the sameas on a pointed
+cone of the
+sameslope.
+Hence, the pressure drag of the conical
+portion
+of the
+nose could be obtained by exact theory.
+The following
+empirical
+expression,
+based upon certain
+of the
+experimental results,
+is suggested for
+calculating
+the wave drag of
+the hemispherical
+tip
+for Machnumbers of 2 and greater:
+2P t
+-
+1
+CDw--
+3
+(1)
+where
+Pt
+is
+the
+pitot-pressure
+coefficient
+at
+the
+tip
+of
+the
+hemisphere
+which
+may
+be
+calculated
+with
+the
+aid
+of
+Rayleigh's
+equation.
+This
+expression
+was
+obtained
+from
+the
+results
+of
+the
+pressure-dlstribution
+tests,
+and
+its
+derivation
+is
+discussed
+in
+more
+detail
+in
+the
+section
+of
+the
+report
+which
+is
+concerned
+with
+the
+pressure-distribution
+tests.
+Using
+this
+expression
+for
+the
+wave
+drag
+coefficient
+of
+the
+hemispherical
+portion,
+the
+expression
+for
+the
+wave
+drag
+coefficient
+of
+the
+complete
+model
+for
+Mach
+numbers
+of
+2
+and
+greater
+becomes
+(2)
+where
+P_
+is
+the
+surface
+pressure
+coefficient
+or
+pressure
+drag
+coefficient
+(references
+lO
+or
+ll)
+for
+a
+cone
+of
+half
+apex
+angle
+_
+at
+the
+free-stream
+Mach
+number.
+An
+approximate
+expression
+for
+_
+which
+is
+sufficiently
+accurate
+for
+the
+drag
+estimates
+is
+F
+i- (d/D)
+ - tan-IL2(L/D
+) - (d/D)]
+(3)
+Foredrag
+Values
+of
+the
+foredrag
+have
+been
+calculated
+by
+the
+addition
+of
+the
+estimated
+or
+theoretical
+wave
+drag
+and
+the
+theoretical
+skln-friction
+drag.
+Since
+the
+skin-friction
+drag
+for
+laminar-boundary-layer
+flow
+contributes
+so
+little
+to
+the
+foredrag,
+the
+inclusion
+of
+the
+small
+effects
+of
+body
+shape
+and
+compressibility
+on
+the
+skin-friction
+drag
+was
+not
+considered
+justified.
+Therefore,
+the
+laminar-skin-friction
+drag
+coefficients
+were
+calculated
+by
+the
+Blasius
+formula
+for
+flat-plate
+CONFIDENTIAL
+
+
+--- PAGE 12 ---
+I0
+CONFIDENTIAL
+NACARMA52H28
+incompressible
+boundary-layer
+flow (reference
+14).
+For the estimates
+of the skin-friction
+drag for
+turbulent-boundary-layer
+flow,
+the
+body shape effects
+were neglected,
+but the effect
+of compressibility
+was considered by use of the interpolation
+formula of reference 15
+which is based upon an extended Frankl and Voishel analysis.
+RESULTSANDDISCUSSION
+Hemispherically
+Blunted Cones
+Pressure
+distributions.-
+The
+pressure-distribution
+data
+obtained
+for
+models
+4p,
+5P,
+and
+6p
+at
+Mach
+numbers
+between
+1.5
+and
+3.8
+are
+shown
+in
+figure
+3-
+The
+data
+are
+referred
+to
+the
+free-stream
+Mach
+number
+ahead
+of
+the
+normal
+shock
+wave
+at
+the
+nose
+of
+each
+model.
+Although
+these
+Mach
+numbers
+were
+approximately
+the
+same
+for
+each
+model,
+they
+differed
+slightly
+due
+to
+the
+differences
+in
+positions
+of
+the
+models
+within
+the
+test
+section.
+For
+each
+of
+the
+models,
+the
+pressure
+coefficient
+at
+the
+nose
+agrees
+with
+the
+pitot
+pressure
+coefficient
+calculated
+by
+Rayleigh's
+equation
+and
+shown
+for
+comparison
+by
+the
+dashed
+lines.
+For
+models
+4p
+and
+5P
+at
+Mach
+numbers
+1.97
+and
+1.5
+(figs.
+3(a)
+and
+3(b))
+the
+rapid
+expansion
+of
+the
+flow
+over
+the
+hemi-
+spherical
+tip
+is
+followed
+by
+a
+recompression
+over
+the
+forward
+part
+of
+the
+conical
+portion
+of
+the
+nose.
+The
+pressure
+on
+the
+conical
+surface
+recovers
+to,
+or
+almost
+to_
+the
+theoretical
+value
+of
+the
+pressure
+coefficient
+for
+a
+sharp-nosed
+cone
+of
+the
+same
+slope.
+For
+a Mach
+number
+of
+3.1,
+the
+expanding
+flow
+on
+the
+hemisphere
+does
+not
+reach
+a
+lower
+pressure
+than
+the
+theoretical
+surface
+pressure
+for
+a
+cone
+of
+the
+same
+slope
+as
+the
+conical
+afterbody_
+and
+it
+is
+found
+that
+the
+pressure
+is
+constant
+over
+_ost
+of
+the
+conical
+portion
+of
+the
+nose.
+From
+these
+data
+it
+appears
+that
+the
+assumption
+made
+in
+the
+drag
+estimates,
+namely,
+that
+the
+pressure
+over
+the
+conical
+portion
+of
+the
+nose
+is
+constant
+and
+equal
+to
+the
+theoretical
+value
+for
+a
+sharp-nosed
+cone
+of
+the
+same
+slope,
+is
+essentially
+correct
+for
+free-stream
+Mach
+numbers
+of
+3 and
+greater.
+For
+Mach
+numbers
+less
+than
+3
+the
+average
+pressure
+over
+the
+conical
+section
+is
+less
+than
+that
+assumed
+in
+the
+estimates,
+and
+hence
+the
+estimated
+drag
+contribution
+from
+this
+part
+of
+the
+nose
+will
+be
+too
+high.
+A
+more
+detailed
+study
+of
+the
+pressure
+distribution
+over
+the
+hemispherical
+portion
+of
+this
+type
+body
+is
+available
+from
+the
+data
+of
+figure
+3(c).
+For
+comparison
+with
+these
+experimental
+data,
+the
+theoreti-
+cal
+incompressible
+distribution
+(only
+part
+of
+which
+is
+shown
+for
+simplicity)
+and
+the
+distribution
+predicted
+by
+Newtonian
+theory
+(reference
+16)
+are
+shown.
+It
+is
+apparent
+that
+as
+the
+Mach
+number
+is
+increased
+the
+pressure
+distribution
+approaches
+that
+predicted
+by
+CONFIDENTIAL
+
+
+--- PAGE 13 ---
+NACARMA52H28
+CONFIDENTIAL
+ii
+Newtonian theory.
+In spite
+of this
+trend,
+it
+is evident that
+the
+distribution
+would never agree exactly
+with
+the Newtonian because
+the peak pressure coefficient
+at the nose would be somewhatless than
+the Newtonian value of 2.
+An additional
+factor
+which has been neglected
+in the Newtonian theory is the effect
+of centrifugal
+forces which,
+although negligible
+for the lower Machnumbers, would tend to reduce
+the theoretical
+pressure coefficients
+over the hemisphere in the high
+Machnumberrange.
+A study of the comparisons of the experimental pressure distri-
+butions
+for
+the hemisphere with
+that predicted
+by Newtonian theory
+(fig.
+3(c))
+indicates
+that
+an empirical
+expression for
+the pressure
+distribution,
+which yields
+reasonably accurate values of the wave
+drag, maybe written.
+The development of the expression is based
+upon two experimental results:
+First,
+the pressure at the tip
+of the
+hemisphere is the stagnation
+pressure and maybe calculated
+exactly
+from the Rayleigh equation.
+Second, at the high Machnumbersthe
+subsequent expansion of the flow
+is similar
+to that predicted
+by
+Newtonian theory,
+and the local
+pressure differs
+from the Newtonian
+value by an amount which varies
+approximately as the cosine of the
+angle
+e.
+Based upon these observations
+the following
+empirical
+expression for
+the pressure distribution
+on a hemisphere maybe
+written:
+P = 2 cos2 @-(2-Pt)
+cos
+@
+(4)
+where
+Pt
+is
+the
+pitot-pressure
+coefficient
+at
+the
+stagnation
+point
+on
+the
+hemisphere.
+The
+expression
+predicts
+a
+pressure
+coefficient
+that
+is
+exact
+at
+e
+=
+0
+and
+agrees
+with
+the
+Newtonian
+value
+of
+P
+=
+0
+at
+e
+=
+90 ° .
+It
+is
+apparent
+from
+the
+data
+of
+figure
+3(c)
+that,
+although
+the
+resulting
+pressure
+distribution
+will
+closely
+approximate
+the
+experimental
+distribution
+at
+high
+Mach
+numbers,
+the
+predicted
+pressures
+near
+e
+=
+90 °
+will
+be
+considerably
+in
+error
+for
+lower
+Mach
+numbers.
+However,
+this
+should
+not
+result
+in
+a
+serious
+error
+in
+the
+pressure
+drag,
+since
+the
+surface
+slope
+is
+small
+in
+this
+region,
+and
+thus
+the
+resulting
+drag
+contribution
+is
+also
+small.
+A
+simple
+expression
+for
+the
+wave
+drag
+coefficient
+of
+the
+hemisphere
+results
+from
+this
+empirical
+equation
+for
+the
+pressure
+distribution.
+Thus,
+based
+upon
+the
+maximum
+cross-section
+area,
+2Pt
+-
+i
+(i)
+CDw=
+3
+Values
+computed
+from
+this
+equation
+are
+compared
+in
+figure
+4 with
+estimates
+of
+the
+wave
+drag
+from
+total
+drag
+measurements
+(reference
+2)
+and
+with
+the
+experimental
+pressure
+drag
+determined
+from
+the
+pressure
+CONFIDENTIAL
+
+
+--- PAGE 14 ---
+12
+NACARMA52H28
+SECURITYINFORMATION
+distributions
+of figure
+3.
+For Machnumbersbetween 2 and 8 the
+agreement is excellent.
+As would be expected from the pressure-
+distribution
+results,
+the values from the empirical
+expression are
+too large in the lower Machnumberrange.
+From these data it
+appears that
+for the estimates of the wave
+drag of the hemispherically
+blunted
+cones, the contribution
+of the
+hemispherical
+tip
+to the total
+wave drag at Machnumbersof 2 and
+greater maybe calculated
+accurately
+with the proposed empirical
+expression.
+Flow
+field.-
+The
+recompression
+of
+the
+flow
+over
+the
+upstream
+portion
+of
+the
+conical
+afterbody,
+which
+was
+noted
+previDusly
+in
+the
+discussion
+of
+the
+pressure
+distributions,
+is
+associated
+with
+the
+appearance,
+a
+short
+distance
+downstream
+from
+the
+bow
+wave,
+of
+an
+approximately
+conical
+shock
+wave
+in
+the
+flow
+field.
+The
+schlieren
+pictures
+for
+model
+5
+(fig.
+5)
+are
+typical
+for
+all
+the
+hemispherically
+blunted
+cones
+(models
+1
+through'5)
+throughout
+the
+Mach
+number
+range.
+These
+pictures
+show
+that
+the
+intensity
+of
+the
+wave
+decreases
+with
+increasing
+Mach
+number.
+At
+Mach
+number
+3.06
+the
+wave
+is
+no
+longer
+evident
+within
+the
+bounds
+of
+the
+schlieren
+field.
+The
+decrease
+in
+intensity
+of
+the
+wave
+is
+in
+accord
+with
+the
+changes
+found
+in
+the
+pressure
+distribution
+data.
+(See
+fig.
+3.)
+At
+first
+glance
+it
+might
+appear
+that
+this
+wave
+could
+be
+associated
+with
+a
+region
+of
+separated
+flow
+on
+the
+hemispherical
+tip,
+with
+subsequent
+reattachment
+accompanied
+by
+a
+shock
+wave.
+However,
+the
+schlieren
+pictures
+show
+no
+evidence
+of
+flow
+separation.
+Additionally,
+it
+is
+apparent
+from
+the
+schlieren
+pictures
+that
+this
+shock
+wave
+does
+not
+extend
+from
+the
+outer
+flow
+down
+to
+the
+body
+surface
+but
+appears
+to
+be
+diffused
+near
+the
+surface.
+These
+observations
+lead
+to
+the
+speculation
+that
+the
+origin
+of
+the
+wave
+must
+be
+associated
+with
+the
+transonic
+or
+mixed
+type
+of
+flow
+which
+occurs
+in
+the
+vicinity
+of
+the
+nose
+of
+the
+body.
+The
+mechanism
+by
+which
+the
+compression
+wave
+is
+formed
+may
+be
+much
+the
+same
+as
+that
+discussed
+in
+reference
+17
+for
+the
+two-dimensional
+flow
+around
+a
+sharp-nosed
+double-wedge
+airfoil
+section
+with
+detached
+bow
+wave.
+It
+is
+believed
+that
+the
+wave
+results
+from
+a
+coalescence
+of
+weak
+compression
+waves
+reflected
+from
+the
+body
+surface.
+(The
+existence
+of
+the
+compression
+region
+is
+confirmed
+by
+the
+pressure-
+distribution
+data.)
+These
+waves
+apparently
+originate
+as
+expansion
+waves
+from
+the
+body
+surface
+downstream
+from
+the
+sonic
+point.
+As
+CONFIDENTIAL
+
+
+--- PAGE 15 ---
+NACARMA52H28
+CONFIDENTIAL
+13
+indicated
+in the sketch_ these expansion waves which travel
+along
+characteristic
+lines
+are reflected
+from the sonic line
+and the bow
+Shoc
+Sonic
+line
+Expansion
+_
+Mach
+Compression
+J
+lines
+I
+I
+I
+I
+i
+I
+Mo
+wave
+as
+compression
+waves
+which
+are
+in
+turn
+reflected
+from
+the
+body
+surface.
+The
+reflection
+of
+these
+wavelets
+from
+the
+body
+surface
+occurs
+in
+such
+a
+manner
+that
+they
+coalesce
+to
+form
+a
+shock
+wave.
+The
+dependence
+of
+this
+phenomenon
+on
+both
+the
+free-streamMach
+number
+and
+the
+inclination
+of
+the
+body
+surface
+Just
+downstream
+of
+the
+point
+of
+tangency
+of
+the
+hemisphere
+with
+the
+afterbody
+is
+demonstrated
+by
+the
+following
+observations.
+For
+the
+hemispherically
+blunted
+cones,
+neither
+the
+shock
+wave
+nor
+the
+region
+of
+recompression
+on
+the
+body
+surface
+were
+found
+for
+Mach
+numbers
+above
+3.06.
+The
+disappearance
+of
+this
+shock
+wave
+and
+region
+of
+compression
+results
+from
+the
+combination
+of
+the
+movement
+of
+the
+bow
+wave
+closer
+to
+the
+body
+surface
+and
+the
+small
+upstream
+movement
+of
+the
+sonic
+point
+with
+increasing
+Mach
+number.
+These
+changes
+reduce
+the
+extent
+of
+the
+mixed
+flow
+region
+so
+that
+for
+CONFIDENTIAL
+
+
+--- PAGE 16 ---
+14
+CONFIDENTIAL
+NACARMA52H28
+Machnumbersabove approximately 3 most of the compression wavelets
+reflected
+from the sonic line
+and bow wave are incident
+upon the body
+surface in the expansion region between the sonic point
+and the point
+of tangency of the hemisphere with
+the afterbody and hence are canceled.
+The importance of the inclination
+of the body surface in the region
+of the reflections
+is indicated
+by the fact
+that,
+although the pressure._
+distribution
+data for model 6p (fig.
+3(c))
+showthat
+at the lowest test
+Machnumberthere exists
+a region of recompression just
+downstreamfrom
+the juncture
+of the hemisphere and cylindrical
+afterbody,
+the magnitude
+of the recompression is very small and does not result
+in a secondary
+shock wave that
+can be detected in the schlieren
+pictures.
+Foredrag.-
+The
+variation
+of
+the
+foredrag
+coefficient
+with
+Mach
+number
+for
+the
+hemispherically
+blunted
+cones
+of
+fineness
+ratio
+3
+(models
+I
+through
+5)
+is
+shown
+in
+figure
+6.
+Since
+the
+models
+vary
+pro-
+gressively
+from
+the
+sharp-nosed
+cone
+to
+the
+very
+blunt
+model
+with
+the
+large
+hemispherical
+tip
+(d/D
+=
+0.5),
+the
+variation
+of
+the
+foredrag
+coefficient
+with
+Mach
+number
+changes
+progressively
+from
+the
+familiar
+variation
+for
+a
+cone
+(foredrag'coefficient
+decreases
+with
+increasing
+Mach
+number)
+to
+the
+variation
+characteristic
+of
+a
+hemisphere
+(fig.
+4).
+These
+same
+data,
+replotted
+in
+figure
+7,
+show
+the
+variation
+of
+foredrag
+with
+nose
+bluntness
+at
+constant
+Mach
+numbers
+and
+provide
+com-
+parisons
+with
+the
+estimated
+foredrag
+characteristics.
+For
+this
+series
+of
+fineness
+ratio
+3 noses,
+a
+small
+saving
+in
+foredrag
+may
+be
+achieved
+through
+the
+use
+of
+a
+hemispherically
+blunted
+cone
+in
+place
+of
+a
+sharp
+cone
+of
+the
+same
+fineness
+ratio.
+Perhaps
+more
+important
+is
+the
+fact
+that
+a
+relatively
+large
+increase
+in
+volu_e
+over
+that
+of
+a
+sharp-nosed
+cone
+may
+be
+realized
+without
+incurring
+any
+increase
+in
+foredrag.
+An
+additional
+factor
+to
+be
+considered
+is
+that
+the
+hemispherical
+nose
+pro-
+vides
+an
+ideal
+housing
+for
+search
+radar
+gear.
+These
+data
+show
+that
+with
+increasing
+Mach
+number
+there
+is
+a
+decrease
+in
+both
+the
+degree
+of
+blunting
+which
+results
+in minimum
+foredrag
+as
+well
+as
+the
+maximum
+blunt-
+ing
+allowable
+such
+that
+the
+foredrag
+is
+not
+greater
+than
+that
+of
+the
+sharp-nosed
+cone.
+These
+results
+are
+in
+essential
+agreement
+with
+the
+preliminary
+foredrag
+estimates
+and
+the
+data
+of
+references
+1
+and
+2.
+Although
+the
+results
+(fig.
+7)
+show
+that
+for
+this
+fineness
+ratio
+3
+series
+of
+models
+there
+is
+some
+drag
+reduction
+with
+increase
+in
+blunt-
+ness,
+the
+magnitude
+of
+the
+possible
+drag
+reduction
+which
+is
+obtainable
+by
+this
+method
+of
+blunting
+decreases
+rapidly
+with
+increasing
+fineness
+ratio.
+In
+fact,
+there
+appears
+to
+be
+an
+upper
+limit
+to
+the
+fineness
+ratio
+for
+which
+this
+type
+of
+blunting
+will
+yield
+any
+drag
+reduction.
+Some
+indications
+of
+the
+magnitude
+of
+this
+limiting
+fineness
+ratio
+which
+varies
+with
+Mach
+number
+have
+been
+obtained
+by
+comparing
+the
+variation
+with
+fineness
+ratio
+of
+the
+estimated
+wave
+drag
+of
+the
+d/D
+=
+0.075
+model
+with
+that
+of
+a
+cone
+of
+the
+same
+fineness
+ratio
+at
+Mach
+numbers
+of
+2
+and
+3.
+These
+results
+(fig.
+8)
+indicate
+that
+the
+wave
+drag
+of
+the
+cone
+CONFIDENTIAL
+
+
+--- PAGE 17 ---
+NACARMA52H28
+CONFIDENTIAL
+15
+is less than that
+of this
+moderately blunt
+model for
+length-to-diameter
+ratios
+in excess of approximately 5.4 and 5.0 at Machnumbers of 2
+and 3, respectively.
+These results
+also showthat
+the range of nose
+fineness ratios
+for which this
+type of blunting
+would be advantageous
+decreases with
+increasing Math numbers.
+It
+should also be pointed
+out that
+the drag penalty associated with
+the use of excessive blunting
+increases rapidly
+with
+increasing
+fineness
+ratio.
+At a Machnumberof about 3.1 the data of the present report
+(fig.
+7) indicate
+that
+the foredrag coefficient
+of a 20-percent blunt
+cone is about 0.01 greater
+than that
+of the sharp-nosed cone of the
+samefineness ratio.
+This increment represents approximately a
+12-percent increase in foredrag and maybe comparedwith
+the data of
+reference
+18_ wherein it
+is shownthat
+the samedegree of blunting
+for
+a fineness ratio
+8 body results
+in an increment in wave drag coefficient
+of 0.053, corresponding to an increase in pressure drag of more than
+300 percent.
+The estimated wave drag coefficients
+for
+the
+d/D = 0.30 and 0.50
+models at Machnumbersof 3.06 an_ 1.96 and the wave drag coefficients
+determined from the pressure distribution
+models are in very good
+agreement.
+(See fig.
+7).
+Similarly,
+the agreementbetween the experi-
+mental foredrag results
+and the estimated foredrag based upon the esti-
+mated wave drag plus laminar incompressible
+skin friction
+is very good
+for Math numbers1.96, 3.06, and 3.67.
+For these test
+Machnumbers,
+study of the schlieren
+pictures
+indicated
+that
+the boundary-layer
+flow
+was laminar over the entire
+model.
+At Math number 1.44 the models were
+tested at two values of Reynolds number since the schlieren
+pictures
+for the higher Reynolds numbertests
+at this
+Machnumberand for the
+tests
+at Machnumber 1.24 indicated
+turbulent-boundary-layer
+flow over
+part of the
+d/D = 0.30 and d/D = 0.50 models.
+These schlieren
+pictures
+and those for the cone are shownin figure
+9.
+It
+is evident that
+for
+the cone, the boundary-layer
+flow is laminar for both values of Reynolds
+number (1.17 x 106 and 3.14 x 106).
+For the
+d/D = 0.30 and d/D = 0.50
+models at
+Re = 1.17 X 106 the boundary-layer
+flow is laminar over the
+entire
+length of each model.
+However, in contrast
+to the results
+for
+the cone, at the higher Reynolds numbertransition
+occurred on these
+models, as evidenced by the appearance of the boundary layer
+and by the
+accompanyingincrease in foredrag shownby the data in figure
+7.
+The
+difference
+between the results
+for
+the cone and the blunt
+bodies is
+probably not due to the small difference
+in the Reynolds numberbut
+results
+largely
+from the effects
+of the differences
+in the body pressure
+distributions.
+For the cone the pressure is constant along the surface
+and therefore
+neutral
+insofar
+as its
+effect
+on the boundary-layer
+flow
+is concerned.
+For both the blunt
+bodies at the low Machnumbers, the
+pressure gradient
+in the streamwise direction
+is positive
+just
+downstream
+from the point
+of tangency of the nose with
+the conical
+section
+(see
+fig.
+3) and hence tends to thicken
+the boundary layer
+and promote
+CONFIDENTIAL
+
+
+--- PAGE 18 ---
+16
+CONFIDENTIAL
+NACARMA52H28
+transition.
+Both the schlieren
+pictures
+and the force measurements
+indicate
+that
+for
+the high Reynolds numbersthe b_undary layer
+is
+turbulent
+over a muchgreater portion
+of the surface of the blunter
+of
+the two bodies.
+This result
+is in agreementwith what might be expected
+on the basis of the differences
+in the pressure distributions
+for the
+two models.
+Although the adverse gradients
+for both the
+d/D = 0.30
+and d/D = 0.50 models start
+at essentially
+the samelongitudinal
+station
+along the models, and initially
+are of approximately equal magnitude,
+the adverse gradient
+for the blunter
+model, d/D = 0.50, extends over
+most of the conical
+section of the model; whereas the gradient
+for
+the
+d/D = 0.30 model is neutral
+over most of the conical
+section.
+Hence, it
+appears reasonable to expect a lower Reynolds numberof tran-
+sition
+for
+the blunter
+of the two models.
+For the
+d/D = 0.30 and d/D = 0.50 models at Machnumbersof 1.2h
+and 1.44, equation 2 yields
+values of the wave drag alone which are
+even greater
+than the measuredforedrags at the lower Reynolds numbers.
+This discrepancy is attributed
+to the fact
+that at these Machnumbers
+the empirical
+expression includes too large a value for
+the wave drag
+of the hemispherical portion
+of these models.
+(See fig.
+4.)
+Hence,
+for
+the foredrag estimates shownin figure
+7 for Machnumbers1.24
+and 1.44, the lower values of the wave drag of the hemispherical portion
+of the models obtained from experiment (fig.
+4) were used.
+For all
+other Machnumbers the empirical
+expression (equation 2) was used.
+The
+estimated foredrag results
+obtained are in fair
+agreementwith
+the
+experimental data.
+As previously
+discussed, preliminary
+estimates and experiment have
+both shownthat
+a small saving in foredrag maybe achieved through the
+use of a hemispherically
+blunted cone in place of a sharp cone of the
+samefineness ratio.
+Although this
+type of blunting
+can be beneficial,
+preliminary
+estimates have also indicated
+that no drag reduction
+can
+be achieved by simply replacing
+the sharp nose of a given cone with
+a
+hemispherical
+tip.
+In this
+case the cone angle is not reduced, since
+the length of the model is reduced instead.
+In order to verify
+these
+results,
+tests
+have been madeat Machnumbers1.44 and 1.99 for
+a series
+of hemispherically
+blunted
+cones, formed by progressively
+blunting
+an
+L/D = 3
+cone.
+Both the experimental foredrag results
+and the esti-
+mated values of foredrag are plotted
+in figure
+i0.
+It
+is evident from
+the figure
+that
+there is good agreementbetween experiment and theory,
+and that,
+as expected, there
+is no drag reduction
+due to mere blunting
+of the parent cone.
+CONFIDENTIAL
+
+
+--- PAGE 19 ---
+3B
+NACARMA52H28
+CONFIDENTIAL
+17
+Theoretical
+MinimumDrag Nose Shapes
+Comparison
+of
+experimental
+and
+theoretical
+foredrag.-
+Comparisons
+of
+the
+experimental
+and
+theoretical
+foredrag
+variations
+with
+Mach
+number
+for
+the
+theoretical
+minimum
+drag
+noses,
+the
+L/D
+=
+3
+cone
+and
+the
+L-V
+ogive,
+are
+shown
+in
+figure
+ii.
+The
+theoretical
+drag
+calculations
+have
+been
+limited
+in
+most
+cases
+to
+a
+smaller
+Mach
+number
+range
+than
+that
+for
+which
+experimental
+results
+are
+available.
+For
+Mach
+numbers
+less
+than
+1.4
+or
+greater
+than
+about
+3,
+the
+conical
+tip
+approximations
+to
+the
+true
+body
+shapes
+which
+would
+have
+been
+necessary
+for
+application
+of
+the
+perturbation
+theory
+to
+the
+minimum
+drag
+shapes
+were
+considered
+unreasonably
+large;
+hence,
+the
+second-order
+theoretical
+results
+were
+limited
+to
+Mach
+numbers
+between
+1.4
+and
+3.
+In
+fact,
+for
+the
+L-V
+Haack
+nose
+the
+theoretical
+calculations
+were
+limited
+to
+Mach
+number
+2.4,
+as
+an
+excessive
+amount
+of
+conical
+tip
+modification
+would
+be
+necessary
+for
+the
+theory
+to
+be
+applicable
+at
+higher
+Mach
+numbers.
+Theoretical
+esti-
+mates
+of
+the
+foredrag
+have
+been
+made
+by
+the
+addition
+of
+flat-plate
+skin-
+friction
+values
+to
+the
+computed
+wave
+drag,
+the
+skin
+friction
+being
+calculated
+for
+a Reynolds
+number
+of
+4 ×
+106 •
+Although
+some
+of
+the
+experimental
+data
+were
+taken
+at
+lower
+Reynolds
+numbers
+(between
+2
+×
+106
+and
+4 ×
+106),
+the
+error
+introduced
+by
+calculation
+of
+the
+skin
+friction
+at
+one
+Reynolds
+number
+is
+small
+and
+certainly
+well
+within
+the
+accuracy
+of
+the
+experimental
+results.
+Either
+completely
+laminar
+(reference
+14)
+or
+completely
+turbulent
+(reference
+15)
+skin-friction
+drag
+has
+been
+assumed,
+although
+the
+schlieren
+pictures
+indicated
+that
+for
+the
+tests
+at
+Mach
+numbers
+of
+3.06
+and
+3.67
+boundary-layer
+transition
+occurred
+on
+some
+of
+the
+models.
+A
+comparison
+of
+the
+experimental
+and
+theoretical
+foredrag
+for
+the
+L/D
+=
+3
+cone
+has
+been
+included
+in
+figure
+ii,
+since
+such
+a
+comparison
+indicates
+how
+well
+the
+skin-friction
+drag
+may
+be
+calculated
+and
+also
+provides
+an
+indication
+of
+the
+accuracy
+of
+the
+other
+experimental
+results.
+For
+the
+Reynolds
+numbers
+of
+this
+investigation,
+schlieren
+observations
+indicated
+laminar-boundary-layer
+flow
+on
+the
+cone
+at
+all
+Mach
+numbers.
+The
+foredrag
+of
+the
+cone
+was
+closely
+estimated
+by
+the
+addition
+of
+the
+exact
+Taylor-Maccoll
+wave
+drag
+and
+Blasius'
+incompressible
+laminar
+skin
+friction,
+s
+In
+general,
+good
+agreement
+between
+the
+experimental
+and
+theoretical
+foredrag
+for
+laminar-boundary-layer
+flow
+was
+obtained
+for
+most
+of
+the
+models
+at
+Mach
+numbers
+of
+1.4
+and
+2.0.
+Nevertheless,
+at
+Mach
+number
+2
+the
+foredrag
+of
+the
+L-D
+and
+L-V
+Haack
+shapes
+are
+overestimated
+by
+about
+SThe
+Handtzche
+and
+Wendt
+transformation
+of
+laminar-boundary-layer
+skin-
+friction
+drag
+of
+a
+flat
+plate
+to
+that
+of
+a
+cone
+was
+neglected
+since
+its
+inclusion
+would
+have
+increased
+the
+foredrag
+by
+only
+i percent.
+CONFIDENTIAL
+
+
+--- PAGE 20 ---
+18
+CONFIDENTIAL
+NACARMA52H28
+the magnitude of the theoretical
+laminar-skin-friction
+drag.
+For a
+Machnumberof 3 the foredrag of the cone and the foredrag of the
+L-D Haack shape are in good agreementwith
+the theory for
+laminar-
+boundary-layer
+flow.
+However, the comparisons indicate
+that
+the
+boundary-layer
+flow for
+the L-V ogive,
+the D-V Haack shape, and the
+hypersonic optimum shape were at least
+partially
+turbulent
+at this
+Machnumber. At the maximumMachnumber (Mo = 3.67) the experimental
+foredrag of the L-V ogive exceeds even the theoretical
+value for
+completely turbulent-boundary-layer
+flow.
+This sameresult
+is also
+inferred
+from the comparison for
+the D-V model.
+It
+is not clear which
+part of the theoretical
+foredrag is at fault,
+that
+is,
+the wave drag
+or the skin-friction
+drag.
+However, it
+appears most likely
+that
+the
+theoretical
+skin-friction
+drag is too small,
+since considerable
+confidence maybe placed in the wave drag value,
+particularly
+for the
+L-V ogive. 4
+The data also showthat
+for these particular
+body shapes, the
+first-order
+theory yields
+acceptable values of wave drag for Machnum-
+bers close to 1.4 only.
+At the higher Machnumbers, the first-order
+theory yields
+results
+which are too low.
+Although slender-body theory has sometimesbeen used to calculate
+the wave drag of shapes with
+fineness ratios
+as low as these, the wave
+drag coefficients
+of 1/9,
+1/8, and 1/6 for
+the L-D, L-V, and D-V Haack
+shapes (reference
+4),
+respectively,
+are too large at all
+Machnumbers
+as comparedwith
+the results
+in figures
+ll(c),
+ll(d)
+and ll(e).
+Comparison
+of
+foredra_
+of
+theoretical
+minimum
+dra G nose
+shapes
+with
+foredrag
+of
+other
+nose
+shapes.-
+In
+order
+to
+assess
+the
+theoretical
+minimum
+drag
+shapes
+for
+the
+three
+auxiliary
+conditions
+of
+given
+length
+and
+diameter,
+given
+length
+and
+volume,
+or
+given
+diameter
+and
+volume,
+other
+common
+shapes
+with
+identical
+values
+of
+these
+parameters
+have
+been
+tested
+and
+comparisons
+of
+the
+results
+are
+shown
+in
+figure
+12.
+Although
+the
+Reynolds
+number
+was
+not
+constant
+throughout
+the
+Mach
+number
+range,
+it
+was
+unchanged
+for
+all
+the
+tests
+at
+each
+Mach
+number.
+Hence,
+differ-
+ences
+in
+foredrag
+between
+models
+compared
+at
+a
+given
+Mach
+number
+may
+not
+be
+attributed
+to
+differences
+in
+Reynolds
+number.
+The
+foredrag
+coefficients
+of
+the
+theoretical
+minimum
+sdrag
+shapes
+for
+a
+given
+length
+and
+diameter,
+the
+L-D
+Haack
+nose
+(or
+Karman
+ogive),
+and
+the
+hypersonic
+optimum
+nose
+(3/4
+power
+and
+Ferrari
+shape,
+see
+fig.
+2)
+4The
+foredrag
+values
+reported
+herein
+for
+the
+L-V
+ogive
+(L/D
+= 2.93)
+are
+about
+i0
+percent
+lower
+than
+those
+reported
+in
+reference
+9
+for
+an
+L/D
+=
+3
+ogive,
+although
+the
+foredrag
+results
+for
+the
+cone
+and
+hypersonic
+optimum
+shapes
+(figs.
+ll(a)
+and
+ll(f))
+are
+in
+agreement.
+Even
+though
+the
+tests
+have
+been
+rerun
+and
+the
+data
+have
+been
+carefully
+checked,
+no
+satisfactory
+explanation
+has,
+as
+yet,
+been
+found
+for
+this
+difference.
+CONFIDENTIAL
+
+
+--- PAGE 21 ---
+NACARMA52H28
+CONFIDENTIAL
+19
+are comparedwith the foredrag coefficients
+of the parabolic
+nose in
+figure
+12(a).
+It
+is noteworthy that the L-D Haack nose is not the least-
+drag shape for any Machnumberwithin
+the range of the tests.
+For the
+major portion
+of the Machnumberrange (above Machnumber1.5),
+the
+hypersonic optimum shape has the least
+foredrag.
+It
+is somewhatsur-
+prising
+that
+an optimum shapebased upon Newtonian impact theory should
+have less drag than the L-D Haack nose at these relatively
+low super-
+sonic Machnumbers.
+It
+is not clear
+whether this
+anomaly results
+from
+the restriction
+of zero slope at the base which was evidently
+assumed
+in the derivation
+of the L-D Haack nose, or whether this
+is a result
+of
+the low fineness ratio
+of the models.
+To investigate
+this
+latter
+point,
+the wave drag coefficients
+of both the L-D Haack and the hypersonic
+optimum shapes were calculated
+by second-order theory for
+fineness
+ratios
+of 3, 5, and 7 at a Machnumberof 3.
+These results
+(fig.
+13)
+show that
+the wave drag coefficient
+of the "Haack" shape is the larger
+for
+fineness ratios
+of 3 and 5-
+For fineness ratio
+7 any difference
+in
+wave drag between the L-D Haack and the hypersonic optimum shapes is so
+small as to be within
+the limits
+of uncertainty
+of the calculations.
+To provide
+a better
+indication
+of the combinations of Machnumberand
+fineness ratio
+for which the hypersonic optimum nose has less wave drag
+than the L-D Haacknose, the results
+of all
+of the available
+second-
+order solutions
+for
+these shapes have been plotted
+in figure
+14. Th_
+plot
+is madein terms of the hypersonic similarity
+parameter,
+K = _--_,
+and indicates
+that
+for values of
+K
+in excess of about 0.4 or 0.5 the
+hypersonic optimum shape has the lower wave drag.
+The foredrag of the theoretical
+minimumdrag shape for
+a given
+diameter and volume (D-V Haack, model 15) is comparedin figure
+12(b)
+with
+the foredrag of a cone (D-V cone, model 17) having identical
+values
+of diameter and volume.
+Except for Machnumbersbelow about 1.4,
+the
+foredrag of the cone is of the order of 20 percent lower than that
+of
+the theoretical
+optimum shape.
+Again, this
+result
+maybe due either
+to
+the low fineness ratio
+of the bodies tested or the failure
+of the
+slender-body theory to predict
+the correct
+minimumdrag shape for
+all
+possible
+shapes rather
+than the correct
+minimumdrag shape for bodies
+with
+zero slope at the base.
+In any event,
+it
+could be expected that
+the drag difference
+would be muchless for higher
+fineness ratio
+noses.
+The foredrag of the theoretical
+minimumdrag shape for
+a given
+length and volume (L-V Haack, model 14) is comparedin figure
+12(c)
+with
+the foredrag of a circular-arc
+ogive (L°V ogive,
+model 16) having
+identical
+values of length and volume.
+Since the base areas of these
+noses differ,
+the foredrag coefficients
+are based on (volume)2/3 instead
+of base area in order that
+a direct
+comparison of the foredrags maybe
+conveniently
+made.
+Over the complete Machnumberrange the foredrag
+CONFIDENTIAL
+
+
+--- PAGE 22 ---
+20
+CO_TFIDENTIAL
+NACARMA52H28
+coefficient
+of the L-V Haackmodel is between 8 and 16 percent lower
+than the foredrag coefficient
+of the L-V ogive.
+For both models the
+variation
+of foredrag coefficient
+with Machnumber is similar.
+Foredrag
+of
+nose
+shapes
+defined
+by
+r
+=
+R(X/L)n.-
+In
+reference
+9
+foredrag
+results
+of
+fineness
+ratio
+3 models
+for
+n
+=
+i,
+3/4,
+1/2,
+and
+1/4
+are
+presented
+for
+the
+Mach
+number
+range
+of
+2.73
+to
+5.00
+and
+for
+length
+Reynolds
+numbers
+between
+2
+x
+106
+and
+3 ×
+106 •
+In
+the
+present
+investigation
+similar
+models
+_ve
+been
+tested
+at
+Mach
+numbers
+from
+1.24
+to
+3.67
+and
+Reynolds
+numbers
+between
+2 ×
+i0 e
+and
+4 ×
+i0 e
+in
+order
+to
+extend
+the
+Mach
+number
+range
+of
+available
+drag
+data.
+The
+foredrag
+results
+of
+this
+investigation
+are
+presented
+in
+figure
+15
+and
+are
+com-
+pared
+with
+part
+of
+the
+results
+of
+reference
+9,
+replotted
+for
+the
+over-
+lapping
+Mach
+number
+range
+of
+both
+investigations.
+In
+general,
+there
+is
+good
+agreement
+between
+the
+data
+from
+both
+sources,
+although
+there
+are
+small
+differences
+which
+may
+be
+attributed
+to
+variations
+in
+Reynolds
+number.
+Both
+the
+hypersonic
+optimum
+nose
+(n
+:
+3/4)
+and
+the
+conical
+nose
+(n
+=
+i)
+show
+a
+similar
+decrease
+in
+foredrag
+coefficient
+with
+increase
+in
+Mach
+number
+over
+the
+complete
+Mach
+number
+range.
+The
+hyper-
+sonic
+optimum
+nose,
+however,
+has
+much
+the
+lower
+foredrag
+(about
+24
+per-
+cent
+lower
+at
+Mach
+number
+1.24
+and
+15
+percent
+lower
+at
+Mach
+number
+3.67).
+In
+contrast
+with
+the
+decrease
+in
+the
+foredrag
+coefficient
+with
+increasing
+Mach
+number
+for
+the
+hypersonic
+optimum
+and
+conical
+noses,
+the
+foredrag
+coefficients
+for
+the
+parabolic
+and
+i/4-power
+noses
+increase
+with
+increasing
+Mach
+number
+in
+the
+lower
+part
+of
+the
+Mach
+number
+range.
+Comparison
+of
+Foredrag
+of
+All
+the
+Force
+Models
+In
+figure
+16
+a
+comparison
+of
+the
+variation
+of
+foredrag
+coeflicient
+with
+Mach
+number
+for
+all
+the
+force
+models
+tested
+is
+shown.
+In
+general,
+it
+is
+seen
+that
+for
+the
+more
+blunt
+noses
+(models
+5,
+12,
+and
+18)
+the
+foredrag
+coefficient
+increases
+with
+increase
+in
+Mach
+number,
+while
+for
+the
+other
+noses
+the
+foredrag
+coefficient
+decreases
+with
+increase
+in
+)_ach number
+over
+most
+of
+the
+range.
+It
+is
+of
+interest
+to
+note
+that
+the
+ellipsoid
+(model
+18),
+although
+showing
+a
+large
+increase
+in
+foredrag
+coefficient
+with
+increase
+in Mach
+number
+to
+Math
+number
+2,
+has
+constant
+foredrag
+coefficient
+for
+Mach
+numbers
+above
+2.
+There
+is
+no
+minimum
+drag
+nose
+for
+the
+complete
+Mach
+number
+range,
+although
+the
+hypersonic
+optimum
+nose
+(model
+iO)
+has
+the
+least
+drag
+for
+_lach numbers
+above
+1.5.
+Below
+Mach
+number
+1.5
+the
+paraboloid
+(model
+ll)
+has
+the
+lowest
+drag,
+slightly
+less
+than
+the
+drag
+of
+the
+L-D
+Haack
+nose
+(model
+13).
+Of
+special
+note
+is
+the
+observation
+'that
+many
+of
+the
+mose
+shapes
+have
+less
+drag
+than
+the
+cone
+(model
+i),
+particularly
+at
+the
+lower
+},lach numbers.
+C 0NFIDENTIAL
+
+
+--- PAGE 23 ---
+NACARMA52H28
+CONFIDENTIAL
+21
+CONCLUSIONS
+Foredrag measurementsat zero angle of attack
+have been madefor
+various hemispherically
+blunted
+cones, theoretical
+minimumdrag nose
+shapes, and other more commonprofiles
+of fineness ratio
+3-
+An analysis
+of the results
+for
+a Machnumber range of 1.24 to 3.67 and for
+Reynolds
+numbersbetween 2 X l0 s and 4 x lO6 has led to the following
+conclu-
+sions:
+i.
+No model had the least
+foredrag for
+the complete Machnumber
+range.
+2.
+Of the models tested the paraboloid
+of revolution
+had the
+least
+foredrag below a Machnumberof 1.5,
+and the hypersonic optimum
+shape had the least
+foredrag above a Machnumberof 1.5.
+3.
+The theoretical
+shapes for minimumpressure drag derived by
+von K_rmanand by Haack for
+given length and diameter or given diameter
+and volume do not have less drag than all
+other possible
+shapeshaving
+identical
+values of the sameparameters.
+4.
+For the hemispherically
+blunted
+cones of low fineness ratios
+(of the order of 3):
+a.
+Small reductions
+in foredrag maybe achieved by hemispheri-
+cal blunting
+(hemisphere diameter approximately 15 percent of
+base diameter) if
+the fineness ratio
+is held constant and,
+hence, the cone angle reduced with
+increased blunting.
+If
+the
+cone angle is held constant and the fineness ratio
+reduced,
+hemispherical
+blunting
+results
+in increased foredrag.
+b.
+A relatively
+large hemispherical
+tip
+diameter (as large
+as 30 percent of the base diameter at Machnumbersof 1.24
+and 1.44) maybe used without
+increasing
+the drag above that
+of a sharp-nosed cone of the samefineness ratio.
+c.
+For Machnumbers of 2 and greater
+the wave drag maybe
+accurately
+estimated by the addition
+of the wave drag of the
+hemispherical
+tip
+calculated
+from an empirical
+expression and
+the wave drag of the conical
+portion
+from Taylor-Maccoll
+theory.
+AmesAeronautical
+Laboratory
+National
+Advisory Committee for Aeronautics
+Moffett
+Field,
+Calif.
+CONFIDENTIAL
+
+
+--- PAGE 24 ---
+22
+CONFIDENTIAL
+NACA
+RM
+A52H28
+REFERENCES
+i.
+.
+3,
+Seiff,
+Alvin,
+Sandahl,
+Carl
+A.,
+Chapman,
+Dean
+R.,
+Perkins,
+Edward
+W._
+and
+Gowen,
+Forrest
+E.:
+Aerodynamic
+Characteristics
+of
+Bodies
+at
+Supersonic
+Speeds.
+NACA
+RM
+A51J25,
+1951.
+Sommer,
+Simon
+C.,
+and
+Stark,
+James
+A.:
+The
+Effect
+of
+Bluntness
+on
+the
+Drag
+of
+Spherical-Tipped
+Truncated
+Cones
+of
+Fineness
+Ratio
+3
+at
+Mach
+Numbers
+1.2
+to
+7.4.
+NACA
+RM
+A52BI3,
+1952.
+yon
+K_rm£n,
+Th.:
+The
+Problems
+of
+Resistance
+in
+Compressible
+Fluids.
+R.
+Accad.
+d'
+Italia,
+CI.
+Sci.
+Frs.
+Mat.
+e
+Nat.,
+vol
+XIV,
+1936,
+pp.
+222-276.
+(Fifth
+Volta
+Congress
+held
+in
+Rome,
+Sept.
+30-0ct.
+6,
+1935).
+4.
+Haack,
+W.:
+Projectile
+Forms
+of
+Minimum
+Wave
+Resistance.
+(Trans-
+lation)
+Douglas
+Aircraft
+Company,
+Inc.,
+Rep.
+288,
+1946.
+5.
+Lighthill,
+M.
+J.:
+Supersonic
+Flow
+Past
+Bodies
+of
+Revolution.
+R.
+&
+M.
+No.
+2003,
+British
+A.R.C.,
+1945.
+.
+o
+•
+Sears,
+William
+R.:
+On
+Projectiles
+of
+Minimum
+Wave
+Drag.
+Quart.
+App.
+Math.,
+vol.
+IV,
+no.
+4,
+Jan.
+1947,
+PP.
+361-366.
+Ward_
+G.
+N.:
+Supersonic
+Flow
+Past
+Slender
+Pointed
+Bodies.
+Quart.
+Jour.
+Mech.
+and
+Appl•
+Math.,
+vol.
+II,
+pt.
+i,
+March
+1949,
+PP.
+75-99.
+Ferrari,
+Carlo:
+The
+Body
+and
+Ogival
+Contour
+Giving
+Minimum
+Wave
+Drag.
+Atti
+dell
+Accademia
+delle
+Scienze
+di
+Torino_
+vol.
+84_
+no.
+i,
+pp.
+3-18,
+1949-50•
+(Translated
+by
+R.
+H.
+Cramer,
+Cornell
+Aero.
+Lab.,
+Inc.,
+Buffalo,
+New
+York,
+presented
+at
+session
+of
+Real,
+Accademia
+delle
+Scienze
+di
+Torino,
+Nov.
+23,
+1949.)
+11
+9
+•
+Eggers,
+A.
+J.,
+Jr.,
+Dennis,
+David
+H.,
+and
+Resnikoff,
+Meyer
+M.:
+Bodies
+of
+Revolution
+for
+Minimum
+Drag
+at
+High
+Supersonic
+Airspeeds.
+NACA
+RM
+A51K27,
+1952 •
+i0.
+Mass.
+Inst.
+of
+Tech.,
+Dept.
+of
+Elect.
+Engr.,
+Center
+of
+Analysis.
+Tables
+of
+Supersonic
+Flow
+Around
+Cones,
+by
+the
+Staff
+of
+the
+Computing
+Section,
+Center
+of
+Analysis,
+under
+the
+direction
+of
+Zdenek
+Kopal.
+Tech.
+Rept.
+No.
+3,
+Cambridge,
+1949.
+ii.
+Stewart,
+H.
+J.:
+sonic
+Speeds.
+Nov.
+18,
+1946.
+The
+Theoretical
+Lift
+and
+Drag
+of
+Cones
+at
+Super-
+Jet
+Propulsion
+Lab.,
+GALCIT
+Memo.
+No.
+4-14,
+CONFIDENTIAL
+
+
+--- PAGE 25 ---
+NACARMA52H28
+CONFIDENTIAL
+23
+12. Ehret, Dorris
+M., Rossow, Vernon J.,
+and Stevens, Victor
+I.:
+An
+Analysis
+of the Applicability
+of the Hypersonic Similarity
+Law
+to the Study of Flow About Bodies of Revolution at Zero Angle of
+Attack.
+NACATN 2250, 1950.
+13. VanDyke, Milton D.:
+Practical
+Calculation
+of Second-Order Super-
+sonic Flow Past Nonlifting
+Bodies of Revolution.
+NACATN 2744,
+1952.
+14. Blasius,
+H.:
+Grenzschichten un Fliissigkeiten
+mit kleiner
+Rubung.
+Zs. Math. un. Phys. Bd 56, p. i
+(1908).
+15. Rubesin_ Morris W., Maydew,Randall C., and Varga, Steven A.:
+An
+Analytical
+and Experimental Investigation
+of the Skin Friction
+of
+the Turbulent Boundary Layer on a Flat
+Plate
+at Supersonic Speeds.
+NACATN 2305, 1951.
+16. Grimminger, G., William,
+E. P.,
+and Young, G. B. W.:
+Inclined
+Bodies of Revolution in Hypersonic Flow.
+no. i,
+November1950, pp. 675-690.
+Lift
+on
+IAS, vol.
+17,
+17. Vincenti,
+Walter G., and Wagoner, Cleo B.:
+Transonic Flow Past a
+WedgeProfile
+with Detached BowWave- General Analytical
+Method
+and Final
+Calculated Results.
+NACATN 2339, 1951.
+18. Jack, John R., and Gould, Lawrence I.:
+Aerodynamics of Slender
+Bodies at MachNumberof 3.12 and Reynolds Numbersfrom 2 x 106
+to 15 X 106.
+ll-Aerodynamic
+Load Distributions
+of Series of Five
+Bodies Having Conical Noses and Cylindrical
+Afterbodies.
+NACARME52CI0, 1952.
+CONFIDENTIAL
+
+
+--- PAGE 40 ---
+38
+CONFIDENTIAL
+NACA
+i_
+A52_28
+Re
+= 3.14
+x
+10 6
+(_) Model _o.
+i,
+_/D = O.
+Figure
+9.--Effect
+of
+Reynolds
+number
+on
+the
+boundary-layer
+flow
+for
+models
+l,
+4,
+and
+5 at
+Mach
+number
+1.44.
+CONFIDENTIAL
+
+
+--- PAGE 52 ---
+5o
+CONFIDENTIAL
+SECURITY
+INFORMATION
+NACA
+RM A52R_P8
+Mode/
+No.
+e
+I
+o2
+03
+_4
+v5
+_7
+D8
+e9
+L
+Designation
+-D-
+Hemisphere-Cone,
+d/D=O
+3
+Hemisphere-Cone,
+d/D--.075
+3
+Hemisphere-Cone,
+d/D=.15
+3
+Hemisphere-Cone,
+d/D--.30
+3
+Hemisphere-Cone,
+d/D=.50
+3
+Hemisphere-Cone,
+d/D--D75
+2.B1
+Hemisphere-Cone,
+d/D=.15
+2.62
+Hemisphere-Cone,
+d/D=.30
+2.24
+0
+lO
+L2
+L4
+16
+lB
+Mode/Designation
+No.
+<> IO
+Hyper. Opt.-
+I I
+Paraboloid
+e
+12
+1/4 Power
+m
+13
+L--D
+Haack
+14
+L--V
+Hoack
+IS
+D--V
+Haack
+v
+16
+L--V
+Ogive
+17
+D--V
+Cone
+IB
+Ellipsoid
+L__
+D
+3
+3
+3
+3
+3
+3
+2.93
+3.38
+3
+i
+:iI
+i
+Mach
+number,
+Mo
+Fi_/ure
+16.--Variation
+of
+foredrag
+coefficient
+with
+Mach
+number
+for oll
+the
+force
+models
+tested
+CONFIDENTIAL
+NACA-Langley
+-
+11-6-52
+-
+350

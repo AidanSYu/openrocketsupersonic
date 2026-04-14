@@ -1,0 +1,16 @@
+# Source: NACA RM A52H28 (Perkins & Jorgensen, November 1952)
+# Digitized from source figures in the local PDF, using pixel-to-axis calibration stored in paper/data/py/naca_a52h28_digitize.py.
+# Reference coefficient: foredrag coefficient C_DF = (total drag - base drag) / (q0 * A_base).
+# Figure provenance by series:
+#   cone_n1, paraboloid_n0p5, quarter_power_n0p25 -> Figure 15
+#   LD_Haack -> Figure 11(c)
+#   LV_ogive -> Figure 11(b)
+# Published Reynolds/tunnel conditions are stored separately in NACA_RM_A52H28_test_conditions.csv.
+# Digitization note: Mach values are snapped to the published nominal test Mach labels; pixel-derived Mach is stored in NACA_RM_A52H28_digitized_points.csv.
+Mach,C_DF_cone_n1,C_DF_paraboloid_n0p5,C_DF_quarter_power_n0p25,C_DF_LD_Haack,C_DF_LV_ogive
+1.24,0.127970,0.072436,0.137628,0.085789,0.116316
+1.44,0.114931,0.088855,0.164671,0.098947,0.118947
+1.99,0.092718,0.092235,0.203786,0.086842,0.112105
+2.86,,,,,0.099474
+3.06,0.082094,0.083543,0.234692,0.082105,0.098947
+3.67,,0.083060,0.236624,0.082632,0.095263

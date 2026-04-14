@@ -1,0 +1,27 @@
+# Basic Finner Reference Projectile — Zero-Yaw Axial Force Coefficient (CX0)
+# Source: Dupuis, A.D. and Hathaway, W., "Aeroballistic Range Tests of the
+#         Basic Finner Reference Projectile at Supersonic Velocities,"
+#         DREV-TM-9703, Defence Research Establishment Valcartier, Aug 1997.
+#         DTIC Accession Number: ADA636861
+# Facility: DREV Aeroballistic Range, Valcartier, Canada
+# Model: Basic Finner — cone-cylinder + 4 rectangular fins, L/D=10.0
+#   Cone half-angle: 10 deg, cone length: 2.84 cal
+#   Cylinder length: 7.16 cal, total length: 10.0 cal
+#   4 rectangular fins: chord 1.0 cal, exposed span 1.0 cal, thickness 0.08 cal
+#   Total fin span: 3.0 cal (tip-to-tip), model diameter: 30 mm
+# Conditions: 0 deg fin cant, alpha=0 deg (zero yaw)
+# Reference area: body cross-section S = pi*d^2/4
+# Data type: Multiple-fit best estimates (averaged from individual shots)
+# Digitized from: ADA636861 Table (multiple-fit coefficients)
+#
+# Also includes CNa and CMa (per radian, referenced to model CG at 5.0 cal)
+# for optional stability cross-check.
+Mach,CX0,CNa_per_rad,CMa_per_rad
+1.077,0.863,18.47,-52.648
+1.293,0.731,18.27,-50.968
+1.832,0.585,11.78,-27.976
+2.375,0.484,10.52,-18.904
+2.718,0.435,9.01,-15.199
+3.147,0.373,8.69,-12.456
+3.734,0.309,8.32,-9.533
+4.300,0.271,7.74,-7.853

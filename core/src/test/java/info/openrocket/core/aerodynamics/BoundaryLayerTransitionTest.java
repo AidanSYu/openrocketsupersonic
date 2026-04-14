@@ -3,6 +3,8 @@ package info.openrocket.core.aerodynamics;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Method;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +13,12 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 
 import info.openrocket.core.ServicesForTesting;
+import info.openrocket.core.logging.WarningSet;
+import info.openrocket.core.models.atmosphere.AtmosphericConditions;
 import info.openrocket.core.plugin.PluginModule;
+import info.openrocket.core.rocketcomponent.ExternalComponent;
+import info.openrocket.core.rocketcomponent.FlightConfiguration;
+import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.startup.Application;
 
 /**
@@ -132,5 +139,65 @@ class BoundaryLayerTransitionTest {
 		double fLamSupersonic = BarrowmanDragCalculator.laminarFraction(3.0, 1.0, 100.0, 1.5e-5);
 		assertTrue(fLamSupersonic < fLamSubsonic,
 				"Laminar fraction at M=3 (" + fLamSupersonic + ") should be less than at M=0.3 (" + fLamSubsonic + ")");
+	}
+
+	@Test
+	void smoothFinishTransitionCfIsLaminarBelowTransition() {
+		double re = 2.0e5;
+		double reTr = 3.0e6;
+		double expected = 1.328 / Math.sqrt(re);
+		double actual = BarrowmanDragCalculator.smoothFinishTransitionCf(re, reTr);
+		assertEquals(expected, actual, 1e-12,
+				"Smooth-finish Cf should reduce to Blasius when Re is below transition");
+	}
+
+	@Test
+	void smoothFinishTransitionCfDropsAsTransitionMovesAft() {
+		double re = 2.0e6;
+		double earlyTransition = BarrowmanDragCalculator.smoothFinishTransitionCf(re, 5.0e5);
+		double lateTransition = BarrowmanDragCalculator.smoothFinishTransitionCf(re, 1.5e6);
+		assertTrue(lateTransition < earlyTransition,
+				"Later transition should reduce smooth-finish Cf: early=" + earlyTransition + " late=" + lateTransition);
+	}
+
+	@Test
+	void agardPerfectFinishUsesPhysicallyReasonableReynoldsAndFriction() throws Exception {
+		Rocket rocket = SupersonicTestRockets.makeAgardB();
+		FlightConfiguration config = rocket.getSelectedConfiguration();
+		FlightConditions conditions = new FlightConditions(config);
+		conditions.setMach(0.2);
+		conditions.setAOA(0.0);
+		conditions.setAtmosphericConditions(new AtmosphericConditions(288.15, 101325));
+
+		BarrowmanDragCalculator dragCalculator = new BarrowmanDragCalculator();
+		Method reMethod = BarrowmanDragCalculator.class
+				.getDeclaredMethod("calculateReynoldsNumber", FlightConfiguration.class, FlightConditions.class);
+		reMethod.setAccessible(true);
+		Method cfMethod = BarrowmanDragCalculator.class
+				.getDeclaredMethod("calculateFrictionCoefficient",
+						FlightConfiguration.class, double.class, double.class, double.class);
+		cfMethod.setAccessible(true);
+		Method roughnessMethod = BarrowmanDragCalculator.class
+				.getDeclaredMethod("calculateRoughnessCorrection", double.class);
+		roughnessMethod.setAccessible(true);
+
+		double re = (double) reMethod.invoke(dragCalculator, config, conditions);
+		double cf = (double) cfMethod.invoke(dragCalculator, config, 0.2, re,
+				conditions.getAtmosphericConditions().getTemperature());
+		double roughnessCorrection = (double) roughnessMethod.invoke(dragCalculator, 0.2);
+		double roughnessLimit = 0.032
+				* Math.pow(ExternalComponent.Finish.POLISHED.getRoughnessSize() / config.getLengthAerodynamic(), 0.2)
+				* roughnessCorrection;
+
+		BarrowmanCalculator calculator = new BarrowmanCalculator();
+		AerodynamicForces total = calculator.getAerodynamicForces(config, conditions, new WarningSet());
+
+		assertTrue(rocket.isPerfectFinish(), "AGARD calibration model should be marked as perfect finish");
+		assertTrue(re > 1.0e6, "AGARD benchmark Reynolds number should be in the wind-tunnel regime, got " + re);
+		assertTrue(cf < roughnessLimit,
+				"Smooth-plate Cf should stay below the legacy roughness floor for a polished calibration model");
+		assertTrue(total.getFrictionCD() < 0.30,
+				"Perfect-finish AGARD friction drag should not blow up into the rough-wall regime, got "
+						+ total.getFrictionCD());
 	}
 }

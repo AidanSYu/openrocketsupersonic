@@ -6,6 +6,10 @@
     </appender>
 
     <!-- Suppress verbose debug logging during tests -->
+    <!-- ShockGeometry logs a WARN on every oblique-shock solver miss; at transonic/supersonic
+         Mach this floods with thousands of lines per second and dominates test wall time. -->
+    <logger name="info.openrocket.core.aerodynamics.ShockGeometry" level="ERROR" />
+
     <root level="WARN">
         <appender-ref ref="STDOUT" />
     </root>
