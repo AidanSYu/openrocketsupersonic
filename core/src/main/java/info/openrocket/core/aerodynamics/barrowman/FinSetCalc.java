@@ -23,8 +23,8 @@ import info.openrocket.core.util.PolyInterpolator;
 import info.openrocket.core.util.Transformation;
 
 public class FinSetCalc extends RocketComponentCalc {
-	
-	/** considers the stall angle as 20 degrees*/
+
+	/** considers the stall angle as 20 degrees */
 	private static final double STALL_ANGLE = (20 * Math.PI / 180);
 
 	/** Mach number below which SBLI effects are not applied. */
@@ -32,7 +32,7 @@ public class FinSetCalc extends RocketComponentCalc {
 
 	/** Number of divisions in the fin chords. */
 	protected static final int DIVISIONS = 48;
-	
+
 	protected double macLength = Double.NaN; // MAC length
 	protected double macLead = Double.NaN; // MAC leading edge position
 	protected double macSpan = Double.NaN; // MAC spanwise position
@@ -42,15 +42,15 @@ public class FinSetCalc extends RocketComponentCalc {
 	protected double cosGamma = Double.NaN; // Cosine of midchord sweep angle
 	protected double cosGammaLead = Double.NaN; // Cosine of leading edge sweep angle
 	protected double rollSum = Double.NaN; // Roll damping sum term
-	
+
 	protected int interferenceFinCount = -1; // No. of fins in interference
-	
+
 	protected double[] chordLead = new double[DIVISIONS];
 	protected double[] chordTrail = new double[DIVISIONS];
 	protected double[] chordLength = new double[DIVISIONS];
-	
+
 	protected final WarningSet geometryWarnings = new WarningSet();
-	
+
 	private final double[] poly = new double[6];
 
 	private final double thickness;
@@ -60,22 +60,28 @@ public class FinSetCalc extends RocketComponentCalc {
 	private final FinSet.CrossSection crossSection;
 	protected double rootChord = Double.NaN;
 
-	/** Distance from nose tip to fin leading edge, for SBLI BL thickness estimate. */
+	/**
+	 * Distance from nose tip to fin leading edge, for SBLI BL thickness estimate.
+	 */
 	private final double xFinFromNose;
 
-	/** Cached SBLI separation length from the last CNa computation (used by pressure drag). */
+	/**
+	 * Cached SBLI separation length from the last CNa computation (used by pressure
+	 * drag).
+	 */
 	private double cachedSBLI_Lsep = 0.0;
 
 	// Aeroelastic coupling parameters (Phase 9a)
-	private final double shearModulus;   // Shear modulus of fin material (Pa)
-	private final double torsionalJ;     // Torsional second moment of area (m^4)
+	private final double shearModulus; // Shear modulus of fin material (Pa)
+	private final double torsionalJ; // Torsional second moment of area (m^4)
 
 	/**
 	 * builds a calculator of aerodynamic forces a specified fin
-	 * @param component		The fin in consideration
+	 * 
+	 * @param component The fin in consideration
 	 */
-	///why is this accepting RocketComponent when it rejects?
-	///why not put FinSet in the parameter instead?
+	/// why is this accepting RocketComponent when it rejects?
+	/// why not put FinSet in the parameter instead?
 	public FinSetCalc(FinSet component) {
 		super(component);
 
@@ -112,7 +118,7 @@ public class FinSetCalc extends RocketComponentCalc {
 		calculatePoly();
 		calculateInterferenceFinCount(component);
 	}
-	
+
 	/*
 	 * Calculates the non-axial forces produced by each set of fins.
 	 * (normal and side forces, pitch, yaw and roll moments, CP position, CNa).
@@ -141,7 +147,7 @@ public class FinSetCalc extends RocketComponentCalc {
 		// increases the local pressure at the fin station.
 		FlightConditions localConditions = getLocalFlowConditions(conditions);
 
-		//////// Calculate CNa.  /////////
+		//////// Calculate CNa. /////////
 
 		// One fin without interference (both sub- and supersonic):
 		double cna1 = calculateFinCNa1(localConditions);
@@ -160,34 +166,34 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		// Take into account fin-fin interference effects
 		switch (interferenceFinCount) {
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-			// No interference effect
-			break;
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+				// No interference effect
+				break;
 
-		case 5:
-			cna *= 0.948;
-			break;
+			case 5:
+				cna *= 0.948;
+				break;
 
-		case 6:
-			cna *= 0.913;
-			break;
+			case 6:
+				cna *= 0.913;
+				break;
 
-		case 7:
-			cna *= 0.854;
-			break;
+			case 7:
+				cna *= 0.854;
+				break;
 
-		case 8:
-			cna *= 0.81;
-			break;
+			case 8:
+				cna *= 0.81;
+				break;
 
-		default:
-			// Assume 75% efficiency
-			cna *= 0.75;
-			warnings.add(Warning.PARALLEL_FINS);
-			break;
+			default:
+				// Assume 75% efficiency
+				cna *= 0.75;
+				warnings.add(Warning.PARALLEL_FINS);
+				break;
 		}
 
 		// Body-fin interference effect
@@ -199,13 +205,22 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		// Phase 6f: Pitts-Nielsen-Kaattari Mach-dependent correction (NACA Report 1307)
 		// At M < 0.85, F_WB = F_BW = 1.0 (no change to subsonic results).
-		// At supersonic speeds, the Mach cone limits the body upwash influence
-		// on the fin, reducing interference lift by 10-20%.
+		// At M >= 1.3 (fully supersonic), PNK is not applied: the Mach-cone upwash
+		// model becomes unreliable for highly-swept, low-AR fins common on sounding
+		// rockets. RASAero II benchmarks show the simpler (1+tau) factor alone
+		// matches flight data better at these conditions.
 		double machForPNK = localConditions.getMach();
-		double sweepLE = (cosGammaLead > 0 && cosGammaLead <= 1.0)
-				? Math.acos(cosGammaLead) : 0.0;
-		double F_WB = PittsNielsenKaattari.computeF_WB(machForPNK, r, span, rootChord, sweepLE);
-		double F_BW = PittsNielsenKaattari.computeF_BW(machForPNK, r, span, rootChord);
+		double F_WB, F_BW;
+		if (machForPNK >= 1.3) {
+			F_WB = 1.0;
+			F_BW = 1.0;
+		} else {
+			double sweepLE = (cosGammaLead > 0 && cosGammaLead <= 1.0)
+					? Math.acos(cosGammaLead)
+					: 0.0;
+			F_WB = PittsNielsenKaattari.computeF_WB(machForPNK, r, span, rootChord, sweepLE);
+			F_BW = PittsNielsenKaattari.computeF_BW(machForPNK, r, span, rootChord);
+		}
 		cna *= interferenceFactor * F_WB * F_BW;
 
 		// Phase 3c note: dynamic pressure ratio scaling was removed here.
@@ -242,56 +257,56 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		// Calculate CP position using local conditions
 		double x = macLead + calculateCPPos(localConditions) * macLength;
-		
-		
+
 		// Calculate roll forces, reduce forcing above stall angle
-		
+
 		// Without body-fin interference effect:
-		//		forces.CrollForce = fins * (macSpan+r) * cna1 * component.getCantAngle() / 
-		//			conditions.getRefLength();
+		// forces.CrollForce = fins * (macSpan+r) * cna1 * component.getCantAngle() /
+		// conditions.getRefLength();
 		// With body-fin interference effect:
-		forces.setCrollForce((macSpan + r) * cna1 * interferenceFactor * F_WB * F_BW * cantAngle / conditions.getRefLength());
-		
+		forces.setCrollForce(
+				(macSpan + r) * cna1 * interferenceFactor * F_WB * F_BW * cantAngle / conditions.getRefLength());
+
 		if (conditions.getAOA() > STALL_ANGLE) {
 			forces.setCrollForce(forces.getCrollForce() * MathUtil.clamp(
 					1 - (conditions.getAOA() - STALL_ANGLE) / (STALL_ANGLE / 2), 0, 1));
 		}
 		forces.setCrollDamp(calculateDampingMoment(conditions));
 		forces.setCroll(forces.getCrollForce() - forces.getCrollDamp());
-		
+
 		forces.setCN(cna * MathUtil.min(conditions.getAOA(), STALL_ANGLE));
 		forces.setCP(new Coordinate(x, 0, 0, cna));
 		forces.setCm(forces.getCN() * x / conditions.getRefLength());
-		
+
 		/*
-		 * TODO: HIGH:  Compute actual side force and yaw moment.
+		 * TODO: HIGH: Compute actual side force and yaw moment.
 		 * This is not currently performed because it produces strange results for
 		 * stable rockets that have two fins in the front part of the fuselage,
-		 * where the rocket flies at an ever-increasing angle of attack.  This may
+		 * where the rocket flies at an ever-increasing angle of attack. This may
 		 * be due to incorrect computation of pitch/yaw damping moments.
 		 */
-		//		if (fins == 1 || fins == 2) {
-		//			forces.Cside = fins * cna1 * Math.cos(theta-angle) * Math.sin(theta-angle);
-		//			forces.Cyaw = fins * forces.Cside * x / conditions.getRefLength();
-		//		} else {
-		//			forces.Cside = 0;
-		//			forces.Cyaw = 0;
-		//		}
+		// if (fins == 1 || fins == 2) {
+		// forces.Cside = fins * cna1 * Math.cos(theta-angle) * Math.sin(theta-angle);
+		// forces.Cyaw = fins * forces.Cside * x / conditions.getRefLength();
+		// } else {
+		// forces.Cside = 0;
+		// forces.Cyaw = 0;
+		// }
 		forces.setCside(0);
 		forces.setCyaw(0);
-		
+
 	}
-	
+
 	/**
-	 * Returns the MAC length of the fin.  This is required in the friction drag
+	 * Returns the MAC length of the fin. This is required in the friction drag
 	 * computation.
 	 * 
-	 * @return  the MAC length of the fin.
+	 * @return the MAC length of the fin.
 	 */
 	public double getMACLength() {
 		return macLength;
 	}
-	
+
 	public double getMidchordPos() {
 		return macLead + 0.5 * macLength;
 	}
@@ -316,7 +331,13 @@ public class FinSetCalc extends RocketComponentCalc {
 		}
 
 		ShockGeometry.LocalConditions local = getLocalConditions(shockGeometry);
-		if (local == null || Math.abs(local.localMach - conditions.getMach()) < 0.01) {
+		// Phase 3c threshold: only apply local-flow correction when the post-shock Mach
+		// differs meaningfully from freestream.  A threshold of 0.10 ignores small
+		// isentropic expansions at minor body transitions (e.g. a 1–2° shoulder expansion
+		// fan gives ΔM ≈ 0.08) which have negligible effect on fin CNa, while still
+		// correcting for large post-normal-shock Mach reductions (ΔM >> 0.10) that
+		// genuinely alter the supersonic K1/K2/K3 aerodynamics.
+		if (local == null || Math.abs(local.localMach - conditions.getMach()) < 0.10) {
 			return conditions;
 		}
 
@@ -325,12 +346,12 @@ public class FinSetCalc extends RocketComponentCalc {
 		localCond.setMach(local.localMach);
 		return localCond;
 	}
-	
+
 	/**
 	 * Pre-calculates the fin geometry values.
 	 */
 	protected void calculateFinGeometry(FinSet component) {
-		
+
 		span = component.getSpan();
 		finArea = component.getPlanformArea();
 		if (finArea < MathUtil.EPSILON) {
@@ -339,7 +360,7 @@ public class FinSetCalc extends RocketComponentCalc {
 		} else {
 			ar = 2 * pow2(span) / finArea;
 		}
-		
+
 		// Check geometry; don't consider points along fin root for this
 		// (doing so will cause spurious jagged fin warnings)
 		CoordinateIF[] points = component.getFinPoints();
@@ -355,29 +376,30 @@ public class FinSetCalc extends RocketComponentCalc {
 			}
 		}
 
-		if ((bodyRadius > 0) && (thickness > bodyRadius / 2)){
-			// Add warnings  (radius/2 == diameter/4)
+		if ((bodyRadius > 0) && (thickness > bodyRadius / 2)) {
+			// Add warnings (radius/2 == diameter/4)
 			geometryWarnings.add(Warning.THICK_FIN, component);
 		}
-		
-		// Calculate the chord lead and trail positions and length.  We do need the points
+
+		// Calculate the chord lead and trail positions and length. We do need the
+		// points
 		// along the root for this
 		points = component.getFinPointsWithRoot();
 		Arrays.fill(chordLead, Double.POSITIVE_INFINITY);
 		Arrays.fill(chordTrail, Double.NEGATIVE_INFINITY);
 		Arrays.fill(chordLength, 0);
-		
+
 		for (int point = 1; point < points.length; point++) {
 			double x1 = points[point - 1].getX();
 			double y1 = points[point - 1].getY();
 			double x2 = points[point].getX();
 			double y2 = points[point].getY();
-			
+
 			// Don't use the default EPSILON since it is too small
 			// and causes too much numerical instability in the computation of x below
 			if (MathUtil.equals(y1, y2, 0.001))
 				continue;
-			
+
 			int i1 = (int) (y1 * 1.0001 / span * (DIVISIONS - 1));
 			int i2 = (int) (y2 * 1.0001 / span * (DIVISIONS - 1));
 			i1 = MathUtil.clamp(i1, 0, DIVISIONS - 1);
@@ -387,24 +409,24 @@ public class FinSetCalc extends RocketComponentCalc {
 				i2 = i1;
 				i1 = tmp;
 			}
-			
+
 			for (int i = i1; i <= i2; i++) {
 				// Intersection point (x,y)
 				// Note that y can be outside the bounds of the line
 				// defined by (x1, y1) (x2 y2) so x can similarly be outside
-				// the bounds.  If the line is nearly horizontal, it can be
-				// 'way outside.  We want to get the whole "strip", so we
+				// the bounds. If the line is nearly horizontal, it can be
+				// 'way outside. We want to get the whole "strip", so we
 				// don't clamp y; however, we do clamp x to avoid numerical
 				// instabilities
 				double y = i * span / (DIVISIONS - 1);
 				double x = MathUtil.clamp((y - y2) / (y1 - y2) * x1 + (y1 - y) / (y1 - y2) * x2,
-										  Math.min(x1, x2), Math.max(x1, x2));
+						Math.min(x1, x2), Math.max(x1, x2));
 				if (x < chordLead[i])
 					chordLead[i] = x;
 				if (x > chordTrail[i])
 					chordTrail[i] = x;
-				
-				// TODO: LOW:  If fin point exactly on chord line, might be counted twice:
+
+				// TODO: LOW: If fin point exactly on chord line, might be counted twice:
 				if (y1 < y2) {
 					chordLength[i] -= x;
 				} else {
@@ -412,7 +434,7 @@ public class FinSetCalc extends RocketComponentCalc {
 				}
 			}
 		}
-		
+
 		// Check and correct any inconsistencies
 		for (int i = 0; i < DIVISIONS; i++) {
 			if (Double.isInfinite(chordLead[i]) || Double.isInfinite(chordTrail[i]) ||
@@ -427,20 +449,21 @@ public class FinSetCalc extends RocketComponentCalc {
 				chordLength[i] = chordTrail[i] - chordLead[i];
 			}
 		}
-		
+
 		// Root chord from the chord arrays at span station 0
 		rootChord = chordTrail[0] - chordLead[0];
 		if (rootChord < 0 || Double.isNaN(rootChord)) {
 			rootChord = 0;
 		}
 
-		/* Calculate fin properties:
+		/*
+		 * Calculate fin properties:
 		 * 
 		 * macLength // MAC length
-		 * macLead   // MAC leading edge position
-		 * macSpan   // MAC spanwise position
-		 * ar        // Fin aspect ratio (already set)
-		 * span      // Fin span (already set)
+		 * macLead // MAC leading edge position
+		 * macSpan // MAC spanwise position
+		 * ar // Fin aspect ratio (already set)
+		 * span // Fin span (already set)
 		 */
 		macLength = 0;
 		macLead = 0;
@@ -450,18 +473,18 @@ public class FinSetCalc extends RocketComponentCalc {
 		rollSum = 0;
 		double area = 0;
 		double radius = component.getFinFront().getY();
-		
+
 		final double dy = span / (DIVISIONS - 1);
 		for (int i = 0; i < DIVISIONS; i++) {
 			double length = chordTrail[i] - chordLead[i];
 			double y = i * dy;
-			
+
 			macLength += length * length;
 			macSpan += y * length;
 			macLead += chordLead[i] * length;
 			area += length;
 			rollSum += chordLength[i] * pow2(radius + y);
-			
+
 			if (i > 0) {
 				double dx = (chordTrail[i] + chordLead[i]) / 2 - (chordTrail[i - 1] + chordLead[i - 1]) / 2;
 				double hypot = MathUtil.hypot(dx, dy);
@@ -476,9 +499,9 @@ public class FinSetCalc extends RocketComponentCalc {
 				}
 			}
 		}
-		
+
 		macLength *= dy;
-		//logger.debug("macLength = {}", macLength);
+		// logger.debug("macLength = {}", macLength);
 		macSpan *= dy;
 		macLead *= dy;
 		area *= dy;
@@ -495,16 +518,36 @@ public class FinSetCalc extends RocketComponentCalc {
 		cosGamma /= (DIVISIONS - 1);
 		cosGammaLead /= (DIVISIONS - 1);
 	}
-	
-	///////////////  CNa1 calculation  ////////////////
-	
+
+	/////////////// CNa1 calculation ////////////////
+
 	private static final double CNA_SUBSONIC = 0.9;
 	private static final double CNA_SUPERSONIC = 1.5;
 
 	/** Lower Mach boundary of transonic wave drag blend region. */
-	private static final double WAVE_DRAG_LOW  = 0.9;
+	private static final double WAVE_DRAG_LOW = 0.9;
 	/** Upper Mach boundary of transonic wave drag blend region. */
 	private static final double WAVE_DRAG_HIGH = 1.2;
+
+	/**
+	 * K1 floor constants for low-AR swept fins (AR &lt; 1.8) with subsonic leading edges.
+	 * <p>
+	 * When the leading-edge normal Mach mLe = M·cos(Γ_LE) &lt; 1, the LE is subsonic
+	 * and Ackeret K1 = 2/β underpredicts lift. A floor prevents the progressive forward
+	 * CP migration that causes spurious instability.
+	 * <p>
+	 * The floor decays once the LE goes supersonic (mLe &gt; 1) following:
+	 * <pre>
+	 *   k1_floor = min(K1_FLOOR_MAX, K1_FLOOR_ASYMPTOTE
+	 *                             + (K1_FLOOR_MAX − K1_FLOOR_ASYMPTOTE)
+	 *                               · exp(−K1_FLOOR_DECAY · (mLe − 1)))
+	 * </pre>
+	 * Calibrated against NASA TM X-653 NSCFB data (Jorgensen, Spahr &amp; Hill 1962),
+	 * 4 points M 3.0–5.82, AR = 1.46, cosΓ_LE = 0.343.
+	 */
+	private static final double K1_FLOOR_MAX       = 0.85;  // floor at mLe ≤ 1 (subsonic LE)
+	private static final double K1_FLOOR_ASYMPTOTE = 0.40;  // floor as mLe → ∞
+	private static final double K1_FLOOR_DECAY     = 1.480; // decay rate fitted to TM X-653 M=5.11,5.82
 	private static final double CNA_SUPERSONIC_B = pow(pow2(CNA_SUPERSONIC) - 1, 1.5);
 	private static final double GAMMA = 1.4;
 	private static final LinearInterpolator K1, K2, K3;
@@ -533,7 +576,7 @@ public class FinSetCalc extends RocketComponentCalc {
 		K2 = new LinearInterpolator(x, k2);
 		K3 = new LinearInterpolator(x, k3);
 	}
-	
+
 	protected double calculateFinCNa1(FlightConditions conditions) {
 		double mach = conditions.getMach();
 		double ref = conditions.getRefArea();
@@ -553,7 +596,22 @@ public class FinSetCalc extends RocketComponentCalc {
 		}
 		// Supersonic case
 		else if (mach >= CNA_SUPERSONIC) {
-			cna1 = finArea * (K1.getValue(mach) + K2.getValue(mach) * alpha +
+			double k1eff = K1.getValue(mach);
+			if (ar < 1.8 && cosGammaLead > 0) {
+				// Subsonic-LE K1 floor for swept low-AR fins.
+				// mLe = M·cos(Γ_LE) is the Mach component normal to the leading edge.
+				// For mLe < 1 (subsonic LE): K1=2/β underpredicts; full floor = 0.85.
+				// For mLe > 1 (supersonic LE): floor decays exponentially, calibrated
+				// against NASA TM X-653 NSCFB 4-point dataset (M 3.0–5.82).
+				// See K1_FLOOR_* constants for derivation.
+				double mLe = mach * cosGammaLead;
+				double kFloor = Math.min(K1_FLOOR_MAX,
+						K1_FLOOR_ASYMPTOTE
+						+ (K1_FLOOR_MAX - K1_FLOOR_ASYMPTOTE)
+						  * Math.exp(-K1_FLOOR_DECAY * (mLe - 1.0)));
+				k1eff = Math.max(k1eff, kFloor);
+			}
+			cna1 = finArea * (k1eff + K2.getValue(mach) * alpha +
 					K3.getValue(mach) * pow2(alpha)) / ref;
 		}
 		// Transonic case, interpolate
@@ -574,8 +632,14 @@ public class FinSetCalc extends RocketComponentCalc {
 		}
 
 		// Phase 6h: ESDU transonic similarity correction
-		// When K_trans is in [-2, +3], override with the universal curve model
-		if (macLength > MathUtil.EPSILON) {
+		// When K_trans is in [-2, +3], override with the universal curve model.
+		// Guard: only apply when local Mach < 2.0. For highly-swept fins, the
+		// sweep-normal Mach mEff = M*cos(LE_sweep) can remain transonic at high
+		// freestream Mach (e.g. 70° sweep → mEff ≈ 0.34*M), causing K_trans to
+		// fall in [-2, +3] even at M=3. At these speeds the Ackeret K1/K2/K3
+		// linearized theory is correct; the transonic similarity model is not
+		// intended for fully supersonic flow with a subsonic normal component.
+		if (macLength > MathUtil.EPSILON && mach < 2.0) {
 			double thicknessRatio = thickness / macLength;
 			double sweepLE = (cosGammaLead > 0 && cosGammaLead <= 1.0) ? Math.acos(cosGammaLead) : 0.0;
 			double kTrans = TransonicSimilarity.computeKTrans(mach, thicknessRatio, sweepLE);
@@ -601,7 +665,7 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		return cna1;
 	}
-	
+
 	private double calculateDampingMoment(FlightConditions conditions) {
 		double rollRate = conditions.getRollRate();
 
@@ -613,10 +677,10 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		double mach = conditions.getMach();
 		double absRate = Math.abs(rollRate);
-		
+
 		/*
 		 * At low speeds and relatively large roll rates (i.e. near apogee) the
-		 * fin tips rotate well above stall angle.  In this case sum the chords
+		 * fin tips rotate well above stall angle. In this case sum the chords
 		 * separately.
 		 */
 		if (absRate * (bodyRadius + span) / conditions.getVelocity() > 15 * Math.PI / 180) {
@@ -631,7 +695,7 @@ public class FinSetCalc extends RocketComponentCalc {
 
 			return MathUtil.sign(rollRate) * sum;
 		}
-		
+
 		if (mach <= CNA_SUBSONIC) {
 			return 2 * Math.PI * rollRate * rollSum /
 					(conditions.getRefArea() * conditions.getRefLength() *
@@ -667,25 +731,25 @@ public class FinSetCalc extends RocketComponentCalc {
 			return sum * span / (DIVISIONS - 1) /
 					(conditions.getRefArea() * conditions.getRefLength());
 		}
-		
+
 		// Transonic, do linear interpolation
 		FlightConditions cond = conditions.clone();
 		cond.setMach(CNA_SUBSONIC - 0.05);
 		double subsonic = calculateDampingMoment(cond);
 		cond.setMach(CNA_SUPERSONIC + 0.05);
 		double supersonic = calculateDampingMoment(cond);
-		
+
 		return subsonic * (CNA_SUPERSONIC - mach) / (CNA_SUPERSONIC - CNA_SUBSONIC) +
 				supersonic * (mach - CNA_SUBSONIC) / (CNA_SUPERSONIC - CNA_SUBSONIC);
 	}
-	
+
 	/**
 	 * Return the relative position of the CP along the mean aerodynamic chord.
 	 * Below mach 0.5 it is at the quarter chord, above mach 2 calculated using an
 	 * empirical formula, between these two using an interpolation polynomial.
 	 * 
-	 * @param cond   Mach speed used
-	 * @return		 CP position along the MAC
+	 * @param cond Mach speed used
+	 * @return CP position along the MAC
 	 */
 	private double calculateCPPos(FlightConditions cond) {
 		double m = cond.getMach();
@@ -703,7 +767,7 @@ public class FinSetCalc extends RocketComponentCalc {
 			}
 			return (ar * beta - 0.67) / denom;
 		}
-		
+
 		// In between use interpolation polynomial
 		double x = 1.0;
 		double val = 0;
@@ -715,10 +779,10 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		return val;
 	}
-	
+
 	/**
 	 * Calculate CP position interpolation polynomial coefficients from the
-	 * fin geometry.  This is a fifth order polynomial that satisfies
+	 * fin geometry. This is a fifth order polynomial that satisfies
 	 * 
 	 * p(0.5)=0.25
 	 * p'(0.5)=0
@@ -729,7 +793,7 @@ public class FinSetCalc extends RocketComponentCalc {
 	 * 
 	 * where f(M) = (ar*sqrt(M^2-1) - 0.67) / (2*ar*sqrt(M^2-1) - 1).
 	 * 
-	 * The values were calculated analytically in Mathematica.  The coefficients
+	 * The values were calculated analytically in Mathematica. The coefficients
 	 * are used as poly[0] + poly[1]*x + poly[2]*x^2 + ...
 	 */
 	private void calculatePoly() {
@@ -750,7 +814,8 @@ public class FinSetCalc extends RocketComponentCalc {
 	}
 
 	/**
-	 * Compute the effective chord ratio due to SBLI separation at supersonic speeds.
+	 * Compute the effective chord ratio due to SBLI separation at supersonic
+	 * speeds.
 	 * Also caches L_sep for use in pressure drag calculation.
 	 *
 	 * @param conditions flight conditions
@@ -802,12 +867,14 @@ public class FinSetCalc extends RocketComponentCalc {
 	 */
 	double calculateSBLIPressureDrag(FlightConditions conditions) {
 		// SBLI pressure drag is disabled: the free-interaction model scales drag by
-		// L_sep × span, but the SBLI interaction height is O(10× BL momentum thickness),
+		// L_sep × span, but the SBLI interaction height is O(10× BL momentum
+		// thickness),
 		// far smaller than fin span. Using full span overestimates SBLI drag 5–20×.
 		// RASAero II (our accuracy benchmark) folds these effects into empirical
 		// correlations rather than adding a separate SBLI term, so we suppress it here
 		// to avoid systematic supersonic drag overestimation.
-		// The SBLI chord reduction (cachedSBLI_Lsep applied in computeSBLIChordReduction)
+		// The SBLI chord reduction (cachedSBLI_Lsep applied in
+		// computeSBLIChordReduction)
 		// is kept as it correctly reduces effective fin chord at the leading-edge.
 		return 0.0;
 	}
@@ -824,7 +891,8 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		// Fin-body junction (interference) drag — Hoerner "Fluid Dynamic Drag" Ch. 8
 		// The horseshoe vortex at each fin root creates additional drag proportional to
-		// the fin root thickness and root chord. The factor 0.28*(t/c)^0.33 is Hoerner's
+		// the fin root thickness and root chord. The factor 0.28*(t/c)^0.33 is
+		// Hoerner's
 		// empirical junction form factor for turbulent boundary layers.
 		if (rootChord > MathUtil.EPSILON && thickness > 0 && sRef > MathUtil.EPSILON) {
 			double tcRoot = thickness / rootChord;
@@ -835,10 +903,10 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		return cd;
 	}
-	
+
 	@Override
 	public double calculatePressureCD(FlightConditions conditions,
-									  double stagnationCD, double baseCD, WarningSet warnings) {
+			double stagnationCD, double baseCD, WarningSet warnings) {
 
 		// a fin with 0 area contributes no drag
 		if (finArea < MathUtil.EPSILON) {
@@ -853,8 +921,8 @@ public class FinSetCalc extends RocketComponentCalc {
 		// empirical supersonic correlation). Referenced to span * thickness area.
 		// For SQUARE: stagnation coefficient (normal shock at blunt leading edge).
 		// For HEXAGONAL: sharp double-wedge LE — oblique shock drag is negligible for
-		//   the thin wedge angles typical of supersonic fin stock (< 5°), so cd_LE = 0.
-		//   The thickness wave drag is captured by the Ackeret term below.
+		// the thin wedge angles typical of supersonic fin stock (< 5°), so cd_LE = 0.
+		// The thickness wave drag is captured by the Ackeret term below.
 		if (crossSection == FinSet.CrossSection.AIRFOIL ||
 				crossSection == FinSet.CrossSection.ROUNDED) {
 
@@ -883,7 +951,7 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		// ---- Phase 2c: Ackeret supersonic thin-airfoil wave drag ----
 		// Wave drag from fin thickness via Ackeret (1925) linear supersonic theory:
-		//   Cdw = 4 * tau^2 / beta
+		// Cdw = 4 * tau^2 / beta
 		// where tau = t/c (thickness ratio) and beta = sqrt(M^2 - 1).
 		// Referenced to fin planform area (one-sided).
 		//
@@ -900,38 +968,38 @@ public class FinSetCalc extends RocketComponentCalc {
 		//
 		// See: Anderson, "Fundamentals of Aerodynamics", Ch. 15; NACA TN-1428.
 		if ((crossSection == FinSet.CrossSection.AIRFOIL ||
-				 crossSection == FinSet.CrossSection.ROUNDED ||
-				 crossSection == FinSet.CrossSection.HEXAGONAL) &&
+				crossSection == FinSet.CrossSection.ROUNDED ||
+				crossSection == FinSet.CrossSection.HEXAGONAL) &&
 				macLength > MathUtil.EPSILON && thickness > 0) {
 
 			double tau = thickness / macLength; // fin thickness ratio t/c
-			double waveCdPlanform;              // Ackeret Cdw, referenced to planform area
+			double waveCdPlanform; // Ackeret Cdw, referenced to planform area
 
 			if (mach >= WAVE_DRAG_HIGH) {
-				// Fully supersonic: exact Ackeret formula
-				waveCdPlanform = ackeretWaveDragCD(mach, tau);
+				// Fully supersonic: DATCOM 4.1.5.1 method (replaces simple cos²Λ).
+				// Handles subsonic vs supersonic leading edge correctly.
+				waveCdPlanform = datcomWaveDragCD(mach, tau, cosGammaLead, crossSection);
 
 			} else if (mach > WAVE_DRAG_LOW) {
 				// Transonic blend: cubic Hermite from (WAVE_LOW, 0, 0) to (WAVE_HIGH, f, f')
-				double fHigh  = ackeretWaveDragCD(WAVE_DRAG_HIGH, tau);
-				double dfHigh = ackeretWaveDragSlope(WAVE_DRAG_HIGH, tau);
+				double fHigh = datcomWaveDragCD(WAVE_DRAG_HIGH, tau, cosGammaLead, crossSection);
+				// Numerical slope at the blend boundary
+				double fHighPlus = datcomWaveDragCD(WAVE_DRAG_HIGH + 0.01, tau, cosGammaLead, crossSection);
+				double dfHigh = (fHighPlus - fHigh) / 0.01;
 
 				double dm = WAVE_DRAG_HIGH - WAVE_DRAG_LOW;
-				double t  = (mach - WAVE_DRAG_LOW) / dm;
+				double t = (mach - WAVE_DRAG_LOW) / dm;
 				double t2 = t * t;
 				double t3 = t2 * t;
 
-				// Cubic Hermite basis: h01*fHigh + h11*dm*dfHigh  (f0=0, df0=0)
+				// Cubic Hermite basis: h01*fHigh + h11*dm*dfHigh (f0=0, df0=0)
 				double h01 = -2 * t3 + 3 * t2;
-				double h11 =      t3 -     t2;
+				double h11 = t3 - t2;
 				waveCdPlanform = h01 * fHigh + h11 * dm * dfHigh;
 
 			} else {
 				waveCdPlanform = 0.0;
 			}
-
-			// Apply leading-edge sweep correction: cos^2(Lambda_LE)
-			waveCdPlanform *= pow2(cosGammaLead);
 
 			// Scale planform-area Cdw to body reference area
 			cd += waveCdPlanform * finArea / conditions.getRefArea();
@@ -944,7 +1012,8 @@ public class FinSetCalc extends RocketComponentCalc {
 	}
 
 	/**
-	 * Ackeret wave drag coefficient for a thin fin cross-section at supersonic speeds.
+	 * Ackeret wave drag coefficient for a thin fin cross-section at supersonic
+	 * speeds.
 	 * <p>
 	 * {@code Cdw = 4 * tau^2 / beta}
 	 * <p>
@@ -960,7 +1029,8 @@ public class FinSetCalc extends RocketComponentCalc {
 	 * @return Ackeret wave drag coefficient referenced to planform area
 	 */
 	private static double ackeretWaveDragCD(double mach, double tau) {
-		if (mach <= 1.0001) return 0.0;
+		if (mach <= 1.0001)
+			return 0.0;
 		double beta = Math.sqrt(mach * mach - 1.0);
 		return 4.0 * tau * tau / beta;
 	}
@@ -977,15 +1047,105 @@ public class FinSetCalc extends RocketComponentCalc {
 	 * @return d(Cdw)/dM
 	 */
 	private static double ackeretWaveDragSlope(double mach, double tau) {
-		if (mach <= 1.0001) return 0.0;
+		if (mach <= 1.0001)
+			return 0.0;
 		double betaSq = mach * mach - 1.0;
-		double beta   = Math.sqrt(betaSq);
+		double beta = Math.sqrt(betaSq);
 		return -4.0 * tau * tau * mach / (beta * betaSq);
+	}
+
+	// ==================== DATCOM 4.1.5.1 Supersonic Wave Drag ====================
+
+	/**
+	 * DATCOM Section 4.1.5.1 supersonic wave drag for swept fins.
+	 * <p>
+	 * Replaces the simple cos²(Λ_LE) Ackeret correction with the proper
+	 * linear-theory method that distinguishes between subsonic and supersonic
+	 * leading edges.
+	 * <p>
+	 * <b>Supersonic LE</b> (β·cot(Λ_LE) ≥ 1): The leading edge is ahead of the
+	 * Mach cone, so the flow normal to the LE is supersonic. The 2D Ackeret
+	 * solution applies in the outboard "two-dimensional flow region."
+	 * Eq. 4.1.5.1-k: C_Dw = (K/β) × (t/c)² × S_bw/S_ref
+	 * <p>
+	 * <b>Subsonic LE</b> (β·cot(Λ_LE) < 1): The leading edge is behind the Mach
+	 * cone, so the normal component is subsonic. Drag is reduced more than cos²Λ
+	 * predicts. The "conical flow region" dominates, and the 3D planform effects
+	 * become important.
+	 * Eq. 4.1.5.1-ℓ: C_Dw = K·cot(Λ_LE) × (t/c)² × S_bw/S_ref
+	 * <p>
+	 * References: USAF DATCOM (1978) Section 4.1.5.1, Eqs. 4.1.5.1-k through -o;
+	 * Puckett & Stewart (1947) JAS 14(10).
+	 *
+	 * @param mach         Mach number (must be > 1)
+	 * @param tau          thickness ratio t/c
+	 * @param cosLambdaLE  cosine of leading-edge sweep angle
+	 * @param section      fin cross-section type
+	 * @return wave drag coefficient referenced to fin planform area
+	 */
+	static double datcomWaveDragCD(double mach, double tau,
+								   double cosLambdaLE, FinSet.CrossSection section) {
+		if (mach <= 1.0001 || tau < 1e-6 || cosLambdaLE < 1e-6) {
+			return 0.0;
+		}
+
+		double beta = Math.sqrt(mach * mach - 1.0);
+
+		// Section shape factor K (DATCOM Table, p. 4.1.5.1-16)
+		double K = datcomSectionK(section);
+
+		// Leading-edge sweep angle
+		double lambdaLE = Math.acos(Math.min(1.0, cosLambdaLE));
+		double cotLambdaLE = cosLambdaLE / Math.sin(Math.max(lambdaLE, 1e-6));
+
+		// Subsonic vs supersonic leading edge classification
+		double betaCotLambda = beta * cotLambdaLE;
+
+		double waveCd;
+		if (betaCotLambda >= 1.0) {
+			// Supersonic leading edge (Eq. 4.1.5.1-k)
+			// 2D flow region dominates — standard Ackeret with β in denominator
+			waveCd = K * tau * tau / beta;
+		} else {
+			// Subsonic leading edge (Eq. 4.1.5.1-ℓ)
+			// Conical flow region — drag scales with cot(Λ) instead of 1/β
+			waveCd = K * cotLambdaLE * tau * tau;
+		}
+
+		return waveCd;
+	}
+
+	/**
+	 * DATCOM section shape factor K for sharp-nosed airfoil sections.
+	 * From DATCOM Table on p. 4.1.5.1-16.
+	 * <p>
+	 * For sections with variable thickness, K is based on the average chord.
+	 * HEXAGONAL (double-wedge with max thickness at mid-chord): K = c(c-x₂)/(x₁·x₃)
+	 * For symmetric double-wedge (x₁ = x₂ = x₃ = c/3): K = c(c-c/3)/((c/3)(c/3)) = 6.0
+	 * For AIRFOIL/ROUNDED (biconvex approximation): K = 16/3 ≈ 5.333
+	 */
+	private static double datcomSectionK(FinSet.CrossSection section) {
+		switch (section) {
+			case HEXAGONAL:
+				// Symmetric double-wedge: max thickness at 50% chord
+				// K = c(c - x₂)/(x₁ × x₃) with x₁ = x₃ = c/2, x₂ = 0
+				// For ORP HEXAGONAL: equilateral, x₁ = x₂ = x₃ = c/3 → K = 6.0
+				// Use 4.0 as a representative value for typical double-wedge
+				// (max thickness at ~33-50% chord gives K = 4-6)
+				return 4.0;
+			case AIRFOIL:
+			case ROUNDED:
+				// Biconvex approximation: K = 16/3
+				return 16.0 / 3.0;
+			default:
+				// SQUARE or unknown: use biconvex as fallback
+				return 16.0 / 3.0;
+		}
 	}
 
 	@Override
 	public double calculateComponentBaseCD(FlightConditions conditions,
-										   double baseCD, WarningSet warnings) {
+			double baseCD, WarningSet warnings) {
 		// a fin with 0 area contributes no drag
 		if (finArea < MathUtil.EPSILON) {
 			return 0.0;
@@ -999,7 +1159,8 @@ public class FinSetCalc extends RocketComponentCalc {
 		} else if (crossSection == FinSet.CrossSection.ROUNDED) {
 			cd = baseCD / 2;
 		}
-		// AIRFOIL and HEXAGONAL (double-wedge) assumed to have zero base drag (sharp TE)
+		// AIRFOIL and HEXAGONAL (double-wedge) assumed to have zero base drag (sharp
+		// TE)
 
 		// Scale to correct reference area
 		cd *= span * thickness / conditions.getRefArea();
@@ -1015,7 +1176,8 @@ public class FinSetCalc extends RocketComponentCalc {
 	 * (SQUARE cross-section) generate significant wake drag at supersonic speeds.
 	 *
 	 * Subsonic (M &lt; 0.9): Hoerner turbulent wake, Cd_te = 0.12 * t_te/c
-	 * Supersonic (M &gt; 1.2): backward-facing step, Cd_te = 0.135 * (t_te/c) / sqrt(beta)
+	 * Supersonic (M &gt; 1.2): backward-facing step, Cd_te = 0.135 * (t_te/c) /
+	 * sqrt(beta)
 	 * Transonic: smoothstep blend
 	 */
 	double calculateTrailingEdgeBaseCD(FlightConditions conditions) {
@@ -1067,11 +1229,11 @@ public class FinSetCalc extends RocketComponentCalc {
 		if (parent == null) {
 			throw new IllegalStateException("fin set without parent component");
 		}
-		
+
 		double lead = component.toRelative(Coordinate.NUL, parent)[0].getX();
 		double trail = component.toRelative(new Coordinate(component.getLength()),
 				parent)[0].getX();
-		
+
 		/*
 		 * The counting fails if the fin root chord is very small, in that case assume
 		 * no other fin interference than this fin set.
@@ -1084,9 +1246,9 @@ public class FinSetCalc extends RocketComponentCalc {
 				if (c instanceof FinSet) {
 					double finLead = c.toRelative(Coordinate.NUL, parent)[0].getX();
 					double finTrail = c.toRelative(new Coordinate(c.getLength()), parent)[0].getX();
-					
+
 					// Compute overlap of the fins
-					
+
 					if ((finLead < trail - 0.005) && (finTrail > lead + 0.005)) {
 						interferenceFinCount += ((FinSet) c).getFinCount();
 					}
@@ -1099,5 +1261,5 @@ public class FinSetCalc extends RocketComponentCalc {
 					", fin points=" + Arrays.toString(component.getFinPoints()));
 		}
 	}
-	
+
 }

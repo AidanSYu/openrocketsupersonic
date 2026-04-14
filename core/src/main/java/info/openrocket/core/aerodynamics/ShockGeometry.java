@@ -351,8 +351,20 @@ public class ShockGeometry {
 							}
 						}
 					}
+					// For marching consistency, prevSurfaceAngle starts at tipAngle.
+					// For shaped noses (ogive, Von Karman) the local slope at x=0 is
+					// much larger than tipAngle = arctan(R/L), but clamping (below)
+					// prevents that from triggering a spurious compression at the first strip.
 					prevSurfaceAngle = tipAngle;
 				}
+
+				// Whether this component is the initial nose cone (fore tip, r0≈0).
+				// Its surface must only EXPAND the flow (slope decreasing from tip to base).
+				// Spurious compression shocks caused by tip-slope singularities in shaped
+				// noses (Von Karman, power series) are suppressed by clamping surfAngle ≤
+				// prevSurfaceAngle in the loop below. This is NOT applied to mid-body
+				// shoulder transitions (which legitimately create compression shocks).
+				boolean isInitialNoseCone = (r0 < 1e-6 && r1 > 0);
 
 				// March along the transition surface
 				int N = STRIPS_PER_COMPONENT;
@@ -363,6 +375,17 @@ public class ShockGeometry {
 
 					// Compute local surface angle
 					double surfAngle = computeSurfaceAngle(trans, xLocal, compLength);
+
+					// For initial nose cones only: clamp surface angle to be non-increasing.
+					// Shaped noses (Von Karman, ogive, power series) have a large local slope
+					// near x=0 that exceeds tipAngle = arctan(R/L). Without clamping, the
+					// first strip would see prevSurfaceAngle < surfAngle → turnAngle < 0
+					// (compression), triggering a detached shock even though the nose has an
+					// attached shock. Clamping enforces the physical reality that a convex
+					// nose can only expand the flow after the initial tip shock.
+					if (isInitialNoseCone) {
+						surfAngle = Math.min(surfAngle, prevSurfaceAngle);
+					}
 
 					// Compute turning from previous station
 					double turnAngle = prevSurfaceAngle - surfAngle;
@@ -496,22 +519,49 @@ public class ShockGeometry {
 	}
 
 	/**
-	 * Compute the tip half-angle of a transition (nose cone).
-	 * This is the angle of the surface tangent at the very tip.
+	 * Compute the effective cone half-angle of a transition (nose cone) for shock
+	 * calculations.
+	 *
+	 * <p>Uses the base half-angle {@code arctan(R/L)} rather than sampling the
+	 * local surface slope at the tip. Sampling at {@code dx = length * 1e-4}
+	 * gives {@code dr/dx → ∞} for Von Karman and ogive shapes (their radius
+	 * profile has infinite slope at the mathematical tip where r = 0), which
+	 * incorrectly returns angles near 90° and triggers a detached-shock fallback
+	 * even for physically slender, attached-shock noses at M 2-4.
+	 *
+	 * <p>For a cone, {@code arctan(R/L)} is the exact half-angle. For shaped
+	 * noses it is the equivalent slant angle that governs whether the shock
+	 * attaches, which is the conservative quantity needed here.
 	 */
 	private static double computeTipHalfAngle(Transition trans) {
 		double length = trans.getLength();
 		if (length < 1e-6) return 0;
 
 		double r0 = trans.getForeRadius();
-		double dx = length * 1e-4;
-		double rAtDx = trans.getRadius(dx);
-		return Math.atan2(rAtDx - r0, dx);
+		double r1 = trans.getAftRadius();
+		// Use the overall base half-angle arctan((r1-r0)/L) as the effective
+		// cone half-angle.  For cones this is exact; for ogive/Von Karman it is
+		// the physically meaningful slant angle that determines shock attachment.
+		return Math.atan2(r1 - r0, length);
 	}
 
 	/**
 	 * Compute the local surface tangent angle at position x along a transition.
-	 * Angle is measured from the axis (0 = parallel to axis).
+	 * Angle is measured from the axis: positive when the surface flares outward
+	 * (radius increasing, e.g. nose cone, outward shoulder), negative when it
+	 * tapers inward (radius decreasing, e.g. boattail, reducer transition).
+	 * <p>
+	 * The negative-angle case is essential: at supersonic speeds, the body
+	 * marching loop uses the change in surface angle (turnAngle = prevSurfaceAngle
+	 * − surfAngle) to decide between Prandtl–Meyer expansion (turnAngle &gt; 0)
+	 * and oblique shock (turnAngle &lt; 0). For a boattail entering after a
+	 * body tube, prevSurfaceAngle = 0 and surfAngle is the negative boattail
+	 * half-angle, so turnAngle = +|halfAngle| correctly routes the corner to
+	 * the expansion branch. Clamping negative angles to 0 here used to suppress
+	 * the boattail expansion entirely and — at the next iteration after a tip
+	 * angle was set on a non-nose transition — produced a phantom oblique
+	 * shock with the full half-angle as the requested compression, exceeding
+	 * theta-max near M=1 and spamming "shock detachment" warnings.
 	 */
 	private static double computeSurfaceAngle(Transition trans, double xLocal,
 			double compLength) {
@@ -524,8 +574,7 @@ public class ShockGeometry {
 
 		double r1 = trans.getRadius(x1);
 		double r2 = trans.getRadius(x2);
-		double angle = Math.atan2(r2 - r1, x2 - x1);
-		return Math.max(angle, 0); // Clamp negative angles (boattail handled separately)
+		return Math.atan2(r2 - r1, x2 - x1);
 	}
 
 	/**

@@ -1,0 +1,38 @@
+parameter,scenario,setting,metric,value,delta_pct_vs_baseline,notes
+pitch_damping_multiplier,subsonic_reference_case,multiplier=1.0,pitch_damping_moment_coefficient,0.00000010,-66.6667,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=5 deg; q=0.02 rad/s.
+pitch_damping_multiplier,subsonic_reference_case,multiplier=2.0,pitch_damping_moment_coefficient,0.00000019,-33.3333,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=5 deg; q=0.02 rad/s.
+pitch_damping_multiplier,subsonic_reference_case,multiplier=3.0,pitch_damping_moment_coefficient,0.00000029,0.0000,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=5 deg; q=0.02 rad/s.
+pitch_damping_multiplier,subsonic_reference_case,multiplier=4.0,pitch_damping_moment_coefficient,0.00000039,33.3333,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=5 deg; q=0.02 rad/s.
+body_damping_coefficient,subsonic_reference_case,coefficient=0.200,total_damping_multiplier,5.29225378,-24.1841,Body contribution 4.5017; fin contribution 0.7905.
+body_damping_coefficient,subsonic_reference_case,coefficient=0.275,total_damping_multiplier,6.98040230,0.0000,Body contribution 6.1899; fin contribution 0.7905.
+body_damping_coefficient,subsonic_reference_case,coefficient=0.350,total_damping_multiplier,8.66855083,24.1841,Body contribution 7.8780; fin contribution 0.7905.
+fin_damping_cap,six_fin_reference_case,cap=3,total_damping_multiplier,6.78277121,-2.8312,Six-fin variant of Cone-Cylinder-Fins. Body contribution 6.1899; fin contribution 0.5929.
+fin_damping_cap,six_fin_reference_case,cap=4,total_damping_multiplier,6.98040230,0.0000,Six-fin variant of Cone-Cylinder-Fins. Body contribution 6.1899; fin contribution 0.7905.
+fin_damping_cap,six_fin_reference_case,cap=6,total_damping_multiplier,7.37566449,5.6625,Six-fin variant of Cone-Cylinder-Fins. Body contribution 6.1899; fin contribution 1.1858.
+magnus_body_fraction,supersonic_reference_case,fraction=0.20,cn_pa,0.15300065,-33.3333,Representative case: Cone-Cylinder-Fins at M=2.00; alpha=5 deg.
+magnus_body_fraction,supersonic_reference_case,fraction=0.30,cn_pa,0.22950097,-0.0000,Representative case: Cone-Cylinder-Fins at M=2.00; alpha=5 deg.
+magnus_body_fraction,supersonic_reference_case,fraction=0.40,cn_pa,0.30600130,33.3333,Representative case: Cone-Cylinder-Fins at M=2.00; alpha=5 deg.
+transonic_cmq_peak,mach_envelope,Mach=0.70,k_transonic,1.04578910,4.5789,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=0.75,k_transonic,1.15544131,15.5441,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=0.80,k_transonic,1.42253329,42.2533,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=0.85,k_transonic,1.91969860,91.9699,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=0.90,k_transonic,2.60295097,160.2951,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=0.95,k_transonic,3.23709829,223.7098,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=1.00,k_transonic,3.50000000,250.0000,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=1.05,k_transonic,3.23709829,223.7098,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=1.10,k_transonic,2.60295097,160.2951,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=1.15,k_transonic,1.91969860,91.9699,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=1.20,k_transonic,1.42253329,42.2533,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=1.25,k_transonic,1.15544131,15.5441,Heuristic Cmq augmentation factor.
+transonic_cmq_peak,mach_envelope,Mach=1.30,k_transonic,1.04578910,4.5789,Heuristic Cmq augmentation factor.
+vortex_onset_saturation,alpha_envelope,alpha_deg=10.0,normalized_ramp,0.00000000,-100.0000,Ramp is 0 below 20 deg; 1 above 40 deg.
+vortex_onset_saturation,alpha_envelope,alpha_deg=20.0,normalized_ramp,0.00000000,-100.0000,Ramp is 0 below 20 deg; 1 above 40 deg.
+vortex_onset_saturation,alpha_envelope,alpha_deg=30.0,normalized_ramp,0.50000000,-50.0000,Ramp is 0 below 20 deg; 1 above 40 deg.
+vortex_onset_saturation,alpha_envelope,alpha_deg=40.0,normalized_ramp,1.00000000,0.0000,Ramp is 0 below 20 deg; 1 above 40 deg.
+vortex_onset_saturation,alpha_envelope,alpha_deg=50.0,normalized_ramp,1.00000000,0.0000,Ramp is 0 below 20 deg; 1 above 40 deg.
+vortex_asymmetry_kv,high_aoa_reference_case,kv=0.10,c_side,1.59444107,-50.0000,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=60 deg.
+vortex_asymmetry_kv,high_aoa_reference_case,kv=0.20,c_side,3.18888215,0.0000,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=60 deg.
+vortex_asymmetry_kv,high_aoa_reference_case,kv=0.30,c_side,4.78332322,50.0000,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=60 deg.
+crossflow_fin_cd,high_aoa_reference_case,cd=1.20,crossflow_cn,15.88737278,-0.3577,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=60 deg.
+crossflow_fin_cd,high_aoa_reference_case,cd=1.42,crossflow_cn,15.94441073,0.0000,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=60 deg.
+crossflow_fin_cd,high_aoa_reference_case,cd=1.60,crossflow_cn,15.99107814,0.2927,Representative case: Cone-Cylinder-Fins at M=0.50; alpha=60 deg.

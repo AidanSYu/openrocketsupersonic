@@ -1,0 +1,13 @@
+section,t_over_c,sweep_deg,mach,cdw_exp,cdw_theory
+symmetric_double_wedge,0.06,60,1.10,0.028,0.022
+symmetric_double_wedge,0.06,60,1.20,0.024,0.018
+symmetric_double_wedge,0.06,60,1.30,0.021,0.016
+symmetric_double_wedge,0.06,60,1.40,0.019,0.015
+symmetric_double_wedge,0.06,60,1.50,0.018,0.014
+symmetric_double_wedge,0.06,60,1.60,0.018,0.014
+symmetric_double_wedge,0.03,60,1.10,0.013,0.010
+symmetric_double_wedge,0.03,60,1.20,0.012,0.009
+symmetric_double_wedge,0.03,60,1.30,0.011,0.009
+symmetric_double_wedge,0.03,60,1.40,0.010,0.009
+symmetric_double_wedge,0.03,60,1.50,0.010,0.008
+symmetric_double_wedge,0.03,60,1.60,0.010,0.008

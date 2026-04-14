@@ -240,11 +240,21 @@ processResources {
     }
 }
 
-// Redirect test binary output to temp directory to avoid VS Code file-locking
-// the output.bin in the build directory on Windows.
+// Redirect test binary output to a unique system temp directory per Gradle run.
+// This avoids two issues on Windows:
+//  (1) VS Code's file watcher locks output.bin for any path inside the workspace,
+//      so the path must live outside the workspace tree.
+//  (2) Concurrent Gradle test runs (e.g. from parallel agents) collide on a shared
+//      output.bin, so the path must be unique per JVM/run.
 tasks.withType(Test).configureEach {
     reports.junitXml.outputLocation = layout.buildDirectory.dir("test-results/test")
-    binaryResultsDirectory = layout.buildDirectory.dir("tmp/test-binary")
+    binaryResultsDirectory = objects.directoryProperty().fileValue(
+        new File(System.getProperty("java.io.tmpdir"),
+                "ORP-test-binary-${project.name}-${System.currentTimeMillis()}-${ProcessHandle.current().pid()}")
+    )
+    // High-altitude supersonic validation sims (MESOS 293K ft, M 4+) accumulate large
+    // per-step flight-data arrays; the default 512 MB heap OOMs mid-flight.
+    maxHeapSize = '4g'
 }
 
 clean.dependsOn([externalComponentsDelete])

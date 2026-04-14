@@ -1,0 +1,110 @@
+# Hoerner, Fluid-Dynamic Drag (1965), Chapter III - Pressure Drag
+# Flat plate drag and normal force coefficients
+# Digitized from Figures 26, 28, 29, 34 and text on pages 3-15 to 3-18
+#
+# Relevance to ORP: CROSSFLOW_FIN_CD = 1.42 in BarrowmanDragCalculator
+# represents the drag coefficient of a fin in pure crossflow (alpha=90).
+# Hoerner gives CD = 1.17 for a square (3D) flat plate and CD = 1.98 for
+# an infinite (2D) flat plate between walls. ORP's 1.42 is between these,
+# which is reasonable for typical fin aspect ratios (h/b ~ 0.3-0.5).
+#
+# =============================================================================
+# TABLE 1: Flat plate CD at 90 degrees vs aspect ratio (Figure 28, page 3-16)
+# =============================================================================
+# CD based on frontal area (h * b), normal flow, Re > 10^4 (turbulent)
+# h = height (in flow direction for plate at angle; short dimension)
+# b = span (perpendicular to flow; long dimension)
+# h/b = 0 is 2D (between walls); h/b = 1 is square plate
+# Circular disk included for comparison
+#
+# Equation 29: CD = CD_inf * [1 - k * (h/b)]
+# where CD_inf is 2D value (1.98) and k is an empirical constant ~0.5
+#
+table,h_over_b,shape,CD,source
+aspect_ratio,0.00,rectangular_2D,1.98,text_p3-16
+aspect_ratio,0.02,rectangular,1.92,fig28_curve
+aspect_ratio,0.05,rectangular,1.85,fig28_curve
+aspect_ratio,0.10,rectangular,1.75,fig28_curve
+aspect_ratio,0.20,rectangular,1.55,fig28_curve
+aspect_ratio,0.33,rectangular,1.43,fig28_curve
+aspect_ratio,0.50,rectangular,1.30,fig28_curve
+aspect_ratio,0.65,rectangular,1.22,fig28_curve
+aspect_ratio,1.00,square,1.17,fig28_and_text
+aspect_ratio,1.00,circular_disk,1.17,fig26_text_p3-15
+#
+# Key text values (page 3-16):
+#   2D (between walls): CD = 1.98, Cp_rear = -1.13
+#   3D (square/disk):   CD = 1.17, Cp_rear = -0.42
+#
+# =============================================================================
+# TABLE 2: Normal force coefficient CN vs angle of attack (Figure 29, p 3-16)
+# =============================================================================
+# Figure 29a: 3D plates (square plate and circular disk)
+# Figure 29b: 2D plates (between tunnel walls)
+# CN based on plate area, Re > 10^4
+# At alpha=90, CN = CD (force is entirely normal to plate = drag direction)
+#
+# Cross-flow principle (eq 22-23, p 3-11):
+#   CN_alpha = CD_basic * sin^2(alpha)   [normal force on cross-flow area]
+#   CD = CD_basic * sin^3(alpha)         [drag component]
+#   CL = CD_basic * sin^2(alpha) * cos(alpha)  [lift component]
+#
+# Text states: C_normal ~ 1.17 = constant for alpha ~ 45 to 90 degrees (3D)
+#
+table,alpha_deg,dimension,CN,source
+normal_force,0,3D,0.00,fig29a
+normal_force,5,3D,0.10,fig29a
+normal_force,10,3D,0.22,fig29a
+normal_force,15,3D,0.38,fig29a
+normal_force,20,3D,0.55,fig29a
+normal_force,25,3D,0.72,fig29a
+normal_force,30,3D,0.88,fig29a
+normal_force,35,3D,0.98,fig29a
+normal_force,40,3D,1.06,fig29a
+normal_force,45,3D,1.10,fig29a
+normal_force,50,3D,1.13,fig29a
+normal_force,60,3D,1.15,fig29a
+normal_force,70,3D,1.16,fig29a
+normal_force,80,3D,1.17,fig29a
+normal_force,90,3D,1.17,fig29a_text
+normal_force,0,2D,0.00,fig29b
+normal_force,10,2D,0.30,fig29b
+normal_force,20,2D,0.70,fig29b
+normal_force,30,2D,1.15,fig29b
+normal_force,40,2D,1.50,fig29b
+normal_force,45,2D,1.65,fig29b
+normal_force,50,2D,1.75,fig29b
+normal_force,60,2D,1.88,fig29b
+normal_force,70,2D,1.93,fig29b
+normal_force,80,2D,1.97,fig29b
+normal_force,90,2D,1.98,fig29b_text
+#
+# =============================================================================
+# TABLE 3: 3D shapes at 90 degrees - drag coefficient (Figure 34, p 3-18)
+# =============================================================================
+# CD vs half-vertex angle epsilon for various 3D bodies
+# At epsilon=90 all shapes converge to the flat plate/disk value
+# "Eiffel cones" and "hemispherical" shapes are 3D
+#
+table,half_vertex_angle_deg,shape,CD,source
+shape_angle,5,3D_cone,0.10,fig34
+shape_angle,10,3D_cone,0.25,fig34
+shape_angle,15,3D_cone,0.40,fig34
+shape_angle,20,3D_cone,0.52,fig34
+shape_angle,30,3D_cone,0.72,fig34
+shape_angle,40,3D_cone,0.87,fig34
+shape_angle,50,3D_cone,0.98,fig34
+shape_angle,60,3D_cone,1.05,fig34
+shape_angle,70,3D_cone,1.10,fig34
+shape_angle,80,3D_cone,1.14,fig34
+shape_angle,90,3D_flat_plate,1.17,fig34_text
+#
+# =============================================================================
+# TABLE 4: Summary of key flat plate CD values (text, pages 3-15 to 3-16)
+# =============================================================================
+#
+table,configuration,CD,Cp_rear,notes
+summary,circular_disk_3D,1.17,-0.42,fig26_high_Re
+summary,square_plate_3D,1.17,-0.42,same_as_disk
+summary,infinite_plate_2D,1.98,-1.13,between_walls
+summary,rectangular_plate_h_b_inf,1.98,-1.13,same_as_2D

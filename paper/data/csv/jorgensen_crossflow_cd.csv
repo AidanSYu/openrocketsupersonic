@@ -1,0 +1,17 @@
+# Jorgensen (1977) NASA TR R-474, Table 1 and §2.3.1
+# Crossflow drag coefficient Cd_n for various cross sections
+# at alpha=90° (pure crossflow), subcritical Mach and Reynolds numbers
+# All Cd_n values are based on cross-section WIDTH, not equivalent diameter d
+#
+# ORP uses: SUBSONIC_CDC = 1.20 (body crossflow, circular cylinder)
+#           CROSSFLOW_FIN_CD = 1.42 (fin crossflow, flat plate approximation)
+#
+cross_section,corner_ratio_k,Cdn_newtonian,Cdn_mod_newtonian,Cdn_measured,source
+circular_cylinder,N/A,1.33,1.20,1.20,Table1_Ref39
+square_k0.00,0.00,2.00,1.80,2.05,Table1_Ref40
+square_k0.02,0.02,1.97,1.78,2.00,Table1_Ref41
+square_k0.08,0.08,1.89,1.70,1.65,Table1_Ref43
+square_k0.24,0.24,1.68,1.51,1.12,Table1_Ref43
+square_k0.50,0.50,1.33,1.20,1.20,Table1_Ref39
+ellipse_a_b_2,N/A,0.94,0.85,0.70,Table1_Ref40_41
+ellipse_a_b_4,N/A,0.59,0.53,0.35,Table1_Ref40

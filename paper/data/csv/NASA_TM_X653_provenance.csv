@@ -1,0 +1,4 @@
+source_id,page,figure,description,method,digitizer,confidence_pct
+fig5a,8,5(a),NSCFB: CNα per degree vs Mach (with trip rings),curve digitization from scanned figure,automated + manual review,75
+fig5b,8,5(b),NSCFB: xCP/d vs Mach (with trip rings),curve digitization from scanned figure,automated + manual review,75
+fig5c,8,5(c),"NSCFB: CD vs Mach (pressure drag, base excluded)",curve digitization from scanned figure,automated + manual review,75

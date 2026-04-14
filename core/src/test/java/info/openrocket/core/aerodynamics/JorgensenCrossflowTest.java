@@ -105,12 +105,16 @@ public class JorgensenCrossflowTest {
 	}
 
 	@Test
-	public void bodyCNaIncreasesAtHighMachHighAoA() {
-		// At M=3, alpha=5deg, crossflow Mach = 3*sin(5deg) ~ 0.26
-		// That's still low crossflow Mach, so use a higher AoA to get supersonic crossflow
-		// M=3, alpha=15deg -> M_cf = 3*sin(15deg) ~ 0.776 -> Cd_c ~ 1.33
-		// M=3, alpha=20deg -> M_cf = 3*sin(20deg) ~ 1.026 -> Cd_c ~ 1.67
-		// Use a body tube (isTube=true) so only body lift contributes
+	public void bodyCNaAtHighMachHighAoA() {
+		// Cylindrical body tubes have CNa = 0 per the Barrowman area-change formula.
+		// The Galejs viscous crossflow formula (K × planformArea/refArea) overestimates
+		// body CNa for long slender bodies (e.g. 17 rad⁻¹ for a typical sounding-rocket
+		// body) and, when supersonic fin CNa drops as 1/β, incorrectly drives CP forward
+		// past the CG causing spurious instability.  RASAero II uses Barrowman (CNa=0)
+		// for cylindrical sections; we do the same.
+		//
+		// A BodyTube calculator for a pure cylindrical component should produce zero CN
+		// regardless of AoA and Mach number.
 		Rocket rocket = TestRockets.makeEstesAlphaIII();
 		BodyTube body = (BodyTube) rocket.getChild(0).getChild(1);
 
@@ -132,42 +136,30 @@ public class JorgensenCrossflowTest {
 		calc.calculateNonaxialForces(condLow, Transformation.IDENTITY, forcesLow, warnings);
 		calc.calculateNonaxialForces(condHigh, Transformation.IDENTITY, forcesHigh, warnings);
 
-		// At high Mach / high AoA, crossflow Mach ~ 3*sin(20deg) ~ 1.026
-		// Cd_c ~ 1.67, so crossflow scale ~ 1.67/1.2 ~ 1.39
-		// The CN should be larger per unit sin^2(alpha)/alpha than at low Mach
-		// Normalize by sin(aoa)^2/aoa to compare the coefficient scaling
-		double sinAoaLow = Math.sin(condLow.getAOA());
-		double sinAoaHigh = Math.sin(condHigh.getAOA());
-		double sincLow = sinAoaLow / condLow.getAOA();
-		double sincHigh = sinAoaHigh / condHigh.getAOA();
-
-		// CN = cp_weight * aoa, cp_weight = scale * K * planformArea/refArea * sinAOA * sincAOA
-		// So the "effective K" = CN / (aoa * planformArea/refArea * sinAOA * sincAOA)
-		// The ratio of effective K at high Mach to low Mach should be Cd_c_high / Cd_c_low
 		double cnLow = forcesLow.getCN();
 		double cnHigh = forcesHigh.getCN();
 
-		// Both should be non-zero (body tube has planform area)
-		assertTrue(Math.abs(cnLow) > 1e-10, "CN at low Mach should be non-zero for body tube");
-		assertTrue(Math.abs(cnHigh) > 1e-10, "CN at high Mach should be non-zero for body tube");
+		// Body tube CNa = 0 (Barrowman); CN = CNa × AoA = 0 at all Mach/AoA combinations
+		assertEquals(0.0, cnLow, 1e-10,
+				"Body tube CN at subsonic M=0.5 should be zero (Barrowman: no area change)");
+		assertEquals(0.0, cnHigh, 1e-10,
+				"Body tube CN at supersonic M=3.0 should be zero (Barrowman: no area change)");
 
-		// The normalized CN (per unit sin^2(alpha)/alpha) should be larger at
-		// high Mach / high AoA due to the Jorgensen crossflow enhancement.
-		// The Phase 3a body lift K also changes with Mach, so we don't expect
-		// an exact match to crossflow Cd_c ratio alone — just verify the
-		// high-Mach normalized CN is at least 20% larger (crossflow + K increase).
-		double normalizedLow = cnLow / (condLow.getAOA() * sinAoaLow * sincLow);
-		double normalizedHigh = cnHigh / (condHigh.getAOA() * sinAoaHigh * sincHigh);
-
-		assertTrue(normalizedHigh > normalizedLow * 1.2,
-				"Body lift at M=3, alpha=20deg should be significantly enhanced by crossflow Cd_c " +
-				"(normalizedHigh=" + normalizedHigh + " vs normalizedLow=" + normalizedLow + ")");
+		// Verify the Jorgensen crossflow Cd table is still computed correctly — it is used
+		// for drag calculation even though it no longer affects body-tube stability.
+		// At M=3, alpha=20°: crossflowMach = 3*sin(20°) ≈ 1.026 → Cd_c ≈ 1.67 → scale ≈ 1.39
+		double crossflowMachHigh = condHigh.getMach() * Math.sin(condHigh.getAOA());
+		double crossflowScale = SymmetricComponentCalc.getCrossflowDragCoefficient(crossflowMachHigh) / 1.2;
+		assertTrue(crossflowScale > 1.3,
+				"Crossflow Cd scale at M_cf≈1.026 should be >1.3 (supersonic crossflow enhancement) " +
+				"(crossflowScale=" + crossflowScale + ")");
 	}
 
 	@Test
 	public void bodyCNaUnchangedAtSubsonic() {
-		// At M=0.5, alpha=2deg, M_crossflow = 0.5*sin(2deg) ~ 0.017
-		// Cd_c ~ 1.20, so crossflow scale ~ 1.0 (no change from baseline)
+		// At M=0.5, alpha=2deg: body tube has CNa=0 (Barrowman: no area change for
+		// constant-diameter cylinder), so CN=0 regardless of AoA or Mach.
+		// The crossflow Mach scale factor is still computed correctly for drag purposes.
 		Rocket rocket = TestRockets.makeEstesAlphaIII();
 		BodyTube body = (BodyTube) rocket.getChild(0).getChild(1);
 
@@ -185,15 +177,14 @@ public class JorgensenCrossflowTest {
 		double cn = forces.getCN();
 
 		// Crossflow Mach = 0.5 * sin(2deg) ~ 0.0175, Cd_c = 1.20
-		// Scale factor = 1.20 / 1.20 = 1.0, so result should be identical to
-		// the unmodified calculation: K * planformArea / refArea * sin(aoa)^2 / aoa * aoa
-		// = K * planformArea / refArea * sin(aoa)^2
+		// Scale factor = 1.20 / 1.20 = 1.0 (correct crossflow table)
 		double crossflowMach = 0.5 * Math.sin(Math.toRadians(2));
 		double scale = SymmetricComponentCalc.getCrossflowDragCoefficient(crossflowMach) / 1.2;
 		assertEquals(1.0, scale, 0.001,
 				"Crossflow scale at M=0.5, alpha=2deg should be ~1.0");
 
-		// CN should be non-zero but small
-		assertTrue(Math.abs(cn) > 0, "CN should be non-zero at AoA=2deg");
+		// Body tube CNa = 0 (Barrowman: no area change); CN = 0 at all Mach/AoA
+		assertEquals(0.0, cn, 1e-10,
+				"Body tube CN at subsonic M=0.5 should be zero (Barrowman: no area change)");
 	}
 }

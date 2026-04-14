@@ -54,7 +54,7 @@ public class SimVRealValidationTest extends BaseTestCase {
         // Motors are now loaded directly into RASAeroMotorsLoader's cache
     }
 
-    private static void loadMotorsIntoRASAeroCache(String path) {
+    static void loadMotorsIntoRASAeroCache(String path) {
         File file = new File(path);
         if (!file.exists()) return;
 
@@ -92,6 +92,8 @@ public class SimVRealValidationTest extends BaseTestCase {
         String[] paths = {
             "simvreal/RasAero Sims/" + cdx1Filename,
             "c:/Code/OpenRocket Plus/simvreal/RasAero Sims/" + cdx1Filename,
+            "simvreal/Docs/Mesos/" + cdx1Filename,
+            "c:/Code/OpenRocket Plus/simvreal/Docs/Mesos/" + cdx1Filename,
         };
         File file = null;
         for (String p : paths) {
@@ -133,6 +135,10 @@ public class SimVRealValidationTest extends BaseTestCase {
             Simulation sim = doc.getSimulation(0);
             Rocket rocket = doc.getRocket();
             result.componentCount = countComponents(rocket);
+
+            // Use a coarse time step to keep simulation runtime reasonable.
+            // MESOS and other high-altitude multi-stage rockets can take hours at default steps.
+            sim.getOptions().setTimeStep(0.05);
 
             // Run the simulation
             try {
@@ -340,6 +346,33 @@ public class SimVRealValidationTest extends BaseTestCase {
                 if (timeStep) lastPrintedTime = t;
             }
         }
+    }
+
+    @Test
+    public void testMesos293K() {
+        // MESOS 293K Flight — Kip Daugirdas, Black Rock Desert NV, 2022-10-01.
+        // Two-stage: O4374 booster + M787 sustainer (both Kip custom motors).
+        // Real flight data (from the RASAero II Comparison PDF / flight card):
+        //   GPS apogee:       293,488 ft AGL
+        //   Accel max vel:    4,047 ft/s (Mach 4.18)
+        //   Time to apogee:   154.3 s
+        // RASAero II postflight sim (Smooth Paint): 289,789 ft (-1.26%), Mach 4.23 (+1.19%).
+        loadMotorsIntoRASAeroCache("simvreal/Docs/Mesos/M787_Expanded_Nozzle_Sea_Level.eng");
+        loadMotorsIntoRASAeroCache("simvreal/Docs/Mesos/O4374_Sea_Level.eng");
+        loadMotorsIntoRASAeroCache("c:/Code/OpenRocket Plus/simvreal/Docs/Mesos/M787_Expanded_Nozzle_Sea_Level.eng");
+        loadMotorsIntoRASAeroCache("c:/Code/OpenRocket Plus/simvreal/Docs/Mesos/O4374_Sea_Level.eng");
+
+        SimResult r = importAndSimulate("MESOS 293K Flight.CDX1");
+        reportResult(r, 293488, 289789);
+        if (r.simulated) {
+            double machAccel = 4047.0 / 1116.45;  // 4047 ft/s at Black Rock launch site
+            double orMach = r.maxVelMs / 343.0;
+            double realMach = 4.18;
+            System.out.printf("Max velocity:  real=%.0f ft/s (Mach %.2f), ORP=%.0f ft/s (Mach %.2f, err %+.1f%%)%n",
+                    4047.0, realMach, r.maxVelFtS, orMach,
+                    (r.maxVelFtS - 4047.0) / 4047.0 * 100);
+        }
+        assertSimulated(r);
     }
 
     @Test

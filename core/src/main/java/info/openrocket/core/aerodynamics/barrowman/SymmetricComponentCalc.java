@@ -128,11 +128,22 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 			frontalArea = Math.abs(Math.PI * (foreRadius * foreRadius - aftRadius * aftRadius));
 
 			double r = component.getRadius(0.99 * length);
-			if (shape.equals(Transition.Shape.OGIVE) && param == 1.0) {
-				sinphi = 0; // special case: tangent ogive
-			} else {
-				sinphi = (aftRadius - r) / MathUtil.hypot(aftRadius - r, 0.01 * length);
-			}
+			// Geometric slope at the base of the nose, used to drive the
+			// empirical TR-R-100 transonic pressure drag interpolator
+			// (calculateTransonicInterpolator). Upstream OpenRocket #2998
+			// special-cased tangent ogives (param == 1.0) by forcing sinphi = 0,
+			// which collapses the entire empirical Cd_p curve to zero from
+			// M = 1.0 through M = 1.5. That zeroes the transonic drag rise on
+			// every tangent-ogive nose cone — including the slender minimum-
+			// diameter rockets in our SimVReal corpus (L500, Kinsel, EZI-65),
+			// which then over-predict apogee by 20–45 % because there is no
+			// nose wave drag during the transonic peak. The geometric formula
+			// already returns a small value for high-fineness ogives (sinphi ≈
+			// 0.10 for L500's 8.85:1 ogive vs ≈ 0.30 for the TR-R-100 reference
+			// 3:1 ogive) — that *is* the slender-body taper, no special case
+			// needed. Use the geometric slope for tangent ogives the same way
+			// we do for every other parametric ogive shape.
+			sinphi = (aftRadius - r) / MathUtil.hypot(aftRadius - r, 0.01 * length);
 		} else {
 			throw new UnsupportedOperationException("Unknown component type " +
 					component.getComponentName());
@@ -197,16 +208,39 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 		double mach = conditions.getMach();
 		CoordinateIF cp;
 
-		// If fore == aft, only body lift is encountered
 		if (isTube) {
-			cp = getLiftCP(conditions, warnings);
+			// Barrowman: a cylindrical body section (foreRadius == aftRadius) has zero
+			// normal-force coefficient.  There is no area change, so the potential-flow
+			// pressure distribution integrates to zero normal force.  The Galejs viscous
+			// crossflow formula — K × planformArea/refArea — grossly overestimates CNa
+			// for long slender bodies (17 rad⁻¹ for an 8"×124" tube) and, when fin CNa
+			// drops as 1/β at supersonic Mach, allows the body CNa to overwhelm fins and
+			// drive CP forward past the CG, producing spurious instability.  RASAero II
+			// correctly uses CNa = 0 for cylindrical sections; we do the same.
+			cp = new Coordinate(planformCenter, 0, 0, 0);
 		} else {
 			// Phase 3a: Mach-dependent CP position
 			// At subsonic: Barrowman CP (cpCache)
 			// At supersonic: CP shifts aft toward planform centroid
 			double effectiveCp = getEffectiveCpPosition(mach);
 
-			cp = new Coordinate(effectiveCp, 0, 0, cnaCache * conditions.getSincAOA() /
+			// At supersonic speeds (M ≥ 1.3), contracting transitions (boattails,
+			// boat-tails) have cnaCache < 0 — a destabilising contribution from
+			// Barrowman's area-change formula.  In practice these components sit in
+			// the wake of the fins at the aft end of the rocket; the simple
+			// potential-flow result is unreliable there and produces a spurious
+			// forward CP shift.  RASAero II ignores boattail CNa for stability in
+			// this regime.  We do the same: blend the weight to zero through the
+			// same transonic band used for body lift (M 0.8 → 1.3).
+			double effectiveCna = cnaCache;
+			if (cnaCache < 0 && mach > STABILITY_BLEND_LOW) {
+				double t = (mach - STABILITY_BLEND_LOW) / (STABILITY_BLEND_HIGH - STABILITY_BLEND_LOW);
+				t = Math.min(1.0, t);
+				double w = t * t * (3 - 2 * t); // cubic Hermite smoothstep, 0→1
+				effectiveCna = cnaCache * (1.0 - w); // fade destabilising CNa to zero
+			}
+
+			cp = new Coordinate(effectiveCp, 0, 0, effectiveCna * conditions.getSincAOA() /
 					conditions.getRefArea()).average(getLiftCP(conditions, warnings));
 		}
 
@@ -334,42 +368,37 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 	}
 
 	/**
-	 * Compute the effective body lift coefficient K as a function of Mach.
+	 * Returns the effective body lift coefficient K, blended to zero at supersonic speeds.
 	 * <p>
-	 * At subsonic speeds, K = 1.1 (Galejs empirical value).
-	 * At supersonic speeds, the crossflow drag coefficient Cd_c decreases
-	 * as the crossflow Mach number transitions from subcritical to supercritical.
+	 * At subsonic speeds (M ≤ 0.8), the Galejs empirical constant K=1.1 applies:
+	 * it accounts for viscous crossflow lift that the potential-flow Barrowman
+	 * formula under-predicts.
 	 * <p>
-	 * Allen &amp; Perkins crossflow analogy:
-	 * - Subcritical crossflow (M_cross &lt; ~0.4): Cd_c ≈ 1.2
-	 * - Supercritical crossflow (M_cross &gt; 0.4): Cd_c decreases
+	 * At supersonic speeds (M ≥ 1.3), K is set to 0. Supersonic slender-body
+	 * theory (Ward 1949) gives body CNa = 2×(A_aft−A_fore)/A_ref, exactly the
+	 * same as the potential-flow Barrowman value, with no additional viscous
+	 * correction. Applying K=1.1 supersonically adds a spurious forward-pulling
+	 * body-lift term that pushes CP in front of CG at high Mach and AoA, causing
+	 * false instability for rockets that flew successfully (e.g. MESOS at M 4.18).
+	 * RASAero II uses strictly Barrowman potential-flow for body components (no
+	 * Galejs correction); zeroing K at supersonic matches this approach.
 	 * <p>
-	 * The crossflow Mach is M * sin(AoA), which at typical flight AoA (1-5°)
-	 * remains subcritical even at M=5. But the overall effectiveness of
-	 * body lift increases modestly with Mach due to compressibility effects.
+	 * A C1-continuous smoothstep blend connects the two regimes through M 0.8–1.3.
 	 *
 	 * @param mach current freestream Mach number
-	 * @return effective body lift coefficient
+	 * @return effective body lift coefficient, in [0, BODY_LIFT_K]
 	 */
 	private static double getEffectiveBodyLiftK(double mach) {
 		if (mach <= STABILITY_BLEND_LOW) {
 			return BODY_LIFT_K;
 		}
-
-		// At supersonic speeds, body lift effectiveness increases slightly
-		// due to compressibility enhancement of the crossflow drag coefficient.
-		// Clamp at a maximum of 1.3 for M > 3 (based on DATCOM data for
-		// typical body fineness ratios).
-		double kSupersonic = Math.min(1.3, BODY_LIFT_K + 0.05 * (mach - 1.0));
-
 		if (mach >= STABILITY_BLEND_HIGH) {
-			return kSupersonic;
+			return 0.0;
 		}
-
-		// Transonic blend
+		// Smoothstep blend from BODY_LIFT_K (subsonic) to 0 (supersonic)
 		double t = (mach - STABILITY_BLEND_LOW) / (STABILITY_BLEND_HIGH - STABILITY_BLEND_LOW);
-		double w = t * t * (3 - 2 * t);
-		return BODY_LIFT_K + w * (kSupersonic - BODY_LIFT_K);
+		double w = t * t * (3 - 2 * t); // cubic Hermite smoothstep, C1-continuous
+		return BODY_LIFT_K * (1.0 - w);
 	}
 
 	@Override
@@ -409,16 +438,30 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 				}
 			}
 		} else {
-			// All nose cones and shoulders from pre-calculated and interpolating
-			if (interpolator == null) {
-				calculateNoseInterpolator();
-			}
-			double interpCd = interpolator.getValue(conditions.getMach());
-			double refArea = conditions.getRefArea();
-			if (Double.isFinite(interpCd) && Double.isFinite(frontalArea) && refArea > 1e-12) {
-				cd = interpCd * frontalArea / refArea;
-			} else {
+			// Nose cones (foreRadius ≈ 0) and expanding shoulders (foreRadius > 0).
+			//
+			// A nose cone points INTO the flow: the tip creates an oblique shock at
+			// supersonic speeds → wave drag.  An expanding shoulder sits mid-body where
+			// the flow is already attached; the diverging surface creates a Prandtl-Meyer
+			// EXPANSION FAN (favorable pressure, no shock) → zero wave drag.  Applying
+			// the nose-cone wave drag model to a shoulder with a 25-30° half-angle
+			// grossly over-predicts drag (e.g. the MESOS booster shoulder at M=2 was
+			// contributing CDp≈0.31, nearly half the vehicle drag).
+			if (foreRadius > 1e-6) {
+				// Expanding shoulder: no wave drag at supersonic speeds.
 				cd = 0;
+			} else {
+				// Nose cone: use analytical wave drag interpolator.
+				if (interpolator == null) {
+					calculateNoseInterpolator();
+				}
+				double interpCd = interpolator.getValue(conditions.getMach());
+				double refArea = conditions.getRefArea();
+				if (Double.isFinite(interpCd) && Double.isFinite(frontalArea) && refArea > 1e-12) {
+					cd = interpCd * frontalArea / refArea;
+				} else {
+					cd = 0;
+				}
 			}
 		}
 
@@ -609,7 +652,17 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 				break;
 
 			case OGIVE:
-				buildAnalyticalWaveDragCurve(false);
+				if (isTangentOgiveReference()) {
+					// Tangent-ogive A52H28-style bodies are badly under-predicted when the
+					// transonic anchor is derived from the near-zero base slope.  The
+					// existing LV-Haack empirical curve is a much better shape proxy for
+					// this reference family at L/D≈3, and the existing fineness scaling
+					// preserves the low-drag behavior of much more slender ogives.
+					addFinenessScaledReferenceCurve(lvHaackInterpolator);
+					extendWithShockExpansion();
+				} else {
+					buildAnalyticalWaveDragCurve(false);
+				}
 				break;
 
 			case ELLIPSOID:
@@ -681,11 +734,7 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 
 			// Extrapolate for fineness ratio if necessary
 			if (int1 != null) {
-				double log4 = Math.log(fineness + 1) / Math.log(4);
-				for (double m : int1.getXPoints()) {
-					double stag = bluntInterpolator.getValue(m);
-					interpolator.addPoint(m, stag * Math.pow(int1.getValue(m) / stag, log4));
-				}
+				addFinenessScaledReferenceCurve(int1);
 			}
 
 			extendWithShockExpansion();
@@ -695,8 +744,8 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 		// The TR-R-100 tables have limited Mach range and fineness ratio coverage.
 		// Dahlem-Buck extends the cone analytical solution to arbitrary shapes using
 		// semi-empirical shape correction factors, providing better coverage at high Mach.
-		if (shape == Transition.Shape.POWER || shape == Transition.Shape.PARABOLIC
-				|| shape == Transition.Shape.HAACK) {
+		if ((shape == Transition.Shape.POWER || shape == Transition.Shape.PARABOLIC
+				|| shape == Transition.Shape.HAACK) && !isDirectReferenceShapeForSupersonicOverride()) {
 			double equivSinPhi = aftRadius / MathUtil.safeSqrt(aftRadius * aftRadius + length * length);
 			LinearInterpolator coneRef = calculateTransonicInterpolator(0, equivSinPhi);
 
@@ -721,6 +770,32 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 
 		// Phase 2E: proper transonic drag rise from Mdd to first data point
 		buildTransonicDragRise();
+	}
+
+	private void addFinenessScaledReferenceCurve(LinearInterpolator referenceCurve) {
+		double log4 = Math.log(fineness + 1) / Math.log(4);
+		for (double m : referenceCurve.getXPoints()) {
+			double stag = bluntInterpolator.getValue(m);
+			interpolator.addPoint(m, stag * Math.pow(referenceCurve.getValue(m) / stag, log4));
+		}
+	}
+
+	private boolean isTangentOgiveReference() {
+		return shape == Transition.Shape.OGIVE && Math.abs(param - 1.0) < 1.0e-6;
+	}
+
+	private boolean isDirectReferenceShapeForSupersonicOverride() {
+		if (shape == Transition.Shape.POWER) {
+			return isApprox(param, 0.25) || isApprox(param, 0.50) || isApprox(param, 0.75) || isApprox(param, 1.0);
+		}
+		if (shape == Transition.Shape.HAACK) {
+			return isApprox(param, 0.0) || isApprox(param, 1.0 / 3.0);
+		}
+		return false;
+	}
+
+	private static boolean isApprox(double value, double target) {
+		return Math.abs(value - target) < 1.0e-6;
 	}
 
 	// ---- Phase 2A: Analytical wave drag methods ----
@@ -762,13 +837,23 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 				}
 			}
 
+			// Clamp non-physical negative results from the analytical solver
+			// before they enter the blend. The shock-expansion integral on a
+			// slender tangent ogive can return slightly negative Cd near the
+			// detachment Mach (e.g. L500's 8.85:1 ogive at M=1.5 → −0.009),
+			// because the rear-half expansion contributes more "suction-area"
+			// than the tip cone shock contributes "pressure-area". The
+			// supersonic-only branch already does Math.max(0, analytical) on
+			// the line below; do the same in the blend so the
+			// empirical-analytical crossfade can never produce a sub-zero point.
+			double clampedAnalytical = Math.max(0, analytical);
 			if (m <= SUPERSONIC_BLEND_HIGH) {
 				double t = (m - SUPERSONIC_BLEND_LOW) / (SUPERSONIC_BLEND_HIGH - SUPERSONIC_BLEND_LOW);
 				double w = t * t * (3 - 2 * t); // smoothstep
 				double empirical = transonic.getValue(m);
-				interpolator.addPoint(m, (1 - w) * empirical + w * analytical);
+				interpolator.addPoint(m, (1 - w) * empirical + w * clampedAnalytical);
 			} else {
-				interpolator.addPoint(m, Math.max(0, analytical));
+				interpolator.addPoint(m, clampedAnalytical);
 			}
 		}
 	}

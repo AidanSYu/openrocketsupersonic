@@ -1,0 +1,392 @@
+# Paul & Wedemeyer (1982) - Vortex-induced side force on ogive-cylinder bodies
+# EOARD-TR-82-7, von Karman Institute for Fluid Dynamics
+# "An investigation of the flow about an ogive cylinder at high angles of incidence"
+#
+# Model: ogive-cylinder, (l/d)_nose = 3.0 (sharp) or 2.4 (blunt, r_N/r_b = 50%)
+#        (l/d)_body = 15, (l/d)_TOT = 18 (sharp) or 17.4 (blunt)
+#        d = 17 mm (wind tunnel model), Re_d = 8.3e4
+# Wind tunnel: VKI S-1 transonic, Mach 0.4-0.9, alpha 0-60 deg
+# Reference area S = pi*d^2/4 (base area)
+#
+# Cy = side force / (0.5 * rho * V^2 * S)
+# Cz = normal force / (0.5 * rho * V^2 * S)  [note: report uses -Cz for upward normal force]
+#
+# Digitized from Figures 87-109 (Cy vs alpha) and Figure 107 (Mach comparison)
+# Also includes Cz from Figures 42-86 for computing Cy/CN ratio
+# Data digitized by visual inspection of scatter-plotted graphs; accuracy ~+/-0.1 in Cy, +/-1 deg in alpha
+#
+# IMPORTANT: The side force direction (sign of Cy) depends on roll orientation and is not
+# aerodynamically deterministic for an axisymmetric body. |Cy| is the meaningful quantity.
+# The sign shown here follows the single roll orientation used in each test run.
+#
+# =========================================================================
+# SECTION 1: Cy vs alpha - Sharp nosed body
+# =========================================================================
+# Source: Figures 87, 89, 91, 93, 95
+#
+nose_type,Mach,alpha_deg,Cy,source_figure
+# --- M = 0.417, Sharp nose (Fig. 87) ---
+sharp,0.417,0,0.00,87
+sharp,0.417,2,0.00,87
+sharp,0.417,4,0.00,87
+sharp,0.417,5,0.00,87
+sharp,0.417,6,0.00,87
+sharp,0.417,7,0.02,87
+sharp,0.417,8,0.05,87
+sharp,0.417,9,0.10,87
+sharp,0.417,10,0.15,87
+sharp,0.417,11,0.18,87
+sharp,0.417,12,0.20,87
+sharp,0.417,13,0.22,87
+sharp,0.417,14,0.20,87
+sharp,0.417,15,0.15,87
+sharp,0.417,16,0.12,87
+sharp,0.417,17,0.08,87
+sharp,0.417,18,0.05,87
+sharp,0.417,19,0.03,87
+sharp,0.417,20,0.02,87
+sharp,0.417,21,0.05,87
+sharp,0.417,22,0.05,87
+sharp,0.417,23,0.08,87
+sharp,0.417,24,0.10,87
+sharp,0.417,25,0.05,87
+sharp,0.417,26,0.02,87
+sharp,0.417,27,0.00,87
+sharp,0.417,28,0.02,87
+sharp,0.417,29,0.05,87
+sharp,0.417,30,0.10,87
+sharp,0.417,32,0.30,87
+sharp,0.417,34,0.60,87
+sharp,0.417,35,0.80,87
+sharp,0.417,36,1.00,87
+sharp,0.417,37,1.20,87
+sharp,0.417,38,1.40,87
+sharp,0.417,39,1.60,87
+sharp,0.417,40,1.80,87
+sharp,0.417,42,2.10,87
+sharp,0.417,44,2.50,87
+sharp,0.417,46,2.80,87
+sharp,0.417,48,3.00,87
+sharp,0.417,50,3.20,87
+sharp,0.417,52,3.40,87
+sharp,0.417,54,3.50,87
+sharp,0.417,55,3.50,87
+sharp,0.417,56,3.40,87
+sharp,0.417,58,3.30,87
+sharp,0.417,60,3.20,87
+# --- M = 0.617, Sharp nose (Fig. 89) ---
+sharp,0.617,0,0.00,89
+sharp,0.617,2,0.00,89
+sharp,0.617,4,0.00,89
+sharp,0.617,6,0.00,89
+sharp,0.617,8,0.02,89
+sharp,0.617,10,0.08,89
+sharp,0.617,12,0.10,89
+sharp,0.617,13,0.12,89
+sharp,0.617,14,0.10,89
+sharp,0.617,15,0.08,89
+sharp,0.617,16,0.05,89
+sharp,0.617,18,0.02,89
+sharp,0.617,20,0.00,89
+sharp,0.617,22,0.00,89
+sharp,0.617,24,0.05,89
+sharp,0.617,26,0.10,89
+sharp,0.617,28,0.20,89
+sharp,0.617,30,0.40,89
+sharp,0.617,32,0.60,89
+sharp,0.617,34,0.80,89
+sharp,0.617,36,1.10,89
+sharp,0.617,38,1.30,89
+sharp,0.617,40,1.60,89
+sharp,0.617,42,1.80,89
+sharp,0.617,44,2.00,89
+sharp,0.617,46,2.20,89
+sharp,0.617,48,2.40,89
+sharp,0.617,50,2.50,89
+sharp,0.617,52,2.10,89
+sharp,0.617,54,2.20,89
+sharp,0.617,56,2.10,89
+sharp,0.617,58,1.80,89
+sharp,0.617,60,3.50,89
+# --- M = 0.695, Sharp nose (Fig. 91) ---
+sharp,0.695,0,0.00,91
+sharp,0.695,4,0.00,91
+sharp,0.695,8,0.05,91
+sharp,0.695,10,0.10,91
+sharp,0.695,12,0.12,91
+sharp,0.695,14,0.15,91
+sharp,0.695,16,0.10,91
+sharp,0.695,18,0.05,91
+sharp,0.695,20,0.02,91
+sharp,0.695,22,0.00,91
+sharp,0.695,24,0.05,91
+sharp,0.695,26,0.08,91
+sharp,0.695,28,0.15,91
+sharp,0.695,30,0.25,91
+sharp,0.695,32,0.30,91
+sharp,0.695,34,0.40,91
+sharp,0.695,36,0.50,91
+sharp,0.695,38,0.55,91
+sharp,0.695,40,0.60,91
+sharp,0.695,42,0.65,91
+sharp,0.695,44,0.70,91
+sharp,0.695,46,0.80,91
+sharp,0.695,48,0.80,91
+sharp,0.695,50,0.70,91
+sharp,0.695,52,0.70,91
+sharp,0.695,54,0.60,91
+sharp,0.695,56,0.50,91
+sharp,0.695,58,0.40,91
+sharp,0.695,60,0.30,91
+# --- M = 0.796, Sharp nose (Fig. 93) ---
+sharp,0.796,0,0.00,93
+sharp,0.796,4,0.00,93
+sharp,0.796,8,0.02,93
+sharp,0.796,10,0.05,93
+sharp,0.796,12,0.08,93
+sharp,0.796,14,0.10,93
+sharp,0.796,16,0.05,93
+sharp,0.796,18,0.02,93
+sharp,0.796,20,0.00,93
+sharp,0.796,22,0.00,93
+sharp,0.796,24,0.00,93
+sharp,0.796,26,0.00,93
+sharp,0.796,28,0.02,93
+sharp,0.796,30,0.05,93
+sharp,0.796,32,0.08,93
+sharp,0.796,34,0.10,93
+sharp,0.796,36,0.10,93
+sharp,0.796,38,0.08,93
+sharp,0.796,40,0.05,93
+sharp,0.796,42,0.05,93
+sharp,0.796,44,0.05,93
+sharp,0.796,46,0.02,93
+sharp,0.796,48,0.00,93
+sharp,0.796,50,0.00,93
+sharp,0.796,52,0.00,93
+sharp,0.796,54,0.00,93
+sharp,0.796,56,-0.20,93
+sharp,0.796,58,-0.40,93
+sharp,0.796,60,-0.60,93
+# --- M = 0.901, Sharp nose (Fig. 95) ---
+sharp,0.901,0,0.00,95
+sharp,0.901,4,0.00,95
+sharp,0.901,8,0.02,95
+sharp,0.901,10,0.05,95
+sharp,0.901,12,0.05,95
+sharp,0.901,14,0.05,95
+sharp,0.901,16,0.02,95
+sharp,0.901,18,0.00,95
+sharp,0.901,20,0.00,95
+sharp,0.901,24,0.00,95
+sharp,0.901,28,0.00,95
+sharp,0.901,30,0.05,95
+sharp,0.901,32,0.05,95
+sharp,0.901,34,0.05,95
+sharp,0.901,36,0.02,95
+sharp,0.901,38,0.00,95
+sharp,0.901,40,0.00,95
+sharp,0.901,42,0.00,95
+sharp,0.901,44,0.00,95
+sharp,0.901,46,0.00,95
+sharp,0.901,48,-0.10,95
+sharp,0.901,50,-0.15,95
+sharp,0.901,52,-0.20,95
+sharp,0.901,54,-0.30,95
+sharp,0.901,56,-0.40,95
+sharp,0.901,58,-0.50,95
+sharp,0.901,60,-0.60,95
+#
+# =========================================================================
+# SECTION 2: Cy vs alpha - Blunt nosed body (r_N/r_b = 50%)
+# =========================================================================
+# Source: Figures 97, 99, 101, 103
+#
+# --- M = 0.395, Blunt nose (Fig. 97) ---
+blunt,0.395,0,0.00,97
+blunt,0.395,4,0.00,97
+blunt,0.395,6,0.00,97
+blunt,0.395,8,0.10,97
+blunt,0.395,10,0.30,97
+blunt,0.395,12,0.40,97
+blunt,0.395,14,0.35,97
+blunt,0.395,16,0.20,97
+blunt,0.395,18,0.10,97
+blunt,0.395,20,0.00,97
+blunt,0.395,22,-0.10,97
+blunt,0.395,24,-0.15,97
+blunt,0.395,26,-0.20,97
+blunt,0.395,28,-0.30,97
+blunt,0.395,30,-0.30,97
+blunt,0.395,32,-0.35,97
+blunt,0.395,34,-0.30,97
+blunt,0.395,36,-0.40,97
+blunt,0.395,38,-0.50,97
+blunt,0.395,40,-0.40,97
+blunt,0.395,42,-0.35,97
+blunt,0.395,44,-0.40,97
+blunt,0.395,46,-0.30,97
+blunt,0.395,48,-0.35,97
+blunt,0.395,50,-0.30,97
+blunt,0.395,52,-0.30,97
+blunt,0.395,54,-0.35,97
+blunt,0.395,56,-0.40,97
+blunt,0.395,58,-0.30,97
+blunt,0.395,60,-0.45,97
+# --- M = 0.611, Blunt nose (Fig. 99) ---
+blunt,0.611,0,0.00,99
+blunt,0.611,4,0.00,99
+blunt,0.611,8,0.10,99
+blunt,0.611,10,0.20,99
+blunt,0.611,12,0.30,99
+blunt,0.611,14,0.30,99
+blunt,0.611,16,0.20,99
+blunt,0.611,18,0.15,99
+blunt,0.611,20,0.15,99
+blunt,0.611,22,0.80,99
+blunt,0.611,24,0.10,99
+blunt,0.611,26,0.00,99
+blunt,0.611,28,-0.10,99
+blunt,0.611,30,-0.20,99
+blunt,0.611,32,-0.20,99
+blunt,0.611,34,-0.30,99
+blunt,0.611,36,-0.30,99
+blunt,0.611,38,-0.40,99
+blunt,0.611,40,-0.35,99
+blunt,0.611,42,-0.30,99
+blunt,0.611,44,-0.30,99
+blunt,0.611,46,-0.35,99
+blunt,0.611,48,-0.30,99
+blunt,0.611,50,-0.30,99
+blunt,0.611,52,-0.35,99
+blunt,0.611,54,-0.30,99
+blunt,0.611,56,-0.35,99
+blunt,0.611,58,-0.30,99
+blunt,0.611,60,-0.30,99
+# --- M = 0.698, Blunt nose (Fig. 101) ---
+blunt,0.698,0,0.00,101
+blunt,0.698,4,0.05,101
+blunt,0.698,6,0.10,101
+blunt,0.698,8,0.15,101
+blunt,0.698,10,0.15,101
+blunt,0.698,12,0.10,101
+blunt,0.698,14,0.05,101
+blunt,0.698,16,0.00,101
+blunt,0.698,18,0.00,101
+blunt,0.698,20,0.00,101
+blunt,0.698,22,0.00,101
+blunt,0.698,24,-0.05,101
+blunt,0.698,26,-0.08,101
+blunt,0.698,28,-0.10,101
+blunt,0.698,30,-0.10,101
+blunt,0.698,32,-0.15,101
+blunt,0.698,34,-0.15,101
+blunt,0.698,36,-0.15,101
+blunt,0.698,38,-0.20,101
+blunt,0.698,40,-0.18,101
+blunt,0.698,42,-0.15,101
+blunt,0.698,44,-0.15,101
+blunt,0.698,46,-0.15,101
+blunt,0.698,48,-0.15,101
+blunt,0.698,50,-0.20,101
+blunt,0.698,52,-0.20,101
+blunt,0.698,54,-0.20,101
+blunt,0.698,56,-0.20,101
+blunt,0.698,58,-0.15,101
+blunt,0.698,60,-0.15,101
+# --- M = 0.797, Blunt nose (Fig. 103) ---
+blunt,0.797,0,0.00,103
+blunt,0.797,4,0.00,103
+blunt,0.797,6,0.05,103
+blunt,0.797,8,0.05,103
+blunt,0.797,10,0.05,103
+blunt,0.797,12,0.05,103
+blunt,0.797,14,0.02,103
+blunt,0.797,16,0.00,103
+blunt,0.797,18,0.00,103
+blunt,0.797,20,0.00,103
+blunt,0.797,22,0.00,103
+blunt,0.797,24,0.00,103
+blunt,0.797,26,0.00,103
+blunt,0.797,28,0.00,103
+blunt,0.797,30,-0.05,103
+blunt,0.797,32,-0.10,103
+blunt,0.797,34,-0.10,103
+blunt,0.797,36,-0.15,103
+blunt,0.797,38,-0.15,103
+blunt,0.797,40,-0.15,103
+blunt,0.797,42,-0.15,103
+blunt,0.797,44,-0.15,103
+blunt,0.797,46,-0.15,103
+blunt,0.797,48,-0.15,103
+blunt,0.797,50,-0.15,103
+blunt,0.797,52,-0.15,103
+blunt,0.797,54,-0.20,103
+blunt,0.797,56,-0.20,103
+blunt,0.797,58,-0.20,103
+blunt,0.797,60,-0.20,103
+#
+# =========================================================================
+# SECTION 3: |Cy_max| vs Mach number (from Figure 105)
+# =========================================================================
+# This is the peak |Cy| observed at each Mach number across all alpha
+#
+# nose_type,Mach,abs_Cy_max,alpha_max_deg,source_figure
+# sharp,0.417,3.50,54,105
+# sharp,0.617,3.50,60,105
+# sharp,0.695,1.00,48,105
+# sharp,0.796,0.60,60,105
+# sharp,0.901,0.60,60,105
+# blunt,0.395,0.50,12,105
+# blunt,0.611,0.80,22,105
+# blunt,0.698,0.20,8,105
+# blunt,0.797,0.20,36,105
+#
+# =========================================================================
+# SECTION 4: Flow regime boundaries (from Figure 106 and text Section 5.3)
+# =========================================================================
+# These boundaries are approximately Mach-independent for M = 0.3-0.9
+#
+# regime,alpha_lower_deg,alpha_upper_deg,description
+# linear_forces,0,8,"No vortex separation; CN linear with alpha"
+# symmetric_vortices,8,12,"Symmetric vortex pair forms on leeward side"
+# weak_asymmetry,12,30,"alpha_AV_weak; small Cy appears due to initial asymmetric perturbation; Cy returns to ~0 near 25 deg"
+# strong_asymmetry,30,50,"alpha_AV_strong; large steady Cy; fully asymmetric vortex pattern"
+# unsteady_shedding,50,90,"alpha_UAV; unsteady asymmetric vortex shedding; Cy fluctuates"
+#
+# KEY FINDINGS FOR ORP MODEL VALIDATION:
+# =======================================
+# 1. ONSET ANGLE: Weak asymmetry begins at alpha ~12-15 deg (sharp nose) or ~25-30 deg (blunt nose).
+#    Strong side forces begin at alpha ~30-35 deg (sharp nose) or ~35-40 deg (blunt nose).
+#    This is HIGHER than ORP's VORTEX_AOA_ONSET = 20 deg for the strong side force,
+#    but LOWER for the weak onset. For model purposes, the "significant" onset at 30-35 deg
+#    for the sharp nose is the most relevant since rockets have sharp ogive noses.
+#
+# 2. SATURATION: Side force reaches maximum at alpha ~48-56 deg (sharp nose, low M).
+#    Above ~50-60 deg, unsteady shedding reduces the steady component.
+#    ORP's VORTEX_AOA_SATURATE = 40 deg is somewhat aggressive; data shows peak closer to 50 deg.
+#
+# 3. MAGNITUDE (Cy/CN ratio):
+#    At M=0.417, sharp nose: peak |Cy| ~ 3.5, while CN (from Fig 43) at alpha=50 deg ~ 6-7
+#    So |Cy|/CN ~ 0.5-0.6 at peak -- much higher than ORP's VORTEX_KV = 0.20.
+#    However, this is for an extremely long body (l/d=18) with NO FINS.
+#    Fins and shorter afterbodies dramatically reduce vortex side force.
+#    For typical sounding rockets (l/d ~ 10-15 with fins), Kv ~ 0.15-0.25 is more appropriate.
+#
+# 4. MACH DEPENDENCE: Side force drops rapidly above M ~0.7. At M=0.8-0.9,
+#    |Cy_max| < 0.6 compared to 3.5 at M=0.4. This is a ~6x reduction.
+#    The crossflow Mach number M*sin(alpha) > 0.42 suppresses the asymmetry.
+#    ORP should consider a Mach-dependent Kv that decreases above M ~0.7.
+#
+# 5. NOSE BLUNTING: 50% blunting (r_N/r_b = 0.5) reduces side force by 5-10x.
+#    This is because blunting delays asymmetric vortex formation.
+#    Typical sounding rockets have sharp ogive noses, so the sharp-nose data is more relevant.
+#
+# 6. COMPARISON WITH ORP CONSTANTS:
+#    ORP VORTEX_AOA_ONSET = 20 deg: Conservative (safe). Strong onset is really ~30-35 deg
+#      but weak onset is ~12-15 deg. For stability margin purposes, 20 deg is a reasonable compromise.
+#    ORP VORTEX_AOA_SATURATE = 40 deg: Slightly low. Data shows peak at ~48-55 deg.
+#      Suggest increasing to 45-50 deg.
+#    ORP VORTEX_KV = 0.20: Reasonable for finned rockets. Bare body data shows
+#      |Cy|/CN ~ 0.5 but fins reduce this substantially. Kv=0.20 is a reasonable
+#      lower bound for finned configurations.

@@ -1,0 +1,775 @@
+--- PAGE 1 ---
+search Center 
+Field, Calif. 
+NATIONAL AERONAUTICS AND SPACE ADMINISTRATION 
+WASHINGTON May 1962 
+--- PAGE 2 ---
+1B 
+n -- 
+NATIONAL AERONAUTICS AND SPACE ADMINISTRATION 
+TECHNICAL MEMORANDUM x-653 
+COMPARISON OF THE EFFECTIVENESS OF FURJ3S WITH THAT OF 
+FINS FOR STABILIZING LOW-FINENESS-RATIO BODIES 
+AT MACH NUMBERS FROM 0.6 TO 5.8* 
+By Leland H. Jorgensen, J. Richard Spahr, 
+and William A. Hill, Jr. 
+SUMMARY 
+An experimental and analytical investigation has been made of the 
+effectiveness of flares and of fins for providing aerodynamic stability 
+of low-fineness-ratio bodies near zero angle of attack. Wind-tunnel 
+tests were performed at Mach numbers from 0.6 to 3.8 to measure the 
+normal force, center of pressure, and drag of bodies consisting of 
+conical noses in combination with cylindrical midsections and finned or 
+flared aftersections. This study included an investigation of the 
+effects of nose bluntness, midbody length, flare angle (from 0' to 20°), 
+and fin leading-edge bluntness. 
+The results showed that for the same plan-form area, flares were 
+more effective than fins, but for the same drag, fins were more 
+effective than flares. Flow separation, which occurred ahead of a 
+flare at certain Mach numbers, resulted in an increase in the stabiliz- 
+ing effectiveness of the flare and a decrease in the drag. However, 
+flow separation led to large undesirable shifts in the center of 
+pressure. Blunt fins were found to be more effective than sharp fins, 
+with the vertical as well as the horizontal fins contributing to the 
+effectiveness. 
+Comparisons of the analytical with the experimental results 
+indicated that the analytical method employed gave good estimates of the 
+stabilizing effectiveness of both fins and flares throughout the 
+supersonic Mach number range. 
+*Title, Unclassified w- 
+--- PAGE 3 ---
+2 
+INTRODUCTION c 
+The relative effectiveness of flares as compared with fins for 
+stabilizing bodies of low fineness ratio is of interest in the design 
+of ballistic and atmospheric entry vehicles. Although many investiga- 
+tions have been made of the effectiveness of flares for stabilizing 
+bodies (e.g., refs. 1 through lo), there is a need for direct compari- 
+sons of flare and fin effectiveness over a wide Mach number range. 
+Accordingly, an investigation was conducted to determine the stability 
+and drag of several flared and finned bodies at Mach numbers from 0.6 to A 
+3.8. Models consisting of conical noses with cylindrical midsections 5 
+and finned or flared aftersections were tested. This stud included 7 
+5 investigation of the effects of flare angle (from 0’ to 20 ) and of 
+nose and fin bluntness. The range of flare angles chosen enabled 
+normal-force and stability comparisons of finned and flared models to 
+be made on the basis of either specified equal plan-form area or equal 
+drag. Both experimental and analytical comparisons have been made, and 
+the purpose of this report is to discuss these comparisons. B 
+NOTATION 
+cross-sectional area of cylindrical portion of body 
+fin semispan measured from surface of cylindrical portion 
+of body 
+drag coefficient (exclusive of base drag) at zero angle of 
+attack 
+pitching-moment-curve slope referred to the moment centers 
+shown in figures 8, 9, and 12, 
+(pitchTAdmoment 
+da 
+normal-force-curve slope, - d (“orma:Aforce 
+du 
+- 
+’stag stagnation pressure coefficient, 
+qW 
+diameter of cylindrical portion of body 
+body base diameter 
+--- PAGE 4 ---
+3 
+dW 
+E trip wire diameter 
+complete elliptic integral of second kind 
+K ratio of normal-force component to normal force of fin alone 
+length 2 
+M free-stream Mach number 
+A 
+5 
+7 
+5 stagnation pressure 'stag 
+free-stream static pressure 
+free-stream dynamic pressure 
+Reynolds number based on d s, 
+R 
+radius of fin leading edge 
+radius of spherical portion of nose r 
+r 
+S 
+center of pressure measured rearward from nose-cylinder 
+juncture X CP 
+X' CP center of pressure measured rearward from moment centers 
+shown in figures 8, 9, and 12 
+angle of attack, deg a 
+@Ti- 
+half -angle, deg P 
+6 
+Sub scripts 
+A aftersect ion 
+B (W> 
+C unblunted cone 
+CY cy1 inde r 
+F fins 
+F1 flare body in presence of fins 
+1 
+--- PAGE 5 ---
+4 - 
+N nose 
+S spherical portion of nose 
+W(B) fins in presence of body 
+EXPERIMEKCAL CONSIDERATIONS 
+Wind Tunnels 
+The experimental investigation was conducted in the Ames 2- by 
+2-Foot Transonic Wind Tunnel and the 1- by 3-Foot Supersonic Wind Tunnel. 
+The 2- by 2-foot tunnel is of the closed-circuit, variable-pressure type. 
+It has a flexible-plate nozzle and a perforated test section which 
+permits continuous choke-free operation at Mach numbers up to 1.4. 
+1- by +foot tunnel is also a closed-circuit, variable-pressure type and 
+has a flexible-plate nozzle that provides a variation of Mach number 
+from about 1.4 to 6. 
+by varying the total pressure within the approximate limits of 1/5 of an 
+atmosphere to 4 atmospheres. The 
+In these tunnels the Reynolds number is changed 
+The water content of the air in the tunnels is maintained at less 
+than 0.0003 pound of water per pound of dry air. 
+effect of humidity on the flow is negligible. Consequently, any 
+Models 
+In order to determine the stabilizing effectiveness of flares and 
+fins, models consisting of bodies with and without flared and finned 
+aftersections were tested. 
+shown in figure 1 in three groupings: 
+bodies with flares (fig. l(b) ) , and bodies with cruciform fins (fig. 1( c) ) 
+In addition, the sizes and positions of wire rings that were placed on 
+the body noses to trip the boundary layer are shown in figure l(d). 
+nose shapes were used: one, a sharp cone of 1b02' 
+(designated NS), and the other, a spherically blunted cone (2rS/d = 0.30) 
+with the same cone angle (designated NB). 
+constructed for testing both separately and with cylindrical bodies of 
+2 and 3.37 diameters in length (designated C and CL, respectively). The 
+cylindrical bodies were constructed so that flared or finned aftersections 
+could be attached. All of the flared aftersections were of equal length 
+(1.373 diameters) but with flare angles of Oo, loo, and 20' (fig. l(b)). 
+The finned aftersections were of the same length and plan form as the 
+20° flared aftersection. 
+all sharp or all blunt leading edges and combinations of sharp and blunt Sketches and designations of the models are 
+nose shapes and bodies (fig. l(a)), 
+Two 
+semiapex angle 
+These nose pieces were 
+As noted in figure l(c), cruciform fins with 
+--- PAGE 6 ---
+5 
+A 
+5 
+7 
+5 leading edges were employed. 
+superimposed on a 100 flare was tested. All models were sting mounted 
+from the rear with a strain-gage balance positioned inside each model. 
+Photographs of typical flared and finned models mounted in the 1- by 
+3-foot supersonic wind tunnel are shown in figure 2. In addition, a model with blunt fins 
+Tests 
+Tests were made to determine the normal-force-curve slope, center 
+of pressure, drag, and boundary-layer-flow characteristics of the models 
+at zero angle of attack for various Mach numbers. The test Mach numbers 
+and Reynolds numbers based on body diameter are summarized in the 
+following table: 
+M 
+5.82 
+To determine accurately the normal-force-curve slopes and centers of 
+pressure at zero angle of attack, the models were tested at half degree 
+increments throughout the a range from -4' to +ho. The blunt-nosed 
+bodies alone and in combination with the flared and finned aftersections 
+were tested throughout the entire Mach number range (M = 0.60 to 5.82). 
+The sharp-nosed models and the models with combined sharp and blunt fins 
+(N$F%sE and N-$F%%) were tested only at selected supersonic Mach 
+numbers. All of the models were tested with wire rings mounted on their 
+noses in an effort to trip the boundary-layer flow (fig. l(d)) . The 
+blunt-nosed model with the 20° flare (NBCFl20) was also tested without 
+any rings at Mach numbers from 2.94 to 5.81. For all tests the 
+shadowgraph technique was employed to observe model boundary-layer flow. 
+Reduction and Precision of Data 
+All of the force and moment data have been reduced to coefficient 
+form. From plots of normal-force coefficient and pitching-moment 
+coefficient versus angle of attack, values of C and C were 
+determined, and center-of-pressure positions (x 
+The measured base pressures were used to compute the base drag which 
+was subtracted fromthe total drag measurements, so that the drag 
+coefficients presented are for forces ahead of the body base. NU % 
+/d) were computed. CP 
+--- PAGE 7 ---
+6 
+The precision of the final data is affected by uncertainties in the 
+c measurement of the forces and moments, and in the determination of the 
+stream static and dynamic pressures used in reducing the forces and 
+moments to coefficient form. These individual uncertainties led to the 
+following estimated uncertainties: 
+kO.OOl5 per deg u +oso 
+cNcc 
+M 20.01 for M 5 - 2.94 
+CD kO.013 M 20.03 for M > 2.94 
+REXULTS AND DISCUSSION 
+For all the models tested, experimental values of CNa, xcp/d, and 
+CD as functions of Mach number are presented in figures 3 through 6. 
+Results for the nose shapes and bodies are given in figure 3, while those 
+for the bodies with flares and for the bodies with fins are given in 
+figures 4 and 5, respectively. 
+flared and finned bodies of equal plan-form area. 
+having boundary-layer trip rings are designated by unflagged symbols, 
+whereas results for the models without trip rings are designated by 
+flagged symbols. 
+Reference is made to these figures in the following discussion which is 
+divided into two major sections: (1) comparison of experimental effective- 
+ness of flares and fins and (2) comparison of computed with experimental 
+results. # 
+In figure 6 results are compared for the 
+Data for the models 
+Representative shadowgraphs are shown in figure 7. 
+Comparison of Experimental Effectiveness of Flares and Fins 
+Flared and finned models of equal plan-form area.- Throughout the 
+Mach number range, the results clearly show that flares are more effec- 
+tive than fins of equal plan-form area. For example, in figure 6 it is 
+seen that the values of (fig. 6(a)) for the flared models were 
+higher at supersonic speeds than those for comparable finned models, and 
+the centers of pressure (fig. 6(b)) were more rearward. As a result, 
+the flare provided considerably more stability than the fins, especially 
+at the higher Mach numbers. The gains in effectiveness of the flared 
+over the finned models were, of course, accompanied by much greater drag 
+for the flared models (fig. 6(c)). CN U 
+r+ 
+It is important to note here that some of the aerodynamic charac- 
+teristics for the 20' flared models were greatly influenced by flow 
+separation ahead of the flare. F 
+The occurrence of flow separation was 
+--- PAGE 8 ---
+A 
+5 
+7 
+5 detected from shadowgraphs, some of which are reproduced in figure 7. It is seen in figure 7(a) that a large region of turbulent-flow separa- 
+tion occurred in the vicinity of the flare-cylinder juncture at 
+This separation resulted in the sharp rise in 
+at Mach numbers from about 1.1 to 1.2. The decrease in C as the 
+Mach number was increased from about1.2 to 1.4 was probably due to a 
+reduction in the extent of the turbulent separation, as evidenced in the 
+shadowgraph at M = 1.37 (fig. 7(b)). 
+effects of laminar flow separation appeared in the measured data. 
+the test Mach numbers of 2.94 and 4.06, removal of the nose-mounted 
+transition rings (shown in fig. l(d)) resulted in laminar flow with 
+separation beginning well in front of the flare. 
+showing turbulent flow, fig . 7( e), with shadowgraph showing laminar 
+flow separation, fig. 7(d) .) The large increase in C for the model 
+with laminar separated flow over that for the same model with turbulent 
+attached flow is evident in figure 6(a). 
+greater than 4.05, the transition rings were completely ineffective, 
+laminar flow separation occurring with the rings attached as well as 
+removed. 
+resulted in a higher 
+pressure and a reduced drag. Thus, the effects of flow separation were 
+beneficial at a particular Mach number; however, the large shift in 
+center of pressure when the flow changed from attached to separated was 
+undesirable . M = 1.20. 
+shown in figure 6(a) cN& 
+NU 
+At higher supersonic Mach numbers, 
+At 
+(Compare shadowgraph 
+NU 
+At the test Mach numbers 
+mow separa-Lion (WIietIiei- lminar OT tar>ident) not only 
+but also in a more rearward center of cNa 
+Although blunted fins were used for the fin and flare comparisons 
+in figure 6, the same general conclusions were reached when results for 
+the flared model, NBCF~~O, were compared with those for the comparable 
+sharp-finned model, NBCFS. In fact, as shown in figure 5, blunting of 
+either horizontal or vertical fins or both was beneficial in increasing 
+effectiveness, so that the advantage of flares over sharp fins was even 
+greater than over blunted fins. 
+Direct comparisons of the stabilizing effectiveness of fins and 
+flares have been made by subtracting the short-forebody, NBC, results 
+(fig. 3) from the results for the flared and finned models (figs. 4 and 5). 
+The ratios Fl/cNa, F’ ‘%, Fl /c %, F’ and x:p, F1/xGp, F have been 
+determined and are presented as a function of Mach number in figure 8. 
+For the comparisons, the center of moments was taken at the fin- 
+cylinder or flare-cylinder juncture (1.37 cylinder diameters forward of 
+the base) . The center-of-pressure positions, x1 were referenced from 
+this juncture as indicated in the sketch of figure 8. 
+clearly demonstrates the increasing stability advantage of flares over 
+fins as Mach number was increased. 
+stability attributable to flow separation. C% 
+CP’ This figure 
+It also shows the great increase in 
+--- PAGE 9 ---
+8 -- 
+Flared and finned models of equal drag.- For certain applications, - 
+comparisons of the effectiveness of flares with that of fins of equal drag 
+may be of greatest interest. 
+having the same drag as the 20° blunt-finned model, NBCF'B, it was found by 
+interpolation of the drag results for the flared models that the flare 
+angle for such a model would be about 7' at the supersonic Mach numbers 
+considered. Values of CN~ and xcp/d for this model were then determined 
+by interpolation. As for the models of equal plan-form area, the results 
+for the forebody alone were subtracted from those for the total model and 
+the rat io s CN,, F/CN,, F1, C%, /c %, F1, and x;~, F/x&~, ~1 were determined. 
+These ratios, presented in figure 9, clearly show the greater effectiveness 
+of the fins. However, it is important to note that the advantage of fins 
+over flares decreased with increasing Mach number. Although no tests were made of a flared model 
+1 
+1 
+Comparisons of Computed With Experimental Results 
+Comparisons of computed with experimental results (figs. 10 and 11) 1 
+indicate that for models without flow separation, the aerodynamic charac- 
+teristics can be predicted reasonably well by the methods outlined in 
+the appendix. No attempt was made to predict the conditions for flow 
+separation or the effects of separation on the forces and moinents. 
+seen in figure 10 for a model with a 20' flare (N$F1;10), flow separation 
+in front of the flare resulted in values of C much greater than 
+computed, and centers of pressure much more rearward. For the models 
+with attached flow the calculated curves were determined both with and 
+without the inclusion of experimental lift from the cylindrical body. 
+In the calculative procedure outlined in the appendix, it was assumed 
+that there was no lift from the body cylinder. 
+experimental results for the nose and for the nose with body (shown in 
+fig. 3), it was found that the cylindrical portion of the body was 
+contributing to the lift. In figures 10 and 11, the calculated curves 
+with the experimental lift of the cylindrical body included are generally 
+in better agreement with experiment than those without it. As 
+NU 
+However, from the 
+Comparisons of computed with experimental stabilizing effectiveness 
+of fins relative to flares have been made and are presented in figure 12. 
+These comparisons are presented for the specified conditions of equal 
+plan-form area (fig . 12( a) ) and equal drag (fig . 12(b) ) . 
+experimental results previously presented in figures 8 and 9, the 
+comparisons are general in that the forebody contribution to the 
+aerodynamic characteristics was not included. 
+plan-form area (fig. 12(a) ) , the increase in superiority of flares over 
+fins as Mach number was increased was closely predicted except when flow - 
+separation occurred. 
+with Mach number of the advantage of fins over flares was only approxi- 
+mated by theory. However, the theoretical and experimental trends with As for the 
+On the basis of equal 
+For specified equal drag (fig . l2(b) ) , the decrease 
+--- PAGE 10 ---
+- 9 
+A 
+5 
+7 
+5 Mach number indicate that there my be little or no advantage of fins 
+over flares at Mach numbers above about 6. 
+CONCLUSIONS 
+Wind-tunnel tests and theoretical calculations have been made to 
+compare the effectiveness of flares with that of fins for stabilizing 
+low-fineness-ratio bodies near zero angle of attack over the Mach 
+number range of 0.6 to 5.8. 
+following conclusions have been drawn: On the basis of this investigation, the 
+1. Flares provided more stability but also more drag than fins 
+of the same plan-form area. 
+advantage of flares over fins increased and the drag disadvantage 
+diminished. With increase in Mach number, the stability 
+2. Fins provided more stability than a flare having the same drag. 
+With increase in Mach number, howevei-, the sta3ility advantage of fins 
+decreased. 
+3. Flow separation, which occurred ahead of a flare at some Mach 
+numbers, caused an increase in the stabilizing effectiveness and a 
+decrease in the drag of the flare, but this effect led to large unde- 
+sirable shifts in the center of pressure. 
+4. Blunt fins gave more longitudinal stability than sharp fins of 
+the same plan area, with the vertical as well as the horizontal fins 
+contributing to the stabilizing effectiveness. 
+5. The aerodynamic characteristics contributed by the fins or flares 
+were virtually unaffected by changes in nose bluntness or body length. 
+6. Analytical methods provided good estimates of the fin and flare 
+effectiveness at supersonic Mach numbers. 
+Ames Research Center 
+National Aeronautics and Space Administration 
+Moffett Field, Calif., Mar. 19, 1962 
+--- PAGE 11 ---
+10 
+APPENDIX 
+FORMULAS FOR P-DICTING THE AERODYNAMIC CaCTERISTICS OF 
+FLAXFlD OR FINNED BODIES 
+General analytical expressions have been derived for the calculation 
+of CNa, C%, and CD for 
+at zero angle of attack. 
+site body, illustrated in 
+teristics for the parts. the component parts of a flared or finned body 
+The aerodynamic characteristics for the compo- 
+sketch (a), were taken as the sum of the charac- 
+Formulas for computing the characteristics for A 
+5 
+7 
+5 
+I Finned or ~ 
+Nose I Cy1 inder i flared , I 
+I 
+I I aftersection 
+I 
+Sketch (a) 
+the component parts are presented in the following sections. 
+are presented for the cylindrical portion of the body, since the theore- 
+tical values of C , C and CD (exclusive of skin-friction drag) are No formulas 
+all zero. Na ma’ 
+CN, AND C% AT ZERO ANGLE OF ATTACK 
+Body Nose 
+For a spherically blunted cone (sketch (b)), the expressions for 
+for %, C CN~ and C% in terms of C for a spherical segment and 
+a sharp-nosed cone are Na, s 
+--- PAGE 12 ---
+c 11 
+A 
+5 
+7 
+5 xN +- d cNa,N 
+are based on the cylinder cross-sectional area, 
+and the reference length for 
+the derivation of equation (2), the center of pressure of the spherical is the cylinder diameter d. In ma? N and C where cNa,N 
+cma, N 
+Moment reference center 
+'T dl 
+I 
+Sketch (b) 
+nose was taken as the center of the sphere, and the center of pressure 
+of the nose cone without blunting was assumed to be at 2/3 cos2% 
+its length from the imaginary vertex. The quantity C was obtained 
+from the modified Newtonian relationship for a spherical segment of 
+Na, s 
+For the calculations of this report, Cpstag was taken as 1.8. 
+cal values of C for an unblunted cone with the same as the 
+blunted conical nose were obtained from chart 8 of reference 11. Theoreti- 
+Na, c 
+--- PAGE 13 ---
+Flared Aftersection 
+For a conical flared aftersection (sketch (b)), the formulas are 
+Finned Aftersection 
+For an aftersection consisting of a circular cylinder in combination 
+with thin fins having sharp leading edges (sketch (c) with 
+small), the formulas are b vanishingly 
+where K is the sum of the interference factors QJ~) and.KB(wA given 
+in figures 2 and 5 of reference 12 and 
+(ref. 13) linea ized wing t eory %,W 
+-I r 1 
+4 
+.. 
+--- PAGE 14 ---
+c 
+A 
+5 
+7 
+5 I 
+I 
+I 
+I 
+“F 
+Aftersection with sharp fins 
+For an aftersection with blunt leading-edged fins (sketch (a)), the 
+caused by bluntness of the two vertical fins ma, F additional CN and C a, F 
+Wb in 
+t 
+Af tersection wi 
+were derived by the 
+expressions are h blunt fins Rear view of blunt fin 
+Sketch (d) 
+use of modified Newtonian theory. The derived 
+--- PAGE 15 ---
+14 
+where - --- 
+AC ma, F =-(2. 2d tan a 6~ )"cNa,F 
+of leading-edge bluntness of 
+ma7 F and C cNa, F The predicted effects on 
+the horizontal fins of the present investigation were found to be 
+negligible . 
+CD AT ZERO ANGLE OF ATTACK 
+The drag coefficient for the complete model configuration was 
+assumed to be equal to the sum of the drag coefficients of the component 
+parts, with base drag coefficient omitted. For each component the drag 
+coefficient was taken as the sum of the pressure drag and skin-friction 
+drag coefficients. 
+believed to be essentially turbulent, the skin-friction drag coefficients 
+were computed by the T' 
+in reference 14. 
+and apply to the general configuration in sketch (a). Since the boundary-layer flow over the models was 
+method, the details of which are clearly given 
+The formulas which follow are for pressure drag only 
+Body Nose 
+For the spherically blunted conical nose (sketch (b)), the drag 
+coefficient was computed from 
+was the drag coefficient of the spherical tip of radius rs, where cDs 
+and CD 
+8~. was the drag coefficient of the unblunted cone of half-angle 
+was obtained from The drag coefficient of the spherical tip C 
+cDS 
+~ the modified Newtonian relationship A 
+5 
+7 
+5 
+--- PAGE 16 ---
+was taken as 1.8. The drag %tag For the calculations of this report, 
+coefficient of the unblunted cone 
+Taylor-Maccoll theory, and values of CD 
+in reference ll. C% was assumed to be that given by 
+were obtained from chart 6 C 
+Flared Aftersection 
+For the flared aftersection (sketch (b)), the drag coefficient was 
+computed from 
+where CR was the drag coefficient of the cone of diameter d' and 
+half-angles 
+cDC 6~1. As for the conical portion of the nose, values of 
+were o"uta~~e6 from chart. 6 in reference 11. 
+Finned Aftersection 
+Modified Newtonian theory (with C = 1.8) was applied to obtain 
+the drag coefficients for the sharp- and blunt-finned aftersections. For 
+the sharp-finned aftersection indicated in sketch (e), the drag coeffi- Pstag 
+cient was estimated from 
+- CDF - 
+For the aftersection with the blunt leading-edged fins (sketch (d) ) , 
+the drag of the rounded leading edges was added to that of the side 
+wedges to give the expression . 
+a% + l6 %tag - (15) 
+--- PAGE 17 ---
+16 
+where 
+r 1 
+A 
+5 
+7 
+5 
+USE OF TRE FOFQ4UlAS FOR RYPEFGONIC MACH NUMBERS 
+At hypersonic Mach nunibers (probably above about 6) the formulas 
+for the flared and finned aftersections should be multiplied by the ratio 
+of the local to the free-stream dynamic pressure. Also, the values of 
+used in the formulas should be determined ‘N,,c’ ‘Na,w’ ‘DCJ and ‘Pstag 
+for the local instead of the free-stream Mach number. If the bow shock- 
+wave position is known, local flow conditions can be estimated by the 
+method of reference 17. For the present investigation, however, free- 
+stream flow conditions were assumed in all of the calculations. 
+--- PAGE 18 ---
+2B 
+REFERENCES 
+A 
+5 
+7 
+5 1. Kehlet, Alan B.: Some Effects of Reynolds Number on the Stability 
+of a Series of Flared-Body and Blunted-Cone Models at Mach Numbers 
+from 1.62 to 6.86. NACA RM L57J29, 1958. 
+2. Dennis, David H.: The Effects of Boundary-Layer Separation Over 
+NACA RM A57130, 1937. Bodies of Revolution With Conical Tail. 
+3. Eggers, A. J., Jr., and Syvertson, Clarence A.: Experimental Inves- 
+tigation of a Body Flare for Obtaining Pitch Stability and a Body 
+Flap for Obtaining Pitch Control in Hypersonic Flight. 
+A54J7-3, 1955. NACA RM 
+4. Knechtel, Earl D., Treon, Stuart L., and Wakefield, Roy M. : Transonic 
+Static Aerodynamic Characteristics of a Blunt Cone-Cylinder Body 
+With Flared Afterbody or Blunt Cruciform Fins. NASA TM X-40, 1959. 
+5. Wakefield, Roy M., Knechtel, Earl D., and Treon, Stuart L.: Transonic 
+Static Aerodynamic Characteristics of a Biunt Cone-Cyiiii&er "Dodji 
+With Flared Afterbodies of Various Angles and Base Areas. NASA 
+TM x-106, 1959. 
+6. Knechtel, Earl D., Wakefield, Roy M., and Treon, Stuart L.: Transonic 
+Static Aerodynamic Characteristics of a Low-Fineness-Ratio Body of 
+Revolution Having a Blunt Ellipsoidal Nose and Flared Afterbodies 
+of Various Angles and Base Areas. NASA TM X-113, 1960. 
+7. Treon, Stuart L., Wakefield, Roy M., and Knechtel, Earl D.: Effects 
+of Nose Shape and Afterbody Flare on the Transonic Characteristics 
+of a Low-Fineness-Ratio Body of Revolution. NASA TM X-164, 1960. 
+8. Wakefield, Roy M., Treon, Stuart L., and Knechtel, Earl D.: Effects 
+of Centerbody Length and Nose Shape on the Transonic Characteristics 
+of Low-Fineness-Ratio Bodies of Revolution With a Flared Afterbody. 
+NASA TM X-366, 1960. 
+9. Treon, Stuart L.: Effects of Nose Cone Angle on the Transonic Aero- 
+dynamic Characteristics of a Blunt Cone-Cylinder Body Having a 
+Cylindrical, Flared, or Blunt-Finned Afterbody. NASA TM x-582, 
+1961. 
+10. Reese, David E., Jr., and Wehrend, William R., Jr.: An Investigation 
+of the Static and Dynamic Aerodynamic Characteristics of a Series 
+of Blunt-Nosed Cylinder-Flare Models at Mach Numbers From 0.65 to 
+2.20. NASA TM X-110, 1960. 
+11. Ames Research Staff: Equations, Tables, and Charts for Compressible 
+Flow. NACA Rep. 1135, 1953. 
+--- PAGE 19 ---
+18 -- .I 
+12. Pitts, William C., Nielsen, Jack N., and Kaattari, George E.: Lift 
+and Center of Pressure of Wing-Body-Tail Combinations at Subsonic, 
+Transonic, and Supersonic Speeds. NACA Rep. 1307, 1957. 
+13. Puckett, A. E., and Stewart, H. J.: Aerodynamic Performance of 
+Jour. Aero. Sci., vol. 14, Delta Wings at Supersonic Speeds. 
+no. 10, Oct. 1947, pp. 567-578. 
+14. Shapiro, A. H.: The Dynamics and Thermodynamics of Compressible 
+Fluid Flow. Vol. 11, chs. 26 and 27, The Ronald Press Co., 
+New York, 1954. 
+15. Seiff, Alvin, and Whiting, Ellis E.: Calculation of Flow Fields 
+From Bow-Wave Profiles for the Downstream Region of Blunt-Nosed 
+Circular Cylinders in Axial Hypersonic Flight. NASA TN D-1147, 
+1961. A 
+5 
+7 
+5 
+--- PAGE 20 ---
+20 
+t Rad. =0.25 d 
+NB 
+d = 1.25 in. d = 1.25 in. 
+(a) Nose shapes and bodies. (b) Bodies with flares. 
+Figure 1.- Models tested. 
+--- PAGE 21 ---
+21 
+M L 
+Wind Rings dw 
+tunnel used in. -- 
+LRad.=O.lO d 
+5.37 d 14.59 d -4 
+- 
+NBC FB, S, 
+.- 
+LRad.= 0.10 d 
+d = 1.25 in. 
+(c) Bodies with fins. 
+7- dw 
+0.008 
+4.06 to 5.82 a and b 
+d = 1.25 in. 
+(d) Sizes and positions of boundary - layer 
+trip rings. 
+Figure 1 .- Concluded. 
+--- PAGE 22 ---
+22 
+A-26685 (a) Flared model, NBCF~~O. .. 
+I . 
+(b) Finned model, NBCFB. A-26686 
+Figure 2.- Typical flared and finned models mounted in the Ames 1- by 
+3-mot Supersonic Wind Tunnel. w 
+..V-Un- -- 
+--- PAGE 23 ---
+23 
+0 0 
+--- PAGE 24 ---
+24 
+I 0 4 
+--- PAGE 25 ---
+0 
+--- PAGE 26 ---
+I cucq t - 0 - 
+n 0 t 
+--- PAGE 27 ---
+.-e,,- -. . 1 27 
+--- PAGE 28 ---
+-- 28 - 
+9 
+CD 
+A 
+5 
+7 
+5 
+0 
+--- PAGE 29 ---
+% 3 a 
+2 
+Q) 0 
+6 
+2 k a0 kk 6 
+l? k 0 
+k l? G 0 
+m 
+ho d .d k La 
+.d k 8 .-. 0 .d k 651 
+a PI .d k -P PI .d k -P PI .d k -P ..\ 
+(D 
+3 ch f ... ..\ 
+(D : ch 
+f (D 
+3 ch f 
+0 
+II 
+ffi 0 
+II 
+ffi 2 k 
+cd 0 
+II 
+ffi d ..\ \o 0 ... \b' 0 k 0 
+h 
+% 
+pk 
+Q) 11 
+x - a W n-P 2% 0 0 
+II d, rn t3 0 d 
+FI 0 
+m 
+ho d .d k k 0 m 
+bo d .d k 
+PI .d k -P PI .d k -P 
+! 
+t- 0 
+II 
+ffi 0 
+II 
+ffi 
+L- 
+rl 
+II .-. 
+"? 
+E 
+P n 
+W 0 
+II 
+ffi 
+..\ 0 cu .-. -3 cn 
+cu 
+II 
+E 
+n 
+v 0 
+--- PAGE 30 ---
+30 
+12 
+8 
+CNa,FL 
+CNa,F 
+4 
+0 
+12 
+8 
+',a, Fl, 
+F 
+4 
+0 
+x'cp, FL 
+x'cp, F Separoted flow 
+4 5 6 0 I 2 3 
+M 
+Figure 8.- Ratio of flare to fin effectiveness for equal plan-form area; 
+a = 00. 
+--- PAGE 31 ---
+12 
+8 
+4 
+0 
+4 
+“c p, FL 
+c 12 
+T w 8 
+4 
+0 
+0 I 2 3 4 5 6 
+M 
+0 Figure 9.- Ratio of fin to flare effectiveness for equal drag; a = 0 . 
+--- PAGE 32 ---
+32 
+--- PAGE 33 ---
+33 
+--- PAGE 34 ---
+34 
+c 
+A 
+5 
+7 
+5 
+.. 
+--- PAGE 35 ---
+35 
+. 
+a, U 0 N - a, U 0 N 
+U N (D 
+In 
+U 
+mz 
+N 
+0 
+(D 
+In 
+0 I 
+NASA-Langley, 1962 A-5 75 

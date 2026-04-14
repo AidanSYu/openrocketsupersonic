@@ -1,0 +1,17 @@
+issue_id,category,component,target,metric,threshold,notes
+G01,guard,gyroscopic_q_threshold,dynP_gate,dynP_max,<500,Log RK4 stepper `dynP` evolution and confirm < 500 Pa.
+G02,guard,angular_timestep_floor,dt_floor,dt_min,>dt_user/4,Run tumbling/drop cases showing `dt` stays above the floor.
+G03,guard,minimum_timestep,dt_floor,dt_min,>dt_user/20,High-drag/transonic sweeps should never hit the absolute floor.
+G04,guard,coefficient_sanitization,coeffs,|C_D|&|C_N|,<MAX_REASONABLE,Confirm sanitized coefficients remain untapped in validated envelopes.
+G05,guard,crossflow_cm_cap,crossflow_cm,|C_m|,<20,Data should show cap only intersects in extreme AoA beyond the validated set.
+G06,guard,crossflow_cn_zeroing,crossflow_cn,|C_N|,>=0.5,Create Mach/AoA contours highlighting the zeroing mask.
+G07,guard,sbli_denominator,sbli,M^2-1,>0.1,Ensure SBLI denominator stays above the floor except near Mach 1.
+G08,guard,pressure_plateau,pressure,pressure,<=2,Demonstrate plateau hits only in off-nominal separated flows.
+G09,guard,step_drag_threshold,step_drag,ΔC_D,<0.04,Measure sub-transonic step drag before/after threshold activation.
+G10,guard,pitch_yaw_randomization,randomization,random_offset,±0.0005,Log offsets for Monte Carlo symmetry breakers.
+T01,tuned,pitch_damping_multiplier,Cmq,Cmq_vs_Mach,linear_range,Export Mach sweep, confirm slope scales linearly with the multiplier.
+T02,tuned,body_damping_and_fin_cap,pitch_damping,body_vs_fin,Damping contributions,Isolate body/fin damping via `six_fin_reference_case`.
+T03,tuned,magnus_body_fraction,yaw_response,C_N_vs_yaw,fraction_impact,Sweep Mach at α=60° in yaw mode to highlight Magnus effect.
+T04,tuned,transonic_cmq_gauss,Cmq,Cmq_transonic,steady_bump,Export transonic Cmq envelope to ensure bump stays below zero crossing.
+T05,tuned,vortex_asymmetry,vortex_sideforce,C_N,AoA_map,Document onset and saturation AoA across Mach.
+T06,tuned,crossflow_cd,crossflow_switch,C_N_poststall,Crossflow switch,Trace crossflow onset threshold and compare pre/post AoA.
