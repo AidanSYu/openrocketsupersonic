@@ -1,0 +1,61 @@
+# NACA TN 3372 -- Peck, Robert F. (April 1955)
+# "Flight Measurements of Base Pressure on Bodies of Revolution
+#  with and without Simulated Rocket Chambers"
+# NACA Langley Aeronautical Laboratory.
+# Supersedes recently declassified NACA RM L50I28a (1950).
+# NTRS: https://ntrs.nasa.gov/citations/19930084618
+# Local PDF: paper/data/pdf/NACA_TN_3372.pdf
+#
+# =============================================================================
+# WHY THIS DATASET MATTERS
+# =============================================================================
+# Independent primary-source free-flight confirmation of the transonic base-
+# pressure peak seen in Hart L52E06. Peck used fin-stabilized bodies (rather
+# than finless sting-free) so the absolute CD_base is lower than Hart's
+# Config A, but the peak shape and location are independent.
+#
+# =============================================================================
+# MODEL GEOMETRY
+# =============================================================================
+#   Configs A, B, C: fin-stabilized bodies of revolution with CYLINDRICAL
+#                    afterbody (flat base, A_b = A_m).
+#     A -- open (hollow) base
+#     B -- simulated rocket chamber
+#     C -- simulated rocket chamber, different nozzle
+#   Config D:        converging (boat-tail) afterbody -- EXCLUDED here
+#                    because it is not representative of a flat cylindrical
+#                    rocket base.
+#   Support:         FREE-FLIGHT after booster separation (no sting)
+#   Mach range:      0.7 to 1.2
+#
+# =============================================================================
+# DIGITIZATION PROVENANCE
+# =============================================================================
+# Values digitized by visual reading of Peck Figure 12 top curve labelled
+# "Avg. of configs. A, B and C edge orifice" (dashed-dotted line).
+# Y-axis: Dp/q plotted as negative (-0.32 to +0.16 with 0.04 per division).
+# X-axis: M from 0.6 to 1.2 with 0.1 per division.
+#
+# Confidence on each point: +-0.015 (Peck's scatter plus tick-reading).
+# Edge-orifice pressure on a flat cylindrical base equals the base-drag
+# coefficient CD_base to within the usual rim-vs-average base pressure
+# correction (Peck text discusses this).
+#
+# Rendered at 250 DPI from the archive.org PDF.
+#
+# =============================================================================
+# DATA (Figure 12, "Avg. of A, B, C edge orifice", cylindrical afterbody)
+# =============================================================================
+# Mach, Cpb_edge_abs, source_figure, quality_flag
+0.60,0.160,TN3372_Fig12_ABCavg_edge,clean_free_flight
+0.70,0.160,TN3372_Fig12_ABCavg_edge,clean_free_flight
+0.80,0.160,TN3372_Fig12_ABCavg_edge,clean_free_flight
+0.85,0.170,TN3372_Fig12_ABCavg_edge,clean_free_flight
+0.90,0.180,TN3372_Fig12_ABCavg_edge,clean_free_flight
+0.95,0.195,TN3372_Fig12_ABCavg_edge,clean_free_flight
+0.98,0.230,TN3372_Fig12_ABCavg_edge,clean_free_flight
+1.00,0.275,TN3372_Fig12_ABCavg_edge,clean_free_flight
+1.05,0.280,TN3372_Fig12_ABCavg_edge,clean_free_flight
+1.10,0.270,TN3372_Fig12_ABCavg_edge,clean_free_flight
+1.15,0.265,TN3372_Fig12_ABCavg_edge,clean_free_flight
+1.20,0.260,TN3372_Fig12_ABCavg_edge,clean_free_flight

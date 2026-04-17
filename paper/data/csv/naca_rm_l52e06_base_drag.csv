@@ -1,0 +1,94 @@
+# NACA RM L52E06 -- Hart, Roger G. (1952)
+# "Effects of Stabilizing Fins and a Rear-support Sting on the Base Pressures
+#  of a Body of Revolution in Free Flight at Mach Numbers from 0.7 to 1.3"
+# NACA Langley Aeronautical Laboratory, 22 September 1952;
+# declassified 25 May 1956.
+# NTRS: https://ntrs.nasa.gov/citations/19930087048
+# Archive.org mirror: https://archive.org/details/NASA_NTRS_Archive_19930087048
+# Local PDF: paper/data/pdf/NACA_RM_L52E06.pdf
+#
+# =============================================================================
+# WHY THIS DATASET MATTERS (for OpenRocket Plus transonic base drag validation)
+# =============================================================================
+# This is a PRIMARY, STING-FREE, FREE-FLIGHT measurement of transonic base
+# drag on a cylindrical-afterbody body of revolution. It contains all three
+# conditions needed to isolate the physical sting-free base drag:
+#   (i)   Config A  -- finless free-flight (NO sting, NO fins)  <-- cleanest
+#   (ii)  Config B  -- same body with SIMULATED REAR-SUPPORT STING
+#   (iii) Config C  -- fin-stabilized free-flight (reference 3, Welsh 1950)
+# Hart's Figure 6 directly shows that a sting reduces base suction by 40%
+# at subsonic speeds but has NO measurable effect at M > 1.15, quantifying
+# exactly the contamination that was present in the Compton NASA TN D-4821
+# wind-tunnel data (M 0.95-1.20) that the original authors themselves rejected.
+#
+# Hart Configuration A is therefore a defensible, sting-free, primary
+# transonic base-drag source directly comparable to OpenRocket Plus's
+# polynomial transonic base-drag peak.
+#
+# =============================================================================
+# MODEL GEOMETRY
+# =============================================================================
+#   Shape:          ogive-cylinder, fineness ratio 11
+#   Nose:           3.5-caliber ogival nose joined to cylinder
+#   Base:           FLAT, A_b = A_m (pure cylindrical afterbody)
+#   Reference area: body cross-sectional (frontal) area
+#   Stability:      internal nose-ballasting (Config A/D) or nose sting (F)
+#                   to keep center-of-gravity forward, trim AoA < 1 deg
+#   Support:        FREE-FLIGHT AFTER BOOSTER SEPARATION (no sting contamination)
+#   Tracking:       Doppler velocimeter + SCR-584 theodolite radar
+#   Atmosphere:     radiosonde balloon released immediately after each flight
+#   Re_L:           15e6 to 45e6 (increasing with M per figure 5)
+#   Drag probable error: < 4% (flight-to-flight repeatability on previously
+#                         tested Config E used to estimate)
+#   Base-pressure probable error: +-0.030 at M=0.8, +-0.013 at M=1.25
+#   Mach number probable error:   +-0.01
+#
+# =============================================================================
+# DIGITIZATION PROVENANCE
+# =============================================================================
+# Values digitized by visual reading of Hart Figure 8 (base-drag coefficient
+# CDB vs M for configurations A and C) and Figure 6 (rim base-pressure
+# coefficient P_B vs M, configurations A vs B [with sting]).
+#
+# Figure 8 Y-axis: CDB, ticks at 0, 0.08, 0.16, 0.24, 0.32 (0.04/minor),
+#                  X-axis: M, ticks at 0.6 to 1.4 (0.02/minor)
+# Figure 6 Y-axis: |P_B| (plotted as -P_B scale: 0 to -0.32 per 0.04)
+#
+# Rendered at 300 DPI from the archive.org-hosted PDF.
+# Confidence on each point: +-0.01 (tick resolution is 0.02).
+# Reading is of the FAIRED CURVE drawn by the original authors through the
+# scatter-data.
+#
+# Compare against OpenRocket Plus current polynomial transonic base drag peak:
+#   Configuration        ORP polynomial (2026-04)     Hart A free-flight
+#   M=0.90               0.205                        0.18
+#   M=1.00               (transition)                 0.255
+#   M=1.05 (ORP peak)    0.25                         0.265  (Hart peak)
+#   M=1.10               ~0.235                       0.265
+#   M=1.13               0.22                         0.26
+#   M=1.20               (blend)                      0.255
+#   M=1.30 (DA anchor)   0.174                        0.25  <-- ORP too low by 30%
+#
+# Key finding: Hart data supports a PEAK ~0.26-0.27 at M=1.03-1.10 that is
+# BROADER and HIGHER than ORP currently implements. Hart also shows that ORP
+# underpredicts CDB at M=1.30 by roughly 30%. The Devan-Ashwood formula
+# 0.064 + 0.186/M^2 = 0.174 at M=1.30 is significantly below the Hart 0.25.
+#
+# =============================================================================
+# DATA (Figure 8, Configuration A, finless, flat base, NO STING)
+# =============================================================================
+# Mach, CDB_A_finless, source_figure, quality_flag
+0.60,0.150,L52E06_Fig8_ConfigA,clean_free_flight
+0.70,0.150,L52E06_Fig8_ConfigA,clean_free_flight
+0.80,0.160,L52E06_Fig8_ConfigA,clean_free_flight
+0.85,0.170,L52E06_Fig8_ConfigA,clean_free_flight
+0.90,0.180,L52E06_Fig8_ConfigA,clean_free_flight
+0.95,0.215,L52E06_Fig8_ConfigA,clean_free_flight
+1.00,0.255,L52E06_Fig8_ConfigA,clean_free_flight
+1.05,0.265,L52E06_Fig8_ConfigA,clean_free_flight
+1.08,0.267,L52E06_Fig8_ConfigA,clean_free_flight
+1.10,0.265,L52E06_Fig8_ConfigA,clean_free_flight
+1.15,0.260,L52E06_Fig8_ConfigA,clean_free_flight
+1.20,0.255,L52E06_Fig8_ConfigA,clean_free_flight
+1.25,0.250,L52E06_Fig8_ConfigA,clean_free_flight
+1.30,0.250,L52E06_Fig8_ConfigA,clean_free_flight

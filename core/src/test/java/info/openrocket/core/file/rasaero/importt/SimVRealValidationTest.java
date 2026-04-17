@@ -235,9 +235,9 @@ public class SimVRealValidationTest extends BaseTestCase {
 
     @Test
     public void testGibb() {
-        // Subsonic: I284W, 3" dia, actual=3913ft, RASAero=4310ft
+        // Subsonic: I284W, 3" dia, actual=3913ft, RASAero=4205ft
         SimResult r = importAndSimulate("Gibb.CDX1");
-        reportResult(r, 3913, 4310);
+        reportResult(r, 3913, 4205);
         assertSimulated(r);
     }
 
@@ -251,9 +251,9 @@ public class SimVRealValidationTest extends BaseTestCase {
 
     @Test
     public void testRaven() {
-        // Transonic: J570W, 1.75" dia, actual=8815ft, RASAero=9288ft
+        // Transonic: J570W, 1.75" dia, actual=8815ft, RASAero=9332ft
         SimResult r = importAndSimulate("Raven.CDX1");
-        reportResult(r, 8815, 9288);
+        reportResult(r, 8815, 9332);
         assertSimulated(r);
     }
 
@@ -267,41 +267,41 @@ public class SimVRealValidationTest extends BaseTestCase {
 
     @Test
     public void testBlister() {
-        // Transonic: K1075GG, 3" dia, actual=9026ft, RASAero=8347ft
+        // Transonic: K1075GG, 3" dia, actual=9026ft, RASAero=8301ft
         SimResult r = importAndSimulate("Blister.CDX1");
-        reportResult(r, 9026, 8347);
+        reportResult(r, 9026, 8301);
         assertSimulated(r);
     }
 
     @Test
     public void testTorrent() {
-        // Supersonic M~1.25: M1850GG, 4" dia, actual=12807ft, RASAero=13852ft
+        // Supersonic M~1.25: M1850GG, 4" dia, actual=12807ft, RASAero=13717ft
         SimResult r = importAndSimulate("Torrent.CDX1");
-        reportResult(r, 12807, 13852);
+        reportResult(r, 12807, 13717);
         assertSimulated(r);
     }
 
     @Test
     public void testFullMetalJacket1() {
-        // Supersonic M~2.3: O10000, 4" dia, actual=37981ft, RASAero=38820ft
+        // Supersonic M~2.3: O10000, 4" dia, actual=37981ft, RASAero=38772ft
         SimResult r = importAndSimulate("Full Metal Jacket1.CDX1");
-        reportResult(r, 37981, 38820);
+        reportResult(r, 37981, 38772);
         assertSimulated(r);
     }
 
     @Test
     public void testN5800MinDia() {
-        // Supersonic M~3.1: N5800, 3.9" dia, actual=56573ft, RASAero=62308ft
+        // Supersonic M~3.1: N5800, 3.9" dia, actual=56573ft, RASAero=61982ft
         SimResult r = importAndSimulate("DontDebateThisN5800MinDia.CDX1");
-        reportResult(r, 56573, 62308);
+        reportResult(r, 56573, 61982);
         assertSimulated(r);
     }
 
     @Test
     public void testQu8k() {
-        // Supersonic M~3.4: Q18000, 8" dia, actual=121478ft, RASAero=116254ft
+        // Supersonic M~3.4: Q18000, 8" dia, actual=121478ft, RASAero=119684ft
         SimResult r = importAndSimulate("Qu8k.CDX1");
-        reportResult(r, 121478, 116254);
+        reportResult(r, 121478, 119684);
         assertSimulated(r);
     }
 
@@ -431,16 +431,16 @@ public class SimVRealValidationTest extends BaseTestCase {
 
         // Data: {filename, actualFt, rasAeroFt}
         String[][] rockets = {
-            {"Gibb.CDX1",                      "3913",  "4310"},
+            {"Gibb.CDX1",                      "3913",  "4205"},
             {"EZI65-1.CDX1",                   "3965",  "4214"},
             {"Thunder&Lightning.CDX1",          "3577",  "3989"},
             {"IonDrive.CDX1",                   "8027",  "8642"},
-            {"Blister.CDX1",                    "9026",  "8347"},
-            {"Raven.CDX1",                      "8815",  "9288"},
-            {"Torrent.CDX1",                    "12807", "13852"},
-            {"Full Metal Jacket1.CDX1",         "37981", "38820"},
-            {"DontDebateThisN5800MinDia.CDX1",  "56573", "62308"},
-            {"Qu8k.CDX1",                       "121478","116254"},
+            {"Blister.CDX1",                    "9026",  "8301"},
+            {"Raven.CDX1",                      "8815",  "9332"},
+            {"Torrent.CDX1",                    "12807", "13717"},
+            {"Full Metal Jacket1.CDX1",         "37981", "38772"},
+            {"DontDebateThisN5800MinDia.CDX1",  "56573", "61982"},
+            {"Qu8k.CDX1",                       "121478","119684"},
         };
 
         int passed = 0, failed = 0, simFailed = 0;

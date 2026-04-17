@@ -46,6 +46,7 @@ public class SimulationHandler extends AbstractElementHandler {
     private Double booster1LaunchWt;
     private Double booster1CG;
     private Boolean includeBooster1;
+    private Double sustainerNozzleDiameter;
     private ThrustCurveMotor booster2Engine;
     private Double booster2SeparationDelay;
     private Double booster2LaunchWt;
@@ -66,16 +67,19 @@ public class SimulationHandler extends AbstractElementHandler {
         if (RASAeroCommonConstants.SUSTAINER_ENGINE.equals(element)
                 || RASAeroCommonConstants.SUSTAINER_IGNITION_DELAY.equals(element)
                 || RASAeroCommonConstants.SUSTAINER_LAUNCH_WT.equals(element)
+                || RASAeroCommonConstants.SUSTAINER_NOZZLE_DIAMETER.equals(element)
                 || RASAeroCommonConstants.SUSTAINER_CG.equals(element)
                 || RASAeroCommonConstants.BOOSTER1_ENGINE.equals(element)
                 || RASAeroCommonConstants.BOOSTER1_IGNITION_DELAY.equals(element)
                 || RASAeroCommonConstants.BOOSTER1_SEPARATION_DELAY.equals(element)
                 || RASAeroCommonConstants.BOOSTER1_LAUNCH_WT.equals(element)
+                || RASAeroCommonConstants.BOOSTER1_NOZZLE_DIAMETER.equals(element)
                 || RASAeroCommonConstants.BOOSTER1_CG.equals(element)
                 || RASAeroCommonConstants.INCLUDE_BOOSTER1.equals(element)
                 || RASAeroCommonConstants.BOOSTER2_ENGINE.equals(element)
                 || RASAeroCommonConstants.BOOSTER2_SEPARATION_DELAY.equals(element)
                 || RASAeroCommonConstants.BOOSTER2_LAUNCH_WT.equals(element)
+                || RASAeroCommonConstants.BOOSTER2_NOZZLE_DIAMETER.equals(element)
                 || RASAeroCommonConstants.BOOSTER2_CG.equals(element)
                 || RASAeroCommonConstants.INCLUDE_BOOSTER2.equals(element)) {
             return PlainTextHandler.INSTANCE;
@@ -92,6 +96,11 @@ public class SimulationHandler extends AbstractElementHandler {
             sustainerIgnitionDelay = Double.parseDouble(content);
         } else if (RASAeroCommonConstants.SUSTAINER_LAUNCH_WT.equals(element)) {
             sustainerLaunchWt = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_WEIGHT;
+        } else if (RASAeroCommonConstants.SUSTAINER_NOZZLE_DIAMETER.equals(element)) {
+            double val = Double.parseDouble(content);
+            if (Math.abs(val) > 1.0e-12) {
+                sustainerNozzleDiameter = val / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH;
+            }
         } else if (RASAeroCommonConstants.SUSTAINER_CG.equals(element)) {
             sustainerCG = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH;
         } else if (RASAeroCommonConstants.BOOSTER1_ENGINE.equals(element)) {
@@ -102,6 +111,8 @@ public class SimulationHandler extends AbstractElementHandler {
             booster1SeparationDelay = Double.parseDouble(content);
         } else if (RASAeroCommonConstants.BOOSTER1_LAUNCH_WT.equals(element)) {
             booster1LaunchWt = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_WEIGHT;
+        } else if (RASAeroCommonConstants.BOOSTER1_NOZZLE_DIAMETER.equals(element)) {
+            warnIfNonZero(warnings, element, content);
         } else if (RASAeroCommonConstants.BOOSTER1_CG.equals(element)) {
             booster1CG = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH;
         } else if (RASAeroCommonConstants.INCLUDE_BOOSTER1.equals(element)) {
@@ -112,6 +123,8 @@ public class SimulationHandler extends AbstractElementHandler {
             booster2SeparationDelay = Double.parseDouble(content);
         } else if (RASAeroCommonConstants.BOOSTER2_LAUNCH_WT.equals(element)) {
             booster2LaunchWt = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_WEIGHT;
+        } else if (RASAeroCommonConstants.BOOSTER2_NOZZLE_DIAMETER.equals(element)) {
+            warnIfNonZero(warnings, element, content);
         } else if (RASAeroCommonConstants.BOOSTER2_CG.equals(element)) {
             booster2CG = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH;
         } else if (RASAeroCommonConstants.INCLUDE_BOOSTER2.equals(element)) {
@@ -159,6 +172,14 @@ public class SimulationHandler extends AbstractElementHandler {
         sim.setFlightConfigurationId(fcid);
         sim.setName("Simulation " + simulationNr);
         sim.copySimulationOptionsFrom(launchSiteSettings);
+
+        // Set the nozzle exit diameter for power-on base drag computation.
+        // RASAero CDX1 files specify this per-simulation in inches; it has been
+        // converted to meters during parsing.
+        if (sustainerNozzleDiameter != null && sustainerNozzleDiameter > 0) {
+            sim.getOptions().setNozzleExitDiameter(sustainerNozzleDiameter);
+        }
+
         context.getOpenRocketDocument().addSimulation(sim);
 
         // Set the weight and CG overrides
@@ -221,26 +242,35 @@ public class SimulationHandler extends AbstractElementHandler {
         config.setSeparationEvent(StageSeparationConfiguration.SeparationEvent.BURNOUT);
     }
 
+    private void warnIfNonZero(WarningSet warnings, String element, String content) {
+        try {
+            if (Math.abs(Double.parseDouble(content)) > 1.0e-12) {
+                warnings.add("Ignoring unsupported RASAero setting " + element + "=" + content + ".");
+            }
+        } catch (NumberFormatException ignored) {
+            // Numeric-format validation is handled by the parser for supported fields.
+        }
+    }
+
     /**
      * Returns the furthest-aft {@link BodyTube} in the stage that should receive
-     * RASAero sustainer/booster motors.
+     * the imported RASAero motor.
      * <p>
-     * Every {@link BodyTube} implements {@link MotorMount}, so a naive
-     * {@code instanceof MotorMount} scan picks the wrong tube once a CDX1
-     * {@code FinCan} is imported as a sibling body tube (see {@link FinCanHandler}):
-     * the fin-can sleeve would incorrectly host the main motor instead of the
-     * primary airframe tube.
+     * For plain body chains this is just the aft-most tube. For CDX1 fin-can
+     * imports, this must still be the aft-most tube even though it is named
+     * {@code "Fin Can"}: {@link FinCanHandler} shortens the underlying parent
+     * tube and inserts the overlapping sleeve as a sibling so the outer
+     * aerodynamic profile stays linear. If we skip that aft sleeve here, the
+     * motor gets anchored to the shortened parent tube, shifting the motor
+     * forward by {@code (shoulderLength + finCanLength)} and corrupting the CG
+     * back-calculation for the stage.
      */
     private MotorMount getMotorMountForStage(int stageNr) {
         AxialStage stage = (AxialStage) rocket.getChild(stageNr);
         for (int i = stage.getChildCount() - 1; i >= 0; i--) {
             RocketComponent component = stage.getChild(i);
             if (component instanceof BodyTube) {
-                BodyTube bt = (BodyTube) component;
-                if ("Fin Can".equals(bt.getName())) {
-                    continue;
-                }
-                return bt;
+                return (BodyTube) component;
             }
         }
         return null;

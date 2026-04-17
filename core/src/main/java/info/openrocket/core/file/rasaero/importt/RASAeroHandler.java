@@ -110,7 +110,7 @@ public class RASAeroHandler extends AbstractElementHandler {
             }
             // Rocket design
             else if (RASAeroCommonConstants.ROCKET_DESIGN.equals(element)) {
-                return new RocketDesignHandler(context, rocket.getChild(0));
+                return new RocketDesignHandler(context, rocket.getChild(0), launchSiteSettings);
             }
             // LaunchSite
             else if (RASAeroCommonConstants.LAUNCH_SITE.equals(element)) {
@@ -157,10 +157,21 @@ public class RASAeroHandler extends AbstractElementHandler {
          */
         private final RocketComponent component;
 
-        public RocketDesignHandler(DocumentLoadingContext context, RocketComponent component) {
+        /**
+         * Shared simulation options used as the template for every imported
+         * RASAero simulation. RocketDesign-level flags (e.g. Turbulence) apply
+         * to all simulations from this file, so we set them here and let
+         * {@link SimulationHandler} copy them into each per-simulation
+         * {@link SimulationOptions} instance.
+         */
+        private final SimulationOptions launchSiteSettings;
+
+        public RocketDesignHandler(DocumentLoadingContext context, RocketComponent component,
+                SimulationOptions launchSiteSettings) {
             super();
             this.context = context;
             this.component = component;
+            this.launchSiteSettings = launchSiteSettings;
         }
 
         @Override
@@ -196,6 +207,16 @@ public class RASAeroHandler extends AbstractElementHandler {
                 return PlainTextHandler.INSTANCE;
             }
 
+            // Imported silently before; keep parsing text so we can emit explicit
+            // warnings when the file requests unsupported behavior.
+            else if (RASAeroCommonConstants.MODIFIED_BARROWMAN.equals(element)
+                    || RASAeroCommonConstants.TURBULENCE.equals(element)
+                    || RASAeroCommonConstants.SUSTAINER_NOZZLE.equals(element)
+                    || RASAeroCommonConstants.BOOSTER1_NOZZLE.equals(element)
+                    || RASAeroCommonConstants.BOOSTER2_NOZZLE.equals(element)) {
+                return PlainTextHandler.INSTANCE;
+            }
+
             // Comments
             else if (RASAeroCommonConstants.COMMENTS.equals(element)) {
                 return PlainTextHandler.INSTANCE;
@@ -212,9 +233,47 @@ public class RASAeroHandler extends AbstractElementHandler {
             if (RASAeroCommonConstants.SURFACE_FINISH.equals(element)) {
                 SurfaceFinishHandler.setSurfaceFinishes(component.getRocket(), content, warnings);
             }
+            else if (RASAeroCommonConstants.MODIFIED_BARROWMAN.equals(element)) {
+                warnIfTrue(warnings, element, content);
+            }
+            else if (RASAeroCommonConstants.TURBULENCE.equals(element)) {
+                if (Boolean.parseBoolean(content)) {
+                    // Honor RASAero's Turbulence=True by forcing a fully-turbulent
+                    // boundary layer in the ORP skin-friction model. Applies to
+                    // every simulation generated from this CDX1 via
+                    // launchSiteSettings, which SimulationHandler copies into
+                    // each sim's own SimulationOptions.
+                    if (launchSiteSettings != null) {
+                        launchSiteSettings.setForceTurbulentBL(true);
+                    }
+                    warnings.add("RASAero " + element + "=True honored: forcing fully-turbulent boundary layer"
+                            + " in skin-friction model.");
+                }
+            }
+            else if (RASAeroCommonConstants.SUSTAINER_NOZZLE.equals(element)
+                    || RASAeroCommonConstants.BOOSTER1_NOZZLE.equals(element)
+                    || RASAeroCommonConstants.BOOSTER2_NOZZLE.equals(element)) {
+                warnIfNonZero(warnings, element, content);
+            }
             // Comments
             else if (RASAeroCommonConstants.COMMENTS.equals(element)) {
                 component.getRocket().setComment(content);
+            }
+        }
+
+        private void warnIfTrue(WarningSet warnings, String element, String content) {
+            if (Boolean.parseBoolean(content)) {
+                warnings.add("Ignoring unsupported RASAero setting " + element + "=" + content + ".");
+            }
+        }
+
+        private void warnIfNonZero(WarningSet warnings, String element, String content) {
+            try {
+                if (Math.abs(Double.parseDouble(content)) > 1.0e-12) {
+                    warnings.add("Ignoring unsupported RASAero setting " + element + "=" + content + ".");
+                }
+            } catch (NumberFormatException ignored) {
+                // Numeric-format validation is handled elsewhere if the value is consumed.
             }
         }
     }

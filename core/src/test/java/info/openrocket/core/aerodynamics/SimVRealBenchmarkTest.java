@@ -23,6 +23,7 @@ import info.openrocket.core.document.Simulation;
 import info.openrocket.core.file.GeneralRocketLoader;
 import info.openrocket.core.file.motor.RASPMotorLoader;
 import info.openrocket.core.file.rasaero.RASAeroMotorsLoader;
+import info.openrocket.core.logging.SimulationAbort;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.masscalc.MassCalculator;
 import info.openrocket.core.masscalc.RigidBody;
@@ -40,7 +41,8 @@ import info.openrocket.core.rocketcomponent.SymmetricComponent;
 import info.openrocket.core.rocketcomponent.TrapezoidFinSet;
 import info.openrocket.core.rocketcomponent.Transition;
 import info.openrocket.core.simulation.FlightData;
-import info.openrocket.core.startup.OpenRocketCore;
+import info.openrocket.core.simulation.FlightEvent;
+import info.openrocket.core.util.BaseTestCase;
 
 /**
  * SimVReal Benchmark: Loads CDX1 files from SimVReal/RasAero Sims,
@@ -60,7 +62,7 @@ import info.openrocket.core.startup.OpenRocketCore;
  * simulations to time out when they run simultaneously.
  */
 @ResourceLock("AERO_CPU_HEAVY")
-public class SimVRealBenchmarkTest {
+public class SimVRealBenchmarkTest extends BaseTestCase {
 
     /** Path to SimVReal CDX1 files, relative to project root */
     private static final String SIMVREAL_DIR = "simvreal/RasAero Sims";
@@ -73,7 +75,6 @@ public class SimVRealBenchmarkTest {
 
     @BeforeAll
     static void setup() {
-        OpenRocketCore.initialize();
         // Preload the RASAero motor database that SimVReal CDX1 files reference by name.
         // Without this, ~5 rockets (Proteus6, Kinsel, etc.) fail with hasMotors=false
         // because the default OpenRocket motor DB doesn't contain these curves.
@@ -255,6 +256,7 @@ public class SimVRealBenchmarkTest {
         List<Double> rasErrors = new ArrayList<>();
         int failed = 0;
         int skipped = 0;
+        int abnormalEnds = 0;
 
         System.out.println();
         System.out.println("=".repeat(120));
@@ -299,6 +301,7 @@ public class SimVRealBenchmarkTest {
                 // Run the first simulation with a timeout
                 sim.getOptions().setTimeStep(0.05);  // reasonable timestep
                 sim.getOptions().setMaximumStepAngle(Math.toRadians(3));
+                sim.getOptions().setMaxSimulationTime(2400);  // allow long descents from high apogee
 
                 // Run in a thread with timeout to prevent hanging
                 Thread simThread = new Thread(() -> {
@@ -339,6 +342,10 @@ public class SimVRealBenchmarkTest {
                 // ORP apogee in feet (FlightData returns meters)
                 double orpApogeeFt = data.getMaxAltitude() * 3.28084;
                 double maxMach = data.getMaxMachNumber();
+                String terminalNote = describeTerminalState(sim, data);
+                if (!terminalNote.isEmpty()) {
+                    abnormalEnds++;
+                }
 
                 // If zero altitude, print debug info
                 if (orpApogeeFt < 1) {
@@ -367,9 +374,10 @@ public class SimVRealBenchmarkTest {
                     failed++;
                 }
 
-                System.out.printf("%-30s %8.0f %8.0f %8.0f %+7.1f%% %+7.1f%% %+7.1f%%  %-4s M%.2f%n",
+                System.out.printf("%-30s %8.0f %8.0f %8.0f %+7.1f%% %+7.1f%% %+7.1f%%  %-4s M%.2f%s%n",
                         vc.rocketName, vc.realAltitudeFt, vc.rasAeroAltitudeFt,
-                        orpApogeeFt, rasError, orpError, deltaVsRas, status, maxMach);
+                        orpApogeeFt, rasError, orpError, deltaVsRas, status, maxMach,
+                        terminalNote.isEmpty() ? "" : " " + terminalNote);
 
             } catch (Exception e) {
                 System.out.printf("%-30s  ERROR: %s%n", vc.rocketName, e.getMessage());
@@ -392,6 +400,9 @@ public class SimVRealBenchmarkTest {
         System.out.println("SUMMARY:");
         System.out.printf("  Tested: %d rockets  |  Skipped: %d  |  Errors: %d%n",
                 total, skipped, failed);
+        if (abnormalEnds > 0) {
+            System.out.printf("  Abnormal endings: %d  (SIM_ABORT or max-time without ground hit)%n", abnormalEnds);
+        }
         System.out.println();
         System.out.printf("  %-20s  %12s  %12s%n", "", "RASAero II", "ORP");
         System.out.printf("  %-20s  %11.2f%%  %11.2f%%%n", "Avg |Error|:", avgRasError, avgOrpError);
@@ -402,6 +413,38 @@ public class SimVRealBenchmarkTest {
         System.out.println();
         System.out.println("TARGET: Match RASAero II accuracy (avg ~3.5%, 80% within ±10%)");
         System.out.println("=".repeat(120));
+    }
+
+    private static String describeTerminalState(Simulation sim, FlightData data) {
+        FlightEvent abortEvent = findFirstEvent(data, FlightEvent.Type.SIM_ABORT);
+        if (abortEvent != null && abortEvent.getData() instanceof SimulationAbort abort) {
+            return String.format("ABORT:%s@%.1fs", abort.getCause().name(), abortEvent.getTime());
+        }
+
+        double maxTime = sim.getOptions().getMaxSimulationTime();
+        double tolerance = Math.max(1.0e-6, sim.getOptions().getTimeStep());
+        for (int branchIndex = 0; branchIndex < data.getBranchCount(); branchIndex++) {
+            FlightEvent simulationEnd = data.getBranch(branchIndex).getLastEvent(FlightEvent.Type.SIMULATION_END);
+            if (simulationEnd == null) {
+                continue;
+            }
+
+            boolean groundHit = data.getBranch(branchIndex).getLastEvent(FlightEvent.Type.GROUND_HIT) != null;
+            if (!groundHit && simulationEnd.getTime() >= maxTime - tolerance) {
+                return String.format("MAXTIME@%.0fs", simulationEnd.getTime());
+            }
+        }
+        return "";
+    }
+
+    private static FlightEvent findFirstEvent(FlightData data, FlightEvent.Type type) {
+        for (int branchIndex = 0; branchIndex < data.getBranchCount(); branchIndex++) {
+            FlightEvent event = data.getBranch(branchIndex).getFirstEvent(type);
+            if (event != null) {
+                return event;
+            }
+        }
+        return null;
     }
 
     /**
@@ -814,6 +857,9 @@ public class SimVRealBenchmarkTest {
                 "CalIsp1.CDX1",
                 "CalIsp4.CDX1",
                 "L500Roc.CDX1",
+                "Kinsel_P4935_A-601_Rocket.CDX1",
+                "Proteus6.CDX1",
+                "Full Metal Jacket1.CDX1",
         };
 
         File outDir = new File("build/reports");
@@ -1052,9 +1098,12 @@ public class SimVRealBenchmarkTest {
         System.out.println("=".repeat(90));
 
         // --- assertions ---
-        assertTrue(orpApogeeFt > 100_000,
-                String.format("ORP apogee %.0f ft is too low (expected ~290K ft, staging timing fix applied)",
+        assertTrue(orpApogeeFt > 240_000,
+                String.format("ORP apogee %.0f ft is still too low for MESOS (expected ~290K ft, major staging/import regression likely)",
                         orpApogeeFt));
+        assertTrue(Math.abs(velError) < 5.0,
+                String.format("ORP max velocity %.0f ft/s differs too much from flight %.0f ft/s (err=%+.2f%%)",
+                        orpMaxVelFps, REAL_MAX_VEL_FPS, velError));
         System.out.printf("  RESULT: ORP error vs real = %+.2f%%  (RASAero = %+.2f%%)%n", orpError, rasError);
     }
 
@@ -1280,5 +1329,214 @@ public class SimVRealBenchmarkTest {
             }
         }
         System.out.println("=".repeat(100));
+    }
+
+    /**
+     * Kinsel A-601 trajectory trace — diagnose +54.6% apogee overshoot and MAXTIME@1200s.
+     *
+     * Real (GPS):    42,771 ft
+     * RASAero:       41,098 ft  (-3.9%)
+     * ORP:           66,136 ft  (+54.6%)  MAXTIME@1200s
+     *
+     * CDX1 parity flags: ModifiedBarrowman=True, Turbulence=True, SustainerNozzle=3.09
+     */
+    @Test
+    void testKinselTrajectoryTrace() throws Exception {
+        final double REAL_APOGEE_FT = 42_771.0;
+        final double RASAERO_APOGEE_FT = 41_098.0;
+
+        File cdx1 = null;
+        for (String base : new String[]{SIMVREAL_DIR, "c:/Code/OpenRocket Plus/" + SIMVREAL_DIR}) {
+            File f = new File(base, "Kinsel_P4935_A-601_Rocket.CDX1");
+            if (f.exists()) { cdx1 = f; break; }
+        }
+        assertNotNull(cdx1, "Kinsel CDX1 not found");
+
+        GeneralRocketLoader loader = new GeneralRocketLoader(cdx1);
+        OpenRocketDocument doc = loader.load();
+        Rocket rocket = doc.getRocket();
+        FlightConfiguration config = rocket.getSelectedConfiguration();
+
+        System.out.println();
+        System.out.println("=".repeat(110));
+        System.out.println("Kinsel A-601 Trajectory Trace — P4935 (LR-EX)");
+        System.out.println("=".repeat(110));
+
+        // Geometry dump
+        final double INM = 0.0254;
+        System.out.printf("  Stages: %d  hasMotors: %b%n", config.getStageCount(), config.hasMotors());
+        for (RocketComponent comp : rocket) {
+            double lenIn = comp.getLength() / INM;
+            double posIn = comp.getPosition().getX() / INM;
+            String extra = "";
+            if (comp instanceof SymmetricComponent sc) {
+                double foreR = sc.getForeRadius() / INM;
+                double aftR = sc.getAftRadius() / INM;
+                extra = String.format("  foreR=%.3f aftR=%.3f in", foreR, aftR);
+            }
+            if (comp instanceof TrapezoidFinSet tfs) {
+                extra = String.format("  count=%d rootChord=%.3f span=%.3f in",
+                        tfs.getFinCount(), tfs.getRootChord() / INM, tfs.getSpan() / INM);
+            }
+            System.out.printf("  %-35s  len=%7.3f in  pos=%7.3f in%s%n",
+                    comp.getClass().getSimpleName() + " [" + comp.getName() + "]", lenIn, posIn, extra);
+        }
+
+        // Mass
+        RigidBody launchBody = MassCalculator.calculateLaunch(config);
+        RigidBody structureBody = MassCalculator.calculateStructure(config);
+        double propMass = launchBody.getMass() - structureBody.getMass();
+        System.out.printf("  Launch mass:     %.3f kg (%.3f lb)  [CDX1: 154.46 lb]%n",
+                launchBody.getMass(), launchBody.getMass() * 2.20462);
+        System.out.printf("  Structure mass:  %.3f kg (%.3f lb)%n",
+                structureBody.getMass(), structureBody.getMass() * 2.20462);
+        System.out.printf("  Propellant mass: %.3f kg (%.3f lb)%n",
+                propMass, propMass * 2.20462);
+        System.out.printf("  Launch CG:       %.3f in from nose%n",
+                launchBody.getCenterOfMass().getX() / INM);
+
+        // Reference area
+        System.out.printf("  Ref area: %.6f m^2  (= dia %.3f in)%n",
+                config.getReferenceArea(),
+                2.0 * Math.sqrt(config.getReferenceArea() / Math.PI) / INM);
+        System.out.printf("  Nozzle exit dia (CDX1): 3.09 in  => nozzle area ratio = %.3f%n",
+                Math.pow(3.09 / 6.125, 2));
+
+        // Cd sweep at key Mach numbers
+        System.out.println();
+        System.out.println("  Cd BREAKDOWN (zero AoA, sea level):");
+        System.out.printf("  %-6s %8s %8s %8s %8s%n", "Mach", "Cd_total", "Cd_fric", "Cd_press", "Cd_base");
+        BarrowmanCalculator calc = new BarrowmanCalculator();
+        AtmosphericConditions atm = new AtmosphericConditions();
+        for (double mach : new double[]{0.5, 0.8, 1.0, 1.2, 1.5, 2.0, 2.5, 3.0}) {
+            FlightConditions fc = new FlightConditions(config);
+            fc.setMach(mach);
+            fc.setAOA(0.0);
+            fc.setAtmosphericConditions(atm);
+            WarningSet w = new WarningSet();
+            AerodynamicForces forces = calc.getAerodynamicForces(config, fc, w);
+            System.out.printf("  %-6.1f %8.4f %8.4f %8.4f %8.4f%n",
+                    mach, forces.getCD(), forces.getFrictionCD(), forces.getPressureCD(), forces.getBaseCD());
+        }
+
+        // Simulate
+        List<Simulation> sims = doc.getSimulations();
+        assertFalse(sims.isEmpty(), "No sims in Kinsel CDX1");
+        Simulation sim = sims.get(0);
+        var opts = sim.getOptions();
+        System.out.printf("%n  Launch alt: %.1f m (%.0f ft)  temp=%.1f K%n",
+                opts.getLaunchAltitude(), opts.getLaunchAltitude() / 0.3048,
+                opts.getLaunchTemperature());
+        opts.setTimeStep(0.05);
+
+        Thread simThread = new Thread(() -> {
+            try { sim.simulate(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        });
+        simThread.start();
+        simThread.join(300_000);  // 5 min timeout for this long sim
+        if (simThread.isAlive()) { simThread.interrupt(); fail("Kinsel sim timeout at 300s"); }
+
+        FlightData data = sim.getSimulatedData();
+        assertNotNull(data);
+        assertTrue(data.getBranchCount() > 0);
+
+        double orpApogeeFt = data.getMaxAltitude() * 3.28084;
+        double orpMaxMach = data.getMaxMachNumber();
+        System.out.printf("%n  Real apogee:    %8.0f ft%n", REAL_APOGEE_FT);
+        System.out.printf("  RASAero apogee: %8.0f ft  (%+.1f%%)%n",
+                RASAERO_APOGEE_FT, 100.0 * (RASAERO_APOGEE_FT - REAL_APOGEE_FT) / REAL_APOGEE_FT);
+        System.out.printf("  ORP apogee:     %8.0f ft  (%+.1f%%)  Max Mach %.3f%n",
+                orpApogeeFt, 100.0 * (orpApogeeFt - REAL_APOGEE_FT) / REAL_APOGEE_FT, orpMaxMach);
+
+        // Terminal state
+        String termNote = describeTerminalState(sim, data);
+        System.out.printf("  Terminal state: %s%n", termNote.isEmpty() ? "NORMAL" : termNote);
+
+        // Trajectory trace (burn phase + coast)
+        var branch = data.getBranch(0);
+        List<Double> times = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_TIME);
+        List<Double> alts  = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_ALTITUDE);
+        List<Double> vels  = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_VELOCITY_TOTAL);
+        List<Double> machs = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_MACH_NUMBER);
+        List<Double> cds   = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_DRAG_COEFF);
+        List<Double> drags = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_DRAG_FORCE);
+        List<Double> thrusts = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_THRUST_FORCE);
+        List<Double> masses = branch.get(info.openrocket.core.simulation.FlightDataType.TYPE_MASS);
+
+        if (times == null) { System.out.println("  NO TRAJECTORY DATA"); return; }
+
+        // Find burnout and apogee
+        int burnoutIdx = -1;
+        for (int i = 1; i < times.size(); i++) {
+            double th = (thrusts != null && i < thrusts.size()) ? thrusts.get(i) : 0;
+            double thPrev = (thrusts != null && i-1 < thrusts.size()) ? thrusts.get(i-1) : 0;
+            if (thPrev > 1.0 && th < 0.5) { burnoutIdx = i; break; }
+        }
+        int apogeeIdx = 0;
+        double maxAlt = -1e9;
+        for (int i = 0; i < alts.size(); i++) {
+            if (alts.get(i) > maxAlt) { maxAlt = alts.get(i); apogeeIdx = i; }
+        }
+
+        System.out.println();
+        System.out.printf("  %-7s %-9s %-9s %-7s %-7s %-8s %-8s %-9s%n",
+                "t(s)", "alt(ft)", "V(ft/s)", "Mach", "Cd", "Fdrag(N)", "Thr(N)", "m(kg)");
+        double prevPrintT = -999;
+        for (int i = 0; i < times.size(); i++) {
+            double t = times.get(i);
+            boolean inBurn = (burnoutIdx < 0) || (i <= burnoutIdx);
+            double interval = inBurn ? 0.2 : 1.0;
+            if (i > apogeeIdx + 10) interval = 5.0;  // sparse during descent
+            if (t - prevPrintT < interval - 1e-6 && i != apogeeIdx && i != burnoutIdx) continue;
+            if (t > 200 && i != apogeeIdx) continue;  // don't flood descent trace
+            prevPrintT = t;
+            double alt = alts.get(i);
+            double v = (vels != null && i < vels.size()) ? vels.get(i) : Double.NaN;
+            double mach = (machs != null && i < machs.size()) ? machs.get(i) : Double.NaN;
+            double cd = (cds != null && i < cds.size()) ? cds.get(i) : Double.NaN;
+            double fd = (drags != null && i < drags.size()) ? drags.get(i) : Double.NaN;
+            double th = (thrusts != null && i < thrusts.size()) ? thrusts.get(i) : Double.NaN;
+            double m = (masses != null && i < masses.size()) ? masses.get(i) : Double.NaN;
+            String marker = "";
+            if (i == burnoutIdx) marker = " <-- BURNOUT";
+            if (i == apogeeIdx) marker = " <-- APOGEE";
+            System.out.printf("  %-7.2f %-9.0f %-9.0f %-7.3f %-7.3f %-8.1f %-8.1f %-9.4f%s%n",
+                    t, alt * 3.28084, v * 3.28084, mach, cd, fd, th, m, marker);
+        }
+
+        // Key metrics
+        if (burnoutIdx > 0) {
+            double tBO = times.get(burnoutIdx);
+            double altBO = alts.get(burnoutIdx);
+            double vBO = vels.get(burnoutIdx);
+            double massBO = masses.get(burnoutIdx);
+            double machBO = machs.get(burnoutIdx);
+            double keBO = 0.5 * massBO * vBO * vBO;
+            double tApogee = times.get(apogeeIdx);
+            double altApogee = alts.get(apogeeIdx);
+
+            System.out.println();
+            System.out.printf("  Burnout: t=%.2fs  alt=%.0f ft  V=%.0f ft/s  M=%.3f  m=%.3f kg%n",
+                    tBO, altBO * 3.28084, vBO * 3.28084, machBO, massBO);
+            System.out.printf("  Apogee:  t=%.2fs  alt=%.0f ft  (coast dAlt=%.0f ft, coast=%.1fs)%n",
+                    tApogee, altApogee * 3.28084,
+                    (altApogee - altBO) * 3.28084, tApogee - tBO);
+            System.out.printf("  KE@burnout: %.0f J%n", keBO);
+
+            // Avg Cd during coast
+            if (cds != null) {
+                double sumCd = 0; int nCd = 0;
+                for (int i = burnoutIdx; i <= apogeeIdx && i < cds.size(); i++) {
+                    if (cds.get(i) > 0 && cds.get(i) < 5) { sumCd += cds.get(i); nCd++; }
+                }
+                System.out.printf("  Avg Cd coast: %.4f  (n=%d)%n", nCd > 0 ? sumCd/nCd : Double.NaN, nCd);
+            }
+        }
+
+        System.out.printf("%n  DIAGNOSIS: ORP overshoots by +%.1f%%. ",
+                100.0 * (orpApogeeFt - REAL_APOGEE_FT) / REAL_APOGEE_FT);
+        System.out.println("Check: coast drag level, nozzle parity, mass, ModifiedBarrowman effect");
+        System.out.println("=".repeat(110));
     }
 }

@@ -60,6 +60,16 @@ public class SimulationConditions implements Monitorable, Cloneable {
 	private double maxSimulationTime = RK4SimulationStepper.RECOMMENDED_MAX_TIME;
 	private double maximumAngleStep = RK4SimulationStepper.RECOMMENDED_ANGLE_STEP;
 
+	/** Nozzle exit diameter in meters for power-on base drag. NaN = unknown. */
+	private double nozzleExitDiameter = Double.NaN;
+
+	/**
+	 * When true, the aerodynamic calculator forces a fully-turbulent boundary
+	 * layer from x = 0. Pass-through of the RASAero II {@code Turbulence=True}
+	 * CDX1 flag. Default {@code false}.
+	 */
+	private boolean forceTurbulentBL = false;
+
 
 	private List<SimulationListener> simulationListeners = new ArrayList<>();
 
@@ -227,6 +237,24 @@ public class SimulationConditions implements Monitorable, Cloneable {
 
 	public void setMaximumAngleStep(double maximumAngle) {
 		this.maximumAngleStep = maximumAngle;
+		this.modID = new ModID();
+	}
+
+	public double getNozzleExitDiameter() {
+		return nozzleExitDiameter;
+	}
+
+	public void setNozzleExitDiameter(double nozzleExitDiameter) {
+		this.nozzleExitDiameter = nozzleExitDiameter;
+		this.modID = new ModID();
+	}
+
+	public boolean isForceTurbulentBL() {
+		return forceTurbulentBL;
+	}
+
+	public void setForceTurbulentBL(boolean forceTurbulentBL) {
+		this.forceTurbulentBL = forceTurbulentBL;
 		this.modID = new ModID();
 	}
 

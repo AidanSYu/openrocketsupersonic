@@ -1,0 +1,97 @@
+# NACA RM L53C02 -- Love, Eugene S. (April 1953)
+# "The Base Pressure at Supersonic Speeds on Two-Dimensional Airfoils and
+#  Bodies of Revolution (With and Without Fins) Having Turbulent Boundary Layers"
+# NACA Langley Aeronautical Laboratory.
+# UNT Digital Library: https://digital.library.unt.edu/ark:/67531/metadc63847/
+# Local PDF: paper/data/pdf/NACA_RM_L53C02_Love.pdf
+#
+# =============================================================================
+# WHY THIS DATASET MATTERS  (for M 2-3 base drag gap identified post Prompt 13)
+# =============================================================================
+# Hart RM L52E06 (in-repo) covers M 0.6-1.30 only (transonic, mixed-regime).
+# Peck TN 3372   (in-repo) covers M 0.6-1.20 only (transonic, fin-stab).
+# TN 3393        (in-repo) covers M 2.73-4.48 only (base turbulent ref).
+# Gap: M 1.3 - 2.7 cylindrical-afterbody base drag.
+#
+# Love Figure 21 ("Effects of Mach number upon the base pressure of 10 deg
+# cone-cylinders of fineness ratio 5") is a compilation curve of Pb_B vs Mach
+# from M = 1.2 to M = 3.8 on cylindrical afterbodies, drawn through all
+# supersonic-wind-tunnel and ballistic-range data available by 1953. The
+# solid "Chapman, Ref. 2" curve is the compilation from NACA TR 1051
+# (Chapman 1950 = TN 2137 declassified), and the dashed curve is Love's
+# present re-estimate for L/D=5.
+#
+# This fills the M 1.5-2.7 gap that Prompt 13 closed on the low-Mach side
+# (Hart + Peck) and leaves open on the supersonic side.
+#
+# =============================================================================
+# MODEL GEOMETRY (Fig. 21 compilation)
+# =============================================================================
+#   Shape:          10-deg cone-cylinder bodies of revolution
+#                   (conical nose + cylindrical afterbody ending in flat base).
+#   Base:           FLAT cylindrical (beta_boattail = 0).
+#   Fineness ratio: L/D = 5 for Love's present-estimate dashed curve.
+#                   Data scatter includes L/D from 3 to 7 per ref 2 / ref 30.
+#   Support:        Wind-tunnel sting-mounted models AND ballistic-range
+#                   free-flight points are mixed in the "all experimental
+#                   points" scatter; the fitted curve smooths over this.
+#   Boundary layer: TURBULENT (this paper is specifically restricted to
+#                   turbulent BL in its title).
+#   Reynolds number range: ~ 1e6 to 10e6 typical; Chapman shows Re effect
+#                   is small above transition (Re > ~2e6).
+#
+# =============================================================================
+# DIGITIZATION PROVENANCE
+# =============================================================================
+# Source: Figure 21 of RM L53C02 (page 50 of PDF, UNT scan rendered at 500 DPI).
+# Two curves digitized:
+#   (1) Chapman Ref. 2 (solid line) -- the TR 1051 compilation through all
+#       1950-era experimental points.
+#   (2) Love "Present estimate, L/D = 5" (dashed line) -- Love's 1953 re-estimate.
+# Y-axis Pb (negative, plotted as positive up): 0 to -0.24, major tick 0.04,
+# minor tick 0.01.  X-axis M_inf: 1 to 4, major 1.0, minor 0.2.
+# Visual reading uncertainty: +-0.005 on Pb, +-0.02 on Mach.
+#
+# =============================================================================
+# SUPPLEMENTARY POINTS (Love figures 23 and 25, single Mach)
+# =============================================================================
+# Figure 23 at M_inf = 2.9, beta_boattail = 0: Pb = -0.12 (average across
+# 4 compilation sources: Ames ref 10, NOL ref 13, Chapman, Cortright-Schroeder).
+# Figure 25 at M_inf = 3.24, beta_boattail = 0: Pb = -0.085 (ref 13 + present).
+# Figure 22 averaged body-of-revolution base pressure at M_inf = 1.93: -0.19
+# and at M_inf = 2.41: -0.13 (uniform across base, near-rim ~ centerline).
+#
+# =============================================================================
+# QUANTITATIVE COMPARISON WITH DEVAN-ASHWOOD (ORP current constants)
+# =============================================================================
+# Devan-Ashwood in ORP: CDB = 0.064 + 0.186 / M^2  (BarrowmanDragCalculator
+# BASE_DRAG_A=0.064, BASE_DRAG_B=0.186).  Computed at Love's Mach points:
+#   M=1.5: DA=0.147, Love ref 2=0.185  --> DA LOW by 0.038 (20%)
+#   M=2.0: DA=0.111, Love ref 2=0.160  --> DA LOW by 0.049 (31%)
+#   M=2.5: DA=0.094, Love ref 2=0.125  --> DA LOW by 0.031 (25%)
+#   M=3.0: DA=0.085, Love ref 2=0.100  --> DA LOW by 0.015 (15%)
+#   M=3.5: DA=0.079, Love ref 2=0.080  --> essentially equal
+#   M=4.0: DA=0.076, Love ref 2=0.070  --> DA slightly HIGH (negligible)
+# Devan-Ashwood is A-level ONLY above M ~ 3.0.  In the M 1.5-3.0 band it
+# systematically under-predicts base drag on a CLEAN cylindrical body
+# (no fins) by 15-31%.
+#
+# =============================================================================
+# DATA (Fig. 21, no-fin 10-deg cone-cylinder, L/D ~ 5, turbulent BL)
+# =============================================================================
+# Mach, Pb_Chapman_Ref2_solid, Pb_Love_LD5_dashed, notes
+1.2,0.190,0.180,faired curve, some scatter +-0.015
+1.4,0.190,0.180,near-peak region, slight maximum on solid curve
+1.5,0.188,0.175,gap-filler for DA/ORP transonic-to-supersonic handoff
+1.6,0.185,0.170,
+1.8,0.175,0.160,
+2.0,0.160,0.155,Fig 22 confirms: Pb avg across base ~ -0.18 at M=1.93
+2.2,0.140,0.140,
+2.4,0.130,0.130,Fig 32 at M=2.41 meas x/c=1.0 (no-fin effective): Pb~-0.135
+2.5,0.125,0.125,
+2.7,0.110,0.110,
+3.0,0.100,0.100,Fig 22 M=2.41 (Pb ~ -0.13) extrapolated consistent
+3.3,0.090,0.090,
+3.5,0.085,0.085,
+3.7,0.078,0.078,
+4.0,0.070,0.070,

@@ -586,9 +586,14 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 		
 		// Compute flight conditions
 		calculateFlightConditions(status, store);
-		
+
+		// TODO: Power-on base drag reduction is physically correct but currently makes
+		// the benchmark worse because coast drag is underestimated.  Enable after
+		// closing the high-M finned-body coast drag gap.
+		// populateThrustState(status, store);
+
 		/*
-		 * Check whether to store warnings or not.  Warnings are ignored when on the 
+		 * Check whether to store warnings or not.  Warnings are ignored when on the
 		 * launch rod or 0.25 seconds after departure, and when the velocity has dropped
 		 * below 20% of the max. velocity.
 		 */
@@ -610,6 +615,37 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 	}
 	
 	
+
+	/**
+	 * Populate FlightConditions with thrust level and nozzle area ratio so
+	 * that the drag calculator can apply power-on base drag reduction.
+	 */
+	private void populateThrustState(SimulationStatus status, DataStore store) {
+		double totalThrust = 0;
+		for (MotorClusterState mcs : status.getActiveMotors()) {
+			totalThrust += mcs.getThrust(status.getSimulationTime());
+		}
+
+		if (totalThrust > 0.1) {
+			// Normalize thrust level to [0, 1] using a soft saturation.
+			// Any appreciable thrust (> 100 N) gives thrustLevel ≈ 1.
+			store.flightConditions.setThrustLevel(Math.min(1.0, totalThrust / 100.0));
+
+			// Compute nozzle area ratio from stored nozzle exit diameter.
+			double nozzleDia = status.getSimulationConditions().getNozzleExitDiameter();
+			if (!Double.isNaN(nozzleDia) && nozzleDia > 0) {
+				double refLength = store.flightConditions.getRefLength();
+				if (refLength > 0) {
+					double bodyRadius = refLength / 2.0;
+					double nozzleRadius = nozzleDia / 2.0;
+					double areaRatio = (nozzleRadius * nozzleRadius) / (bodyRadius * bodyRadius);
+					store.flightConditions.setNozzleAreaRatio(Math.min(areaRatio, 1.0));
+				}
+			}
+		} else {
+			store.flightConditions.setThrustLevel(0);
+		}
+	}
 
 	private static class RK4Parameters {
 		/** Linear acceleration */

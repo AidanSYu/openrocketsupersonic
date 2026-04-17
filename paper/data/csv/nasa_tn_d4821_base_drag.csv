@@ -1,0 +1,50 @@
+# NASA TN D-4821 — Compton, William B. III (1968)
+# "Effect on Base Drag of Recessing the Bases of Conical Afterbodies
+#  at Subsonic and Transonic Speeds"
+# NASA Langley Research Center, October 1968.
+# NTRS: https://ntrs.nasa.gov/citations/19680027582
+# Local PDF: paper/data/pdf/NASA_TN_D-4821.pdf
+#
+# Configuration used for digitization: Figure 15(b), L/Dm = 1.5, beta = 0 deg,
+# flat base, c/Rb = 0 (no concavity), A_b/A_m = 1.00. This is the only
+# flat-base CYLINDRICAL afterbody configuration in the report.
+#
+# Tunnel: Langley 16-foot transonic tunnel.
+# Support: 5%-thick swept strut mounted below the model (see Figure 1).
+# Mach: 0.3 to 1.3. Angle of attack: 0 deg.
+# Re based on model length: 8e6 to 16e6 depending on Mach.
+#
+# DIGITIZATION PROVENANCE
+# -----------------------
+# Values digitized by visual reading of Figure 15(b) open-circle symbols
+# (c/Rb = 0, flat). Y-axis on that panel spans 0.12 to 0.24 with 0.04
+# per major division. Confidence on each point: +-0.005 to +-0.01.
+#
+# CRITICAL CAVEAT FROM THE ORIGINAL AUTHORS (page 9, verbatim):
+#   "Because of normal and reflected shocks on the model and near the
+#    base between Mach numbers 0.95 and 1.20, the data in this Mach
+#    number range were not faired."
+#
+# Consequence: the M 0.95-1.20 points below are strut-shock contaminated
+# and were REJECTED by the original authors. They are reported here for
+# completeness only, with quality_flag = strut_caution. These points
+# should NOT be used to anchor model values in the transonic band.
+#
+# CD,b is referenced to the model maximum cross-section area A_m.
+#
+# Mach,CD_b_flat,quality_flag
+0.30,0.128,clean
+0.40,0.130,clean
+0.50,0.130,clean
+0.60,0.135,clean
+0.70,0.140,clean
+0.80,0.150,clean
+0.90,0.165,clean
+0.95,0.175,strut_caution_authors_rejected
+1.00,0.200,strut_caution_authors_rejected
+1.05,0.215,strut_caution_authors_rejected
+1.10,0.215,strut_caution_authors_rejected
+1.15,0.210,strut_caution_authors_rejected
+1.20,0.220,strut_caution_authors_rejected
+1.25,0.210,clean
+1.30,0.200,clean

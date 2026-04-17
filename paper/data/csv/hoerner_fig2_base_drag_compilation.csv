@@ -1,0 +1,93 @@
+# HOERNER -- Fluid-Dynamic Drag (1965), Chapter XVI, Figure 2
+#   Sighard F. Hoerner, "Base drag coefficients (on base area S_B) of
+#   various simple projectile and missile body shapes as a function of
+#   Mach number"
+# Published by the author (Hoerner Fluid Dynamics), 1965 edition.
+# archive.org: https://archive.org/details/FluidDynamicDragHoerner1965
+# Local PDF:   paper/data/pdf/Hoerner_FluidDynamicDrag_1965.pdf (22.8 MB)
+# Figure location: p. 16-4 (PDF page 327)
+#
+# =============================================================================
+# ATTRIBUTION / PRIMARY SOURCES
+# =============================================================================
+# Hoerner Figure 2 is a COMPILATION of data from multiple primary sources,
+# explicitly itemised in the figure legend (page 16-4) as:
+#
+# (a) PLAIN "CYLINDRICAL" PROJECTILE BODIES:
+#   + J.H. University flight with fins     (ref 7,g) (7,o)
+#   triangle  l/d=12 in wind tunnel at 5e7 (ref 7,m)
+#   triangle  Aberdeen Ballistic Range Re~2e6 (ref 7,e)
+#   square    Aachen wind tunnel, pressure distribution (ref 7,d)
+#   square    Kochel cone-cylinder bodies (Re~1e6) (ref 7,c)
+#   NACA various reports                   (ref 13,a,b,g) (7,k)
+#   nabla     NOL 60-deg cone-cylinder (fig 8)  (ref 7,h)
+#   circle    OAL wind tunnel Re~2e7        (ref 7,g)
+#   >         Virginia smooth projectile shape (ref 7,g)
+#   X         "cylindrical" missile with fins (ref 8,g)
+#   O         "straight" missile body Re~3e7 (ref 7,n)
+#   *         at high Mach numbers           (ref 7,g)
+#
+# (b) VARIOUS SIMPLE BODY SHAPES:
+#   dot     Kochel, behind sphere at Re~1e7 (ref 7,c)
+#   dot     NOL behind disk                 (ref 7,p)
+#   nabla   NPL straight 2x10 cone Re>1e5   (ref 7,l)
+#
+# (c) BOAT-TAILED MISSILES WITH FINS:
+#   (multiple symbols, all LOWER drag -- NOT digitized here)
+#
+# =============================================================================
+# WHY THIS DATASET MATTERS
+# =============================================================================
+# Hoerner's textbook compilation is the most widely cited reference for
+# transonic base drag in classical aerodynamics. His Figure 2 upper envelope
+# for "plain cylindrical projectile bodies" represents the statistical
+# consensus of mid-20th-century experimental data across ballistic ranges,
+# wind tunnels, and flight tests. It is independent of Hart L52E06 and Peck
+# TN 3372 (those are SUB-references within the compilation but the envelope
+# also incorporates Aberdeen free-flight, Aachen, Kochel, NOL, OAL, NPL,
+# Virginia, and J.H. University data).
+#
+# =============================================================================
+# DIGITIZATION PROVENANCE
+# =============================================================================
+# Values digitized by visual reading of Hoerner Figure 2 on page 16-4 of the
+# 1965 edition (PDF page 327 of the archive.org scan). Rendered at 400 DPI.
+# Y-axis: CDB = |CpB| (absolute base pressure coefficient, since base area
+#         CDB = base drag / (q * A_base) and for flat cylindrical base
+#         CDB numerically equals |Cp_B|).
+# Y-axis gridlines at 0.1, 0.2, 0.3, 0.4.
+# X-axis: LOG Mach from 0.3 to 10, major labels 0.3, 0.4, 0.5, 0.6, 0.8, 1.0,
+#         1.5, 2, 3, 4, 5, 6, 8, 10.
+#
+# We digitize the "upper envelope" of the PLAIN CYLINDRICAL PROJECTILE
+# BODIES cluster (category (a)), which is the set most representative of
+# a stubby flat-base rocket. This upper envelope is traced by the top
+# trace of plus-signs corresponding to the J.H. University free-flight
+# with fins (references 7,g and 7,o) -- the same family as Hart and Peck.
+#
+# Confidence on each point: +-0.015 to +-0.02 (the log-M axis compresses
+# the transonic region; the peak is very narrow and y-ticks are 0.05 apart).
+# Points flagged "peak_zone" are the sharp M~1 spike and have higher
+# uncertainty because of axis compression.
+#
+# =============================================================================
+# DATA (Hoerner Fig 2, upper envelope -- plain cylindrical projectile bodies)
+# =============================================================================
+# Mach, CDB_upper_envelope, source_figure, quality_flag
+0.30,0.125,Hoerner65_Fig2_cylindrical_upper,clean
+0.40,0.130,Hoerner65_Fig2_cylindrical_upper,clean
+0.50,0.140,Hoerner65_Fig2_cylindrical_upper,clean
+0.60,0.150,Hoerner65_Fig2_cylindrical_upper,clean
+0.70,0.170,Hoerner65_Fig2_cylindrical_upper,clean
+0.80,0.200,Hoerner65_Fig2_cylindrical_upper,clean
+0.90,0.260,Hoerner65_Fig2_cylindrical_upper,peak_rise
+0.95,0.310,Hoerner65_Fig2_cylindrical_upper,peak_rise
+1.00,0.340,Hoerner65_Fig2_cylindrical_upper,peak_zone_high_uncertainty
+1.05,0.320,Hoerner65_Fig2_cylindrical_upper,peak_zone
+1.10,0.300,Hoerner65_Fig2_cylindrical_upper,transonic_plateau
+1.20,0.280,Hoerner65_Fig2_cylindrical_upper,transonic_plateau
+1.50,0.250,Hoerner65_Fig2_cylindrical_upper,transonic_plateau
+2.00,0.180,Hoerner65_Fig2_cylindrical_upper,supersonic_decline
+3.00,0.115,Hoerner65_Fig2_cylindrical_upper,supersonic_decline
+4.00,0.080,Hoerner65_Fig2_cylindrical_upper,supersonic_decline
+5.00,0.060,Hoerner65_Fig2_cylindrical_upper,supersonic_decline

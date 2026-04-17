@@ -1,0 +1,45 @@
+---
+title: "Shock-Coupled Drag, Stability, and Dynamic Derivative Modeling for Supersonic and Hypersonic Slender Finned Vehicles with Experimental Validation from Mach 0.3 to 17"
+author:
+  - "Aidan Yu"
+date: "April 2026"
+documentclass: article
+classoption:
+  - "a4paper"
+fontsize: 11pt
+geometry:
+  - "left=25mm"
+  - "right=25mm"
+  - "top=25mm"
+  - "bottom=25mm"
+linestretch: "1.2"
+toc: false
+numbersections: false
+colorlinks: true
+linkcolor: "blue"
+urlcolor: "blue"
+lang: en-US
+header-includes: |
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{mathptmx}
+  \usepackage{graphicx}
+  \usepackage{microtype}
+  \usepackage{booktabs}
+  \usepackage{longtable}
+  \usepackage{float}
+  \floatplacement{figure}{H}
+  \usepackage{amsmath}
+  \usepackage{textcomp}
+  \providecommand{\degree}{\ensuremath{^{\circ}}}
+  \DeclareUnicodeCharacter{00B0}{\ensuremath{^{\circ}}}
+  \DeclareUnicodeCharacter{00B1}{\ensuremath{\pm}}
+  \DeclareUnicodeCharacter{00B7}{\ensuremath{\cdot}}
+  \DeclareUnicodeCharacter{00D7}{\ensuremath{\times}}
+  \DeclareUnicodeCharacter{2013}{--}
+  \DeclareUnicodeCharacter{2014}{---}
+  \setlength{\LTleft}{0pt plus 1fill}
+  \setlength{\LTright}{0pt plus 1fill}
+  \emergencystretch=4em
+  \graphicspath{{./}}
+---
