@@ -63,6 +63,10 @@ public abstract class AbstractSimulationStepper implements SimulationStepper {
 		AtmosphericConditions atmosphere = modelAtmosphericConditions(status);
 		store.flightConditions = new FlightConditions(status.getConfiguration());
 		store.flightConditions.setAtmosphericConditions(atmosphere);
+		// Propagate RASAero Turbulence=True flag (if set) so the skin-friction
+		// calculator forces a fully-turbulent boundary layer from x=0.
+		store.flightConditions.setForceTurbulentBL(
+				status.getSimulationConditions().isForceTurbulentBL());
 
 
 		//// Local wind speed and direction

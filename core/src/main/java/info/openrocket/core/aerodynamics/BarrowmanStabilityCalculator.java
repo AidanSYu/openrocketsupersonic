@@ -41,6 +41,22 @@ public class BarrowmanStabilityCalculator implements StabilityCalculator {
 	private static final String BARROWMAN_PACKAGE = "info.openrocket.core.aerodynamics.barrowman";
 	private static final String BARROWMAN_SUFFIX = "Calc";
 
+	/**
+	 * Global damping multiplier applied to the legacy getDampingMultiplier() result.
+	 * The original OpenRocket code used 1x; this fork uses 3x for more realistic
+	 * apogee-turn behavior. Package-visible for sensitivity testing only.
+	 */
+	static double DAMPING_MULTIPLIER = 3.0;
+
+	/**
+	 * Transonic Cmq augmentation peak factor. The augmentation is:
+	 *   k_transonic = 1.0 + TRANSONIC_CMQ_PEAK * exp(-((M-1)/TRANSONIC_CMQ_SIGMA)^2)
+	 * At M=1.0, k_transonic = 1 + TRANSONIC_CMQ_PEAK = 3.5 by default.
+	 * Package-visible for sensitivity testing only.
+	 */
+	static double TRANSONIC_CMQ_PEAK = 2.5;
+	static double TRANSONIC_CMQ_SIGMA = 0.15;
+
 	private final WarningSet ignoreWarningSet = new WarningSet();
 
 	private Map<RocketComponent, RocketComponentCalc> calcMap = null;
@@ -122,7 +138,7 @@ public class BarrowmanStabilityCalculator implements StabilityCalculator {
 		double yawRate = conditions.getYawRate();
 		double velocity = conditions.getVelocity();
 
-		mul *= 3; // Higher damping yields much more realistic apogee turn
+		mul *= DAMPING_MULTIPLIER; // Higher damping yields much more realistic apogee turn
 
 		double pitchDampingMomentMagnitude = MathUtil.min(mul * pow2(pitchRate / velocity), total.getCm());
 		double yawDampingMomentMagnitude = MathUtil.min(mul * pow2(yawRate / velocity), total.getCyaw());
@@ -165,7 +181,7 @@ public class BarrowmanStabilityCalculator implements StabilityCalculator {
 		}
 
 		double mach = conditions.getMach();
-		double k_transonic = 1.0 + 2.5 * Math.exp(-Math.pow((mach - 1.0) / 0.15, 2));
+		double k_transonic = 1.0 + TRANSONIC_CMQ_PEAK * Math.exp(-Math.pow((mach - 1.0) / TRANSONIC_CMQ_SIGMA, 2));
 		cmqTotal *= k_transonic;
 
 		total.setCmq(cmqTotal);

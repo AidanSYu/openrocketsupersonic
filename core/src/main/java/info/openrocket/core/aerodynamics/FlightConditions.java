@@ -76,6 +76,14 @@ public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 	 */
 	private double nozzleAreaRatio = Double.NaN;
 
+	/**
+	 * When true, the skin-friction model forces a fully-turbulent boundary
+	 * layer from the nose tip (no laminar run). Mirrors RASAero II
+	 * {@code Turbulence=True} semantics and is set by the simulation stepper
+	 * from {@link info.openrocket.core.simulation.SimulationConditions}.
+	 */
+	private boolean forceTurbulentBL = false;
+
 	/** Current roll rate. */
 	private double rollRate = 0;
 
@@ -503,6 +511,27 @@ public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 	 */
 	public double getNozzleAreaRatio() {
 		return nozzleAreaRatio;
+	}
+
+	/**
+	 * @return whether the skin-friction model should force a fully-turbulent
+	 *         boundary layer (RASAero {@code Turbulence=True} semantics).
+	 */
+	public boolean isForceTurbulentBL() {
+		return forceTurbulentBL;
+	}
+
+	/**
+	 * Set the force-turbulent-BL flag for this flight state. When
+	 * {@code true}, the skin-friction calculator bypasses the mixed
+	 * laminar/transitional smooth-plate model and treats the boundary layer as
+	 * fully turbulent from x=0.
+	 */
+	public void setForceTurbulentBL(boolean forceTurbulentBL) {
+		if (this.forceTurbulentBL == forceTurbulentBL)
+			return;
+		this.forceTurbulentBL = forceTurbulentBL;
+		fireChangeEvent();
 	}
 
 	// --- Plume-induced separation accessors (Phase 9e) ---

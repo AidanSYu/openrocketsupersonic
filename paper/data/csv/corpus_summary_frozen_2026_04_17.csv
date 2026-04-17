@@ -1,0 +1,66 @@
+# SimVReal Corpus Frozen Summary - Post-Prompt-13 Audited Rerun
+# Date: 2026-04-17
+# Git SHA: 4fe8a410119a77aaa28fd6dba8ed225825976ad5 (branch: supersonic-aero-dev)
+# Source test: SimVRealBenchmarkTest.testSimVRealBenchmark (package info.openrocket.core.aerodynamics)
+# Exporter: SimVRealOutlierDiagnosticTest.testGenerateFullCorpusDiagnostics
+# Upstream CSV: core/build/reports/simvreal-outliers/simvreal-full-corpus-summary.csv
+#
+# Headline corpus metrics (24 cases, all terminal note NORMAL):
+#   avg |error| = 6.855% (test reports 6.84%; minor rounding only)
+#   within +-10% = 20/24 = 83.3%
+#   within +-5%  = 15/24 = 62.5%
+#   abnormal endings = 0
+#
+# Prior baselines from AST_PARALLEL_AGENT_ROADMAP.md Current Baseline + Prompt 12/13 session logs:
+#   pre-P12 (2026-04-16): avg 7.60%, within +-5% 54.2%, within +-10% 83.3%, abnormal 0
+#   post-P12 (2026-04-16): avg 7.39%, within +-5% 54.2%, within +-10% 83.3%, abnormal 0
+#   post-P13 (2026-04-17, headline memo): avg 6.83%, within +-5% 62.5%, within +-10% 83.3%, abnormal 0
+#   post-P13 AUDITED rerun (2026-04-17 this artifact): avg 6.84%, within +-5% 62.5%, within +-10% 83.3%, abnormal 0
+#
+# "pre_p12_orp_err_pct" is taken from the stale simvreal-full-corpus-summary.csv (Apr 16 22:20,
+#    pre-P12) which was the pre-P12 audited corpus run; these are the values used in the
+#    2026-04-16 Current Baseline in AST_PARALLEL_AGENT_ROADMAP.md.
+# "post_p13_orp_err_pct" is from this rerun (2026-04-17).
+# "delta_pp" = (post_p13_orp_err_pct) - (pre_p12_orp_err_pct); negative = error shrank.
+# "closing_fix" attributes the improvement to a specific Prompt session:
+#   P12 = Remove Lamb-Oberkampf Re correction (M > 1.3 supersonic base drag purity)
+#   P13 = Widen transonic base drag peak with Hart L52E06 re-anchor (M 0.95-1.50)
+#   prior = closed pre-Prompt-12 (e.g. by finned-body base augmentation, Prompt 16/18 era)
+#   none = no material change (subsonic out-of-polynomial-range cases)
+#
+rocket,cdx1,real_ft,rasaero_ft,pre_p12_orp_ft,post_p13_orp_ft,pre_p12_orp_err_pct,post_p13_orp_err_pct,delta_pp,within_plusminus5_pct_post_p13,within_plusminus10_pct_post_p13,max_mach_post_p13,terminal_note_post_p13,closing_fix,notes
+"Byrum","Byrum.CDX1",5732,5281,6214,6214,8.4121,8.4121,0.0000,no,yes,0.749,NORMAL,none,"stable; subsonic peak M<1; no polynomial overlap"
+"Cancer Descending","CancerDescending.CDX1",6188,6328,6503,6503,5.0932,5.0932,0.0000,no,yes,0.567,NORMAL,none,"subsonic; unchanged"
+"EZI-65 J450ST","EZI65-1.CDX1",3965,4214,4605,4605,16.1401,16.1401,0.0000,no,no,0.610,NORMAL,none,"flagged non-aero out of scope; see subsonic_nonaero_outliers.md"
+"Gibb","Gibb.CDX1",3913,4205,4298,4298,9.8367,9.8367,0.0000,no,yes,0.554,NORMAL,none,"subsonic; borderline +-10%"
+"Ion Drive","IonDrive.CDX1",8027,8642,7773,7773,-3.1687,-3.1687,0.0000,yes,yes,0.787,NORMAL,none,"subsonic healthy"
+"Raven","Raven.CDX1",8815,9332,11235,10950,27.4551,24.2204,-3.2347,no,no,1.108,NORMAL,P13,"transonic min-dia; still OPEN; blocked on M 2-3 finned-body base data"
+"Thunder & Lightning","Thunder&Lightning.CDX1",3577,3989,4198,4198,17.3572,17.3572,0.0000,no,no,0.551,NORMAL,none,"flagged non-aero out of scope; see subsonic_nonaero_outliers.md"
+"Blister","Blister.CDX1",9026,8301,8775,8775,-2.7789,-2.7789,0.0000,yes,yes,0.837,NORMAL,none,"transonic healthy; unchanged"
+"Rabia","Rabia.CDX1",12745,12197,13256,12987,4.0120,1.8972,-2.1148,yes,yes,1.171,NORMAL,P13,"transonic; moved into +-5% band"
+"Rabia Short Fin Can","Rabia-ShortFinCan.CDX1",10584,10225,10604,10604,0.1849,0.1936,0.0087,yes,yes,0.875,NORMAL,none,"very near zero; unchanged"
+"Torrent","Torrent.CDX1",12807,13717,13555,13424,5.8419,4.8194,-1.0225,yes,yes,1.238,NORMAL,P13,"transonic; moved into +-5% band"
+"Caliber Isp 04 Team 3","CalIsp1.CDX1",3964,3876,3935,3935,-0.7300,-0.7300,0.0000,yes,yes,0.637,NORMAL,none,"healthy; unchanged"
+"Caliber Isp 04 Team 1","CalIsp2.CDX1",3837,3948,4010,4010,4.5171,4.5170,-0.0001,yes,yes,0.664,NORMAL,none,"healthy; unchanged"
+"Caliber Isp 04 Team 2","CalIsp3.CDX1",3710,3876,3937,3937,6.1087,6.1086,-0.0001,no,yes,0.639,NORMAL,none,"subsonic; unchanged"
+"Caliber Isp 05 Columbia","CalIsp4.CDX1",5085,4847,4855,4855,-4.5156,-4.5158,-0.0002,yes,yes,0.847,NORMAL,none,"healthy; unchanged"
+"Caliber Isp 05 Discovery","CalIsp5.CDX1",4930,4836,4847,4847,-1.6739,-1.6742,-0.0003,yes,yes,0.811,NORMAL,none,"healthy; unchanged"
+"Kline-Rogers L500","L500Roc.CDX1",24771,26509,25231,24274,1.8575,-2.0080,-3.8655,yes,yes,1.984,NORMAL,P12+P13,"supersonic transit; moved from +1.9% to -2.0%; P12 (Re removal) + P13 (polynomial) both acted"
+"Don't Debate This","DontDebateThisN5800MinDia.CDX1",56573,61982,57867,54467,2.2880,-3.7218,-6.0098,yes,yes,3.035,NORMAL,P12+P13,"supersonic; moved from +2.3% to -3.7%; fin-base augmentation prior; P12+P13 tightened further"
+"Qu8k","Qu8k.CDX1",121478,119684,119251,116866,-1.8335,-3.7966,-1.9631,yes,yes,3.416,NORMAL,P12+P13,"hypersonic healthy; small shift well within +-5%"
+"Proteus 6","Proteus6.CDX1",85067,81499,89290,82895,4.9647,-2.5537,-7.5184,yes,yes,2.780,NORMAL,P12+P13,"supersonic; crossed zero; moved deeper into +-5%"
+"Full Metal Jacket BALLS 005","Full Metal Jacket1.CDX1",37981,38772,41283,38259,8.6945,0.7323,-7.9622,yes,yes,2.308,NORMAL,P12+P13,"supersonic; moved from +8.7% to near-zero"
+"Full Metal Jacket Black Rock 6","Full Metal Jacket2.CDX1",30038,32548,31183,29364,3.8118,-2.2454,-6.0572,yes,yes,2.457,NORMAL,P12+P13,"supersonic; moved across zero; deeper into +-5%"
+"A-601 Kinsel","Kinsel_P4935_A-601_Rocket.CDX1",42771,41098,57794,54807,35.1251,28.1409,-6.9842,no,no,2.287,NORMAL,P12+P13,"supersonic fin-can; still OPEN; -7.0 pp closed by P12 (Re removal) + P13 (polynomial). Ground-hit at 1166 s under 2400 s cap (safer than prior 1198 s)."
+"AeroPac 104K","AeroPac104KStageOne&Two-2.CDX1",104659,113786,97343,94339,-6.9903,-9.8608,-2.8705,yes,yes,2.918,NORMAL,P12+P13,"2-stage supersonic; error magnitude increased but still within +-10% (moved from -7.0% to -9.9%)"
+#
+# --- Corpus-wide aggregates, pre-P12 vs post-P13 audited ---
+# pre_p12:  avg |err| = 7.60%, within +-5% = 54.2% (13/24), within +-10% = 83.3% (20/24), abnormal = 0
+# post-P13: avg |err| = 6.84%, within +-5% = 62.5% (15/24), within +-10% = 83.3% (20/24), abnormal = 0
+# Delta: avg -0.76 pp; within+-5% +8.3 pp; within+-10% unchanged; abnormal unchanged
+#
+# --- Top remaining outliers (>=+-10%), all post-P13 ---
+# Kinsel +28.1% supersonic fin-can, blocked on M 2-3 finned-body base drag primary data
+# Raven  +24.2% transonic min-dia, blocked on M 2-3 finned-body base drag / L/D>25 thick-BL correction
+# T&L    +17.4% subsonic non-aero, flagged out of scope
+# EZI-65 +16.1% subsonic non-aero, flagged out of scope

@@ -161,6 +161,85 @@ class BoundaryLayerTransitionTest {
 	}
 
 	@Test
+	void forceTurbulentBLBypassesLaminarBranchForPerfectFinishRocket() throws Exception {
+		// On a perfect-finish rocket at subsonic Mach with Re below transition,
+		// the default (forceTurbulentBL=false) path uses the Blasius laminar
+		// branch of smoothFinishTransitionCf. Setting forceTurbulentBL=true
+		// must skip that laminar branch and produce a materially higher Cf
+		// consistent with the fully-turbulent rough-plate formula used for
+		// non-perfect-finish rockets. This mirrors the RASAero II behavior
+		// triggered by CDX1 Turbulence=True.
+		Rocket rocket = SupersonicTestRockets.makeAgardB();
+		assertTrue(rocket.isPerfectFinish(), "AGARD calibration model should be perfect finish");
+		FlightConfiguration config = rocket.getSelectedConfiguration();
+
+		BarrowmanDragCalculator dragCalculator = new BarrowmanDragCalculator();
+		Method cfMethod = BarrowmanDragCalculator.class
+				.getDeclaredMethod("calculateFrictionCoefficient",
+						FlightConfiguration.class, double.class, double.class, double.class, boolean.class);
+		cfMethod.setAccessible(true);
+
+		// Low-Re subsonic regime where laminar branch would otherwise apply:
+		// Re = 1e5 is well below transitionReynoldsNumber(M=0.3) ~= 2.96e6.
+		double mach = 0.3;
+		double re = 1.0e5;
+		double T_e = 288.15;
+
+		double cfDefault = (double) cfMethod.invoke(dragCalculator, config, mach, re, T_e, false);
+		double cfForced = (double) cfMethod.invoke(dragCalculator, config, mach, re, T_e, true);
+
+		assertTrue(cfForced > cfDefault,
+				"forceTurbulentBL=true should yield higher Cf than default laminar path "
+						+ "(cfDefault=" + cfDefault + ", cfForced=" + cfForced + ")");
+		// The forced-turbulent Cf at Re=1e5 should match the rough-plate branch
+		// of incompressibleCf(Re, false), which returns 1.48e-2 below Re=1e4 or
+		// Schlichting above. At Re=1e5 the Schlichting formula gives ~0.0073.
+		assertTrue(cfForced > 5.0e-3,
+				"Forced-turbulent Cf at Re=1e5 should exceed 5e-3 (Schlichting-turbulent), got " + cfForced);
+		// And the default laminar-dominated Cf should sit below ~5e-3 at the
+		// same Re (Blasius: 1.328/sqrt(1e5) ~= 4.2e-3, damped slightly by the
+		// subsonic compressibility factor).
+		assertTrue(cfDefault < 5.0e-3,
+				"Default smooth-finish Cf at Re=1e5 should be laminar-like (<5e-3), got " + cfDefault);
+	}
+
+	@Test
+	void forceTurbulentBLHasNoEffectWhenAlreadyFullyTurbulent() throws Exception {
+		// For a non-perfect-finish rocket, the default path already takes the
+		// rough-plate branch of incompressibleCf. Setting forceTurbulentBL=true
+		// therefore must not change the Cf result — it is a no-op in this
+		// regime. This protects non-CDX1 simulations from any regression.
+		Rocket rocket = SupersonicTestRockets.makeAgardB();
+		rocket.setPerfectFinish(false);
+		FlightConfiguration config = rocket.getSelectedConfiguration();
+
+		BarrowmanDragCalculator dragCalculator = new BarrowmanDragCalculator();
+		Method cfMethod = BarrowmanDragCalculator.class
+				.getDeclaredMethod("calculateFrictionCoefficient",
+						FlightConfiguration.class, double.class, double.class, double.class, boolean.class);
+		cfMethod.setAccessible(true);
+
+		// Sweep a few (M, Re) points covering sub-, trans-, and supersonic regimes.
+		double T_e = 288.15;
+		double[][] points = {
+				{ 0.3, 1.0e5 },
+				{ 0.5, 5.0e5 },
+				{ 0.95, 3.0e6 },
+				{ 1.5, 1.0e7 },
+				{ 3.0, 5.0e7 }
+		};
+		for (double[] p : points) {
+			double m = p[0];
+			double re = p[1];
+			double cfOff = (double) cfMethod.invoke(dragCalculator, config, m, re, T_e, false);
+			double cfOn = (double) cfMethod.invoke(dragCalculator, config, m, re, T_e, true);
+			assertEquals(cfOff, cfOn, 1e-12,
+					String.format("forceTurbulentBL should not change Cf for non-perfect-finish rocket "
+							+ "at M=%.2f, Re=%.1e (off=%.6e, on=%.6e)", m, re, cfOff, cfOn));
+		}
+	}
+
+	@Test
 	void agardPerfectFinishUsesPhysicallyReasonableReynoldsAndFriction() throws Exception {
 		Rocket rocket = SupersonicTestRockets.makeAgardB();
 		FlightConfiguration config = rocket.getSelectedConfiguration();
@@ -175,7 +254,7 @@ class BoundaryLayerTransitionTest {
 		reMethod.setAccessible(true);
 		Method cfMethod = BarrowmanDragCalculator.class
 				.getDeclaredMethod("calculateFrictionCoefficient",
-						FlightConfiguration.class, double.class, double.class, double.class);
+						FlightConfiguration.class, double.class, double.class, double.class, boolean.class);
 		cfMethod.setAccessible(true);
 		Method roughnessMethod = BarrowmanDragCalculator.class
 				.getDeclaredMethod("calculateRoughnessCorrection", double.class);
@@ -183,7 +262,7 @@ class BoundaryLayerTransitionTest {
 
 		double re = (double) reMethod.invoke(dragCalculator, config, conditions);
 		double cf = (double) cfMethod.invoke(dragCalculator, config, 0.2, re,
-				conditions.getAtmosphericConditions().getTemperature());
+				conditions.getAtmosphericConditions().getTemperature(), false);
 		double roughnessCorrection = (double) roughnessMethod.invoke(dragCalculator, 0.2);
 		double roughnessLimit = 0.032
 				* Math.pow(ExternalComponent.Finish.POLISHED.getRoughnessSize() / config.getLengthAerodynamic(), 0.2)

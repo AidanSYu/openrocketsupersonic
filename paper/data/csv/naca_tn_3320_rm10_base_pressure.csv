@@ -1,0 +1,71 @@
+# NACA TN 3320 -- Jackson, Rumsey & Chauvin (Nov 1954)
+# "Flight Measurements of Drag and Base Pressure of a Fin-stabilized
+#  Parabolic Body of Revolution (NACA RM-10) at Different Reynolds Numbers
+#  and at Mach Numbers from 0.9 to 3.3"
+# (Supersedes NACA RM L50G24, 1950)
+# Langley Aeronautical Laboratory / Pilotless Aircraft Research Division.
+# NTRS: https://ntrs.nasa.gov/citations/19930084086
+# Local PDF: paper/data/pdf/NACA_RM_10_Evans_Stoney.pdf
+#
+# =============================================================================
+# WHY THIS DATASET MATTERS  (CATEGORY A -- finned supersonic base drag)
+# =============================================================================
+# Free-flight data on a FIN-STABILIZED body of revolution from M = 0.9 to
+# M = 3.3.  This is the ONLY primary M 2-3 base-drag source I could retrieve
+# that measured a fin-equipped vehicle (Kinsel is fin-stabilized).
+#
+# However two important caveats bear on its use as a Kinsel anchor:
+#   (1) RM-10 has a PARABOLIC BOATTAILED base (A_base / A_frontal = 0.367,
+#       base-diameter / body-diameter = 0.606, effective boattail angle
+#       ~7 deg over the aft length).  Kinsel has a FLAT CYLINDRICAL fin-can
+#       base (A_base = A_frontal).  Viswanath and Love show boattailing
+#       reduces |Pb| by roughly 0.03 at M ~ 2-3 vs a flat base.
+#   (2) Four 60-deg-sweptback fins sit AT the very base station, with the
+#       fin trailing edge roughly coincident with the base.  Love Fig 30/32
+#       shows this fin placement gives a Pb that is NEAR the no-fin value
+#       at M = 2.41 (Pb_finned ~ -0.14 vs Pb_nofin Fig 21 ~ -0.135).
+#
+# =============================================================================
+# DIGITIZATION PROVENANCE
+# =============================================================================
+# Source: Figure 9 of NACA TN 3320 ("Comparison of base-pressure coefficient
+# for the full-scale and half-scale models with corresponding Reynolds
+# number").  Full-scale Model 1 circles are used below (Doppler radar +
+# telemeter, 4 full-scale models).  The paper explicitly states (p 20)
+# that full-scale base drag is "more representative of the true base drag"
+# than half-scale, because the half-scale models had afterburning effects
+# that raised Pb (reduced |Pb|) in an asymmetric way.
+#
+# Y-axis Pb (plotted as -Pb / q_base, 0 at top, -0.3 at bottom full-vacuum),
+# major tick 0.1, minor tick 0.02.  X-axis M: 0.8 to 3.2, major 0.4, minor 0.1.
+# Visual reading uncertainty: +-0.010 on Pb, +-0.01 on Mach.
+#
+# CDB referenced to base area = |Cpb| directly (integrated p_b over A_base).
+# CDB referenced to body frontal area = |Cpb| * A_base/A_frontal
+#                                     = |Cpb| * 0.367 for RM-10.
+#
+# Full-scale Re_L (based on body length 12.2 ft) rises from ~40e6 at M=0.9
+# to ~210e6 at M=3.3 (Fig. 4).  Turbulent BL throughout.
+#
+# =============================================================================
+# DATA (Fig. 9, Model 1 full-scale fin-stabilized parabolic body, boattailed)
+# =============================================================================
+# Mach, Cpb_abs, CDB_base_area, CDB_frontal_area, notes
+0.85,0.020,0.020,0.0074,subsonic, low base suction
+0.90,0.030,0.030,0.0110,
+0.95,0.060,0.060,0.0220,transonic rise
+0.97,0.135,0.135,0.0496,transonic peak (spike seen in Model 1 scatter)
+1.00,0.135,0.135,0.0496,peak plateau
+1.05,0.120,0.120,0.0440,
+1.10,0.100,0.100,0.0367,
+1.20,0.080,0.080,0.0294,supersonic trough stated in paper summary
+1.30,0.080,0.080,0.0294,
+1.40,0.080,0.080,0.0294,
+1.60,0.080,0.080,0.0294,
+1.80,0.085,0.085,0.0312,
+2.00,0.090,0.090,0.0330,
+2.30,0.090,0.090,0.0330,
+2.50,0.090,0.090,0.0330,
+2.80,0.090,0.090,0.0330,
+3.00,0.090,0.090,0.0330,
+3.20,0.080,0.080,0.0294,decline begins approaching M=3.3 test limit

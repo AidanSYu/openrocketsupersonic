@@ -22,10 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class RASAeroLoaderTest extends BaseTestCase {
     private static final double EPSILON = 0.0001;
@@ -204,5 +207,77 @@ public class RASAeroLoaderTest extends BaseTestCase {
         // include OR motors so the total
         // warning size decreases
         assertEquals(4, loader.getWarnings().size());
+    }
+
+    @Test
+    public void testWarnsForUnsupportedRASAeroSettings() {
+        String cdx1 = readResource("/file/rasaero/importt/Show-off.CDX1");
+        assertNotEquals(cdx1, cdx1.replace("<ModifiedBarrowman>False</ModifiedBarrowman>",
+                "<ModifiedBarrowman>True</ModifiedBarrowman>"));
+
+        cdx1 = cdx1.replace("<ModifiedBarrowman>False</ModifiedBarrowman>",
+                        "<ModifiedBarrowman>True</ModifiedBarrowman>")
+                .replace("<Turbulence>False</Turbulence>", "<Turbulence>True</Turbulence>")
+                .replace("<SustainerNozzle>0</SustainerNozzle>", "<SustainerNozzle>1.25</SustainerNozzle>")
+                .replace("<Booster1Nozzle>0</Booster1Nozzle>", "<Booster1Nozzle>0.75</Booster1Nozzle>")
+                .replaceFirst("<SustainerNozzleDiameter>0</SustainerNozzleDiameter>",
+                        "<SustainerNozzleDiameter>1.25</SustainerNozzleDiameter>")
+                .replaceFirst("<Booster1NozzleDiameter>0</Booster1NozzleDiameter>",
+                        "<Booster1NozzleDiameter>0.75</Booster1NozzleDiameter>")
+                .replaceFirst("<Booster2NozzleDiameter>0</Booster2NozzleDiameter>",
+                        "<Booster2NozzleDiameter>0.5</Booster2NozzleDiameter>");
+
+        RASAeroLoader loader = new RASAeroLoader();
+        OpenRocketDocument doc;
+        try {
+            doc = OpenRocketDocumentFactory.createEmptyRocket();
+            DocumentLoadingContext context = new DocumentLoadingContext();
+            context.setOpenRocketDocument(doc);
+            context.setMotorFinder(new DatabaseMotorFinder());
+            loader.loadFromStream(context,
+                    new BufferedInputStream(new ByteArrayInputStream(cdx1.getBytes(StandardCharsets.UTF_8))),
+                    "Show-off");
+        } catch (IllegalStateException ise) {
+            fail(ise.getMessage());
+            return;
+        } catch (RocketLoadException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Every imported simulation should have the force-turbulent-BL flag
+        // propagated from the RocketDesign-level Turbulence=True setting.
+        assertFalse(doc.getSimulations().isEmpty(), "expected at least one simulation from Show-off.CDX1");
+        for (info.openrocket.core.document.Simulation sim : doc.getSimulations()) {
+            assertTrue(sim.getOptions().isForceTurbulentBL(),
+                    "Simulation " + sim.getName() + " should have forceTurbulentBL=true when CDX1 has Turbulence=True");
+        }
+
+        String warnings = loader.getWarnings().toString();
+        assertTrue(warnings.contains("Ignoring unsupported RASAero setting ModifiedBarrowman=True."),
+                warnings);
+        // Turbulence=True is now honored: the loader forces a fully-turbulent
+        // boundary layer on the imported SimulationOptions instead of ignoring
+        // the flag.
+        assertTrue(warnings.contains("RASAero Turbulence=True honored: forcing fully-turbulent boundary layer"
+                + " in skin-friction model."), warnings);
+        assertTrue(warnings.contains("Ignoring unsupported RASAero setting SustainerNozzle=1.25."),
+                warnings);
+        assertTrue(warnings.contains("Ignoring unsupported RASAero setting Booster1Nozzle=0.75."),
+                warnings);
+        // SustainerNozzleDiameter is consumed (stored on SimulationOptions.nozzleExitDiameter),
+        // so it no longer emits a warning. Booster1/2 nozzle diameters remain unsupported.
+        assertTrue(warnings.contains("Ignoring unsupported RASAero setting Booster1NozzleDiameter=0.75."),
+                warnings);
+        assertTrue(warnings.contains("Ignoring unsupported RASAero setting Booster2NozzleDiameter=0.5."),
+                warnings);
+    }
+
+    private String readResource(String path) {
+        try (InputStream stream = this.getClass().getResourceAsStream(path)) {
+            assertNotNull(stream, "Could not open " + path);
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

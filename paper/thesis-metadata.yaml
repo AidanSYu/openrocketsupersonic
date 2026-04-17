@@ -1,0 +1,91 @@
+---
+title: "Supersonic and Hypersonic Aerodynamic Extensions for OpenRocket"
+subtitle: "Technical Report"
+author:
+  - "Aidan Yu"
+institute:
+  - "Independent Researcher"
+date: "April 2026"
+# Default Pandoc LaTeX template (report = \chapter for #, \section for ##)
+documentclass: report
+classoption:
+  - "oneside"
+  - "openany"
+fontsize: 12pt
+papersize: letter
+# Symmetric, centered text block (binding gutter was causing larger left margin)
+geometry:
+  - "left=1in"
+  - "right=1in"
+  - "top=1in"
+  - "bottom=1in"
+  - "includeheadfoot"
+  - "centering"
+
+linestretch: "1.5"
+
+toc: true
+toc-depth: 3
+# Headings already include manual numbering (e.g. "1. Introduction")
+numbersections: false
+
+colorlinks: true
+linkcolor: "blue"
+urlcolor: "blue"
+toccolor: "black"
+
+lang: en-US
+
+# pdfLaTeX-friendly fonts (Basic MiKTeX); no fontspec / unicode-math required
+header-includes: |
+  \usepackage{listings}
+  \usepackage{textcomp}
+  \providecommand{\degree}{\ensuremath{^{\circ}}}
+  \DeclareUnicodeCharacter{00B0}{\ensuremath{^{\circ}}}
+  \usepackage{mathptmx}
+  \usepackage{courier}
+  \usepackage{microtype}
+  \usepackage{enumitem}
+  \setlist{itemsep=0.25em, parsep=0pt, topsep=0.5em}
+  \usepackage{etoolbox}
+  \usepackage{graphicx}
+  \usepackage{tikz}
+  \usetikzlibrary{arrows.meta,positioning,calc,patterns,decorations.pathreplacing}
+  \usepackage{pgfplots}
+  \pgfplotsset{compat=1.18}
+  \allowdisplaybreaks
+  \AtBeginDocument{%
+    \lstset{%
+      basicstyle=\ttfamily\footnotesize,
+      breaklines=true,
+      breakatwhitespace=false,
+      columns=fullflexible,
+      keepspaces=true,
+      tabsize=2,
+      showstringspaces=false,
+      xleftmargin=0.5em,
+      framexleftmargin=0.5em,
+      aboveskip=0.75em,
+      belowskip=0.5em
+    }%
+  }
+  \AtBeginEnvironment{longtable}{%
+    \footnotesize
+    \setlength{\tabcolsep}{3pt}%
+    \renewcommand{\arraystretch}{1.15}%
+  }
+  \setlength{\LTleft}{0pt plus 1fill}
+  \setlength{\LTright}{0pt plus 1fill}
+  \emergencystretch=4em
+
+include-before: |
+  \newpage
+  \thispagestyle{empty}
+  \vspace*{\fill}
+  \begin{center}
+  \large\textit{The pages that follow contain the math. No one asked for it, but the physics we chase demanded it. These equations are merely the shadow; the truth they describe is waiting out there in the sand.}
+  \end{center}
+  \vspace*{\fill}
+  \newpage
+
+---

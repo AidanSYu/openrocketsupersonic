@@ -104,6 +104,23 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 
 	private SimulationStepperMethod stepperMethodChoice = SimulationStepperMethod.RK4;
 
+	/**
+	 * Nozzle exit diameter in meters. Used to compute the nozzle area ratio
+	 * (A_nozzle / A_base) for power-on base drag reduction during motor burn.
+	 * Set from CDX1 import (SustainerNozzleDiameter field). NaN = unknown.
+	 */
+	private double nozzleExitDiameter = Double.NaN;
+
+	/**
+	 * When true, the skin-friction model forces a fully-turbulent boundary layer
+	 * from the nose tip (no laminar run, no transitional blending). This mirrors
+	 * the RASAero II behavior triggered by the CDX1 {@code Turbulence=True} flag.
+	 * Default is {@code false}; set to {@code true} only during CDX1 import when
+	 * the file requests it. Programmatic callers (UI, tests) leave this at the
+	 * default so existing mixed-BL behavior is preserved.
+	 */
+	private boolean forceTurbulentBL = false;
+
 	private Path dragLookupCsvPath;
 	private Path stabilityLookupCsvPath;
 	private MachAoALookup dragLookupTable;
@@ -420,6 +437,37 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 		fireChangeEvent();
 	}
 
+	public double getNozzleExitDiameter() {
+		return nozzleExitDiameter;
+	}
+
+	public void setNozzleExitDiameter(double diameter) {
+		this.nozzleExitDiameter = diameter;
+	}
+
+	/**
+	 * @return whether the skin-friction model should force a fully-turbulent
+	 *         boundary layer from x = 0 (RASAero {@code Turbulence=True} semantics).
+	 */
+	public boolean isForceTurbulentBL() {
+		return forceTurbulentBL;
+	}
+
+	/**
+	 * Sets the force-turbulent-boundary-layer flag. When {@code true}, the skin
+	 * friction calculator skips the laminar / transitional regime entirely and
+	 * treats the boundary layer as fully turbulent over the whole wetted length,
+	 * matching the behavior RASAero II applies when the CDX1 file specifies
+	 * {@code Turbulence=True}.
+	 */
+	public void setForceTurbulentBL(boolean forceTurbulentBL) {
+		if (this.forceTurbulentBL == forceTurbulentBL) {
+			return;
+		}
+		this.forceTurbulentBL = forceTurbulentBL;
+		fireChangeEvent();
+	}
+
 	public double getMaxSimulationTime() {
 		return maxSimulationTime;
 	}
@@ -688,6 +736,11 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 			this.geodeticComputation = src.geodeticComputation;
 		}
 
+		if (this.forceTurbulentBL != src.forceTurbulentBL) {
+			isChanged = true;
+			this.forceTurbulentBL = src.forceTurbulentBL;
+		}
+
 		if (!Objects.equals(this.dragLookupCsvPath, src.dragLookupCsvPath) || this.dragLookupTable != src.dragLookupTable) {
 			isChanged = true;
 			this.dragLookupCsvPath = src.dragLookupCsvPath;
@@ -807,6 +860,8 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 		conditions.setTimeStep(getTimeStep());
 		conditions.setMaxSimulationTime(getMaxSimulationTime());
 		conditions.setMaximumAngleStep(getMaximumStepAngle());
+		conditions.setNozzleExitDiameter(getNozzleExitDiameter());
+		conditions.setForceTurbulentBL(isForceTurbulentBL());
 
 		return conditions;
 	}

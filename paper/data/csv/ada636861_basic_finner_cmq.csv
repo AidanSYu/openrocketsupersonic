@@ -1,0 +1,101 @@
+# Basic Finner Reference Projectile — Pitch Damping Derivative (Cmq + CmAlphaDot)
+# Source: Dupuis, A.D. and Hathaway, W., "Aeroballistic Range Tests of the
+#         Basic Finner Reference Projectile at Supersonic Velocities,"
+#         DREV-TM-9703, Defence Research Establishment Valcartier, Aug 1997.
+#         DTIC Accession Number: ADA636861
+# Facility: DREV Aeroballistic Range, Valcartier, Canada
+# Model: Basic Finner — cone-cylinder + 4 rectangular fins, L/D=10.0
+#   See ADA636861_basic_finner_cx0.csv for full geometry spec.
+# Reference area: body cross-section S = pi*d^2/4
+# Moment reference: 55% of length from nose (5.50 cal from nose, per ADA636861)
+#
+# ***IMPORTANT NOTE ON DATA TYPE***
+# Free-flight aeroballistic range data cannot separate Cmq from Cm_alpha_dot.
+# The "Cmq" reported in ADA636861 Tables VII/VIII/IX is the *combined*
+# pitch-damping coefficient (Cmq + Cm_alpha_dot), which is the physically
+# meaningful quantity for rigid-body trajectory prediction.
+#
+# ORP implements:   Cmq_strip + Cm_alpha_dot = Cmq_strip * (1 + 0.4) = 1.4 * Cmq_strip
+# Where Cm_alpha_dot = 0.4 * Cmq is a standard engineering approximation.
+# For direct comparison: ORP_damping_total = 1.4 * ORP.getCmq()
+#                        ADA636861_damping_total = Cmq_value_below (already combined)
+#
+# ***TABLE SOURCES***
+# Table VII  (source_table=VII) : 26 per-shot values from 2-term linear theory reduction.
+#                                 DBSQ column gives Fisher's dimensionless squared
+#                                 residual (lower = better fit quality).
+# Table VIII (source_table=VIII): 26 per-shot values from 6-DOF single-fit trajectory
+#                                 reduction (more rigorous than linear theory).
+# Table IX   (source_table=IX)  : 8 multi-fit group values, several shots per Mach bin,
+#                                 with probable_error_pct column (percent, from PDF).
+#
+# quality_flag:
+#   "outlier"     = report text notes low AoA dispersion, unstable fit, or unphysical sign
+#   "low_confidence" = large DBSQ or large probable-error (>15 %)
+#   "ok"          = within normal band
+#
+# Extracted from: paper/data/pdf/ADA636861.pdf, pages 43-49 (Tables VII-IX)
+shot,mach,cmq,source_table,dbsq,probable_error_pct,quality_flag
+# --- Table VII (linear theory, per-shot) ---
+DA95022010,1.056,-319.4,VII,0.4,,ok
+DA95022219,1.057,-333.3,VII,2.1,,ok
+DA95022230,1.116,-289.2,VII,0.1,,ok
+DA95030613,1.254,-416.1,VII,2.4,,ok
+DA95022009,1.332,-475.1,VII,0.7,,ok
+DA95030622,1.380,418.7,VII,17.9,,outlier
+DA95021318,1.799,-331.7,VII,0.5,,ok
+DA95021529,1.846,-277.2,VII,0.6,,ok
+DA95021308,1.850,-330.3,VII,0.9,,ok
+DA95021328,2.348,-338.2,VII,0.3,,ok
+DA95020907,2.364,-360.2,VII,0.4,,ok
+DA95021317,2.413,-278.8,VII,2.0,,ok
+DA95020927,2.663,-307.3,VII,3.4,,ok
+DA95020906,2.741,-242.1,VII,1.9,,ok
+DA95020916,2.749,-89.7,VII,0.1,,outlier
+DA95030603,2.969,-319.3,VII,0.1,,ok
+DA95022205,2.970,-250.8,VII,1.6,,ok
+DA95022215,3.312,-263.6,VII,2.8,,ok
+DA95022726,3.337,-205.7,VII,0.4,,ok
+DA95022702,3.681,-209.0,VII,8.0,,low_confidence
+DA95030121,3.741,-244.4,VII,17.0,,low_confidence
+DA95022712,3.774,-228.2,VII,4.7,,ok
+DA95031523,4.127,-195.3,VII,2.6,,ok
+DA95030101,4.422,-261.0,VII,45.3,,low_confidence
+DA95030111,4.471,-214.1,VII,16.3,,low_confidence
+# --- Table VIII (6-DOF single-fit, per-shot) ---
+DA95022010,1.056,-332.0,VIII,0.4,11,ok
+DA95022219,1.058,-349.6,VIII,2.0,7,ok
+DA95022230,1.116,-320.0,VIII,0.1,,ok
+DA95030613,1.254,-386.0,VIII,2.3,14,ok
+DA95022009,1.332,-505.5,VIII,0.8,6,ok
+DA95030622,1.377,-500.0,VIII,15.8,,low_confidence
+DA95021318,1.799,-385.8,VIII,0.6,6,ok
+DA95021529,1.846,-370.0,VIII,0.6,,ok
+DA95021308,1.850,-416.3,VIII,1.0,5,ok
+DA95021328,2.348,-294.8,VIII,0.4,11,ok
+DA95020907,2.364,-330.0,VIII,0.5,,ok
+DA95021317,2.414,-298.6,VIII,2.1,5,ok
+DA95020927,2.663,-397.9,VIII,3.7,3,ok
+DA95020906,2.741,-254.3,VIII,2.1,6,ok
+DA95020916,2.749,-300.0,VIII,0.0,2,ok
+DA95030603,2.969,-250.0,VIII,0.1,1,ok
+DA95022205,2.970,-275.4,VIII,1.7,5,ok
+DA95022215,3.312,-231.9,VIII,3.0,4,ok
+DA95022726,3.338,-250.0,VIII,0.4,,ok
+DA95022702,3.682,-210.7,VIII,8.5,3,low_confidence
+DA95030121,3.745,-277.1,VIII,17.6,2,low_confidence
+DA95022712,3.775,-204.7,VIII,5.0,3,ok
+DA95031523,4.127,-152.4,VIII,2.7,7,ok
+DA95030101,4.425,-155.4,VIII,46.6,6,low_confidence
+DA95030111,4.473,-247.2,VIII,17.7,2,low_confidence
+# --- Table IX (6-DOF multi-fit, grouped) ---
+# Note: Table IX labels these as grouped fits over multiple shots (see ADA636861 p.48).
+# The Cmq listed here is the multi-fit value; DBSQ is mean over the group.
+GROUP1,1.077,-322.4,IX,0.9,5,ok
+GROUP2,1.293,-487.4,IX,1.5,6,ok
+GROUP3,1.832,-377.7,IX,0.7,4,ok
+GROUP4,2.375,-306.5,IX,1.0,4,ok
+GROUP5,2.718,-335.5,IX,1.9,3,ok
+GROUP6,3.147,-260.1,IX,1.3,3,ok
+GROUP7,3.734,-239.8,IX,10.1,1,ok
+GROUP8,4.300,-247.0,IX,10.2,2,ok

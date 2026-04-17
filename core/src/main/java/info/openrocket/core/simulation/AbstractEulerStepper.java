@@ -133,9 +133,13 @@ public abstract class AbstractEulerStepper extends AbstractSimulationStepper {
 			// step, oscillation is building up.
 			if (newAcceleration.getZ() * linearAcceleration.getZ() < -MathUtil.EPSILON) {
 				// If acceleration oscillation is building up, the new timestep is the solution of
-				// a + j*t = 0
-				t = Math.abs(a / jerk.getZ());
-				log.trace("oscillation avoidance changes timeStep to " + t);
+				// a + j*t = 0.  Guard against near-zero jerk to avoid Infinity/NaN timesteps
+				// that would prevent ground-hit detection (causing MAXTIME termination).
+				double jz = jerk.getZ();
+				if (Math.abs(jz) > MathUtil.EPSILON) {
+					t = Math.abs(a / jz);
+					log.trace("oscillation avoidance changes timeStep to " + t);
+				}
 			}
 		}
 

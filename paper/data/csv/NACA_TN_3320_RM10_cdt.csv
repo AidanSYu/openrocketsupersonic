@@ -1,0 +1,87 @@
+# NACA RM-10 Parabolic Fin-Stabilized Body — Zero-Lift Total Drag (CDT)
+# Source: Jackson, H.H., Rumsey, C.B., and Chauvin, L.T.,
+#         "Flight Measurements of Drag and Base Pressure of a Fin-Stabilized
+#          Parabolic Body of Revolution (NACA RM-10) at Different Reynolds
+#          Numbers and at Mach Numbers from 0.9 to 3.3,"
+#         NACA Technical Note 3320, November 1954.
+#         (Supersedes NACA RM L50G24, 1950.)
+#         Authors: Langley Aeronautical Laboratory / Pilotless Aircraft
+#          Research Division, Wallops Island.
+#         NTRS: https://ntrs.nasa.gov/citations/19930084086
+#         Local PDF: paper/data/pdf/NACA_TN_3320.pdf
+#
+# Vehicle: NACA RM-10 research model, parabolic-arc body of revolution,
+#          rocket-boosted, telemetered free-flight model.
+#   Parabolic body (cut at 81.25% of basic length to allow rocket jet at base)
+#   Actual body fineness ratio (length / max diameter) = 12.2
+#   Full-scale body length = 12.208 ft (146.5 in, 3.7211 m)
+#   Full-scale max diameter = 12.0 in (0.3048 m); base diameter = 7.272 in (0.1847 m)
+#   Body profile (full-scale, from Fig. 1, x measured from station of Y_max):
+#          Y(in) = 6.000 - 0.0007407 * x^2
+#   Four 60-deg sweptback fins at base, untapered planform:
+#          Total aspect ratio = 2.04
+#          Fin cross-section: 10% t/c circular-arc normal to LE
+#                             (= 5% streamwise thickness ratio)
+#          Fin LE origin station = 129 in; fins extend to station 146.5 in
+#          Tip-to-tip span across fins = 35.88 in (0.9114 m)
+#          Per-fin exposed semi-span ≈ 13.07 in (0.332 m)
+#
+# Test: Free-flight, rocket-boosted models. Deceleration-phase data after
+#       burnout. Velocity and total drag from CW Doppler radar and telemetered
+#       longitudinal accelerometer. Trajectory / atmospheric data from SCR 584
+#       radar and radiosondes.
+#       Nine models total (4 full-scale, 5 half-scale).
+#       Full-scale:  M 0.85 – 3.30, Re_L = 14e6 – 210e6 (based on body length)
+#       Half-scale:  M 0.90 – 3.02, Re_L = 15e6 – 110e6
+#       Reported accuracy for mean CDT curves: ~±0.005 supersonic,
+#       ~±0.01 transonic/subsonic; individual-shot scatter ±0.008 (full-scale)
+#       to ±0.015 (half-scale).
+#
+# This benchmark is INDEPENDENT of the Basic Finner (ADA636861):
+#   - Different vehicle (parabolic body vs cone-cylinder, f.r. 12.2 vs 10.0)
+#   - Different fin geometry (60-deg swept circular-arc vs rectangular flat slab)
+#   - Different test facility (NACA Langley / Wallops vs DREV Valcartier)
+#   - Different decade (1950/1954 vs 1997)
+#   - Different test technique (rocket-boosted telemetered free flight +
+#     Doppler radar vs aeroballistic range photographic tracking)
+#
+# Data below:
+#   CDT_full_scale  = mean-curve total drag coefficient, full-scale model
+#                     (based on max body frontal area 0.785 sq ft)
+#   CDT_half_scale  = mean-curve total drag coefficient, half-scale model
+#                     (based on max body frontal area 0.196 sq ft)
+#   Both are zero-lift (fin-stabilized, alpha ~= 0 deg).
+#
+# Digitization source: Figures 7 (full-scale, 4 models, Doppler + telemeter),
+#                      Figure 8 (half-scale, 5 models), and Figure 10
+#                      (averaged-curve comparison). Anchor points explicitly
+#                      quoted in text:
+#   - Full-scale maximum CDT = 0.26 at M = 1.04
+#   - Full-scale CDT = 0.21 at M = 2.5
+#   - Full-scale CDT = 0.17 at M = 3.3
+#   - Half-scale maximum CDT = 0.25 at M = 1.05
+#   - Half-scale CDT = 0.19 at M = 3.0
+#   - Both curves converge to CDT = 0.195 at M = 2.9
+#
+# Where one column is blank ("") the Mach number is outside that model's
+# tested range (half-scale only goes to M ≈ 3.02, full-scale max is 3.30).
+Mach,CDT_full_scale,CDT_half_scale
+0.90,0.150,
+0.95,0.180,
+1.00,0.250,0.220
+1.04,0.260,0.245
+1.05,0.258,0.250
+1.10,0.255,0.245
+1.20,0.245,0.238
+1.30,0.240,0.232
+1.40,0.235,0.228
+1.50,0.230,0.225
+1.60,0.227,0.222
+1.80,0.220,0.215
+2.00,0.215,0.210
+2.20,0.213,0.205
+2.50,0.210,0.200
+2.70,0.205,0.198
+2.90,0.195,0.195
+3.00,0.190,0.190
+3.30,0.170,

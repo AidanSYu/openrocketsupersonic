@@ -1,0 +1,25 @@
+Case,CDX1File,RealAltFt,RASAeroAltFt,ORPErrorPct,PeakMach,ModifiedBarrowman,Turbulence,SustainerNozzleDia_in,Booster1NozzleDia_in,Booster2NozzleDia_in,SustNozzleApplied,B1NozzleApplied,B2NozzleApplied,UnsupportedActiveCount,ParityClass,Notes
+Byrum,Byrum.CDX1,5732,5281,+1.9,0.48,False,False,0,0,0,n/a,n/a,n/a,0,CLEAN,
+CancerDescending,CancerDescending.CDX1,6188,6328,+3.5,0.52,False,False,0,0,0,n/a,n/a,n/a,0,CLEAN,
+EZI-65,EZI65-1.CDX1,3965,4214,+16.1,0.61,False,False,0,0,0,n/a,n/a,n/a,0,CLEAN,Outlier >10%
+Gibb,Gibb.CDX1,3913,4205,-0.1,0.64,False,False,0,0,0,n/a,n/a,n/a,0,CLEAN,
+IonDrive,IonDrive.CDX1,8027,8642,-5.7,0.72,False,False,0,0,0,n/a,n/a,n/a,0,CLEAN,
+Raven,Raven.CDX1,8815,9332,+27.5,1.12,False,False,0,0,0,n/a,n/a,n/a,0,CLEAN,Outlier >10%; min-dia transonic
+Thunder&Lightning,Thunder&Lightning.CDX1,3577,3989,+17.4,0.55,False,False,0,0,0,n/a,n/a,n/a,0,CLEAN,Outlier >10%
+Blister,Blister.CDX1,9026,8301,-3.8,0.85,False,False,1.3125,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+Rabia,Rabia.CDX1,12745,12197,+0.5,1.05,False,False,1.188,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+Rabia-ShortFinCan,Rabia-ShortFinCan.CDX1,10584,10225,-2.6,0.98,False,False,1.187,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+Torrent,Torrent.CDX1,12807,13717,+7.1,1.22,False,False,1.625,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+CalIsp1,CalIsp1.CDX1,3964,3876,+3.2,0.45,False,False,0.63,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+CalIsp2,CalIsp2.CDX1,3837,3948,+5.3,0.43,False,False,0.63,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+CalIsp3,CalIsp3.CDX1,3710,3876,+5.0,0.42,False,False,0.63,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+CalIsp4,CalIsp4.CDX1,5085,4847,+3.3,0.60,False,False,0.63,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+CalIsp5,CalIsp5.CDX1,4930,4836,+3.1,0.52,False,False,0.63,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+L500Roc,L500Roc.CDX1,24771,26509,+8.6,2.00,False,False,1,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+DontDebateThis,DontDebateThisN5800MinDia.CDX1,56573,61982,+2.3,3.10,False,True,2.488,0,0,Yes,n/a,n/a,1,CONTAMINATED,Turbulence=True ignored
+Proteus6,Proteus6.CDX1,85067,81499,+5.0,2.94,False,False,4.8,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+FMJ_BALLS005,Full Metal Jacket1.CDX1,37981,38772,+8.7,2.30,False,False,2.5,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+FMJ_BlackRock6,Full Metal Jacket2.CDX1,30038,32548,+2.7,2.10,False,False,2.5,0,0,Yes,n/a,n/a,0,CLEAN,Nozzle dia applied
+Qu8k,Qu8k.CDX1,121478,119684,-5.3,3.40,True,True,6,0,0,Yes,n/a,n/a,2,CONTAMINATED,ModifiedBarrowman+Turbulence ignored
+Kinsel,Kinsel_P4935_A-601_Rocket.CDX1,42771,41098,+35.1,2.33,True,True,3.09,0,0,Yes,n/a,n/a,2,CONTAMINATED,ModifiedBarrowman+Turbulence ignored; worst outlier
+AeroPac104K,AeroPac104KStageOne&Two-2.CDX1,104659,113786,-1.2,3.50,False,True,1.23,1.75,0,Yes,No,n/a,2,CONTAMINATED,Turbulence ignored; Booster1NozzleDia=1.75 ignored

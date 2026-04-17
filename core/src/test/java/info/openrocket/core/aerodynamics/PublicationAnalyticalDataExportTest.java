@@ -95,6 +95,8 @@ public class PublicationAnalyticalDataExportTest {
 		exportNacaRmA52H28(outDir);
 		exportNacaTn3393Base(outDir);
 		exportNasaTmX653StaticStability(outDir);
+		exportBasicFinnerComparison(outDir);
+		exportHypersonicConeComparison(outDir);
 		exportTunedParameterSensitivity(outDir);
 		writePublicationReadmes(outDir);
 
@@ -1684,6 +1686,127 @@ public class PublicationAnalyticalDataExportTest {
 			return finSet.getPlanformArea() * instanceCount;
 		}
 		return Double.NaN;
+	}
+
+	// ================================================================
+	// Basic Finner: ORP CD vs ADA636861 experimental
+	// ================================================================
+
+	private void exportBasicFinnerComparison(Path outDir) throws IOException {
+		Path csv = csvPath(outDir, "basic_finner_comparison.csv");
+		BarrowmanCalculator calc = new BarrowmanCalculator();
+		Rocket rocket = SupersonicTestRockets.makeBasicFinner();
+
+		double[][] expData = {
+				{ 1.077, 0.863 },
+				{ 1.293, 0.731 },
+				{ 1.832, 0.585 },
+				{ 2.375, 0.484 },
+				{ 2.718, 0.435 },
+				{ 3.147, 0.373 },
+				{ 3.734, 0.309 },
+				{ 4.300, 0.271 },
+		};
+
+		try (BufferedWriter w = Files.newBufferedWriter(csv, StandardCharsets.UTF_8)) {
+			w.write("Mach,CX0_exp,CD_orp,frictionCD,pressureCD,baseCD,error_pct\n");
+			for (double[] row : expData) {
+				double mach = row[0];
+				double cx0Exp = row[1];
+				FlightConfiguration config = rocket.getSelectedConfiguration();
+				FlightConditions cond = new FlightConditions(config);
+				cond.setMach(mach);
+				cond.setAOA(0.0);
+				AerodynamicForces forces = calc.getAerodynamicForces(config, cond, new WarningSet());
+				double cdOrp = forces.getCD();
+				double errPct = (cdOrp - cx0Exp) / cx0Exp * 100.0;
+				w.write(String.format(java.util.Locale.US,
+						"%.3f,%.3f,%.6f,%.6f,%.6f,%.6f,%.1f%n",
+						mach, cx0Exp, cdOrp,
+						forces.getFrictionCD(), forces.getPressureCD(), forces.getBaseCD(),
+						errPct));
+			}
+		}
+	}
+
+	// ================================================================
+	// Hypersonic cone: ORP CD vs DTIC AD0487365
+	// ================================================================
+
+	private void exportHypersonicConeComparison(Path outDir) throws IOException {
+		Path csv = csvPath(outDir, "hypersonic_cone_comparison.csv");
+
+		double[][] expData = {
+				// theta_deg, mach, cd_exp
+				{ 8, 6.5, 0.072 },
+				{ 8, 6.5, 0.085 },
+				{ 8, 9.0, 0.080 },
+				{ 8, 14.3, 0.090 },
+				{ 12, 6.5, 0.125 },
+				{ 12, 9.0, 0.128 },
+				{ 12, 17.2, 0.150 },
+				{ 16, 6.5, 0.205 },
+				{ 16, 9.0, 0.198 },
+				{ 16, 14.3, 0.222 },
+				{ 16, 17.2, 0.227 },
+		};
+
+		try (BufferedWriter w = Files.newBufferedWriter(csv, StandardCharsets.UTF_8)) {
+			w.write("theta_deg,Mach,CD_exp,CD_orp,pressureCD,frictionCD,baseCD,error_pct\n");
+			for (double[] row : expData) {
+				double theta = row[0];
+				double mach = row[1];
+				double cdExp = row[2];
+
+				Rocket rocket = makeConeForExport(theta);
+				FlightConfiguration config = rocket.getSelectedConfiguration();
+				BarrowmanCalculator calc = new BarrowmanCalculator();
+				FlightConditions cond = new FlightConditions(config);
+				cond.setMach(mach);
+				cond.setAOA(0.0);
+				AerodynamicForces forces = calc.getAerodynamicForces(config, cond, new WarningSet());
+				double cdOrp = forces.getCD();
+				double errPct = (cdOrp - cdExp) / cdExp * 100.0;
+				w.write(String.format(java.util.Locale.US,
+						"%.0f,%.1f,%.3f,%.6f,%.6f,%.6f,%.6f,%.1f%n",
+						theta, mach, cdExp, cdOrp,
+						forces.getPressureCD(), forces.getFrictionCD(), forces.getBaseCD(),
+						errPct));
+			}
+		}
+	}
+
+	/**
+	 * Build a simple cone rocket matching the DTIC AD0487365 geometry
+	 * (same as HypersonicConeDragBenchmarkTest.makeCone).
+	 */
+	private static Rocket makeConeForExport(double halfAngleDeg) {
+		double baseRadius = 0.015;
+		double coneLength = baseRadius / Math.tan(Math.toRadians(halfAngleDeg));
+
+		Rocket rocket = new Rocket();
+		rocket.setName("Cone-" + halfAngleDeg + "deg");
+
+		info.openrocket.core.rocketcomponent.AxialStage stage =
+				new info.openrocket.core.rocketcomponent.AxialStage();
+		stage.setName("Sustainer");
+		rocket.addChild(stage);
+
+		info.openrocket.core.rocketcomponent.NoseCone nose =
+				new info.openrocket.core.rocketcomponent.NoseCone(
+						info.openrocket.core.rocketcomponent.Transition.Shape.CONICAL,
+						coneLength, baseRadius);
+		nose.setName("Cone");
+		nose.setThickness(0.001);
+		stage.addChild(nose);
+
+		info.openrocket.core.rocketcomponent.BodyTube body =
+				new info.openrocket.core.rocketcomponent.BodyTube(0.001, baseRadius, 0.001);
+		body.setName("Base");
+		stage.addChild(body);
+
+		rocket.enableEvents();
+		return rocket;
 	}
 
 	private static String componentCategory(RocketComponent component) {
