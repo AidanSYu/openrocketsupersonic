@@ -60,8 +60,10 @@ public class SimulationConditions implements Monitorable, Cloneable {
 	private double maxSimulationTime = RK4SimulationStepper.RECOMMENDED_MAX_TIME;
 	private double maximumAngleStep = RK4SimulationStepper.RECOMMENDED_ANGLE_STEP;
 
-	/** Nozzle exit diameter in meters for power-on base drag. NaN = unknown. */
-	private double nozzleExitDiameter = Double.NaN;
+	/** Nozzle exit diameter in meters by axial stage number. NaN = unknown. */
+	private double sustainerNozzleExitDiameter = Double.NaN;
+	private double booster1NozzleExitDiameter = Double.NaN;
+	private double booster2NozzleExitDiameter = Double.NaN;
 
 	/**
 	 * When true, the aerodynamic calculator forces a fully-turbulent boundary
@@ -241,11 +243,31 @@ public class SimulationConditions implements Monitorable, Cloneable {
 	}
 
 	public double getNozzleExitDiameter() {
-		return nozzleExitDiameter;
+		return sustainerNozzleExitDiameter;
 	}
 
 	public void setNozzleExitDiameter(double nozzleExitDiameter) {
-		this.nozzleExitDiameter = nozzleExitDiameter;
+		setNozzleExitDiameterForStage(0, nozzleExitDiameter);
+	}
+
+	public double getNozzleExitDiameterForStage(int stageNumber) {
+		return switch (stageNumber) {
+			case 0 -> sustainerNozzleExitDiameter;
+			case 1 -> booster1NozzleExitDiameter;
+			case 2 -> booster2NozzleExitDiameter;
+			default -> Double.NaN;
+		};
+	}
+
+	public void setNozzleExitDiameterForStage(int stageNumber, double nozzleExitDiameter) {
+		switch (stageNumber) {
+			case 0 -> sustainerNozzleExitDiameter = nozzleExitDiameter;
+			case 1 -> booster1NozzleExitDiameter = nozzleExitDiameter;
+			case 2 -> booster2NozzleExitDiameter = nozzleExitDiameter;
+			default -> {
+				return;
+			}
+		}
 		this.modID = new ModID();
 	}
 

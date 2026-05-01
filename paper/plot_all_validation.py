@@ -2,7 +2,7 @@
 """Rebuild all publication PNGs from final CSVs.
 
 Usage:
-    python plot_all_validation.py          # regenerate all 15 PNGs
+    python plot_all_validation.py          # regenerate all publication PNGs
     python plot_all_validation.py normal_shock prandtl_meyer  # specific plots only
 
 Output goes to  paper/data/png/  (overwrites existing files).
@@ -37,7 +37,10 @@ PNG  = DATA_DIR / "png"
 
 
 def _read(name: str) -> pd.DataFrame:
-    return pd.read_csv(CSV / name, comment="#")
+    path = CSV / name
+    if not path.exists():
+        raise FileNotFoundError(f"required CSV not found: {path}")
+    return pd.read_csv(path, comment="#")
 
 
 # ======================================================================
@@ -342,8 +345,7 @@ def plot_agard_b_total():
     df_smooth  = df_tr[df_tr["surfaceMode"] == "natural_transition"].copy()
     df_ordinary = df_tr[df_tr["surfaceMode"] == "ordinary_finish_bracket"].copy()
     if df_smooth.empty or df_ordinary.empty:
-        print("  SKIP agard_b_total — missing transition data")
-        return
+        raise ValueError("agard_b_total requires natural_transition and ordinary_finish_bracket rows")
 
     m_exp = df_exp["Mach"].values.astype(float)
     cd_exp = df_exp["C_D_total"].values.astype(float)
@@ -394,8 +396,7 @@ def plot_agard_b_components():
     df_smooth   = df_tr[df_tr["surfaceMode"] == "natural_transition"].copy()
     df_ordinary = df_tr[df_tr["surfaceMode"] == "ordinary_finish_bracket"].copy()
     if df_smooth.empty or df_ordinary.empty:
-        print("  SKIP agard_b_components — missing transition data")
-        return
+        raise ValueError("agard_b_components requires natural_transition and ordinary_finish_bracket rows")
 
     m_exp = df_exp["Mach"].values.astype(float)
     mmax = float(m_exp.max())
@@ -694,8 +695,7 @@ def plot_tm_x653_stability():
     df_xcp = df[df["metric"] == "X_CP_d"].copy()
 
     if df_cn.empty or df_xcp.empty:
-        print("  SKIP tm_x653 — no data in pointwise comparison CSV")
-        return
+        raise ValueError("tm_x653 requires C_N and X_CP_d rows in pointwise comparison CSV")
 
     fig, (ax_cn, ax_xcp) = plt.subplots(1, 2, figsize=WIDE_FIG)
     fig.suptitle("NASA TM X-653 Static Stability Validation (NSCFB)",
@@ -745,8 +745,7 @@ TN3650_CSV = Path(
 def plot_tn3650_fin_wave_drag():
     csv_path = SCRIPT_DIR.parent / TN3650_CSV
     if not csv_path.exists():
-        print(f"  SKIP tn3650 — {csv_path} not found")
-        return
+        raise FileNotFoundError(f"tn3650 required CSV not found: {csv_path}")
     df = pd.read_csv(csv_path)
     tcs = sorted(df["t_over_c"].unique())
 
@@ -781,8 +780,7 @@ def plot_tobak_cmq():
         # Check alternate location
         csv_path = SCRIPT_DIR.parent / "core" / "paper" / "data" / "csv" / "tobak_cmq_benchmark.csv"
     if not csv_path.exists():
-        print("  SKIP tobak_cmq — CSV not found")
-        return
+        raise FileNotFoundError("tobak_cmq required CSV not found in paper/data/csv or core/paper/data/csv")
     df = pd.read_csv(csv_path, comment="#")
     thetas = sorted(df["half_angle_deg"].unique())
 
@@ -851,13 +849,9 @@ def main():
     for name in targets:
         fn = PLOTS.get(name)
         if fn is None:
-            print(f"Unknown plot: {name}  (available: {', '.join(PLOTS)})")
-            continue
+            raise SystemExit(f"Unknown plot: {name}  (available: {', '.join(PLOTS)})")
         print(f"[{name}]")
-        try:
-            fn()
-        except Exception as e:
-            print(f"  ERROR: {e}")
+        fn()
 
 
 if __name__ == "__main__":

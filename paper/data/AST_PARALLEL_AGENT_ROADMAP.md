@@ -8,13 +8,13 @@ If you are an agent receiving this file, your job is not to scope down the claim
 
 Turn the current strong component-level validation base into a defensible AST-style aerodynamic modeling paper with credible vehicle-level closure.
 
-Current honest status (2026-04-16):
-- AST quantitative targets now met: avg |error| = 7.60%, 83.3% within ±10%, 54.2% within ±5%, 0 abnormal endings.
-- 4 outliers remain >10%: EZI-65 (+16.1%), T&L (+17.4%), Raven (+27.5%), Kinsel (+35.1%).
-- Wave 1 diagnosis complete: base drag too low is the common residual across all 4 outliers (not fins, not damping, not import parity, not geometry).
-- Candidate fix list produced (Prompt 11). Candidate #1 (remove Lamb-Oberkampf Re correction) in progress (Prompt 12).
-- A-601 Kinsel MAXTIME is resolved (Prompt 7); the remaining +35.1% overshoot is pure ascent drag deficit.
-- Realistic closure expectation: Raven to ~+12%, Kinsel to ~+27%. Full <10% closure for all 4 is not achievable with physics-defensible changes alone.
+Current honest status (2026-04-17 audited baseline):
+- AST quantitative targets are met with caveats: avg |error| = 6.84%, 83.3% within ±10%, 62.5% within ±5%, 0 abnormal endings.
+- 4 outliers remain >10%: EZI-65 (+16.14%), T&L (+17.36%), Raven (+24.22%), Kinsel (+28.14%).
+- EZI-65 and T&L are flagged non-aero for this aero-closure pass; RASAero II also overpredicts those flight cards.
+- Raven and Kinsel remain aero-open. Prompt 13 closed Raven by 3.24 pp; Prompts 12 + 13 closed Kinsel by 6.99 pp.
+- Basic Finner post-Prompt-13 MAPE is 11.9% over the 8 multiple-fit ADA636861 points, with a 14% tight regression gate.
+- Full <10% closure for all 4 remaining outliers is not currently achievable with physics-defensible model changes alone.
 
 ## Read First
 
@@ -119,7 +119,7 @@ Most important new evidence from the generated outlier reports (updated 2026-04-
 - The mechanism differs by Mach regime:
   - **Subsonic (EZI-65, T&L)**: Body tube base drag ~37% of total. RASAero also overpredicts (+6.3%, +11.5%), suggesting partial non-aerodynamic origin.
   - **Transonic min-dia (Raven)**: Body tube base drag = 0.31 at M=1.12 is the dominant term. Extreme L/D = 41.7 may cause base drag model underprediction.
-  - **Supersonic fin-can (Kinsel)**: Fin can base drag = 45% of total. CDX1 parity gap was suspected (ModifiedBarrowman, Turbulence, SustainerNozzle=3.09) but Prompt 4 sensitivity analysis confirms all three are bounded <2% combined. Nozzle IS already imported; Turbulence <1%; ModifiedBarrowman <2% (ORP Phase 3 equivalent). The +35.1% overshoot is a pure aero model deficit.
+  - **Supersonic fin-can (Kinsel)**: Fin can base drag = 45% of total. CDX1 parity gap was suspected (ModifiedBarrowman, Turbulence, SustainerNozzle=3.09) but Prompt 4 sensitivity analysis confirms all three are bounded <2% combined. Nozzle IS already imported; Turbulence <1%; ModifiedBarrowman <2% (ORP Phase 3 equivalent). The audited +28.14% overshoot is a pure aero model deficit; the older +35.1% number is the pre-P12 baseline.
 - Body friction is consistent per unit L/D across healthy and outlier cases (not a model error).
 - Kinsel's MAXTIME issue is fixed (descent from 58,000 ft with drogue now completes).
 
@@ -149,7 +149,7 @@ Update this table when you take or finish work.
 | 17 | Search for direct pitch-damping closure opportunities | P1 | done | Claude Opus 4.6 | 2026-04-16 | ADA636861 Table VII has ~25 Cmq points for Basic Finner at M 1.05-4.5, never digitized. See `pitch_damping_closure_memo.md`. |
 | 18 | Boattail and fin-can geometry reconciliation | P0 | done | Claude Opus 4.6 | 2026-04-16 | Geometry import correct; finned base augmentation verified working; remaining overshoot is aero model deficit, not geometry. See session log and reconciliation test. |
 | 19 | Full corpus rerun after accepted fixes | P1 | done | Claude Opus 4.7 (1M context) | 2026-04-17 | Audited full corpus rerun (SimVRealBenchmarkTest + SimVRealOutlierDiagnosticTest, BUILD SUCCESSFUL 7m 57s). Headline confirmed: avg \|error\| = 6.84 % (vs memo 6.83 %), within ±5 % = 62.5 %, within ±10 % = 83.3 %, abnormal endings = 0. Kinsel: +28.1 % (benchmark harness) vs +31.3 % (diagnostic harness in P13 memo); both correct. Raven: +24.2 % (memo said +24.3 %). Frozen artifacts: `paper/data/corpus_summary_2026_04_17.md` + `paper/data/csv/corpus_summary_frozen_2026_04_17.csv`. All 24 per-case mds + trajectory CSVs + component-CD sweeps regenerated under `core/build/reports/simvreal-outliers/`. |
-| 20 | Regression-lock all accepted improvements | P1 | not_started |  |  |  |
+| 20 | Regression-lock all accepted improvements | P1 | done | Claude Opus 4.7 (1M context) | 2026-04-17 | Inventory memo + 3 new gate layers: (a) `SimVRealBenchmarkTest.testSimVRealBenchmark` now asserts Prompt-19 frozen corpus headlines (avg ≤ 7.5 %, ±10 % ≥ 80 %, ±5 % ≥ 58 %, abnormal = 0); (b) new `ClosedOutlierRegressionTest` pins Raven ≤ +27 % and Kinsel ≤ +33 % to guard Prompts 12 + 13 closures; (c) new `testMapePostPrompt13TightGate` in `BasicFinnerDragBenchmarkTest` enforces BF MAPE ≤ 14 % per P13 session-log recommendation. Memo at `paper/data/md/prompt20_regression_lock_inventory.md` gives the mechanism → test → claim traceability matrix. |
 | 21 | Brutal AST readiness review | Gate | not_started |  |  |  |
 | 22 | Claim map finalization | Gate | not_started |  |  |  |
 | 23 | Final paper go/no-go gate | Gate | not_started |  |  |  |
@@ -191,6 +191,8 @@ Add new high-value artifact paths here as they are created.
 - [transonic_base_drag_source_hunt.md](C:/Code/OpenRocket%20Plus/paper/data/transonic_base_drag_source_hunt.md) (Prompt 13 unblock memo: per-candidate retrieval log, ORP-vs-data quantitative gap table, recommendations)
 - [corpus_summary_2026_04_17.md](C:/Code/OpenRocket%20Plus/paper/data/corpus_summary_2026_04_17.md) (Prompt 19: frozen post-P12+P13 audited corpus summary, headline metrics, before/after table, per-case 24-rocket table, outlier root-cause ranking, cross-reference of fix → closed-case, AST-target status)
 - [corpus_summary_frozen_2026_04_17.csv](C:/Code/OpenRocket%20Plus/paper/data/csv/corpus_summary_frozen_2026_04_17.csv) (Prompt 19: machine-readable per-case pre-P12 vs post-P13 with closing-fix attribution and aggregate header rows)
+- [prompt20_regression_lock_inventory.md](C:/Code/OpenRocket%20Plus/paper/data/md/prompt20_regression_lock_inventory.md) (Prompt 20: mechanism → test → claim-protected traceability matrix; 13 mechanisms, all locked or reasoned-out)
+- [ClosedOutlierRegressionTest.java](C:/Code/OpenRocket%20Plus/core/src/test/java/info/openrocket/core/aerodynamics/ClosedOutlierRegressionTest.java) (Prompt 20: single-case Raven and Kinsel gates protecting Prompts 12 + 13 closures)
 
 ## New Blockers Found
 
@@ -226,9 +228,9 @@ Add blockers here as they are discovered.
 - Prompt 14-D ✓ (RM-10 overshoot root-cause diagnostic; 4 actionable mechanisms ranked, primary = finned-base augmentation misapplied on bodies with upstream boattail + 2 cm terminal-boattail placeholder generates phantom pressure CD; see `paper/data/rm10_vs_basic_finner_diagnostic.md`)
 - Prompt 15 — not started
 
-### Wave 4 — NOT STARTED
-- Prompt 19
-- Prompt 20
+### Wave 4 — IN PROGRESS
+- Prompt 19 ✓ (audited full-corpus rerun, frozen summary + per-case CSV committed)
+- Prompt 20 ✓ (regression-locked: Prompt-19 corpus headline gates, Raven/Kinsel closed-outlier gates, Basic Finner post-P13 tight MAPE gate; full inventory memo at `paper/data/md/prompt20_regression_lock_inventory.md`)
 - Prompt 21
 - Prompt 22
 - Prompt 23
@@ -544,6 +546,23 @@ Use this template for every handoff.
   - RM-10 half-scale data (Re_L 15-110e6) is in the CSV but not wired to a test; could be added as a secondary check of Re sensitivity in the current model.
   - The +80.5 % overshoot on NACA RM-10 plus the -14 to -31 % undershoot on Basic Finner bracket an inconsistency in ORP's high-M finned-vehicle drag budget that cannot be explained by a simple global tuning. A physics-based reconciliation is the correct path; this prompt is NOT the one to do it.
 - Recommended next prompt: Prompt 15 (exact-geometry minimum-diameter validation path) to see whether Raven's transonic overshoot shares a common mechanism with the RM-10 overprediction (possible: both involve tapered / slender afterbodies). Alternatively, a new prompt scoped to "audit SymmetricComponentCalc pressure-drag path on tapered / parabolic afterbodies" could directly target the RM-10 mechanism — but that must not regress Basic Finner, NACA RM A52H28, or TN 3393.
+
+### Session — Prompt 20: Regression-Lock All Accepted Improvements
+- Agent: Claude Opus 4.7 (1M context)
+- Date: 2026-04-17
+- Prompt(s): 20
+- Status: done. Three new mechanism-specific regression layers added. All pre-existing A-level benchmarks pass unchanged.
+- Summary: Took every fix that materially improved the SimVReal corpus across Prompts 9-19 and added mechanism-specific regression coverage where it did not already exist. Built the claim-to-test traceability matrix at `paper/data/md/prompt20_regression_lock_inventory.md`, cross-referencing 13 campaign mechanisms against their protecting tests. Audit found that Prompt 12 (Re-correction removal) already had 10 lock tests in `BaseDragModelTest`, Prompt 13 (Hart polynomial) already had 14 lock tests in the same file, Prompt 16 had `DampingHeuristicSensitivityTest`, Prompt 17-FU had `BasicFinnerCmqBenchmarkTest`, Prompt 14 had `NacaRm10FinnedBodyDragBenchmarkTest`, 14-D had `Rm10VsBasicFinnerDiagnosticTest`, Prompt 18 had `BoattailFinCanGeometryReconciliationTest` (8 tests), and the Raven THICK_BL audit had `RavenThickBLAuditTest`. The three gaps that needed new coverage: (a) the SimVReal corpus headline aggregate metrics (avg |error|, within ±10 %, within ±5 %, abnormal endings) were NOT gated — `testSimVRealBenchmark` only printed the metrics without asserting. Added four explicit gate assertions at the end of the existing method so a future corpus regression will trip. (b) No per-case regression guard existed for Raven or Kinsel — both outliers had been closed 3-7 pp by Prompts 12+13 but nothing protected the closure. Added new file `ClosedOutlierRegressionTest.java` with two single-flight gate tests: Raven ≤ +27 % (post-P13 +24.2 %, 2.8 pp headroom) and Kinsel ≤ +33 % (post-P13 +28.1 %, 4.9 pp headroom). (c) Basic Finner MAPE was gated only at the loose 30 % scatter ceiling; Prompt 13 session log had recommended a narrow 14 % post-P13 gate ("a change pushing MAPE past 14 % signals a non-trivial supersonic drag regression"). Added `testMapePostPrompt13TightGate` to `BasicFinnerDragBenchmarkTest` as a second gate running in parallel with the loose gate. Measured 11.9 % — passes. No calculator code was modified (hard rule of this prompt). Subsonic stub, EZI-65, T&L, THICK_BL_K external anchor, MESOS, and individual healthy-case apogee values are explicitly flagged as NOT-locked with per-item justification in the memo.
+- Files changed: `core/src/test/java/info/openrocket/core/aerodynamics/SimVRealBenchmarkTest.java` (+35 lines: 4 gate assertions at the end of `testSimVRealBenchmark`), `core/src/test/java/info/openrocket/core/aerodynamics/BasicFinnerDragBenchmarkTest.java` (+55 lines: new `testMapePostPrompt13TightGate` method and Javadoc), `paper/data/AST_PARALLEL_AGENT_ROADMAP.md` (this session log, Prompt Status Board row 20 → done, Wave 4 section updated, Important Artifacts list updated).
+- Files generated: `core/src/test/java/info/openrocket/core/aerodynamics/ClosedOutlierRegressionTest.java` (new file, 2 gate tests: `ravenStaysBelowGate`, `kinselStaysBelowGate`, with shared helper), `paper/data/md/prompt20_regression_lock_inventory.md` (new memo: scope, 13-row summary table, new-tests section, pre-existing locks audit, not-locked justifications, verification runs, cross-references).
+- Measurements (all PASS, branch `supersonic-aero-dev` at SHA `03c367d09`, 2026-04-17):
+  - `BasicFinnerDragBenchmarkTest` — 12 tests PASS (1 m 36 s). New `testMapePostPrompt13TightGate`: 11.9 % MAPE ≤ 14 % gate. Existing 11 tests unchanged.
+  - `ClosedOutlierRegressionTest` — 2 tests PASS (1 m 21 s). `ravenStaysBelowGate` → Raven sim err well below +27 %. `kinselStaysBelowGate` → Kinsel sim err well below +33 %.
+  - `SimVRealBenchmarkTest.testSimVRealBenchmark` — 1 test PASS (4 m 47 s). Fresh corpus run: avg |error| = 6.84 %, within ±10 % = 83.3 %, within ±5 % = 62.5 %, abnormal endings = 0. All four new gates PASS.
+  - `BaseDragModelTest` — 53 tests PASS (56 s). All pre-existing Prompt 12 + Prompt 13 locks (Re removal 8+1 tests, Hart anchor 9+1+1+1+1 tests) still pass.
+- What improved: Every material campaign fix now has a mechanism-specific regression test. The corpus headline numbers (previously printed but not gated) are now locked at Prompt 19 frozen values with modest headroom. Raven and Kinsel's Prompt-12+13 closures (which were only implicit through the corpus aggregate) now have dedicated single-case guards so a targeted revert is caught immediately. Basic Finner gains a second tighter gate that catches supersonic drag regressions before they break the loose 30 % scatter ceiling. Claim-to-test traceability is now a single memo — a reviewer can walk the 13-row table and confirm each claim is locked or documented as out-of-scope.
+- What is still open: (a) No primary-source anchor for `THICK_BL_K = 1.3` — Addy 1970 AEDC-TR-70-146 retrieval is the concrete unblock. (b) Subsonic stub `0.12 + 0.13*M²` at M < 0.85 remains unchanged, consistent with Prompt 13 out-of-scope call. (c) EZI-65 and T&L subsonic outliers are flagged non-aero and not gated. (d) MESOS 293K pre-existing failure not locked (not a Prompt 20 scope). (e) The `SimVRealBenchmarkTest` gates run a 4-minute corpus sim; individual per-case gates on healthy rockets would be duplicative, so the aggregate is the right abstraction. (f) Future Prompt 21 reviewer may want per-case gates on Qu8k / DontDebateThis / L500 to catch targeted regressions in hypersonic / supersonic transit cases — deferred as those cases are already within ±5 % and the aggregate gate catches any movement out of that band.
+- Recommended next prompt: Prompt 21 (Brutal AST readiness review). Prompt 20 completes Wave 4 regression locking. With the corpus frozen (Prompt 19) and every accepted fix now gate-tested (Prompt 20), Prompt 21 can audit the repo's honest AST-readiness call against the locked claims without worrying about silent drift.
 
 ### Session — Prompt 19 Corpus Rerun Freeze
 - Agent: Claude Opus 4.7 (1M context)

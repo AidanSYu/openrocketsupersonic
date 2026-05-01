@@ -156,6 +156,53 @@ public class BasicFinnerDragBenchmarkTest {
 				String.format("Basic Finner MAPE %.1f%% exceeds gate %.0f%%", mape, MAPE_GATE_PCT));
 	}
 
+	/**
+	 * Prompt 20 regression lock: post-Prompt-13 tighter MAPE gate.
+	 * <p>
+	 * History: Prompt 12 (remove Lamb-Oberkampf Re correction) moved Basic
+	 * Finner MAPE 11.8 % → 11.3 %; Prompt 13 (Hart L52E06 re-anchor of the
+	 * transonic base-drag polynomial) moved it 11.3 % → 11.9 % (+0.6 pp,
+	 * well within the Prompt 13 non-regression allowance of +2 pp). The
+	 * Prompt 13 session-log recommended keeping BF MAPE under 14 % as the
+	 * narrow gate going forward (a change exceeding 14 % implies a
+	 * non-trivial supersonic drag regression that should not be quietly
+	 * accepted alongside a Hart-anchoring tweak).
+	 * <p>
+	 * The existing {@link #testDiagnosticAndMAPE()} keeps the loose 30 %
+	 * scatter gate. This test adds the post-Prompt-13 tight gate so a
+	 * regression that pushes MAPE past 14 % — even one that still clears
+	 * the loose gate — will surface here. See
+	 * paper/data/AST_PARALLEL_AGENT_ROADMAP.md "Session — Prompt 13
+	 * Implementation" and paper/data/transonic_base_drag_source_hunt.md.
+	 */
+	@Test
+	void testMapePostPrompt13TightGate() {
+		double[][] data = {
+				{ 1.077, 0.863 },
+				{ 1.293, 0.731 },
+				{ 1.832, 0.585 },
+				{ 2.375, 0.484 },
+				{ 2.718, 0.435 },
+				{ 3.147, 0.373 },
+				{ 3.734, 0.309 },
+				{ 4.300, 0.271 },
+		};
+		double sumAbsPctErr = 0;
+		for (double[] row : data) {
+			double cdOrp = computeTotalCd(row[0]);
+			sumAbsPctErr += Math.abs(cdOrp - row[1]) / row[1] * 100;
+		}
+		double mape = sumAbsPctErr / data.length;
+		double postP13TightGate = 14.0;
+		assertTrue(mape <= postP13TightGate,
+				String.format("Basic Finner MAPE %.2f%% exceeds Prompt-20 post-P13 tight gate %.1f%%. "
+						+ "Prompt 13 baseline = 11.9%%; a change pushing MAPE past 14%% signals a "
+						+ "non-trivial supersonic drag regression even though it may still clear the "
+						+ "loose 30%% gate in testDiagnosticAndMAPE. See the Prompt 13 session log "
+						+ "in paper/data/AST_PARALLEL_AGENT_ROADMAP.md.",
+						mape, postP13TightGate));
+	}
+
 	// ================================================================
 	// Trend tests
 	// ================================================================

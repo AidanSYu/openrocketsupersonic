@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -21,12 +23,15 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 import info.openrocket.core.document.OpenRocketDocument;
 import info.openrocket.core.document.Simulation;
 import info.openrocket.core.file.GeneralRocketLoader;
+import info.openrocket.core.file.motor.RASPMotorLoader;
+import info.openrocket.core.file.rasaero.RASAeroMotorsLoader;
 import info.openrocket.core.logging.SimulationAbort;
 import info.openrocket.core.logging.Warning;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.masscalc.MassCalculator;
 import info.openrocket.core.masscalc.RigidBody;
 import info.openrocket.core.models.atmosphere.AtmosphericConditions;
+import info.openrocket.core.motor.ThrustCurveMotor;
 import info.openrocket.core.rocketcomponent.BodyTube;
 import info.openrocket.core.rocketcomponent.FinSet;
 import info.openrocket.core.rocketcomponent.FlightConfiguration;
@@ -48,10 +53,14 @@ import info.openrocket.core.util.BaseTestCase;
 public class SimVRealOutlierDiagnosticTest extends BaseTestCase {
 
 	private static final String SIMVREAL_DIR = "simvreal/RasAero Sims";
+	private static final String MESOS_DIR = "simvreal/Docs/Mesos";
 	private static final String REPORT_DIR = "build/reports/simvreal-outliers";
 	private static final double FT_PER_METER = 3.28084;
 	private static final double IN_PER_METER = 39.37007874015748;
 	private static final double LB_PER_KG = 2.20462262185;
+	private static final SimVRealBenchmarkTest.ValidationCase MESOS_CASE =
+			new SimVRealBenchmarkTest.ValidationCase("MESOS 293K Flight.CDX1", "MESOS 293K",
+					293_488.0, 289_789.0, "GPS", true);
 
 	private static final String[] TARGET_CASES = {
 			// Current 4 outliers (>10% error)
@@ -202,8 +211,47 @@ public class SimVRealOutlierDiagnosticTest extends BaseTestCase {
 		}
 	}
 
+	/**
+	 * Generate the same artifact bundle for the dedicated MESOS 293K two-stage
+	 * validation case. MESOS lives outside the 24-case SimVReal corpus and uses
+	 * custom KIP motor files, so it gets its own export path.
+	 */
+	@Test
+	void testGenerateMesosDiagnostics() throws Exception {
+		File mesosDir = findMesosDir();
+		if (mesosDir == null) {
+			System.out.println("SKIP: MESOS directory not found. Set working directory to project root.");
+			return;
+		}
+		loadMesosMotors(mesosDir);
+
+		File outDir = new File(REPORT_DIR);
+		outDir.mkdirs();
+
+		DiagnosticArtifacts artifacts = generateArtifacts(MESOS_CASE, mesosDir, outDir, 900_000);
+		File summaryFile = new File(outDir, "mesos-summary.csv");
+		try (BufferedWriter w = new BufferedWriter(new FileWriter(summaryFile))) {
+			w.write(FULL_CORPUS_CSV_HEADER);
+			w.write(artifacts.toFullCorpusCsvRow());
+			w.write('\n');
+		}
+
+		System.out.printf(Locale.US,
+				"  %-28s ORP=%8.0f ft err=%+6.1f%% M%.2f -> %s%n",
+				MESOS_CASE.rocketName,
+				artifacts.orpApogeeFt,
+				artifacts.orpErrorPct,
+				artifacts.maxMach,
+				artifacts.markdownReport.getName());
+	}
+
 	private static DiagnosticArtifacts generateArtifacts(SimVRealBenchmarkTest.ValidationCase vc,
 			File simvrealDir, File outDir) throws Exception {
+		return generateArtifacts(vc, simvrealDir, outDir, 120_000);
+	}
+
+	private static DiagnosticArtifacts generateArtifacts(SimVRealBenchmarkTest.ValidationCase vc,
+			File simvrealDir, File outDir, long timeoutMs) throws Exception {
 		File cdx1 = new File(simvrealDir, vc.cdx1File);
 		assertTrue(cdx1.exists(), "CDX1 file not found: " + cdx1.getAbsolutePath());
 
@@ -217,7 +265,8 @@ public class SimVRealOutlierDiagnosticTest extends BaseTestCase {
 		Simulation sim = sims.get(0);
 		sim.getOptions().setTimeStep(0.05);
 		sim.getOptions().setMaximumStepAngle(Math.toRadians(3));
-		runSimulationWithTimeout(sim, 120_000, vc.rocketName);
+		sim.getOptions().setRandomSeed(SimVRealBenchmarkTest.BENCHMARK_RANDOM_SEED);
+		runSimulationWithTimeout(sim, timeoutMs, vc.rocketName);
 
 		FlightData data = sim.getSimulatedData();
 		assertNotNull(data, "No flight data produced for " + vc.rocketName);
@@ -311,6 +360,7 @@ public class SimVRealOutlierDiagnosticTest extends BaseTestCase {
 				vc.rasAeroAltitudeFt, vc.rasAeroErrorPct()));
 		md.append(String.format(Locale.US, "- ORP apogee: `%.0f ft` (`%+.1f%%` vs real, `%+.1f%%` vs RASAero)%n",
 				orpApogeeFt, orpErrorPct, deltaVsRasPct));
+		md.append(String.format(Locale.US, "- ORP max velocity: `%.0f ft/s`%n", data.getMaxVelocity() * FT_PER_METER));
 		md.append(String.format(Locale.US, "- Max Mach: `%.3f`%n", data.getMaxMachNumber()));
 		md.append(String.format(Locale.US, "- Flight time: `%.1f s` across `%d` branch(es); primary branch = `%d`%n",
 				data.getFlightTime(), data.getBranchCount(), primaryBranchIndex));
@@ -406,7 +456,8 @@ public class SimVRealOutlierDiagnosticTest extends BaseTestCase {
 			return;
 		}
 
-		FlightConditions conditions = new FlightConditions(config);
+		FlightConfiguration activeConfig = activeConfigurationAt(config, branch, index);
+		FlightConditions conditions = new FlightConditions(activeConfig);
 		conditions.setMach(mach);
 		conditions.setAOA(aoaRad);
 		conditions.setPitchRate(pitchRate);
@@ -416,7 +467,7 @@ public class SimVRealOutlierDiagnosticTest extends BaseTestCase {
 
 		BarrowmanCalculator calc = new BarrowmanCalculator();
 		WarningSet warnings = new WarningSet();
-		Map<RocketComponent, AerodynamicForces> forceMap = calc.getForceAnalysis(config, conditions, warnings);
+		Map<RocketComponent, AerodynamicForces> forceMap = calc.getForceAnalysis(activeConfig, conditions, warnings);
 
 		md.append(String.format(Locale.US,
 				"### %s%n%n- Time: `%.3f s`%n- Mach: `%.3f`%n- AoA: `%.3f deg`%n- Air temperature: `%.2f K`%n- Air pressure: `%.1f Pa`%n%n",
@@ -450,6 +501,21 @@ public class SimVRealOutlierDiagnosticTest extends BaseTestCase {
 			md.append('\n');
 			appendWarnings(md, "Breakdown warnings", warnings);
 		}
+	}
+
+	private static FlightConfiguration activeConfigurationAt(FlightConfiguration config, FlightDataBranch branch, int index) {
+		FlightConfiguration activeConfig = config.clone();
+		double time = valueAt(branch, FlightDataType.TYPE_TIME, index);
+		for (FlightEvent event : branch.getEvents()) {
+			if (event.getType() != FlightEvent.Type.STAGE_SEPARATION || event.getTime() > time) {
+				continue;
+			}
+			RocketComponent component = event.getSource();
+			if (component != null) {
+				activeConfig.clearStagesBelow(component.getStageNumber());
+			}
+		}
+		return activeConfig;
 	}
 
 	private static void writeComponentCdCsv(Rocket rocket, double maxMach, File csvOut) throws Exception {
@@ -786,6 +852,39 @@ public class SimVRealOutlierDiagnosticTest extends BaseTestCase {
 			}
 		}
 		return null;
+	}
+
+	private static File findMesosDir() {
+		File dir = new File(MESOS_DIR);
+		if (dir.exists()) {
+			return dir;
+		}
+		Path current = Paths.get(System.getProperty("user.dir"));
+		for (int i = 0; i < 5; i++) {
+			File candidate = current.resolve(MESOS_DIR).toFile();
+			if (candidate.exists()) {
+				return candidate;
+			}
+			current = current.getParent();
+			if (current == null) {
+				break;
+			}
+		}
+		return null;
+	}
+
+	private static void loadMesosMotors(File mesosDir) throws Exception {
+		for (String motorFile : new String[] { "M787_Expanded_Nozzle_Sea_Level.eng", "O4374_Sea_Level.eng" }) {
+			File engFile = new File(mesosDir, motorFile);
+			assertTrue(engFile.exists(), "MESOS motor file not found: " + engFile.getAbsolutePath());
+			try (InputStream stream = new FileInputStream(engFile)) {
+				RASPMotorLoader loader = new RASPMotorLoader();
+				List<ThrustCurveMotor.Builder> builders = loader.load(stream, motorFile);
+				for (ThrustCurveMotor.Builder builder : builders) {
+					RASAeroMotorsLoader.addMotorToCache(builder.build());
+				}
+			}
+		}
 	}
 
 	private static boolean isTargetCase(String rocketName) {

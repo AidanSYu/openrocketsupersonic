@@ -741,7 +741,7 @@ The following table catalogs every Mach-regime blending region in the implementa
 | # | Quantity | $M_\text{lo}$ | $M_\text{hi}$ | Blend type | Subsonic model | Supersonic model | Source file |
 |---|----------|---------------|---------------|------------|----------------|------------------|-------------|
 | 1 | $\beta$ (compressibility factor) | 0.95 | 1.05 | Cubic Hermite | $\sqrt{1-M^2}$ | $\sqrt{M^2-1}$ | `FlightConditions.java` |
-| 2 | Base drag $C_{D,\text{base}}$ | 0.85 | 1.30 | Degree-4 poly ($C^1$) | $0.12 + 0.13M^2$ | Devan-Ashwood | `BarrowmanDragCalculator.java` |
+| 2 | Base drag $C_{D,\text{base}}$ | 0.85 | 1.50 | Degree-5 poly ($C^1$) | $0.12 + 0.13M^2$ | Devan-Ashwood | `BarrowmanDragCalculator.java` |
 | 3 | Skin friction $C_f$ | 0.90 | 1.10 | Linear | Prandtl incompressible | Van Driest II | `BarrowmanDragCalculator.java` |
 | 4 | Roughness correction | 0.90 | 1.10 | Linear | Subsonic roughness | Supersonic roughness | `BarrowmanDragCalculator.java` |
 | 5 | Fin $C_{N\alpha}$ | 0.90 | 1.50 | `PolyInterpolator` ($C^1$) | Barrowman $2\pi/\beta$ | Ackeret $4/\beta$ | `FinSetCalc.java` |
@@ -805,7 +805,7 @@ Blend regions (numbers refer to the table in Section 10.4):
 | ID | Quantity | $M$ range |
 |:--:|----------|-----------|
 | [1] | $\beta$ factor | $0.95$ -- $1.05$ |
-| [2] | Base drag | $0.85$ -- $1.30$ |
+| [2] | Base drag | $0.85$ -- $1.50$ |
 | [3] | Skin friction | $0.90$ -- $1.10$ |
 | [5] | Fin $C_{N\alpha}$ | $0.90$ -- $1.50$ |
 | [6] | Fin wave drag | $0.90$ -- $1.20$ |
@@ -815,7 +815,7 @@ Blend regions (numbers refer to the table in Section 10.4):
 | [10] | Shock geometry | $1.00$ -- $1.10$ |
 | [11] | PNK fin-body | $0.85$ -- $1.15$ |
 
-The transonic region $M \in [0.85, 1.50]$ contains seven overlapping blend regions. The overlap is intentional: each aerodynamic quantity transitions at the Mach range appropriate to its physical behavior. Base drag peaks near $M = 1.05$ and must blend over a wide region (0.85 to 1.30) to capture the characteristic asymmetric transonic shape. Fin $C_{N\alpha}$, which depends on $1/\beta$, needs a wider supersonic margin (up to $M = 1.5$) because the Barrowman subsonic formula and the Ackeret supersonic formula both diverge as $M \to 1$ and the interpolation polynomial must span a region wide enough to control the curvature.
+The transonic region $M \in [0.85, 1.50]$ contains seven overlapping blend regions. The overlap is intentional: each aerodynamic quantity transitions at the Mach range appropriate to its physical behavior. Base drag peaks near $M = 1.05$ and now holds a Hart L52E06-anchored supersonic-side plateau through $M \approx 1.30$ before matching Devan-Ashwood at $M = 1.50$. Fin $C_{N\alpha}$, which depends on $1/\beta$, needs a wider supersonic margin (up to $M = 1.5$) because the Barrowman subsonic formula and the Ackeret supersonic formula both diverge as $M \to 1$ and the interpolation polynomial must span a region wide enough to control the curvature.
 
 
 ### 10.6 Design Principles for Blend Selection
@@ -837,7 +837,7 @@ Use a degree-4 or degree-5 constrained polynomial when:
 - An interior constraint exists (e.g., a peak value at a specific Mach number)
 - The transition has asymmetric shape (different curvature on subsonic vs supersonic sides)
 
-**Example**: Base drag blend (Entry 2), which must match the subsonic parabola and its slope at $M = 0.85$, pass through the transonic peak of 0.25 at $M = 1.05$, and match the Devan-Ashwood formula and its slope at $M = 1.30$.
+**Example**: Base drag blend (Entry 2), which must match the subsonic parabola and its slope at $M = 0.85$, pass through the transonic peak of 0.25 at $M = 1.05$, pass near the Hart L52E06 anchor at $M = 1.30$, and match the Devan-Ashwood formula and its slope at $M = 1.50$.
 
 #### 10.6.3 When to Use Rational Blend (AP09)
 
@@ -877,7 +877,7 @@ The experimental record in this work spans more than six decades of NACA, NASA, 
 
 ### 11.1 Test Suite Overview
 
-The aerodynamic validation suite comprises **72 test files** in the `info.openrocket.core.aerodynamics` package hierarchy, encompassing **24 subsystems independently validated against published experimental or tabulated external data** with stated quantitative acceptance criteria. Each model is validated at three levels: unit level (exact analytical comparisons against published tables), component level (coefficient magnitudes and trends against empirical correlations), and system level (full-vehicle Mach sweeps with continuity verification).
+The aerodynamic validation suite comprises **72 test files** in the `info.openrocket.core.aerodynamics` package hierarchy. The publication claim map tracks 24 validation rows, but not all rows carry the same evidentiary weight: `A` rows are independently matched against published experimental or tabulated external data, while `B`/`C`/`D` rows are source-anchored heuristics, internal consistency checks, or explicit open gaps. Each claim is therefore reported with its evidence class rather than being treated as uniformly closed.
 
 #### 11.1.1 Five Standard Rocket Geometries
 
@@ -994,7 +994,7 @@ The 24 validations span two categories: **mathematical correctness** (subsystems
 - **EOARD-TR-82-7 (Paul and Wedemeyer 1982)**: wind-tunnel vortex sideforce measurements at high AoA
 - **AEDC-TR-76-58**: wind-tunnel roll damping measurements with transonic behavior
 
-Each of the 24 subsystems has been matched against a published external dataset with a stated quantitative acceptance criterion.
+Each `A`-level subsystem has been matched against a published external dataset or authoritative tabulated source with a stated quantitative acceptance criterion. Lower-ranked `B`/`C`/`D` rows remain useful engineering evidence but are not presented as closed external validation.
 
 **Table 11.4 — Subsystems Independently Validated Against Published External Data**
 
@@ -1013,7 +1013,7 @@ Each of the 24 subsystems has been matched against a published external dataset 
 | 11 | Laminar base drag (Chapman) | NACA TN 3393 laminar data (4 points) | MAPE | 4.4% |
 | 12 | Fin wave drag (DATCOM 4.1.5.1) | NACA TN 3650 free-flight (12 points, 60° delta) | $\tau^2$ scaling + trend | Pass |
 | 13 | Shock geometry pre-pass | Taylor-Maccoll + Prandtl-Meyer (NACA 1135) | Mach error at fin station | < 4e-9% |
-| 14 | Static stability / CP location | NASA TM X-653 (NSCFB, M 0.6–5.82) | CNa MAPE / xCP MAPE | 8% / 7.1% |
+| 14 | Static stability / CP location | NASA TM X-653 (NSCFB, M 0.6–5.82) | CNa MAPE / xCP MAPE | 6.8% / 7.1% |
 | 15 | Dynamic stability derivatives ($C_{mq}$, roll, Magnus) | Strip-theory self-consistency (6 Mach points) | Cmq error vs independent recomputation | < 0.5% |
 | 16 | Crossflow body $C_{d,c} = 1.20$ | Jorgensen (1977) NASA TR R-474 Table 1 | Absolute match to tabulated value | Exact |
 | 17 | Crossflow fin $C_{d,c} = 1.42$ | Hoerner (1965) Ch. 3 Fig. 28 | Relative error vs flat-plate value 1.43 | 0.7% |
@@ -1021,7 +1021,7 @@ Each of the 24 subsystems has been matched against a published external dataset 
 | 19 | Transonic $C_{mq}$ augmentation | AEDC-TR-76-58 roll damping (Fig. 12) | Transonic peak confirmed | Qualitative pass |
 | 20 | Magnus body fraction = 0.3 | BRL Report 1193 (Platou 1963) | Within measured range 0.3–0.8 | Confirmed |
 | 21 | Vortex sideforce ($K_v = 0.20$) | Paul & Wedemeyer (1982) EOARD-TR-82-7 | CY/CN ratio at peak | Within range |
-| 22 | Finned-vehicle total drag (Basic Finner) | ADA636861 (Dupuis & Hathaway 1997), 33 points M 1.08–4.30 | MAPE | 22.7% |
+| 22 | Finned-vehicle total drag (Basic Finner) | ADA636861 (Dupuis & Hathaway 1997), 8 multiple-fit points M 1.08–4.30 | MAPE | 11.9% |
 | 23 | Compressible skin friction (Van Driest II) | NASA TN D-6945 (Hopkins 1972) | Monotonic decrease; ~50% reduction at M=5 | Confirmed |
 | 24 | Hypersonic cone foredrag | DTIC AD0487365 (Grabow 1965), 11 points M 6.5–17.2 | MAPE | 16.7% |
 
@@ -1063,7 +1063,7 @@ All peaks occur in the physically real transonic drag rise region, not at model 
 
 #### 11.3.4 Vehicle-Level Benchmark -- Basic Finner (ADA636861)
 
-The Basic Finner is a standard reference projectile (cone-cylinder with four rectangular fins) used extensively in aeroballistic range testing. The benchmark (`BasicFinnerDragBenchmarkTest.java`) validates total drag predictions against the free-flight measurements of Dupuis and Hathaway (1997), DTIC ADA636861. The test data comprise 8 multiple-fit and 25 single-shot zero-yaw axial force coefficient ($C_{X0}$) points spanning $M = 1.08$ to $M = 4.30$. This is the first vehicle-level total drag validation for the extended aerodynamic module. The overall MAPE is 22.7%, which is reasonable given that the Basic Finner's blunt rectangular fins and short body challenge the slender-body assumptions underlying the Barrowman framework.
+The Basic Finner is a standard reference projectile (cone-cylinder with four rectangular fins) used extensively in aeroballistic range testing. The benchmark (`BasicFinnerDragBenchmarkTest.java`) validates total drag predictions against the free-flight measurements of Dupuis and Hathaway (1997), DTIC ADA636861. The headline MAPE is computed over the 8 multiple-fit zero-yaw axial force coefficient ($C_{X0}$) points spanning $M = 1.08$ to $M = 4.30$; the 25 single-shot points are archived as supporting scatter data. The post-Prompt-13 MAPE is 11.9%, with a tight 14% regression gate. This is the first vehicle-level total drag validation for the extended aerodynamic module, but it does not close the broader high-M finned-body family because RM-10 remains a documented open mismatch.
 
 #### 11.3.5 AGARD-B Standard Model Benchmark
 
@@ -1215,11 +1215,11 @@ This work has extended the OpenRocket aerodynamic simulation framework from a su
 
 9. **Chapman laminar base drag.** Implementation of the Chapman (1950) laminar base pressure model ($C_{pb,\text{lam}} = 1870/(M^2\sqrt{Re_L})$) for low-Reynolds-number or polished-surface rockets, validated against NACA TN 3393 with a MAPE of 4.4%. The Chapman-Korst turbulent model (ESDU 77021) provides a higher-fidelity alternative to the Devan-Ashwood correlation at high supersonic Mach numbers.
 
-10. **Comprehensive external validation against physical experimental data.** A total of 24 subsystems independently validated against published external sources with stated quantitative acceptance criteria. Seven subsystems are verified against exact analytical or authoritative tabulated references (NACA Report 1135, U.S. Standard Atmosphere 1976) to confirm mathematical correctness. The remaining 17 subsystems are verified against physical experimental measurements: wind-tunnel pressure drag (NACA RM A52H28, MAE 0.029 in $C_D$ for five nose shapes; NACA TN 3393, MAPE 4.4% laminar / 15.9% turbulent at Mach 2.73--4.48), free-flight wing drag measured in actual model flights (NACA TN 3650, 12 points, 60-degree delta wing), aeroballistic free-flight range tests of real 30 mm projectiles (ADA636861, Dupuis and Hathaway 1997, MAPE 22.7% over $M = 1.08$--$4.30$), hypersonic ballistic range drag (DTIC AD0487365, Grabow 1965, 11 points $M = 6.5$--$17.2$, MAPE 16.7%), wind-tunnel stability (NASA TM X-653, CNa MAPE 8%, xCP MAPE 7.1%), and wind-tunnel dynamic derivative measurements (NACA TN 3788, AEDC-TR-76-58, BRL Report 1193, EOARD-TR-82-7). This constitutes genuine physical validation against measured hardware behavior, not internal consistency checks.
+10. **Comprehensive validation with explicit evidence classes.** The claim map tracks 24 validation rows, separating externally closed `A`-level benchmarks from `B`/`C`/`D` heuristics and open model gaps. Seven rows are verified against exact analytical or authoritative tabulated references (NACA Report 1135, U.S. Standard Atmosphere 1976) to confirm mathematical correctness. The physical experimental set includes wind-tunnel pressure drag (NACA RM A52H28, MAE 0.029 in $C_D$ for five nose shapes; NACA TN 3393, MAPE 4.4% laminar / 15.9% turbulent at Mach 2.73--4.48), free-flight wing drag measured in actual model flights (NACA TN 3650, 12 points, 60-degree delta wing), aeroballistic free-flight range tests of real 30 mm projectiles (ADA636861, Dupuis and Hathaway 1997, Basic Finner MAPE 11.9% over the 8 multiple-fit points), hypersonic ballistic range drag (DTIC AD0487365, Grabow 1965, 11 points $M = 6.5$--$17.2$, MAPE 16.7%), wind-tunnel stability (NASA TM X-653, CNa MAPE 6.8%, xCP MAPE 7.1%), and wind-tunnel dynamic derivative measurements (NACA TN 3788, AEDC-TR-76-58, BRL Report 1193, EOARD-TR-82-7). Remaining high-M finned-body gaps are preserved as limitations rather than counted as closed validation.
 
 ### 12.2 Validation Summary
 
-The extended aerodynamic models have been validated against 24 independently published external sources: 7 exact analytical or authoritative tabulated sources verifying mathematical correctness, and 17 experimental datasets from wind-tunnel tests, free-flight ballistic range programs, and aeroballistic instrumentation campaigns conducted between 1950 and 1997. The experimental record includes wind-tunnel pressure drag (NACA RM A52H28, NACA TN 3393), free-flight wing drag measured from actual instrumented model flights (NACA TN 3650), free-flight projectile total drag from real hardware fired down a ballistic range (ADA636861), hypersonic ballistic range drag (DTIC AD0487365), wind-tunnel stability (NASA TM X-653), wind-tunnel dynamic derivatives (NACA TN 3788, AEDC-TR-76-58), and Magnus and vortex force measurements from wind-tunnel experiments (BRL Report 1193, EOARD-TR-82-7). All 72 automated test files pass with zero failures.
+The extended aerodynamic models are tracked in a 24-row claim map: 7 exact analytical or authoritative tabulated sources verify mathematical correctness, while the experimental record includes wind-tunnel pressure drag (NACA RM A52H28, NACA TN 3393), free-flight wing drag measured from actual instrumented model flights (NACA TN 3650), free-flight projectile total drag from real hardware fired down a ballistic range (ADA636861), hypersonic ballistic range drag (DTIC AD0487365), wind-tunnel stability (NASA TM X-653), wind-tunnel dynamic derivatives (NACA TN 3788, AEDC-TR-76-58), and Magnus and vortex force measurements from wind-tunnel experiments (BRL Report 1193, EOARD-TR-82-7). Rows with only sensitivity, regression, or heuristic evidence remain labeled `B`, `C`, or `D`.
 
 Quantitative results from the experimental validation:
 
@@ -1227,9 +1227,9 @@ Quantitative results from the experimental validation:
 - Turbulent base drag (NACA TN 3393, wind-tunnel, $M = 2.73$--$4.48$): MAPE 15.9%
 - Laminar base drag (NACA TN 3393, wind-tunnel, $M = 2.73$--$4.48$): MAPE 4.4%
 - Fin wave drag (NACA TN 3650, free-flight measurements, 12 points): trend and scaling confirmed
-- Finned-vehicle total drag (ADA636861, aeroballistic range, 33 points, $M = 1.08$--$4.30$): MAPE 22.7%
+- Finned-vehicle total drag (ADA636861, aeroballistic range, 8 multiple-fit points, $M = 1.08$--$4.30$): MAPE 11.9%
 - Hypersonic cone drag (DTIC AD0487365, ballistic range, 11 points, $M = 6.5$--$17.2$): MAPE 16.7%
-- Static stability (NASA TM X-653, wind-tunnel, $M = 0.6$--$5.82$): CNa MAPE 8%, xCP MAPE 7.1%
+- Static stability (NASA TM X-653, wind-tunnel, $M = 0.6$--$5.82$): CNa MAPE 6.8%, xCP MAPE 7.1%
 - Gas dynamics solvers (NACA Report 1135, tabulated exact solutions): max error $< 0.02\%$
 
 The valid Mach range has been extended from approximately $M < 2$ (original OpenRocket) to $M < 10$ (this work), a five-fold increase. Within the range $M = 0.3$ to $M = 5.0$, the total drag coefficient predictions are physically consistent with published experimental data and analytical solutions for all five standard geometries. The test suite additionally covers five standard rocket geometries spanning cone, ogive, boattail, and Von Karman nose shapes; a continuous Mach sweep from 0.3 to 10.0 at 235 steps for continuity verification; angle of attack sweeps from 0 to 15 degrees; edge case hardening at $M = 0, 0.999, 1.000, 1.001, 10.0$; and performance benchmarks confirming $< 1$ ms per supersonic aero calculation.

@@ -167,7 +167,7 @@ public class RASPMotorLoader extends AbstractMotorLoader {
 						for (int i = 0; i < delays.size(); i++) {
 							delayArray[i] = delays.get(i);
 						}
-						motors.add(createRASPMotor(manufacturer, designation, comment,
+						motors.add(createRASPMotor(filename, manufacturer, designation, comment,
 								length, diameter, delayArray, propW, totalW, time, thrust, removeDelayFromDesignation));
 					}
 				} catch (NumberFormatException e) {
@@ -197,7 +197,7 @@ public class RASPMotorLoader extends AbstractMotorLoader {
 	 * 
 	 * @throws IOException if the data is illegal for a thrust curve
 	 */
-	private static ThrustCurveMotor.Builder createRASPMotor(String manufacturer, String designation,
+	private static ThrustCurveMotor.Builder createRASPMotor(String filename, String manufacturer, String designation,
 			String comment, double length, double diameter, double[] delays,
 			double propW, double totalW, List<Double> time, List<Double> thrust, boolean removeDelayFromDesignation)
 			throws IOException {
@@ -234,6 +234,7 @@ public class RASPMotorLoader extends AbstractMotorLoader {
 			builder.setManufacturer(m)
 					.setDesignation(designation)
 					.setDescription(comment)
+					.setDataSource(filename)
 					.setMotorType(m.getMotorType())
 					.setStandardDelays(delays)
 					.setDiameter(diameter)

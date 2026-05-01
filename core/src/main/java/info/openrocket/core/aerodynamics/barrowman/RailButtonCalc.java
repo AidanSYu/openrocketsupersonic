@@ -68,7 +68,7 @@ public class RailButtonCalc extends RocketComponentCalc {
 		final CoordinateIF[] instanceOffsets = button.getInstanceOffsets();
 
 		// compute button reference area
-		final double buttonHt = button.getTotalHeight();
+		final double buttonHt = effectiveAerodynamicHeight();
 		final double outerArea = buttonHt * button.getOuterDiameter();
 		final double notchArea = (button.getOuterDiameter() - button.getInnerDiameter()) * button.getInnerHeight();
 		final double refArea = outerArea - notchArea;
@@ -131,7 +131,7 @@ public class RailButtonCalc extends RocketComponentCalc {
 			double stagnationCD, double refArea) {
 
 		final CoordinateIF[] instanceOffsets = button.getInstanceOffsets();
-		final double buttonHt = button.getTotalHeight();
+		final double buttonHt = effectiveAerodynamicHeight();
 
 		double CDmul = 0.0;
 		if (conditions.getMach() > MathUtil.EPSILON) {
@@ -157,7 +157,10 @@ public class RailButtonCalc extends RocketComponentCalc {
 			CDmul = 8.786395072609939E-4;
 		}
 
-		return CDmul * stagnationCD * refArea / conditions.getRefArea();
+		// The Hoerner values are bluff-body drag coefficients referenced to the
+		// button frontal area. They are not pressure coefficients, so do not scale
+		// them by the vehicle stagnation coefficient.
+		return CDmul * refArea / conditions.getRefArea();
 	}
 
 	/**
@@ -190,7 +193,7 @@ public class RailButtonCalc extends RocketComponentCalc {
 			return 0;
 		}
 
-		final double buttonHt = button.getTotalHeight();
+		final double buttonHt = effectiveAerodynamicHeight();
 		final double outerDiam = button.getOuterDiameter();
 
 		// Effective deflection angle of the protuberance
@@ -272,7 +275,7 @@ public class RailButtonCalc extends RocketComponentCalc {
 		double sRef = conditions.getRefArea();
 		if (sRef < 1e-12) return 0;
 
-		final double buttonHt = button.getTotalHeight();
+		final double buttonHt = effectiveAerodynamicHeight();
 		final double outerDiam = button.getOuterDiameter();
 
 		// Interference area: strip on body downstream, width ~ outerDiam, length ~ 3*buttonHt
@@ -292,5 +295,18 @@ public class RailButtonCalc extends RocketComponentCalc {
 		}
 
 		return INTERFERENCE_FRICTION_PENALTY * cf * interferenceArea / sRef;
+	}
+
+	private double effectiveAerodynamicHeight() {
+		double height = button.getTotalHeight();
+		double diameter = button.getOuterDiameter();
+		if (diameter > 0.0 && height / diameter < 0.55) {
+			// Some RASAero imports carry low-profile guide envelopes used for launch
+			// hardware placement, while the source ALX1 marks railguide drag area as
+			// zero. Keep the physical component for mass/placement, but do not model
+			// the display envelope as a large exposed bluff protuberance.
+			return 0.0;
+		}
+		return height;
 	}
 }

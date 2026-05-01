@@ -611,37 +611,42 @@ At $M = 2.0$: $C_{d,\text{base}} = 0.064 + 0.186/4.0 = 0.111$
 At $M = 5.0$: $C_{d,\text{base}} = 0.064 + 0.186/25.0 = 0.071$
 
 
-#### 6.2.3 Transonic Base Drag: Degree-4 Polynomial Blend
+#### 6.2.3 Transonic Base Drag: Degree-5 Polynomial Blend
 
-The transonic regime ($M \in [0.85, 1.3]$) features a sharp peak in base drag
+The transonic regime ($M \in [0.85, 1.5]$) features a sharp peak in base drag
 near $M \approx 1.05$, where the wake becomes highly unsteady and the flow
 transitions from subsonic to supersonic separation. This peak is captured by
-a degree-4 polynomial constructed via `PolyInterpolator` with five constraints:
+a degree-5 polynomial constructed via `PolyInterpolator` with six constraints:
 
 | # | Constraint | Location   | Type       | Value / Expression |
 |---|-----------|------------|------------|--------------------|
 | 1 | Subsonic value     | $M = 0.85$ | Value      | $0.12 + 0.13(0.85)^2 = 0.214$ |
 | 2 | Transonic peak     | $M = 1.05$ | Value      | $0.25$ (experimental) |
-| 3 | Supersonic value   | $M = 1.30$ | Value      | $0.064 + 0.186/(1.30)^2 = 0.174$ |
-| 4 | Subsonic slope     | $M = 0.85$ | Derivative | $0.26 \times 0.85 = 0.221$ |
-| 5 | Supersonic slope   | $M = 1.30$ | Derivative | $-2 \times 0.186/(1.30)^3 = -0.169$ |
+| 3 | Hart transonic anchor | $M = 1.30$ | Value      | $0.230$ (Hart L52E06 reads about $0.250$) |
+| 4 | Supersonic handoff | $M = 1.50$ | Value      | $0.064 + 0.186/(1.50)^2 = 0.147$ |
+| 5 | Subsonic slope     | $M = 0.85$ | Derivative | $0.26 \times 0.85 = 0.221$ |
+| 6 | Supersonic slope   | $M = 1.50$ | Derivative | $-2 \times 0.186/(1.50)^3 = -0.110$ |
 
-The `PolyInterpolator` is configured with value constraints at three points
-$(0.85, 1.05, 1.30)$ and derivative constraints at two points $(0.85, 1.30)$,
-yielding a 4th-degree polynomial (5 constraints, 5 coefficients).
+The `PolyInterpolator` is configured with value constraints at four points
+$(0.85, 1.05, 1.30, 1.50)$ and derivative constraints at two points
+$(0.85, 1.50)$, yielding a 5th-degree polynomial (6 constraints, 6
+coefficients). The $M=1.30$ interior value is anchored to Hart NACA RM L52E06
+free-flight data; the Devan-Ashwood constants are unchanged and are joined at
+$M=1.50$.
 
 The construction in the code:
 
 ```java
 PolyInterpolator baseDragInterp = new PolyInterpolator(
-    new double[] { 0.85, 1.05, 1.30 },      // value points
-    new double[] { 0.85, 1.30 });            // derivative points
+    new double[] { 0.85, 1.05, 1.30, 1.50 }, // value points
+    new double[] { 0.85, 1.50 });             // derivative points
 baseDragTransonicPoly = baseDragInterp.interpolator(
     0.214,     // subsonic value at M=0.85
     0.25,      // peak at M=1.05
-    0.174,     // Devan-Ashwood at M=1.3
+    0.230,     // Hart anchor near M=1.30
+    0.147,     // Devan-Ashwood at M=1.50
     0.221,     // subsonic derivative at M=0.85
-   -0.169);    // Devan-Ashwood derivative at M=1.3
+   -0.110);    // Devan-Ashwood derivative at M=1.50
 ```
 
 The resulting profile:
@@ -666,13 +671,13 @@ The resulting profile:
 \addplot[thick, dashed, domain=0.5:0.85, samples=40] {0.12+0.13*x*x};
 \addlegendentry{subsonic $0.12+0.13M^2$}
 \addplot[very thick, black] coordinates {
-  (0.85,0.214)(0.90,0.22)(0.95,0.235)(1.00,0.245)(1.05,0.25)(1.10,0.23)(1.20,0.20)(1.30,0.174)
+  (0.85,0.214)(0.95,0.235)(1.05,0.25)(1.15,0.25)(1.30,0.230)(1.50,0.147)
 };
-\addlegendentry{degree-4 transonic polynomial}
-\addplot[thick, blue, dashed, domain=1.3:2.1, samples=50] {0.064+0.186/(x*x)};
-\addlegendentry{Devan--Ashwood ($M\ge 1.3$)}
+\addlegendentry{degree-5 transonic polynomial}
+\addplot[thick, blue, dashed, domain=1.5:2.1, samples=50] {0.064+0.186/(x*x)};
+\addlegendentry{Devan--Ashwood ($M\ge 1.5$)}
 \draw[dashed, gray] (axis cs:0.85,0.08) -- (axis cs:0.85,0.27);
-\draw[dashed, gray] (axis cs:1.30,0.08) -- (axis cs:1.30,0.27);
+\draw[dashed, gray] (axis cs:1.50,0.08) -- (axis cs:1.50,0.27);
 \end{axis}
 \end{tikzpicture}
 \caption{Base drag coefficient: subsonic correlation, transonic polynomial with peak at $M=1.05$, and supersonic Devan--Ashwood branch (schematic).}

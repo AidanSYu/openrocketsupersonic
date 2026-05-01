@@ -158,6 +158,10 @@ public class SimVRealValidationTest extends BaseTestCase {
             result.apogeeFt = result.apogeeM / FOOT_TO_METER;
             result.maxVelMs = data.getMaxVelocity();
             result.maxVelFtS = result.maxVelMs / FOOT_TO_METER;
+            // Trajectory-derived peak Mach (uses altitude-correct speed of sound at every step,
+            // not v_peak / a_sea_level). Peak velocity and peak Mach do not generally occur at
+            // the same time or altitude.
+            result.maxMach = data.getMaxMachNumber();
             result.flightTimeS = data.getFlightTime();
             result.flightData = data;
             result.simulated = true;
@@ -204,8 +208,10 @@ public class SimVRealValidationTest extends BaseTestCase {
 
         System.out.println("Components: " + result.componentCount);
         System.out.printf("Apogee:     %.0f ft (%.0f m)%n", result.apogeeFt, result.apogeeM);
-        System.out.printf("Max Vel:    %.0f ft/s (%.1f m/s, Mach %.2f)%n",
-                result.maxVelFtS, result.maxVelMs, result.maxVelMs / 343.0);
+        System.out.printf("Max Vel:    %.0f ft/s (%.1f m/s)%n",
+                result.maxVelFtS, result.maxVelMs);
+        System.out.printf("Max Mach:   %.2f (trajectory peak; altitude-correct a)%n",
+                result.maxMach);
         System.out.printf("Flt Time:   %.1f s%n", result.flightTimeS);
         System.out.println("---");
         System.out.printf("Actual:     %.0f ft%n", actualAltFt);
@@ -365,12 +371,13 @@ public class SimVRealValidationTest extends BaseTestCase {
         SimResult r = importAndSimulate("MESOS 293K Flight.CDX1");
         reportResult(r, 293488, 289789);
         if (r.simulated) {
-            double machAccel = 4047.0 / 1116.45;  // 4047 ft/s at Black Rock launch site
-            double orMach = r.maxVelMs / 343.0;
+            // Real flight Mach 4.18 is from the flight card (computed at peak-velocity altitude,
+            // not at sea level). ORP r.maxMach uses the same convention via FlightDataType.TYPE_MACH_NUMBER.
             double realMach = 4.18;
-            System.out.printf("Max velocity:  real=%.0f ft/s (Mach %.2f), ORP=%.0f ft/s (Mach %.2f, err %+.1f%%)%n",
-                    4047.0, realMach, r.maxVelFtS, orMach,
-                    (r.maxVelFtS - 4047.0) / 4047.0 * 100);
+            System.out.printf(
+                "Max velocity: real=%.0f ft/s (Mach %.2f), ORP=%.0f ft/s (Mach %.2f, err %+.1f%%)%n",
+                4047.0, realMach, r.maxVelFtS, r.maxMach,
+                (r.maxVelFtS - 4047.0) / 4047.0 * 100);
         }
         assertSimulated(r);
     }
@@ -500,6 +507,7 @@ public class SimVRealValidationTest extends BaseTestCase {
         double apogeeFt = 0;
         double maxVelMs = 0;
         double maxVelFtS = 0;
+        double maxMach = 0;
         double flightTimeS = 0;
         int componentCount = 0;
         String error = "";

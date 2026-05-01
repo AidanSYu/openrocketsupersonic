@@ -72,6 +72,7 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
             "simvreal/rasp.eng",
             "c:/Code/OpenRocket Plus/simvreal/rasp.eng",
     };
+    static final int BENCHMARK_RANDOM_SEED = 0x51A7EA;
 
     @BeforeAll
     static void setup() {
@@ -302,6 +303,7 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
                 sim.getOptions().setTimeStep(0.05);  // reasonable timestep
                 sim.getOptions().setMaximumStepAngle(Math.toRadians(3));
                 sim.getOptions().setMaxSimulationTime(2400);  // allow long descents from high apogee
+                sim.getOptions().setRandomSeed(BENCHMARK_RANDOM_SEED);
 
                 // Run in a thread with timeout to prevent hanging
                 Thread simThread = new Thread(() -> {
@@ -413,6 +415,37 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
         System.out.println();
         System.out.println("TARGET: Match RASAero II accuracy (avg ~3.5%, 80% within ±10%)");
         System.out.println("=".repeat(120));
+
+        // ==================== Prompt 20 Headline Gates ====================
+        // Regression-locks the Prompt 19 frozen audited corpus headline metrics
+        // (paper/data/corpus_summary_2026_04_17.md, git SHA 4fe8a41):
+        //   avg |error| = 6.84 %, within ±10 % = 83.3 %, within ±5 % = 62.5 %,
+        //   abnormal endings = 0 (all 24 terminal note NORMAL)
+        // Gates below are set at modest headroom from the frozen values so that
+        // any future change that regresses the corpus materially will trip.
+        //
+        // These gates protect the aggregate AST-readiness story. Individual
+        // outlier closure is regression-locked separately in
+        //   ClosedOutlierRegressionTest (Raven, Kinsel).
+        //
+        // Do NOT relax these gates without re-running the full corpus and
+        // updating corpus_summary_2026_04_17.md with the new frozen numbers.
+        double withinTen = 100.0 * orpUnder10 / total;
+        double withinFive = 100.0 * orpUnder5 / total;
+
+        assertEquals(0, abnormalEnds,
+                "SimVReal corpus abnormal endings must stay at 0 (Prompt 19 frozen). "
+                        + "Any SIM_ABORT or MAXTIME without ground hit breaks the AST stability claim.");
+        assertTrue(avgOrpError <= 7.5,
+                String.format("SimVReal corpus avg |error| = %.2f%% exceeds Prompt-20 gate 7.5%% "
+                        + "(Prompt 19 frozen value 6.84%%). See paper/data/corpus_summary_2026_04_17.md.",
+                        avgOrpError));
+        assertTrue(withinTen >= 80.0,
+                String.format("SimVReal within ±10%% = %.1f%% fell below gate 80%% "
+                        + "(Prompt 19 frozen value 83.3%%).", withinTen));
+        assertTrue(withinFive >= 58.0,
+                String.format("SimVReal within ±5%% = %.1f%% fell below gate 58%% "
+                        + "(Prompt 19 frozen value 62.5%%).", withinFive));
     }
 
     private static String describeTerminalState(Simulation sim, FlightData data) {
@@ -1005,6 +1038,7 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
 
         opts.setTimeStep(0.05);
         opts.setMaximumStepAngle(Math.toRadians(3));
+        opts.setRandomSeed(BENCHMARK_RANDOM_SEED);
 
         Thread simThread = new Thread(() -> {
             try { sim.simulate(); }

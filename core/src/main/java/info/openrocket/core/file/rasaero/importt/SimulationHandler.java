@@ -47,11 +47,13 @@ public class SimulationHandler extends AbstractElementHandler {
     private Double booster1CG;
     private Boolean includeBooster1;
     private Double sustainerNozzleDiameter;
+    private Double booster1NozzleDiameter;
     private ThrustCurveMotor booster2Engine;
     private Double booster2SeparationDelay;
     private Double booster2LaunchWt;
     private Double booster2CG;
     private Boolean includeBooster2;
+    private Double booster2NozzleDiameter;
 
     public SimulationHandler(DocumentLoadingContext context, Rocket rocket, SimulationOptions launchSiteSettings,
             int simulationNr) {
@@ -112,7 +114,10 @@ public class SimulationHandler extends AbstractElementHandler {
         } else if (RASAeroCommonConstants.BOOSTER1_LAUNCH_WT.equals(element)) {
             booster1LaunchWt = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_WEIGHT;
         } else if (RASAeroCommonConstants.BOOSTER1_NOZZLE_DIAMETER.equals(element)) {
-            warnIfNonZero(warnings, element, content);
+            double val = Double.parseDouble(content);
+            if (Math.abs(val) > 1.0e-12) {
+                booster1NozzleDiameter = val / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH;
+            }
         } else if (RASAeroCommonConstants.BOOSTER1_CG.equals(element)) {
             booster1CG = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH;
         } else if (RASAeroCommonConstants.INCLUDE_BOOSTER1.equals(element)) {
@@ -124,7 +129,10 @@ public class SimulationHandler extends AbstractElementHandler {
         } else if (RASAeroCommonConstants.BOOSTER2_LAUNCH_WT.equals(element)) {
             booster2LaunchWt = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_WEIGHT;
         } else if (RASAeroCommonConstants.BOOSTER2_NOZZLE_DIAMETER.equals(element)) {
-            warnIfNonZero(warnings, element, content);
+            double val = Double.parseDouble(content);
+            if (Math.abs(val) > 1.0e-12) {
+                booster2NozzleDiameter = val / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH;
+            }
         } else if (RASAeroCommonConstants.BOOSTER2_CG.equals(element)) {
             booster2CG = Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH;
         } else if (RASAeroCommonConstants.INCLUDE_BOOSTER2.equals(element)) {
@@ -142,18 +150,8 @@ public class SimulationHandler extends AbstractElementHandler {
             rocket.setSelectedConfiguration(fcid);
         }
 
-        // RASAero's SustainerIgnitionDelay is measured from liftoff.
-        // ORP's IgnitionEvent.BURNOUT delay is measured from when the booster burns out.
-        // Convert by subtracting the booster1 burn time so that M_sustainer fires at the
-        // correct absolute time (= sustainerIgnitionDelay seconds after liftoff).
-        Double correctedSustainerDelay = sustainerIgnitionDelay;
-        if (sustainerIgnitionDelay != null && booster1Engine != null && Boolean.TRUE.equals(includeBooster1)) {
-            double boosterBurnTime = booster1Engine.getBurnTime();
-            correctedSustainerDelay = Math.max(0.0, sustainerIgnitionDelay - boosterBurnTime);
-        }
-
         // Add motors to the rocket
-        MotorMount sustainerMount = addMotorToStage(0, sustainerEngine, correctedSustainerDelay, fcid, true, warnings);
+        MotorMount sustainerMount = addMotorToStage(0, sustainerEngine, sustainerIgnitionDelay, fcid, true, warnings);
         MotorMount booster1Mount = addMotorToStage(1, booster1Engine, booster1IgnitionDelay, fcid, includeBooster1,
                 warnings);
         MotorMount booster2Mount = addMotorToStage(2, booster2Engine, 0.0, fcid, includeBooster2, warnings);
@@ -178,6 +176,12 @@ public class SimulationHandler extends AbstractElementHandler {
         // converted to meters during parsing.
         if (sustainerNozzleDiameter != null && sustainerNozzleDiameter > 0) {
             sim.getOptions().setNozzleExitDiameter(sustainerNozzleDiameter);
+        }
+        if (booster1NozzleDiameter != null && booster1NozzleDiameter > 0) {
+            sim.getOptions().setNozzleExitDiameterForStage(1, booster1NozzleDiameter);
+        }
+        if (booster2NozzleDiameter != null && booster2NozzleDiameter > 0) {
+            sim.getOptions().setNozzleExitDiameterForStage(2, booster2NozzleDiameter);
         }
 
         context.getOpenRocketDocument().addSimulation(sim);

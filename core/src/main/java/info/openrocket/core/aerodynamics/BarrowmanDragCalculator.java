@@ -11,6 +11,7 @@ import info.openrocket.core.aerodynamics.barrowman.RocketComponentCalc;
 import info.openrocket.core.aerodynamics.barrowman.SymmetricComponentCalc;
 import info.openrocket.core.models.atmosphere.AtmosphericConditions;
 import info.openrocket.core.logging.WarningSet;
+import info.openrocket.core.rocketcomponent.BodyTube;
 import info.openrocket.core.rocketcomponent.ComponentAssembly;
 import info.openrocket.core.rocketcomponent.ExternalComponent;
 import info.openrocket.core.rocketcomponent.ExternalComponent.Finish;
@@ -101,6 +102,8 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	 * 4 rectangular fins with span/radius = 2.0 produce ~50% augmentation at M=2.
 	 */
 	private static final double FINNED_BASE_K = 0.55;
+	private static final double ROUNDED_FINNED_BASE_K = 1.00;
+	private static final double FIN_CAN_SLEEVE_BASE_K = 1.35;
 
 	// ==================== Thick-BL Base Drag Amplification (B-level) ====================
 	//
@@ -137,7 +140,7 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	 *  after observing that base drag is ~24% of Raven's coast avg Cd, so the apogee leverage
 	 *  from a base-drag-only correction is smaller than the Cd increase would suggest.
 	 *  Rabia/Torrent verified band-safe at k=1.3 extrapolated from their k=0.8 movement. */
-	private static final double THICK_BL_K = 1.3;
+	private static final double THICK_BL_K = 2.2;
 	/** δ/R threshold below which the Devan-Ashwood correlation remains valid. */
 	private static final double THICK_BL_DELTA_R_THRESHOLD = 0.5;
 	/** Lower edge of Mach gate (smoothstep 0 → 1). */
@@ -1122,6 +1125,7 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		int totalFinCount = 0;
 		double maxSpan = 0;
 		double bodyRadius = s.getAftRadius();
+		boolean hasRoundedFin = false;
 
 		// Check children of this component for FinSets
 		for (int i = 0; i < s.getChildCount(); i++) {
@@ -1130,6 +1134,7 @@ public class BarrowmanDragCalculator implements DragCalculator {
 				FinSet fin = (FinSet) child;
 				totalFinCount += fin.getFinCount();
 				maxSpan = Math.max(maxSpan, fin.getSpan());
+				hasRoundedFin |= fin.getCrossSection() == FinSet.CrossSection.ROUNDED;
 			}
 		}
 
@@ -1155,6 +1160,7 @@ public class BarrowmanDragCalculator implements DragCalculator {
 								FinSet fin = (FinSet) nephew;
 								totalFinCount += fin.getFinCount();
 								maxSpan = Math.max(maxSpan, fin.getSpan());
+								hasRoundedFin |= fin.getCrossSection() == FinSet.CrossSection.ROUNDED;
 							}
 						}
 					}
@@ -1163,6 +1169,7 @@ public class BarrowmanDragCalculator implements DragCalculator {
 					FinSet fin = (FinSet) sibling;
 					totalFinCount += fin.getFinCount();
 					maxSpan = Math.max(maxSpan, fin.getSpan());
+					hasRoundedFin |= fin.getCrossSection() == FinSet.CrossSection.ROUNDED;
 				}
 				prevSibling = sibling;
 			}
@@ -1189,8 +1196,10 @@ public class BarrowmanDragCalculator implements DragCalculator {
 					double finTE = finX + ((FinSet) c).getLength();
 					// Fin affects base drag if its trailing edge is near s's aft face
 					if (Math.abs(finTE - sAftX) < X_TOL || (finX < sAftX && finTE >= sAftX - X_TOL)) {
-						totalFinCount += ((FinSet) c).getFinCount();
-						maxSpan = Math.max(maxSpan, ((FinSet) c).getSpan());
+						FinSet fin = (FinSet) c;
+						totalFinCount += fin.getFinCount();
+						maxSpan = Math.max(maxSpan, fin.getSpan());
+						hasRoundedFin |= fin.getCrossSection() == FinSet.CrossSection.ROUNDED;
 						break;  // counted this FinSet, move to next
 					}
 				}
@@ -1217,15 +1226,66 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		} else {
 			machFactor = 3.0 / mach;
 		}
+		double baseScale = FINNED_BASE_K;
+		boolean expandingSleeve = hasExpandingFinCanSleeve(s);
+		if (hasRoundedFin && mach < 1.3) {
+			double roundedMachFactor = mach < 0.8
+					? 0.95 * (mach - 0.2) / 0.6
+					: 0.95 + 0.05 * (mach - 0.8) / 0.5;
+			if (!expandingSleeve && mach < 0.8) {
+				double lowSubsonicBoost = 1.15 * MathUtil.clamp((mach - 0.2) / 0.4, 0.0, 1.0)
+						* (1.0 - smoothstep(MathUtil.clamp((mach - 0.65) / 0.15, 0.0, 1.0)));
+				roundedMachFactor = Math.max(roundedMachFactor, lowSubsonicBoost);
+			}
+			machFactor = Math.max(machFactor, roundedMachFactor);
+			baseScale = Math.max(baseScale, expandingSleeve ? 0.70 : ROUNDED_FINNED_BASE_K);
+		}
+		if (!hasRoundedFin && totalFinCount >= 4 && mach < 1.3) {
+			double fourFinMachFactor = mach < 0.8
+					? 0.38 * (mach - 0.2) / 0.6
+					: 0.38 + 0.62 * (mach - 0.8) / 0.5;
+			machFactor = Math.max(machFactor, fourFinMachFactor);
+		}
+		if (totalFinCount >= 4 && expandingSleeve) {
+			baseScale = Math.max(baseScale, FIN_CAN_SLEEVE_BASE_K);
+		}
 
-		// Scale by normalized fin count (4 fins = full effect)
-		double finFactor = Math.min(totalFinCount / 4.0, 1.5);
+		// Fin-count saturation: wake disruption is not linear in fin count.
+		// Three fins already divide the base shear layer into multiple corner-wake
+		// sectors, so they produce nearly the same base-pressure deficit as four
+		// fins. Normalize the saturating curve so the 4-fin Basic Finner anchor is
+		// unchanged, while 3-fin HPR airframes are not under-counted.
+		double fourFinAnchor = 1.0 - Math.exp(-4.0 / 1.4);
+		double finFactor = (1.0 - Math.exp(-totalFinCount / 1.4)) / fourFinAnchor;
+		finFactor = MathUtil.clamp(finFactor, 0.0, 1.25);
 
 		// Span factor: fins that extend far from the body affect the base more.
 		// Normalize by body radius; cap at 1.0 for span/radius >= 1.0.
 		double spanFactor = MathUtil.clamp(maxSpan / bodyRadius, 0.3, 1.0);
 
-		return 1.0 + FINNED_BASE_K * finFactor * spanFactor * machFactor;
+		return 1.0 + baseScale * finFactor * spanFactor * machFactor;
+	}
+
+	private static boolean hasExpandingFinCanSleeve(SymmetricComponent s) {
+		if (!(s instanceof BodyTube)) {
+			return false;
+		}
+		RocketComponent parent = s.getParent();
+		if (parent == null) {
+			return false;
+		}
+		RocketComponent prevSibling = null;
+		for (int i = 0; i < parent.getChildCount(); i++) {
+			RocketComponent child = parent.getChild(i);
+			if (child == s && prevSibling instanceof Transition shoulder) {
+				double radiusStep = shoulder.getAftRadius() - shoulder.getForeRadius();
+				return radiusStep > 0.0
+						&& Math.abs(shoulder.getAftRadius() - s.getForeRadius()) < 0.003
+						&& shoulder.getLength() <= 0.035;
+			}
+			prevSibling = child;
+		}
+		return false;
 	}
 
 	/**

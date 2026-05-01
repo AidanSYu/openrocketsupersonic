@@ -129,16 +129,13 @@ public class NacaRm10FinnedBodyDragBenchmarkTest {
 	 * <ul>
 	 *   <li>Paraboloid nose (Sta 0 -> 90): POWER shape parameter 0.5,
 	 *       radius 0 -> 6.00 in</li>
-	 *   <li>Fore boattail (Sta 90 -> 129): conical taper 6.00 -> 4.873 in</li>
-	 *   <li>Fin-mount body tube (Sta 129 -> 146.5): approximated as a
-	 *       constant-radius tube at the fin-LE body radius (4.873 in).
-	 *       OpenRocket requires fins to attach to a BodyTube; a true
-	 *       tapered fin-mount would require a FreeFormFinSet. The
-	 *       constant-radius approximation overstates the fin-region body
-	 *       diameter by at most ~1.24 in (26%) near the base but preserves
-	 *       fin root attachment geometry.</li>
-	 *   <li>Final terminal boattail (very short) from 4.873 -> 3.636 in so
-	 *       base diameter matches the reported test value.</li>
+	 *   <li>Single conical-equivalent afterbody (Sta 90 -> 146.5): taper
+	 *       6.00 -> 3.636 in. This replaces the earlier split
+	 *       fore-boattail + constant-radius fin mount + 2 cm terminal-boattail
+	 *       placeholder, which generated a nonphysical steep-boattail drag
+	 *       contribution.</li>
+	 *   <li>Minimal base-radius fin-mount tube used only because OpenRocket
+	 *       requires fins to attach to a BodyTube.</li>
 	 * </ul>
 	 */
 	private static Rocket makeNacaRm10FullScale() {
@@ -163,24 +160,24 @@ public class NacaRm10FinnedBodyDragBenchmarkTest {
 		nose.setFinish(ExternalComponent.Finish.POLISHED);
 		stage.addChild(nose);
 
-		// 2) Fore boattail (Sta 90 -> 129): the portion of the parabolic
-		// afterbody forward of the fin LE. Conical approximation to the
-		// parabolic taper over 39 inches of body length.
+		// 2) Conical-equivalent afterbody (Sta 90 -> 146.5). This preserves
+		// the reported base diameter without the former 2 cm terminal-boattail
+		// placeholder.
 		Transition foreBoattail = new Transition();
 		foreBoattail.setShapeType(Transition.Shape.CONICAL);
 		foreBoattail.setForeRadius(FULL_BODY_DIAMETER_M / 2.0);
-		foreBoattail.setAftRadius(FIN_LE_RADIUS_M);
-		foreBoattail.setLength(FORE_BOATTAIL_LENGTH_M);
+		foreBoattail.setAftRadius(FULL_BASE_DIAMETER_M / 2.0);
+		foreBoattail.setLength(FORE_BOATTAIL_LENGTH_M + FIN_MOUNT_LENGTH_M);
 		foreBoattail.setThickness(0.002);
-		foreBoattail.setName("Fore Boattail (Sta 90-129)");
+		foreBoattail.setName("Afterbody Taper (Sta 90-146.5)");
 		foreBoattail.setFinish(ExternalComponent.Finish.POLISHED);
 		stage.addChild(foreBoattail);
 
-		// 3) Fin-mount body tube (Sta 129 -> 146.5): constant-radius
-		// approximation of the tapered fin-root region, with radius set to
-		// the body radius at the fin LE (Y=4.873 in).
-		BodyTube finMount = new BodyTube(FIN_MOUNT_LENGTH_M, FIN_LE_RADIUS_M, 0.002);
-		finMount.setName("Fin-Mount Body (Sta 129-146.5)");
+		// 3) Minimal fin-mount ring at the actual base radius. The fins overhang
+		// this ring axially, matching the real swept fins better than assigning a
+		// constant-radius 17.5 in body tube through the whole tapered afterbody.
+		BodyTube finMount = new BodyTube(0.001, FULL_BASE_DIAMETER_M / 2.0, 0.002);
+		finMount.setName("Base Fin-Mount Ring");
 		finMount.setFinish(ExternalComponent.Finish.POLISHED);
 		stage.addChild(finMount);
 
@@ -213,30 +210,11 @@ public class NacaRm10FinnedBodyDragBenchmarkTest {
 		TrapezoidFinSet fins = new TrapezoidFinSet(4,
 				FIN_ROOT_CHORD_M, finTipChordM, sweepLength, FIN_SEMI_SPAN_M);
 		fins.setName("60-deg Sweep Fins");
-		fins.setCrossSection(FinSet.CrossSection.ROUNDED); // circular-arc profile
+		fins.setCrossSection(FinSet.CrossSection.HEXAGONAL); // sharp biconvex proxy
 		fins.setThickness(finThickness);
 		fins.setFinish(ExternalComponent.Finish.POLISHED);
 		fins.setAxialMethod(AxialMethod.BOTTOM);
 		finMount.addChild(fins);
-
-		// 5) Final terminal boattail (Sta 146.5 is the actual base). The
-		// fin-mount tube terminates at Sta 146.5 but with the fin-LE radius
-		// (4.873 in), which is larger than the true base radius (3.636 in).
-		// We represent the residual area contraction as a very short final
-		// boattail to preserve the correct base diameter for base-drag
-		// calculation.
-		Transition terminalBoattail = new Transition();
-		terminalBoattail.setShapeType(Transition.Shape.CONICAL);
-		terminalBoattail.setForeRadius(FIN_LE_RADIUS_M);
-		terminalBoattail.setAftRadius(FULL_BASE_DIAMETER_M / 2.0);
-		// Use a small but nonzero length so the taper is included in wetted
-		// surface. Physically this is a lumped representation of the
-		// body radius contraction over the fin-chord station range.
-		terminalBoattail.setLength(0.02); // 2 cm placeholder
-		terminalBoattail.setThickness(0.002);
-		terminalBoattail.setName("Terminal Boattail");
-		terminalBoattail.setFinish(ExternalComponent.Finish.POLISHED);
-		stage.addChild(terminalBoattail);
 
 		rocket.enableEvents();
 		return rocket;
