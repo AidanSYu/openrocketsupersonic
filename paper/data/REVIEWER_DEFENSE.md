@@ -2,23 +2,25 @@
 
 This file is the short answer key for likely reviewer questions. It is deliberately strict: if a claim is not defensible from published data or exported artifacts, it should not be in the manuscript body as a validated result.
 
-## What we can defend now
+## What we can defend now (Updated 2026-04-14)
 
 - The atmosphere-property upgrades are source-anchored and reproducible.
 - The core gas-dynamics solvers are quantitatively validated against published tables and reference cases.
-- The hypersonic `Cp,max` building block is validated to grade A via independent derivation from NACA 1135 Tables I+II (15-point comparison, machine-epsilon agreement).
+- The hypersonic `Cp,max` building block is source-anchored.
 - The repo can regenerate paper-facing validation artifacts from tests.
 - The repo now includes a quantitative sensitivity appendix for the thesis tuning constants.
-- `NACA RM A52H28` is now a real external zero-lift foredrag benchmark with stored digitized points, Reynolds-matched exports, and quantitative error metrics. This also closes the cone/ogive zero-lift drag trends row (same nose shapes at L/D=3).
-- `AGARD-B` is now a secondary external benchmark (grade A with transition-sensitivity caveats), supported by NACA TN 3393 as an independent base-drag anchor.
+- `NACA RM A52H28` is a real external zero-lift foredrag benchmark with stored digitized points, Reynolds-matched exports, and quantitative error metrics (MAE = 0.0147). Residual cone and quarter-power biases are isolated and documented.
+- **`NACA TN 3393` is now an independent base-drag benchmark** with figure-digitized Cpb on matched coefficient basis. Turbulent BL agreement is confirmed; laminar divergence is expected and documented.
+- **`NASA TM X-653` is now an external static-stability benchmark** with digitized CNa and xCP/d for the NSCFB finned configuration (M 0.6-3.0). Agreement is good subsonic through M~2; M=3.0 anomaly is flagged.
+- **All 10 numerical guards are proven inactive** in the validated flight envelope via runtime instrumentation (`GuardInvarianceTest.java`, 72-point sweep).
 
 ## What we should not claim yet
 
-- Broad predictive accuracy for full-vehicle `Cd(M)` from a single drag benchmark alone.
-- Any claim that `NASA TM X-653` predictive accuracy extends above M 3.0; the M=3.0 fin-body interference anomaly is documented but unresolved.
-- Predictive static stability accuracy without external `Cn(alpha)`, `Cm(alpha)`, or `x_CP(M)` data.
+- Broad predictive accuracy for full-vehicle `Cd(M)` above what the three external benchmarks cover.
+- Predictive static stability above M~3.0 (fin-body interference anomaly documented).
 - Predictive dynamic stability or 6-DOF fidelity while pitch damping and related terms remain tuned.
 - Broad Mach 10+ aerodynamic accuracy for full bodies.
+- Laminar base-drag predictions (model is turbulent-calibrated).
 
 ## Standard reviewer questions
 
@@ -34,17 +36,17 @@ Answer: the static- and dynamic-stability tuning terms listed in the thesis tabl
 4. Do we use RASAero as validation truth?
 Answer: no. RASAero comparisons are supporting diagnostics only. Any term calibrated partly from RASAero output is not treated as externally validated.
 
-5. Why is AGARD-B presented as a secondary benchmark?
-Answer: AGARD-B provides external Cd(M) comparison with AEDC-TR-70-100 tunnel data, but the component split depends strongly on boundary-layer transition state. With NACA TN 3393 now independently closing base drag (turbulent BL), AGARD-B serves as a complementary transonic benchmark rather than the sole drag-split anchor. The exposed-vs-gross reference-area issue is closed; the remaining sensitivity is in friction/transition modeling.
+5. Why is AGARD-B not enough by itself?
+Answer: because AGARD-B is transition-sensitive and therefore a diagnostic, not an anchor. The repo now has independent base-drag closure via NACA TN 3393, so AGARD-B is supplementary.
 
 6. What does NACA RM A52H28 prove right now?
-Answer: it proves the repo can run a real external zero-lift drag benchmark on exact body-of-revolution geometries with a passing first-pass aggregate MAE. It also shows the remaining model gaps clearly: the residual error is now concentrated mainly in the cone and quarter-power families around `M = 1.24-1.99`, not as a general collapse across all shapes.
+Answer: it proves the model reproduces zero-lift foredrag trends across 5 nose-shape families (MAE = 0.0147, MAPE = 12.5%). The remaining cone and quarter-power biases are isolated to specific model limitations (transonic pressure polynomial for cone, TR-R-100 table calibration for quarter-power), not general model failure. See `a52h28_bias_isolation.md`.
 
 7. What is the strongest current publication core?
-Answer: the open-source gas-dynamics and cone-flow backbone, plus atmospheric-property upgrades, all tied to published references and reproducible artifacts.
+Answer: three independent external benchmarks (A52H28 foredrag, TN 3393 base drag, TM X-653 static stability), plus source-anchored gas-dynamics and atmospheric-property building blocks, plus proven guard invariance. All tied to published references with reproducible artifacts.
 
 8. What is the minimum extra evidence required for a paper now?
-Answer: finish one independent transonic / base-drag benchmark on a matched coefficient basis and one exact external `Cn(alpha)` / CP benchmark with real digitized ordinates. `NACA TN 3393` and `NASA TM X-653` now have fixture/export support in the repo, but the source-data side is still incomplete.
+Answer: the three manuscript gates (zero-lift drag, base drag, static stability) are closed. The remaining gaps are dynamic stability heuristics (pitch damping, Magnus, transonic Cmq) which should be presented as appendix material, and the M=3.0 fin-body interference anomaly which should be flagged as a known limitation.
 
 9. How should the final manuscript describe the advanced 6-DOF features?
 Answer: as simulation extensions and robustness work, unless external dynamic-stability data are added.
@@ -56,4 +58,7 @@ Answer: the framework extends analytically into hypersonic regimes, but external
 Answer: see `tuned_parameter_sensitivity.csv` and `tuned_parameter_sensitivity.md`. The current package shows the sign, scale, and monotonicity of the main aerodynamic heuristics under representative cases; they should still be described as sensitivity-bounded, not externally closed.
 
 12. Are the numerical guard thresholds part of the aerodynamic validation claim?
-Answer: no. They belong to software robustness, not aerodynamic accuracy. Keep them in a separate appendix and cite `NUMERICAL_GUARD_AUDIT.md` if a reviewer asks.
+Answer: no. They belong to software robustness, not aerodynamic accuracy. All 10 guards are now proven inactive in the validated envelope (M 0.3-5.0, AoA 0-10°) via runtime instrumentation in `GuardInvarianceTest.java`. See `guard_tuned_invariance.md` and `NUMERICAL_GUARD_AUDIT.md`.
+
+13. What are the known model limitations?
+Answer: (a) Cone transonic pressure drag is overpredicted at M 1.24-1.99 due to shape-agnostic transonic polynomial. (b) Quarter-power shape has a flat ~10-15% overprediction from TR-R-100 table calibration. (c) Base drag model is turbulent-calibrated; laminar BL data diverges as expected. (d) M=3.0 fin-body interference produces a CNa/xCP anomaly not present in experiment. All are documented with root causes in the repo.
