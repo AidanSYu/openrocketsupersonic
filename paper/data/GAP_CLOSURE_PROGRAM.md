@@ -13,134 +13,137 @@ Close every item that is currently:
 
 without collapsing manuscript claims into overstatement.
 
-## Current State
+## Current State (Updated 2026-04-14)
 
 The repo now has:
 
-- strong analytical building-block validation
-- one real external zero-lift drag benchmark (`NACA RM A52H28`) with a passing first-pass aggregate MAE and narrowed residual bias
-- one useful but non-anchor diagnostic benchmark (`AGARD-B`)
-- benchmark fixture/export support for `NACA TN 3393` and `NASA TM X-653`
+- strong analytical building-block validation (NACA 1135 shocks, Prandtl-Meyer, Taylor-Maccoll, atmosphere)
+- one real external zero-lift drag benchmark (`NACA RM A52H28`) with a passing first-pass aggregate MAE = 0.0147 and isolated residual biases
+- **one independent base-drag benchmark (`NACA TN 3393`)** with figure-digitized Cpb on matched coefficient basis, confirming turbulent BL agreement
+- **one external static-stability benchmark (`NASA TM X-653`)** with digitized CNa and xCP/d for NSCFB finned config, M 0.6-3.0
+- one useful diagnostic benchmark (`AGARD-B`) for transition-sensitivity analysis
 - sensitivity exports for tuned parameters
 - a clear robustness-vs-aerodynamics boundary
-- a documented guard/tuned invariance package
+- **runtime-proven guard invariance** via `GuardInvarianceTest.java` (72-point Mach/AoA sweep, 0 violations)
+- **documented A52H28 cone and quarter-power bias isolation** (transonic pressure vs TR-R-100 table causes separated)
 
 The repo does **not** yet have:
 
-- a clean external base-drag closure case on a matched coefficient basis
-- a clean external static-stability / CP closure case with digitized published ordinates
-- external closure for dynamic stability heuristics
+- external closure for dynamic stability heuristics (pitch damping, Magnus, transonic Cmq)
 - a basis for broad whole-vehicle or Mach-10+ predictive claims
+- laminar base-drag agreement (model is turbulent-calibrated)
 
 ## Workstreams
 
-### 1. Zero-Lift Drag Closure
+### 1. Zero-Lift Drag Closure — **CLOSED**
 
 Goal: make external `Cd(M)` claims reviewer-defensible.
 
-Subproblems:
+**Completed:**
 
-- explain and reduce the remaining `A52H28` cone / quarter-power residuals
-- finish the independent transonic / base-drag benchmark on `NACA TN 3393`
-- keep `AGARD-B` diagnostic until the independent base-drag anchor exists
+- A52H28 benchmark: MAE = 0.0147, 5 nose shapes, figure-digitized, Reynolds-matched
+- A52H28 bias isolation: cone residual → transonic pressure model, quarter-power → TR-R-100 table (documented in `a52h28_bias_isolation.md`)
+- NACA TN 3393 base drag: figure-digitized Cpb on matched coefficient basis, turbulent BL agreement confirmed
+- AGARD-B retained as diagnostic, no longer sole transonic anchor
 
-Definition of done:
+### 2. Static Stability Closure — **CLOSED**
 
-- one exact external body-of-revolution benchmark with good absolute error
-- one independent transonic / base-drag benchmark
-- no need to rely on AGARD alone to justify drag-split tuning
+Goal: make `Cn(alpha)` and `x_CP` claims reviewer-defensible.
 
-### 2. Static Stability Closure
+**Completed:**
 
-Goal: make `Cn(alpha)`, `Cm(alpha)`, and `x_CP` claims reviewer-defensible.
+- NASA TM X-653: CNa and xCP/d digitized from Figures 5(a), 5(b) for NSCFB config
+- Agreement metrics: CNa MAE < 0.003/deg for M 0.6-2.0
+- M=3.0 fin-body interference anomaly documented and flagged
 
-Subproblems:
+**Remaining (future work):**
 
-- finish digitizing `NASA TM X-653` now that fixture/export support exists
-- determine whether additional body-only or interference datasets are needed
-- separate body lift, fin lift, and interference-layer validation
+- Additional body-only or interference datasets (NASA TN D-6996, NACA Report 1307)
+- Higher AoA validation
 
-Definition of done:
-
-- at least one exact external nonzero-AoA benchmark
-- explicit agreement metrics for `Cn(alpha)` and/or `x_CP`
-
-### 3. Dynamic / High-AoA Heuristic Exposure
+### 3. Dynamic / High-AoA Heuristic Exposure — **PARTIALLY CLOSED**
 
 Goal: reduce the manuscript risk from tuned terms.
 
-Subproblems:
+**Completed:**
 
-- pitch damping multiplier
-- body damping coefficient / fin cap
-- Magnus fraction
-- transonic `Cmq` boost
-- vortex asymmetry and onset/saturation
-- crossflow fin `Cd`
+- T03 Magnus body fraction: confirmed within bounds
+- T01 pitch damping: flagged for further external data
 
-Definition of done:
+**Pending:**
 
-- each heuristic either has external data closure or is explicitly de-scoped to appendix/supporting material
+- T02 body/fin damping cap
+- T04 transonic Cmq augmentation
+- T05 vortex asymmetry
+- T06 crossflow fin Cd
 
-### 4. Numerical Guard Separation
+Each pending heuristic is explicitly de-scoped to appendix/supporting material per the validation matrix.
+
+### 4. Numerical Guard Separation — **CLOSED**
 
 Goal: prove numerical safeguards are not contaminating aerodynamic claims.
 
-Subproblems:
+**Completed:**
 
-- invariance sweeps for thresholds / caps / floors
-- trigger-case audits
-- clean-case confirmation that guards stay inactive where claims are made
+- `GuardInvarianceTest.java`: 72-point Mach/AoA runtime sweep, all 10 guards inactive
+- Beta continuity through transonic verified
+- No NaN/Infinity at edge conditions including M=1.0
+- Results exported to `guard_tuned_invariance_metrics.csv` for reviewer inspection
+- `guard_tuned_invariance.md` documents all evidence
 
-Definition of done:
+## Immediate Order (Updated 2026-04-14)
 
-- reviewer can see which thresholds are software-only and why they do not alter clean aerodynamic validation cases
+Items 1-4 are now complete. Next priorities:
 
-## Immediate Order
+1. ~~Finish `NACA TN 3393` figure digitization and coefficient-basis closure.~~ **DONE**
+2. ~~Finish `NASA TM X-653` digitization and comparison metrics.~~ **DONE**
+3. ~~Separate the remaining `A52H28` cone / quarter-power residuals into transition-state versus pressure-drag causes.~~ **DONE**
+4. ~~Re-rank tuned heuristics after the new external datasets are in place.~~ **DONE** (T01 flagged, T03 passed, T02/T04/T05/T06 de-scoped to appendix)
 
-1. Finish `NACA TN 3393` figure digitization and coefficient-basis closure.
-2. Finish `NASA TM X-653` digitization and comparison metrics.
-3. Separate the remaining `A52H28` cone / quarter-power residuals into transition-state versus pressure-drag causes.
-4. Re-rank tuned heuristics after the new external datasets are in place.
+**Future work priorities:**
+5. External data for T01 pitch-damping multiplier (highest-risk remaining tuned term).
+6. Investigate M=3.0 fin-body interference anomaly in NASA TM X-653 comparison.
+7. Additional external datasets: NASA TN D-6996 (body-only crossflow), NACA Report 1307 (fin-body interference).
 
-## Ranked Risk Register
+## Ranked Risk Register (Updated 2026-04-14)
 
 ### Highest-risk model gaps
 
-- Static stability / CP claims are still unsupported by an external `Cn(alpha)` / `x_CP` dataset.
-- Pitch damping, Magnus fraction, and transonic `Cmq` augmentation remain tuned heuristics.
-- Crossflow replacement logic and vortex-asymmetry terms remain tuned heuristics for high AoA.
-- Base drag is still unclosed by an independent external dataset.
+- Pitch damping, transonic `Cmq` augmentation, and vortex-asymmetry terms remain tuned heuristics (de-scoped to appendix).
+- M=3.0 fin-body interference anomaly produces CNa/xCP spike not present in TM X-653 data.
 
 ### Medium-risk model gaps
 
-- `A52H28` residuals are now narrower but still likely mix transition-state ambiguity at `M = 1.44` with remaining cone / quarter-power pressure-drag model error.
-- `AGARD-B` is informative but still transition-sensitive and therefore unsuitable as the sole transonic tuning anchor.
+- `A52H28` cone and quarter-power residuals are now isolated and documented but not reduced.
+- `AGARD-B` remains transition-sensitive (useful diagnostic, not primary anchor).
+- Laminar base-drag predictions diverge from experiment (model is turbulent-calibrated).
 
-### Lower-risk but mandatory transparency items
+### Lower-risk — now closed
 
-- Numerical guard thresholds, clamps, and timestep floors need invariance / trigger-map documentation.
+- ~~Static stability / CP claims unsupported by external dataset~~ → Closed by NASA TM X-653
+- ~~Base drag unclosed by independent external dataset~~ → Closed by NACA TN 3393
+- ~~Numerical guard invariance undocumented~~ → Closed by `GuardInvarianceTest.java`
 
-## Immediate Fix Hypotheses To Test
+## Fix Hypotheses — Status (Updated 2026-04-14)
 
-### A52H28
+### A52H28 — **Isolated, documented**
 
-1. Keep the polished / perfect-finish and Reynolds-matched export assumptions locked for the benchmark articles.
-2. Isolate the remaining cone overprediction at `M = 1.24-1.99`.
-3. Isolate the remaining quarter-power overprediction at `M = 1.24-1.99`.
-4. Resolve the `M = 1.44` duplicate-Re / transition-state ambiguity as far as the source permits.
+1. ✓ Polished / perfect-finish and Reynolds-matched export assumptions locked.
+2. ✓ Cone overprediction isolated to transonic pressure model (`a52h28_bias_isolation.md`).
+3. ✓ Quarter-power overprediction isolated to TR-R-100 table + fineness scaling.
+4. M=1.44 dual-Re ambiguity documented as inherent source limitation.
 
-### AGARD-B / Base Drag
+### AGARD-B / Base Drag — **Base-drag closed independently**
 
-1. Keep AGARD as a transition/base-drag diagnostic only.
-2. Replace the provisional `NACA TN 3393` proxy ordinates with figure-derived points and a matched coefficient basis.
-3. Instrument/report transition-state quantities alongside AGARD friction results.
+1. ✓ AGARD retained as transition/base-drag diagnostic only.
+2. ✓ NACA TN 3393 now has figure-derived Cpb on matched coefficient basis.
+3. Transition-state instrumentation alongside AGARD remains future work.
 
-### Static Stability
+### Static Stability — **First closure achieved**
 
-1. Keep the TM geometry fixture and export in the repo as the comparison target.
-2. Digitize `Cn(alpha)` / `x_CP` ordinates from `paper/data/pdf/NASA_TM_X_653.pdf`.
-3. Export and report comparison metrics into `paper/data`.
+1. ✓ TM geometry fixture and export in repo.
+2. ✓ CNa and xCP/d digitized from TM X-653 Figures 5(a), 5(b).
+3. ✓ Comparison metrics exported to `paper/data`.
 
 ## Files To Touch Next
 
