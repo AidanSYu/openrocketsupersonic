@@ -117,3 +117,6 @@ docs/build
 **/CLAUDE.md
 **/GEMINI.md
 **/.claude
+
+# USAF DATCOM full scan (>100 MiB); GitHub blocks commits containing this blob
+**/USAF STABILITY AND CONTROL DATCOM*.pdf
