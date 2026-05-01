@@ -14,6 +14,8 @@ import info.openrocket.core.logging.Warning;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.l10n.Translator;
 import info.openrocket.core.masscalc.RigidBody;
+import info.openrocket.core.motor.ThrustCurveMotor;
+import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.simulation.exception.SimulationCalculationException;
 import info.openrocket.core.simulation.exception.SimulationException;
 import info.openrocket.core.simulation.listeners.SimulationListenerHelper;
@@ -52,6 +54,8 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 	 * A random amount that is added to pitch and yaw coefficients, plus or minus.
 	 */
 	public static final double PITCH_YAW_RANDOM = 0.0005;
+
+	private static final double SEA_LEVEL_STATIC_PRESSURE = 101325.0;
 	
 	/**
 	 * Maximum roll step allowed.  This is selected as an uneven division of the full
@@ -412,7 +416,9 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 		thrust = 0;
 		Collection<MotorClusterState> activeMotorList = status.getActiveMotors();
 		for (MotorClusterState currentMotorState : activeMotorList ) {
-			thrust += currentMotorState.getThrust( status.getSimulationTime() );
+			double motorThrust = currentMotorState.getThrust(status.getSimulationTime());
+			thrust += motorThrust;
+			thrust += calculatePressureThrustCorrection(status, store, currentMotorState, motorThrust);
 		}
 
 		// Post-listeners
@@ -421,6 +427,31 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 		checkNaN(thrust, "thrust");
 
 		return thrust;
+	}
+
+	private double calculatePressureThrustCorrection(SimulationStatus status, DataStore store,
+			MotorClusterState motorState, double motorThrust) {
+		if (motorThrust <= 0.0 || store.flightConditions == null || store.flightConditions.getAtmosphericConditions() == null) {
+			return 0.0;
+		}
+		if (!(motorState.getMotor() instanceof ThrustCurveMotor)) {
+			return 0.0;
+		}
+		if (!(motorState.getMount() instanceof RocketComponent mountComponent)) {
+			return 0.0;
+		}
+		int stageNumber = mountComponent.getStageNumber();
+		double nozzleDiameter = status.getSimulationConditions().getNozzleExitDiameterForStage(stageNumber);
+		if (!(nozzleDiameter > 0.0) || Double.isNaN(nozzleDiameter)) {
+			return 0.0;
+		}
+		double ambientPressure = store.flightConditions.getAtmosphericConditions().getPressure();
+		double pressureDelta = SEA_LEVEL_STATIC_PRESSURE - ambientPressure;
+		if (!(pressureDelta > 0.0)) {
+			return 0.0;
+		}
+		double nozzleArea = Math.PI * MathUtil.pow2(nozzleDiameter / 2.0);
+		return motorState.getConfig().getMotorCount() * pressureDelta * nozzleArea;
 	}
 
 	/**

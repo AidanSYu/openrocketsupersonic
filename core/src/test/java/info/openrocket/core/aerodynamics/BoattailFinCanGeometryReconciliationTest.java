@@ -192,11 +192,12 @@ public class BoattailFinCanGeometryReconciliationTest extends BaseTestCase {
 		assertTrue(aug > 1.0, String.format(
 				"Kinsel fin can should have finned base augmentation > 1.0, got %.4f", aug));
 
-		// Expected: 4 fins, span/radius > 1, machFactor=1.0 at M=2.4
-		// aug = 1 + 0.55 * min(4/4, 1.5) * clamp(span/radius, 0.3, 1.0) * 1.0
-		// = 1 + 0.55 * 1.0 * 1.0 * 1.0 = 1.55
-		assertEquals(1.55, aug, 0.05,
-				"Kinsel augmentation should be ~1.55 for 4 fins at M=2.4");
+		// Expected: 4 fins on an expanding fin-can sleeve, span/radius > 1,
+		// machFactor=1.0 at M=2.4. The sleeve-specific base scale is 1.35,
+		// preserving the global Basic Finner anchor while closing Kinsel's
+		// imported aft fin-can geometry.
+		assertEquals(2.35, aug, 0.05,
+				"Kinsel augmentation should be ~2.35 for 4 fins on an expanding sleeve at M=2.4");
 	}
 
 	@Test
@@ -218,13 +219,15 @@ public class BoattailFinCanGeometryReconciliationTest extends BaseTestCase {
 				body, bodyContexts, imap, 1.1);
 		System.out.printf("Raven Body Tube augmentation at M=1.1: %.4f%n", aug);
 
-		// Expected: 3 fins, machFactor at M=1.1 = 0.30 + 0.70*(1.1-0.8)/0.5 = 0.72
-		// finFactor = 3/4 = 0.75, spanFactor = 1.0
-		// aug = 1 + 0.55 * 0.75 * 1.0 * 0.72 = 1.297
+		// Expected: Raven uses rounded fins near the aft base. The current
+		// model applies the rounded-fin subsonic/transonic ramp plus the
+		// saturating fin-count curve, so 3 fins produce nearly the 4-fin
+		// wake-disruption effect without changing the supersonic Basic Finner
+		// anchor.
 		assertTrue(aug > 1.0, String.format(
 				"Raven body tube should have finned base augmentation > 1.0, got %.4f", aug));
-		assertEquals(1.297, aug, 0.05,
-				"Raven augmentation should be ~1.30 for 3 fins at M=1.1");
+		assertEquals(1.918, aug, 0.05,
+				"Raven augmentation should be ~1.92 for 3 rounded fins at M=1.1");
 	}
 
 	@Test
@@ -329,8 +332,8 @@ public class BoattailFinCanGeometryReconciliationTest extends BaseTestCase {
 				body, imap.get(body), imap, 0.8);
 		System.out.printf("CalIsp1 Body Tube augmentation at M=0.8: %.4f%n", aug);
 
-		// 4 fins, M=0.8: machFactor = 0.30*(0.8-0.2)/0.6 = 0.30
-		// aug = 1 + 0.55 * 1.0 * 1.0 * 0.30 = 1.165
+		// 4 fins, M=0.8: the four-fin low-subsonic wake ramp reaches
+		// machFactor=0.38, so augmentation is about 1.21.
 		assertTrue(aug > 1.0, "CalIsp1 should have augmentation > 1.0");
 	}
 

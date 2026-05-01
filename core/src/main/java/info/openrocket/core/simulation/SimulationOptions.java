@@ -105,11 +105,13 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 	private SimulationStepperMethod stepperMethodChoice = SimulationStepperMethod.RK4;
 
 	/**
-	 * Nozzle exit diameter in meters. Used to compute the nozzle area ratio
-	 * (A_nozzle / A_base) for power-on base drag reduction during motor burn.
-	 * Set from CDX1 import (SustainerNozzleDiameter field). NaN = unknown.
+	 * Nozzle exit diameter in meters by RASAero axial stage number. Used to compute
+	 * nozzle area ratio and pressure-thrust corrections during motor burn.
+	 * Stage 0 is the sustainer, stage 1 booster 1, stage 2 booster 2.
 	 */
-	private double nozzleExitDiameter = Double.NaN;
+	private double sustainerNozzleExitDiameter = Double.NaN;
+	private double booster1NozzleExitDiameter = Double.NaN;
+	private double booster2NozzleExitDiameter = Double.NaN;
 
 	/**
 	 * When true, the skin-friction model forces a fully-turbulent boundary layer
@@ -438,11 +440,32 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 	}
 
 	public double getNozzleExitDiameter() {
-		return nozzleExitDiameter;
+		return sustainerNozzleExitDiameter;
 	}
 
 	public void setNozzleExitDiameter(double diameter) {
-		this.nozzleExitDiameter = diameter;
+		setNozzleExitDiameterForStage(0, diameter);
+	}
+
+	public double getNozzleExitDiameterForStage(int stageNumber) {
+		return switch (stageNumber) {
+			case 0 -> sustainerNozzleExitDiameter;
+			case 1 -> booster1NozzleExitDiameter;
+			case 2 -> booster2NozzleExitDiameter;
+			default -> Double.NaN;
+		};
+	}
+
+	public void setNozzleExitDiameterForStage(int stageNumber, double diameter) {
+		switch (stageNumber) {
+			case 0 -> sustainerNozzleExitDiameter = diameter;
+			case 1 -> booster1NozzleExitDiameter = diameter;
+			case 2 -> booster2NozzleExitDiameter = diameter;
+			default -> {
+				return;
+			}
+		}
+		fireChangeEvent();
 	}
 
 	/**
@@ -740,6 +763,18 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 			isChanged = true;
 			this.forceTurbulentBL = src.forceTurbulentBL;
 		}
+		if (!MathUtil.equals(this.sustainerNozzleExitDiameter, src.sustainerNozzleExitDiameter)) {
+			isChanged = true;
+			this.sustainerNozzleExitDiameter = src.sustainerNozzleExitDiameter;
+		}
+		if (!MathUtil.equals(this.booster1NozzleExitDiameter, src.booster1NozzleExitDiameter)) {
+			isChanged = true;
+			this.booster1NozzleExitDiameter = src.booster1NozzleExitDiameter;
+		}
+		if (!MathUtil.equals(this.booster2NozzleExitDiameter, src.booster2NozzleExitDiameter)) {
+			isChanged = true;
+			this.booster2NozzleExitDiameter = src.booster2NozzleExitDiameter;
+		}
 
 		if (!Objects.equals(this.dragLookupCsvPath, src.dragLookupCsvPath) || this.dragLookupTable != src.dragLookupTable) {
 			isChanged = true;
@@ -782,7 +817,10 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 				MathUtil.equals(this.launchTemperature, o.launchTemperature) &&
 				MathUtil.equals(this.maximumAngle, o.maximumAngle) &&
 				MathUtil.equals(this.timeStep, o.timeStep) &&
-				MathUtil.equals(this.maxSimulationTime, o.maxSimulationTime)) &&
+				MathUtil.equals(this.maxSimulationTime, o.maxSimulationTime) &&
+				MathUtil.equals(this.sustainerNozzleExitDiameter, o.sustainerNozzleExitDiameter) &&
+				MathUtil.equals(this.booster1NozzleExitDiameter, o.booster1NozzleExitDiameter) &&
+				MathUtil.equals(this.booster2NozzleExitDiameter, o.booster2NozzleExitDiameter)) &&
 				this.windModelType == o.windModelType &&
 				this.averageWindModel.equals(o.averageWindModel) &&
 				this.multiLevelPinkNoiseWindModel.equals(o.multiLevelPinkNoiseWindModel) &&
@@ -861,6 +899,8 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 		conditions.setMaxSimulationTime(getMaxSimulationTime());
 		conditions.setMaximumAngleStep(getMaximumStepAngle());
 		conditions.setNozzleExitDiameter(getNozzleExitDiameter());
+		conditions.setNozzleExitDiameterForStage(1, getNozzleExitDiameterForStage(1));
+		conditions.setNozzleExitDiameterForStage(2, getNozzleExitDiameterForStage(2));
 		conditions.setForceTurbulentBL(isForceTurbulentBL());
 
 		return conditions;

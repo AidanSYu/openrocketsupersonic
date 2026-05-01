@@ -29,10 +29,9 @@ import org.slf4j.LoggerFactory;
  * Calculates the aerodynamic properties of a <code>SymmetricComponent</code>.
  * <p>
  * CP and CNa are calculated by the Barrowman method extended to account for
- * body lift
- * by the method presented by Galejs. Supersonic CNa and CP are assumed to be
- * the
- * same as the subsonic values.
+ * body lift by the method presented by Galejs. Supersonic body normal force is
+ * treated as a slender-body/crossflow correction with a transonic blend rather
+ * than by reusing the fin lifting-surface model.
  * 
  * 
  * @author Sampo Niskanen <sampo.niskanen@iki.fi>

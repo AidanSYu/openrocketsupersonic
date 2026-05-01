@@ -71,17 +71,15 @@ public abstract class RailGuideHandler {
         RailButton button = new RailButton();
 
         button.setOuterDiameter(diameter);
-        button.setInnerDiameter(diameter / 2);
+        // RASAero specifies an external rail-guide envelope, not the OpenRocket
+        // button/notch/screw decomposition. Preserve the specified frontal area
+        // for drag parity by making the synthetic button un-notched.
+        button.setInnerDiameter(diameter);
 
-        double screwHeight = diameter / 4; // Arbitrary value; RASAero doesn't specify this
-        double buttonHeight = height - screwHeight; // Arbitrary value; RASAero doesn't specify this
-        double innerHeight = (height - screwHeight) / 2; // Arbitrary value; RASAero doesn't specify this
-        double baseHeight = (buttonHeight - innerHeight) / 2;
-
-        button.setTotalHeight(buttonHeight);
-        button.setBaseHeight(baseHeight);
-        button.setFlangeHeight(baseHeight);
-        button.setScrewHeight(screwHeight);
+        button.setTotalHeight(height);
+        button.setBaseHeight(height / 2);
+        button.setFlangeHeight(height / 2);
+        button.setScrewHeight(0);
 
         // Add the second rail guide instance
         button.setInstanceCount(2);

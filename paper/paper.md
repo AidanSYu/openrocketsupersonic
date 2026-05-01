@@ -44,7 +44,8 @@ base drag suite covering turbulent, laminar, and boattail regimes [@chapman1950;
 Newtonian theory for the hypersonic regime [@anderson2006]. All Mach regime
 transitions use C1-continuous polynomial blending to prevent trajectory integrator
 instabilities near Mach 1. The software is validated through 72 aerodynamic test
-files across 22 independently benchmarked subsystems.
+files tracked in a claim-by-claim validation matrix; remaining heuristic and open
+geometry-family gaps are explicitly classified rather than treated as closed.
 
 # Statement of Need
 
@@ -159,10 +160,10 @@ Table 3 summarizes validation results for the principal subsystems.
 | Fin wave drag | NACA TN 3650 [@ulmann1956] | 21% |
 | Fin CNa (M 0.6–5.82) | NASA TM X-653 [@nielsen1962] | 6.8% |
 | Fin xCP (M 0.6–5.82) | NASA TM X-653 [@nielsen1962] | 7.1% |
-| Basic Finner total drag | ADA636861 [@dupuis1997] | 22.7% |
-| Hypersonic cone drag (M 6.5–17.2) | DTIC AD0487365 [@grabow1965] | 17.8% |
+| Basic Finner total drag | ADA636861 [@dupuis1997] | 11.9% |
+| Hypersonic cone drag (M 6.5–17.2) | DTIC AD0487365 [@grabow1965] | 16.7% |
 
-![Nose wave drag coefficient versus Mach number for five nose shapes at fineness ratio 3, comparing the present model against NACA RM A52H28 wind-tunnel data. Aggregate MAE = 0.0328, MAPE = 29.3%.](data/png/naca_rm_a52h28_validation.png)
+![Nose wave drag coefficient versus Mach number for five nose shapes at fineness ratio 3, comparing the present model against NACA RM A52H28 wind-tunnel data. Aggregate MAE = 0.029.](data/png/naca_rm_a52h28_validation.png)
 
 The shock solver matches NACA 1135 tabular values to better than 0.01% across
 Mach 1.2–10 and cone half-angles 5–40°. Nose wave drag validated on five
@@ -175,12 +176,12 @@ skin friction transformation [@hopkins1971] reduces $C_f$ by approximately 50%
 relative to the incompressible value at Mach 5, consistent with the Hopkins and
 Inouye (1971) experimental survey.
 
-The vehicle-level Basic Finner benchmark (MAPE 22.7%, 8 points, M 1.08–4.30)
+The vehicle-level Basic Finner benchmark (MAPE 11.9%, 8 multiple-fit points, M 1.08–4.30)
 reflects real free-flight range measurements on 30 mm projectiles [@dupuis1997],
 a more stringent test than wind-tunnel pressure data because it includes
 manufacturing variation, sabot separation, base flow unsteadiness, and all
 other physical effects present in actual flight. The hypersonic cone drag
-benchmark (MAPE 17.8%, 11 points, M 6.5–17.2) confirms usable accuracy
+benchmark (MAPE 16.7%, 11 points, M 6.5–17.2) confirms usable accuracy
 through the Modified Newtonian regime.
 
 The software enables a class of research and educational activities that was

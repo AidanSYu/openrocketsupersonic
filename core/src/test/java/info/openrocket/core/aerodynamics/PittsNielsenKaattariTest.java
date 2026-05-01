@@ -3,6 +3,8 @@ package info.openrocket.core.aerodynamics;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Map;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -14,6 +16,7 @@ import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.plugin.PluginModule;
 import info.openrocket.core.rocketcomponent.FlightConfiguration;
 import info.openrocket.core.rocketcomponent.Rocket;
+import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.rocketcomponent.TrapezoidFinSet;
 import info.openrocket.core.startup.Application;
 import info.openrocket.core.util.TestRockets;
@@ -225,5 +228,45 @@ public class PittsNielsenKaattariTest {
 				"Combined PNK correction should reduce interference at M=2.0: " + combinedReduction);
 		assertTrue(combinedReduction > 0.7,
 				"Combined PNK correction should be modest (10-20%): " + combinedReduction);
+	}
+
+	@Test
+	public void productionSuppressesPnkAboveHighTransonicBand() {
+		Rocket rocket = SupersonicTestRockets.makeConeCylinderFins();
+		FlightConfiguration config = rocket.getSelectedConfiguration();
+
+		double cna125 = finCNaFromProductionAnalysis(config, 1.25);
+		double cna130 = finCNaFromProductionAnalysis(config, 1.30);
+		double cna135 = finCNaFromProductionAnalysis(config, 1.35);
+
+		assertTrue(cna125 > 0.0, "fin CNa should be positive below PNK suppression");
+		assertTrue(cna130 > 0.0, "fin CNa should be positive at PNK suppression threshold");
+		assertTrue(cna135 > 0.0, "fin CNa should be positive above PNK suppression");
+
+		double directFwb = PittsNielsenKaattari.computeF_WB(
+				2.0, BODY_RADIUS, FIN_SEMISPAN, ROOT_CHORD, SWEEP_LE);
+		double directFbw = PittsNielsenKaattari.computeF_BW(
+				2.0, BODY_RADIUS, FIN_SEMISPAN, ROOT_CHORD);
+		assertTrue(directFwb * directFbw < 1.0,
+				"raw PNK curve still has a high-Mach correction");
+		assertTrue(cna135 >= 0.95 * cna130,
+				"production path should not keep applying raw PNK reduction above M=1.3");
+	}
+
+	private static double finCNaFromProductionAnalysis(FlightConfiguration config, double mach) {
+		FlightConditions conditions = new FlightConditions(config);
+		conditions.setMach(mach);
+		conditions.setAOA(Math.toRadians(5.0));
+		conditions.setTheta(Math.PI / 2);
+
+		BarrowmanCalculator calc = new BarrowmanCalculator();
+		Map<RocketComponent, AerodynamicForces> forces =
+				calc.getForceAnalysis(config, conditions, new WarningSet());
+		for (Map.Entry<RocketComponent, AerodynamicForces> entry : forces.entrySet()) {
+			if (entry.getKey() instanceof TrapezoidFinSet) {
+				return entry.getValue().getCP().getWeight();
+			}
+		}
+		throw new AssertionError("No fin force row found");
 	}
 }

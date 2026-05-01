@@ -152,8 +152,8 @@ public class FinSetCalc extends RocketComponentCalc {
 		// One fin without interference (both sub- and supersonic):
 		double cna1 = calculateFinCNa1(localConditions);
 
-		// Apply SBLI chord reduction at supersonic speeds
-		double sbliChordRatio = computeSBLIChordReduction(conditions);
+		// Apply SBLI on the same local-Mach basis used for fin CNa.
+		double sbliChordRatio = computeSBLIChordReduction(localConditions);
 		cna1 *= sbliChordRatio;
 
 		// Multiple fins with fin-fin interference
@@ -1157,7 +1157,11 @@ public class FinSetCalc extends RocketComponentCalc {
 		if (crossSection == FinSet.CrossSection.SQUARE) {
 			cd = baseCD;
 		} else if (crossSection == FinSet.CrossSection.ROUNDED) {
-			cd = baseCD / 2;
+			// RASAero "Rounded" fins are frequently rounded-leading-edge / blunt- or
+			// near-blunt-trailing-edge plates, not ideal teardrop airfoils. Treat the
+			// exposed trailing-edge thickness as a full base wake; true AIRFOIL and
+			// HEXAGONAL profiles remain sharp-TE below.
+			cd = baseCD;
 		}
 		// AIRFOIL and HEXAGONAL (double-wedge) assumed to have zero base drag (sharp
 		// TE)

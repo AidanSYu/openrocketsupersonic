@@ -251,6 +251,10 @@ public class RASAeroLoaderTest extends BaseTestCase {
             assertTrue(sim.getOptions().isForceTurbulentBL(),
                     "Simulation " + sim.getName() + " should have forceTurbulentBL=true when CDX1 has Turbulence=True");
         }
+        info.openrocket.core.document.Simulation firstSimulation = doc.getSimulations().get(0);
+        assertEquals(1.25 * 0.0254, firstSimulation.getOptions().getNozzleExitDiameterForStage(0), EPSILON);
+        assertEquals(0.75 * 0.0254, firstSimulation.getOptions().getNozzleExitDiameterForStage(1), EPSILON);
+        assertEquals(0.5 * 0.0254, firstSimulation.getOptions().getNozzleExitDiameterForStage(2), EPSILON);
 
         String warnings = loader.getWarnings().toString();
         assertTrue(warnings.contains("Ignoring unsupported RASAero setting ModifiedBarrowman=True."),
@@ -264,11 +268,11 @@ public class RASAeroLoaderTest extends BaseTestCase {
                 warnings);
         assertTrue(warnings.contains("Ignoring unsupported RASAero setting Booster1Nozzle=0.75."),
                 warnings);
-        // SustainerNozzleDiameter is consumed (stored on SimulationOptions.nozzleExitDiameter),
-        // so it no longer emits a warning. Booster1/2 nozzle diameters remain unsupported.
-        assertTrue(warnings.contains("Ignoring unsupported RASAero setting Booster1NozzleDiameter=0.75."),
+        // Per-simulation nozzle diameters are consumed and stored by stage, so
+        // the *NozzleDiameter fields no longer emit unsupported-setting warnings.
+        assertFalse(warnings.contains("Ignoring unsupported RASAero setting Booster1NozzleDiameter=0.75."),
                 warnings);
-        assertTrue(warnings.contains("Ignoring unsupported RASAero setting Booster2NozzleDiameter=0.5."),
+        assertFalse(warnings.contains("Ignoring unsupported RASAero setting Booster2NozzleDiameter=0.5."),
                 warnings);
     }
 

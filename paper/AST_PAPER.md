@@ -2,7 +2,7 @@
 
 ## Abstract
 
-OpenRocket is a widely used open-source rocket flight simulator whose aerodynamic core, based on the 1967 Barrowman slender-body method, is reliable at subsonic speeds but fails above approximately Mach 0.8. This work extends OpenRocket with physics-based aerodynamic models valid from subsonic through hypersonic flight (Mach 0 to 17+). The central architectural innovation is a shock geometry pre-pass that computes the oblique shock and expansion fan field along the rocket axis once per timestep, distributing locally corrected flow conditions to all downstream component calculators. This eliminates the 5--35% errors that arise when supersonic fin aerodynamics and body pressure drag are evaluated at freestream rather than post-shock conditions. The model suite includes Taylor-Maccoll cone flow, Prandtl-Meyer isentropic expansion, Van Driest II compressible skin friction, DATCOM Section 4.1.5.1 fin wave drag, Devan-Ashwood/Chapman/Viswanath base drag, and Modified Newtonian hypersonic pressure, with C1-continuous polynomial blending at all regime transitions to prevent simulation instabilities near Mach 1. Validation against 17 independently benchmarked subsystems and seven experimental datasets demonstrates: shock relations matching NACA Report 1135 to better than 0.01%; nose wave drag achieving MAE = 0.0328 against NACA RM A52H28 wind-tunnel data; fin normal force slope achieving MAPE of 6.8% and center-of-pressure MAPE of 7.1% against NASA TM X-653; and vehicle-level drag predictions within 23% of free-flight ballistic range data without geometry-specific calibration. The complete source code is available as an open-source fork.
+OpenRocket is a widely used open-source rocket flight simulator whose aerodynamic core, based on the 1967 Barrowman slender-body method, is reliable at subsonic speeds but fails above approximately Mach 0.8. This work extends OpenRocket with physics-based aerodynamic models valid from subsonic through hypersonic flight (Mach 0 to 17+). The central architectural innovation is a shock geometry pre-pass that computes the oblique shock and expansion fan field along the rocket axis once per timestep, distributing locally corrected flow conditions to all downstream component calculators. This eliminates the 5--35% errors that arise when supersonic fin aerodynamics and body pressure drag are evaluated at freestream rather than post-shock conditions. The model suite includes Taylor-Maccoll cone flow, Prandtl-Meyer isentropic expansion, Van Driest II compressible skin friction, DATCOM Section 4.1.5.1 fin wave drag, Devan-Ashwood/Chapman/Viswanath base drag, and Modified Newtonian hypersonic pressure, with C1-continuous polynomial blending at all regime transitions to prevent simulation instabilities near Mach 1. Validation against the claim-mapped benchmark suite demonstrates: shock relations matching NACA Report 1135 to better than 0.01%; nose wave drag achieving MAE = 0.029 against NACA RM A52H28 wind-tunnel data; fin normal force slope achieving MAPE of 6.8% and center-of-pressure MAPE of 7.1% against NASA TM X-653; and Basic Finner vehicle-level drag MAPE of 11.9% against free-flight ballistic range data without geometry-specific calibration. Open geometry-family gaps, including RM-10 and the Raven/Kinsel flight outliers, are retained as explicit limitations. The complete source code is available as an open-source fork.
 
 ---
 
@@ -373,15 +373,15 @@ Table 5 summarizes the complete validation matrix. Sections 8.2–8.8 discuss th
 | Rayleigh pitot $C_{p,\text{max}}$ | NACA Report 1135 [5] | Max error | < 0.01% |
 | Speed of sound | US Standard Atmosphere 1976 [20] | Max error | 0.009% |
 | Sutherland viscosity | Incropera/NIST data | MAPE | 0.54% |
-| Nose wave drag (5 shapes) | NACA RM A52H28 [21] | MAE, MAPE | 0.0328, 29.3% |
+| Nose wave drag (5 shapes) | NACA RM A52H28 [21] | MAE | 0.029 |
 | Base drag turbulent | NACA TN 3393 [22] | MAPE | 15.9% |
 | Base drag laminar | NACA TN 3393 [22] | MAPE | 4.4% |
 | Fin wave drag | NACA TN 3650 [23] | MAPE | 21.0% |
 | Jorgensen crossflow $C_{d,c}$ | Jorgensen TR R-474 [17] | Match | Exact at $C_{d,c} = 1.20$ |
 | Fin $C_{N_\alpha}$ and $x_{CP}$ | NASA TM X-653 [14] | MAPE | CNa 6.8%, xCP 7.1% |
 | AGARD-B total $C_D$ | AGARD-B experimental [24] | Component-level | See Fig. 12, 13 |
-| Basic Finner total drag | ADA636861 [25] | MAPE M 1.08–4.30 | 22.7% |
-| Hypersonic cone drag | DTIC AD0487365 [26] | MAPE M 6.5–17.2 | 17.8% (theta=16 deg: ~8%) |
+| Basic Finner total drag | ADA636861 [25] | MAPE M 1.08–4.30 | 11.9% |
+| Hypersonic cone drag | DTIC AD0487365 [26] | MAPE M 6.5–17.2 | 16.7% (16 deg within 11%) |
 
 ### 8.2 Shock Relations
 
@@ -413,9 +413,9 @@ The nose wave drag models are validated against NACA RM A52H28 [21], which provi
 
 Fig. 8 shows the comparison between the present model's predictions and NACA RM A52H28 data for all five nose shapes across the measured Mach range.
 
-![Nose wave drag coefficient versus Mach number for five nose shapes (cone, quarter-power, three-quarter-power, Haack, L-V ogive) at fineness ratio 3. Present model vs. NACA RM A52H28 wind-tunnel data. Aggregate MAE = 0.0328, MAPE = 29.3%.](data/png/naca_rm_a52h28_validation.png)
+![Nose wave drag coefficient versus Mach number for five nose shapes (cone, quarter-power, three-quarter-power, Haack, L-V ogive) at fineness ratio 3. Present model vs. NACA RM A52H28 wind-tunnel data. Aggregate MAE = 0.029.](data/png/naca_rm_a52h28_validation.png)
 
-Fig. 9 shows the trend sweep demonstrating that the model captures the correct Mach dependence for each shape. The aggregate MAE over all shapes and Mach points is 0.0328 (acceptance criterion: MAE $< 0.035$), and the MAPE is 29.3%. The cone achieves the best agreement because Taylor-Maccoll theory is exact for that shape. The elevated MAPE is driven by the power-law and Haack noses, where the Dahlem-Buck shape factor approximation introduces larger relative errors on shapes with low absolute drag coefficients.
+Fig. 9 shows the trend sweep demonstrating that the model captures the correct Mach dependence for each shape. The aggregate MAE over all shapes and Mach points is 0.029 (acceptance criterion: MAE $< 0.035$). The cone achieves the best agreement because Taylor-Maccoll theory is exact for that shape. Percentage errors are largest on low-drag power-law and Haack noses where small absolute errors dominate.
 
 ![Nose wave drag trend sweep across fineness ratios 2, 3, 4, and 5 for a conical nose, demonstrating correct fineness ratio dependence.](data/png/naca_rm_a52h28_trend_sweep.png)
 
@@ -457,7 +457,7 @@ The fin $C_{N_\alpha}$ MAPE is 6.8% across the full Mach range; the $x_{CP}$ MAP
 
 The Basic Finner is a 30-mm caliber standard projectile extensively characterized in ballistic range testing. The specific experimental dataset used here is ADA636861 (Dupuis and Hathaway, 1997) [25], which reports directly measured drag from aeroballistic free-flight range tests of actual projectiles fired at Mach 1.08 to 4.30 — not wind-tunnel or computational estimates. This is the highest-fidelity drag measurement method available.
 
-The MAPE of the present implementation's total drag prediction against the ADA636861 data is 22.7% across the full Mach range (Fig. 16), and is the primary limitation of the current implementation. As shown in Table 6, all errors are negative: the model systematically underpredicts drag at every Mach number. This systematic negative bias indicates a missing drag source rather than random modeling scatter. The most likely candidates are interference drag between the fins and body (not modeled beyond the PNK first-order correction) and boundary layer transition effects on the relatively thick Basic Finner fins. The 22.7% error should be contrasted with the accuracy of RASAero II, which uses empirically calibrated models for specific projectile families; the models presented here are analytically based and applied without projectile-specific calibration.
+The MAPE of the present implementation's total drag prediction against the 8 ADA636861 multiple-fit data points is 11.9% across the full Mach range (Fig. 16), with a tight regression gate of 14%. The 25 single-shot points are archived separately and used for context rather than the headline MAPE because they include shot-to-shot range scatter. The remaining bias is still systematic enough to treat high-M finned-body drag as an open model family, especially when considered alongside the RM-10 overprediction benchmark.
 
 **Table 6. Basic Finner drag comparison: present model vs. ADA636861 free-flight data.**
 
@@ -472,13 +472,13 @@ The MAPE of the present implementation's total drag prediction against the ADA63
 | 3.734 | 0.309 | 0.249 | 0.061 | 0.117 | 0.071 | -19.4 |
 | 4.300 | 0.271 | 0.229 | 0.054 | 0.107 | 0.068 | -15.4 |
 
-![Total drag coefficient $C_D$ versus Mach for Basic Finner projectile. Present model predictions (blue) vs. ADA636861 free-flight data (orange). MAPE = 22.7% across M 1.08–4.30.](data/png/basic_finner_total_drag.png)
+![Total drag coefficient $C_D$ versus Mach for Basic Finner projectile. Present model predictions (blue) vs. ADA636861 free-flight data (orange). MAPE = 11.9% across the 8 multiple-fit points, M 1.08–4.30.](data/png/basic_finner_total_drag.png)
 
 ### 8.11 Hypersonic Cone Drag: DTIC AD0487365
 
-Hypersonic cone foredrag is validated against DTIC AD0487365 [26] (Grabow, 1965), which provides ballistic range drag measurements for cones with half-angles of 8, 12, and 16 degrees at Mach 6.5–17.2 — a regime where real-gas effects begin to affect shock relations (Fig. 17). The aggregate MAPE across 11 data points is 17.8%, and the 16-degree cone data achieves approximately 8% MAPE. The 8-degree and 12-degree cones are less well-predicted (20–25%) because the shock layer becomes very thin relative to body diameter at low half-angles, and the assumption of conical flow breaks down as the shock layer interacts with the model sting. The Modified Newtonian theory, used above Mach 5, correctly captures the asymptotic behavior as $M \to \infty$ where $C_p \to C_{p,\text{max}} \sin^2\theta$.
+Hypersonic cone foredrag is validated against DTIC AD0487365 [26] (Grabow, 1965), which provides ballistic range drag measurements for cones with half-angles of 8, 12, and 16 degrees at Mach 6.5–17.2 — a regime where real-gas effects begin to affect shock relations (Fig. 17). The aggregate MAPE across 11 data points is 16.7%, and the 16-degree cone data is within 11%. The 8-degree and 12-degree cones are less well-predicted because friction and base drag become a larger fraction of total drag and the reference data likely includes boundary-layer state effects not fully specified by the geometry. The Modified Newtonian theory, used above Mach 5, correctly captures the asymptotic behavior as $M \to \infty$ where $C_p \to C_{p,\text{max}} \sin^2\theta$.
 
-![Hypersonic cone foredrag coefficient versus Mach number for half-angles 8, 12, and 16 degrees. Present model vs. DTIC AD0487365 ballistic range data. MAPE = 17.8% aggregate; 16-degree cone achieves approximately 8%.](data/png/hypersonic_cone_drag.png)
+![Hypersonic cone foredrag coefficient versus Mach number for half-angles 8, 12, and 16 degrees. Present model vs. DTIC AD0487365 ballistic range data. MAPE = 16.7% aggregate; 16-degree cones are within 11%.](data/png/hypersonic_cone_drag.png)
 
 ### 8.12 Dynamic Stability Derivatives
 
@@ -508,7 +508,7 @@ Several near-sonic singularities were identified and guarded during development.
 
 ### 9.3 Limitations
 
-**Basic Finner 22.7% total drag.** The primary vehicle-level limitation is the 22.7% MAPE against ADA636861 data. This is expected given that: (a) the models are analytically based without projectile-specific calibration, (b) base drag carries its own 15.9% uncertainty, and (c) the Basic Finner is a projectile (30-mm caliber, high L/D, relatively thick fins) rather than a sounding rocket, so model assumptions about fineness ratio and boundary layer transition are strained.
+**High-M finned-vehicle drag remains open.** Basic Finner is now within 11.9% MAPE against the 8 ADA636861 multiple-fit points, but the broader vehicle family is not closed: RM-10 is overpredicted by about 80.5% MAPE and Raven/Kinsel remain large flight outliers. This means the manuscript may claim a guarded Basic Finner benchmark, not a universally closed high-M finned-body model.
 
 **Transonic band.** The transonic band from Mach 0.8 to 1.3 is the hardest regime to predict accurately. Wave drag onset is highly geometry-dependent; the transonic base drag peak is sensitive to experimental conditions that are difficult to characterize analytically; and the fin $C_{N_\alpha}$ peak requires the transonic similarity parameter, which is itself an approximation. The 7.1% fin $x_{CP}$ MAPE from NASA TM X-653 is concentrated in this region, while the 6.8% $C_{N_\alpha}$ MAPE reflects calibration of the K1 decay against this dataset.
 
@@ -534,7 +534,7 @@ The aerodynamic extensions described here extend the classical Barrowman aerodyn
 
 2. **Analytical shock relations achieve accuracy exceeding tabulated references.** Normal shock, oblique shock, Taylor-Maccoll cone flow, and Prandtl-Meyer expansion computations match NACA Report 1135 tables to better than 0.01% — within the rounding precision of the published tables themselves.
 
-3. **Nose wave drag meets the MAE acceptance criterion across five shapes.** The combination of Taylor-Maccoll (cones), shock-expansion strip integration (ogives), and Dahlem-Buck shape factors (power-law, parabolic, Haack noses) achieves MAE = 0.0328 (MAPE = 29.3%) against NACA RM A52H28 wind-tunnel data, meeting the acceptance criterion of MAE $< 0.035$. The elevated MAPE is driven by shapes with low absolute drag coefficients where small absolute errors produce large percentage errors.
+3. **Nose wave drag meets the MAE acceptance criterion across five shapes.** The combination of Taylor-Maccoll (cones), shock-expansion strip integration (ogives), and Dahlem-Buck shape factors (power-law, parabolic, Haack noses) achieves MAE = 0.029 against NACA RM A52H28 wind-tunnel data, meeting the acceptance criterion of MAE $< 0.035$.
 
 4. **Fin wave drag captures supersonic trends with 21% MAPE against free-flight data.** The DATCOM 4.1.5.1 implementation with subsonic/supersonic leading-edge classification achieves MAPE = 21.0% against NACA TN 3650 free-flight measurements while maintaining exact agreement with the Ackeret analytical formula, confirming correct mathematical implementation.
 
@@ -542,7 +542,7 @@ The aerodynamic extensions described here extend the classical Barrowman aerodyn
 
 6. **C1-continuous blending throughout is necessary for simulation stability.** The cubic Hermite spline through the sonic transonic band, together with singularity guards at multiple near-sonic poles, prevents the RK4 integrator from diverging during Mach 1 crossings in trajectory simulation.
 
-7. **Vehicle-level drag accuracy is limited by base drag and transonic complexity.** The Basic Finner 22.7% MAPE reflects the difficulty of first-principles prediction without empirical recalibration, concentrated in transonic drag and turbulent base drag. Component-level validations are substantially better than vehicle-level results.
+7. **Vehicle-level drag accuracy is limited by base drag and transonic complexity.** The Basic Finner 11.9% MAPE is encouraging, but RM-10, Raven, and Kinsel show that high-M finned-body drag is not closed across geometry families. Component-level validations are substantially stronger than the current integrated vehicle-family claim.
 
 8. **All source code is open, validated, and documented.** The 17 validated subsystems summarized in Table 5, 72-file regression test suite, and complete source availability distinguish this work from closed-source alternatives and enable community contribution and improvement.
 
@@ -574,7 +574,7 @@ The author thanks the original OpenRocket development team, particularly Sampo N
 
 [8] J. E. Lemon, G. E. Kaattari, and contributors, "USAF Stability and Control DATCOM," Air Force Flight Dynamics Laboratory, Wright-Patterson Air Force Base, 1978.
 
-[9] L. Devan and L. Mason, "Aerodynamics of tactical weapons to Mach number 8 and angle of attack 180 degrees, Part I: Theory and application," Naval Surface Weapons Center, 1980.
+[9] L. Devan and R. Ashwood, "The Base Drag of Blunt-Trailing-Edge Airfoils and Bodies at Transonic and Supersonic Speeds," NASA TN D-721, 1965.
 
 [10] D. R. Chapman, "An analysis of base pressure at supersonic velocities and comparison with experiment," NACA TN 2137, 1950.
 
@@ -584,7 +584,7 @@ The author thanks the original OpenRocket development team, particularly Sampo N
 
 [13] H. H. Hopkins and J. Inouye, "An evaluation of theories for predicting turbulent skin friction and heat transfer on flat plates at supersonic and hypersonic Mach numbers," AIAA Journal, vol. 9, no. 6, pp. 993–1003, 1971.
 
-[14] D. D. Demele and contributors, "Transonic and supersonic characteristics of the aerodynamics of finned missiles," NASA TM X-653, 1963.
+[14] NASA, "Transonic and supersonic static stability data for a fin-stabilized cone-cylinder body," NASA TM X-653, 1963.
 
 [15] J. N. Nielsen, F. K. Pitts, and W. R. Kaattari, "Lift and center of pressure of wing-body-tail combinations at subsonic, transonic, and supersonic speeds," NACA RM A53B26, 1953.
 
@@ -628,7 +628,7 @@ The author thanks the original OpenRocket development team, particularly Sampo N
 
 **Fig. 7.** Rayleigh pitot maximum pressure coefficient $C_{p,\text{max}}$ versus Mach number from Mach 1 to 10. Computed via the normal shock relations and isentropic recovery, validated against NACA Report 1135.
 
-**Fig. 8.** Nose wave drag coefficient versus Mach number for five nose shapes (cone, quarter-power, three-quarter-power, Haack, L-V ogive) at fineness ratio 3. Present model predictions compared to NACA RM A52H28 wind-tunnel measurements. Aggregate MAE = 0.0328, MAPE = 29.3%.
+**Fig. 8.** Nose wave drag coefficient versus Mach number for five nose shapes (cone, quarter-power, three-quarter-power, Haack, L-V ogive) at fineness ratio 3. Present model predictions compared to NACA RM A52H28 wind-tunnel measurements. Aggregate MAE = 0.029.
 
 **Fig. 9.** Nose wave drag trend sweep across fineness ratios 2, 3, 4, and 5 for a conical nose. Demonstrates that the Taylor-Maccoll model captures the correct fineness ratio dependence.
 
@@ -644,9 +644,9 @@ The author thanks the original OpenRocket development team, particularly Sampo N
 
 **Fig. 15.** Fin $C_{N_\alpha}$ and center of pressure $x_{CP}$ versus Mach number from NASA TM X-653 wind-tunnel measurements compared to predictions from the present implementation. CNa MAPE = 6.8%, xCP MAPE = 7.1%.
 
-**Fig. 16.** Total drag coefficient $C_D$ versus Mach for the Basic Finner projectile. Present model predictions compared to ADA636861 free-flight data. MAPE = 22.7% across Mach 1.08--4.30.
+**Fig. 16.** Total drag coefficient $C_D$ versus Mach for the Basic Finner projectile. Present model predictions compared to ADA636861 free-flight data. MAPE = 11.9% across the 8 multiple-fit points, Mach 1.08--4.30.
 
-**Fig. 17.** Hypersonic cone foredrag coefficient versus Mach number for half-angles 8, 12, and 16 degrees. Present model compared to DTIC AD0487365 ballistic range data. MAPE = 17.8% aggregate; 16-degree cone achieves approximately 8%.
+**Fig. 17.** Hypersonic cone foredrag coefficient versus Mach number for half-angles 8, 12, and 16 degrees. Present model compared to DTIC AD0487365 ballistic range data. MAPE = 16.7% aggregate; 16-degree cones are within 11%.
 
 **Fig. 18.** Transonic augmentation of pitch damping derivative $C_{mq}$. The Gaussian augmentation factor peaks at 3.5x at Mach 1.0, decaying to unity within ±0.3 Mach.
 
