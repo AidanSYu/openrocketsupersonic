@@ -502,6 +502,42 @@ The Basic Finner $C_{mq}$ benchmark (`BasicFinnerCmqBenchmarkTest`) compares the
 
 Recalibrating against ADA636861 directly would burn the only available external $C_{mq}$ benchmark for this geometry class, leaving the recalibrated value with no remaining check. The constants are therefore left as-is and a second independent free-flight $C_{mq}$ dataset is the prerequisite for tuning them. None has been located.
 
+#### 9.9.6 Second Cmq Source on a Non-Basic-Finner Geometry -- Bhagwandin & Sahu 2013
+
+A geometry-independent cross-check is provided by the URANS pitch-damping CFD predictions of Bhagwandin and Sahu (2013), ARL-TR-6725. The report covers two slender finned geometries: the Army-Navy Basic Finner (ANF, the same configuration used by ADA636861 above) and the **Air Force Modified Finner (AFF)**, a tangent-ogive-cylinder body with a clipped-delta sharp-LE fin set. AFF differs from ANF in two of three top-level shape descriptors -- nose family (curved tangent ogive vs straight cone) and fin planform (delta vs rectangular) -- which qualifies it as a non-Basic-Finner second source for the Cmq audit.
+
+The combined comparator `BhagwandinSahuCmqComparatorTest` reports per-band agreement against the planar-pitching CFD predictions in Tables A-1 and A-2 of the report (digitized at `paper/data/csv/bhagwandin_sahu_2013_anf_aff_cmq.csv`):
+
+| Geometry | Mach band | Points | MAPE | Worst $|\Delta_\text{pct}|$ |
+|---|---|---:|---:|---:|
+| AFF | 1.30--2.50 | 5 | **18.96%** | 30.83% at $M = 2.50$ |
+| ANF | 1.29--4.50 | 8 | 28.02% | 33.82% at $M = 2.00$ |
+
+The AFF supersonic per-point signed deltas are $+4.79$, $-12.08$, $-20.99$, $-26.08$, $-30.83\%$ at $M = 1.30, 1.50, 1.75, 2.00, 2.50$. The bias on AFF is in the **same direction** as on ANF (ORP underpredicts $\lvert C_{mq} \rvert$ at supersonic Mach), which is consistent with the supersonic underprediction being a model-physics issue rather than a geometry-specific artifact. The transonic-band agreement is dominated by the same Gaussian-augmentation overshoot already documented against ADA636861 in Section 9.9.5 and is not separately informative on AFF.
+
+This benchmark is reported as **B-level** in the present revision. Justification: the AFF supersonic MAPE of 18.96% is below the 30% closure threshold targeted in the AST roadmap and the bias direction reproduces on the second geometry, but the AFF fin planform used in the ORP comparator fixture (`makeAirForceModifiedFinner` in `SupersonicTestRockets.java`) is currently a placeholder (root chord 1.0 cal, tip 0.5 cal, sweep 0.5 cal, span 1.0 cal). The dimensional callouts of Figure 3 of the source report were not available in repo at the time of this comparator -- the ARL-TR-6725 / DTIC ADA592550 PDF has not yet been dropped into `paper/data/pdf/`, and a full needs-list with the planform values required for promotion to A-level is recorded at `paper/data/cmq_second_source_bhagwandin_2013_assessment.md` ("AFF fin planform -- needs-list"). The B-level rating reflects the incomplete fixture, not the agreement: the comparator is sign-consistent with ANF and within the supersonic band's claimed precision once the planform is calibrated. Comparator artifacts: `paper/data/csv/bhagwandin_aff_cmq_comparator_2026_05_02.csv` and `paper/data/csv/bhagwandin_anf_cmq_comparator_2026_05_02.csv`.
+
+### 9.10 CFD Comparator -- Bunescu et al. 2025 ANF URANS
+
+The Cmq second source above is a CFD prediction of pitch damping; an additional CFD comparator anchors the ORP total-drag pipeline against an independent open-access URANS dataset on the Basic Finner. Bunescu et al. (2025), *Aerospace* **12**(5), 371, report URANS k-epsilon predictions on the same Army-Navy Basic Finner geometry used by ADA636861 (60 mm diameter, $L/D = 10$, four 1-cal rectangular fins). Six points were digitized from Figure 10 (5 axial-force coefficient $C_X$ at AoA = 0 spanning $M = 0.40$--$3.50$, plus 1 normal-force coefficient $C_N$ at AoA = $10°$, $M = 1.60$); the comparator test `BunescuANFCfdComparatorTest` is locked at:
+
+| Mach | AoA (deg) | Coeff | Bunescu CFD | ORP | $\Delta_\text{pct}$ |
+|---|---:|---|---:|---:|---:|
+| 0.40 | 0 | $C_X$ | 0.460 | 0.189 | $-58.95\%$ |
+| 0.95 | 0 | $C_X$ | 0.910 | 0.461 | $-49.35\%$ |
+| 1.60 | 0 | $C_X$ | 0.780 | 0.541 | $-30.67\%$ |
+| 2.50 | 0 | $C_X$ | 0.550 | 0.372 | $-32.28\%$ |
+| 3.50 | 0 | $C_X$ | 0.390 | 0.296 | $-24.06\%$ |
+| 1.60 | 10 | $C_N$ | 3.400 | 1.245 | $-63.38\%$ |
+
+Combined MAPE = **43.1%**; $C_X$-only MAPE = 39.1%. ORP systematically underpredicts the URANS values across the full Mach sweep, with the largest gap in the low-transonic regime and convergence at high supersonic. This result is reported honestly as **publication evidence, not a regression gate.** Three observations anchor the interpretation:
+
+1. **The CFD-vs-ORP gap is consistent with the existing ADA636861 free-flight benchmark.** `BasicFinnerDragBenchmarkTest` already documents an 11.9% MAPE against the free-flight aeroballistic data (Section 11.3.4), with the same sign and the same Mach pattern. Bunescu's URANS sits **above** the ADA636861 free-flight values at matching Mach, so the ordering is `CFD > free-flight experiment > ORP` -- the expected pattern when free-flight aeroballistic data (sting-free, finite-Re) is the ground truth, CFD on a 60 mm full-scale model overpredicts at the transonic peak, and an analytical Barrowman-family model is the most aggressive underprediction.
+2. **Reynolds-number mismatch is part of the story.** The ORP benchmark fixture is the 30 mm aeroballistic-range model used in ADA636861; Bunescu's CFD is the 60 mm full-scale wind-tunnel calibration model. $Re_d$ differs by roughly a factor of two at matching Mach, which contributes some of the gap but does not fully explain it.
+3. **The single $C_N$ point at AoA $= 10°$, $M = 1.60$ is the worst miss (-63%).** Bunescu reports $C_N = 3.4$; ORP gives 1.25. ORP's normal-force prediction in the ANF supersonic regime is anchored against the NASA TM X-653 NSCFB blunt-fin geometry (Section 11.4.1, MAPE 6.84%), not against the ANF rectangular-fin configuration. The ANF-specific $C_N$ gap may indicate that the Pitts-Nielsen-Kaattari interference factor or the cylinder-fin crossflow $C_d$ is biased low for this exact geometry; this is a flagged investigation, not a calibration adjustment.
+
+The honest disposition: the gap is documented and bounded, no constants are tuned to close it, and a second independent CFD anchor on matching geometry would be required to justify any retune. The companion CFD source ARBRL-TR-02495 (Sahu, Nietubicz \& Steger 1983, Thin-Layer Navier-Stokes on a secant-ogive-cylinder-boattail at $M = 0.9$--$1.2$) is in repo at `paper/data/pdf/Empirical heuristics and tuned constants validation/` for transonic base-flow validation but has not been exercised as a comparator in this revision -- the geometry is structurally different from the Basic Finner and would require building a separate ORP rocket model. Comparator artifacts: `paper/data/csv/bunescu_anf_cfd_2025.csv` (digitized source), `paper/data/csv/bunescu_anf_comparator_2026_05_02.csv` (test output), and `paper/data/md/bunescu_anf_cfd_comparator_2026_05_02.md` (assessment memo).
+
 
 ## 10. Regime Blending
 
@@ -945,6 +981,8 @@ Including this benchmark in the validation pack is a deliberate honesty choice. 
 
 Interpretation, paraphrasing the NASA TM X-653 closure memo (`paper/data/md/nasa_tm_x653_validation_report.md`): below $M = 3$ the implementation tracks the experimental curve within $9\%$ on $C_N$ and within $4\%$ on $x_{CP}/d$ at $M = 3.0$ (down from a 125% error before the M=3.0 ESDU TransonicSimilarity guard was added). At $M = 4.06$--$5.82$ the implementation over-predicts $C_N$ by 13--18% and shows a $x_{CP}/d$ plateau because the $K_1 = 0.85$ floor prevents fin $C_{N\alpha}$ from decaying with Mach as fast as the experiment for low-aspect-ratio fins. This is an honest, documented model trade-off; the case is reported as externally benchmarked at $\le 8\% / \le 7.1\%$ MAPE.
 
+**Fourth independent static-aero anchor -- Arcas wind-tunnel coefficients (NASA TN D-4013 + TN D-4014).** The TM X-653 NSCFB result above (a low-fineness blunt cruciform-fin geometry) is supplemented by digitized wind-tunnel coefficients for the Arcas single-stage sounding rocket (a slender ogive-cylinder-boattail geometry with trapezoidal double-wedge fins). Two companion Langley reports cover the same model continuously across $M = 0.60$--$4.63$: TN D-4013 (Ferris 1967, Langley 8-ft transonic pressure tunnel, $M = 0.60$--$1.20$) and TN D-4014 (Babb \& Fuller 1967, Langley Unitary Plan Wind Tunnel, $M = 1.50$--$4.63$). The combined set provides 12 Mach points $\times$ 4 quantities ($C_{N\alpha}$, $C_{A0}$, $x_{CP}$, $C_{m\alpha}$) = 48 data values, archived at `paper/data/csv/arcas_wind_tunnel_combined_2026_05_02.csv` with figure-by-figure provenance in `paper/data/md/arcas_wind_tunnel_assessment_2026_05_02.md`. The dataset documents the externally-validated trend that $x_{CP}$ moves rearward through the transonic peak ($\sim 86\%$ body length at $M \approx 1.0$--$1.2$) and progressively forward at supersonic Mach (down to $\sim 56\%$ at $M = 4.63$). Confidence distribution from the digitization assessment: 0 high / 9 medium / 3 low (the three low-confidence rows are the transonic Fig.\ 11 peak in D-4013 and the high-Mach $C_{m\alpha}$ slope reads in D-4014 where the moment slope is small). This is a **B-level** benchmark in the present revision: the Arcas .ork comparator and `ArcasWindTunnelComparatorTest` are not yet built, so the dataset enters the manuscript as an externally-anchored target rather than as a closed validation. The path to A-level promotion is documented in the digitization assessment (build the Arcas geometry from TN D-4013 Fig.\ 1, run ORP at the digitized Mach points at the tunnel Reynolds number, and re-digitize the three low-confidence rows with WebPlotDigitizer to bound reader uncertainty). Citation: TN D-4013 and TN D-4014 are both verified from the title pages of the PDFs in repo (`paper/data/pdf/New/incoming/arcas/`), per the citation-hygiene policy of this work.
+
 #### 11.4.2 Crossflow $C_{d,c}$ Anchors -- Jorgensen and Hoerner
 
 `JorgensenCrossflowCdBenchmarkTest` confirms the implementation's body crossflow drag $C_{d,c} = 1.20$ exactly matches Jorgensen TR R-474 Table 1 (circular cylinder), and the fin crossflow drag $C_{d,c} = 1.42$ matches Hoerner Ch. 3 Fig. 28 ($1.43$ tabulated; 0.7% relative error).
@@ -972,6 +1010,7 @@ The dynamic stability suite is documented in Section 9.9. Summary:
 | Pitch damping $C_{mq}$ vs TN 3788 | 39% at $M=1.5$; conservative high-$M$ | external benchmark |
 | Pitch damping `3x` multiplier vs ADA636861 | MAPE 69%; sign correct, supersonic under-prediction | **integrated flight data** |
 | Transonic Cmq Gaussian (peak 3.5×) vs ADA636861 | over-predicts $\sim 3.6\times$ at $M = 1.05$--$1.12$ | **integrated flight data** |
+| Pitch damping vs Bhagwandin & Sahu 2013 ARL-TR-6725 (AFF) | supersonic MAPE 18.96% on a non-Basic-Finner geometry; sign-consistent with ANF | external benchmark (B-level, AFF planform fixture pending; see Section 9.9.6) |
 | Magnus body fraction (0.3) | within BRL 1193 measured 0.3--0.8 range | external benchmark |
 | Vortex asymmetry ($K_v = 0.20$) | within 40--70% expected range | external benchmark |
 
@@ -1107,6 +1146,17 @@ The following results contribute to the trajectory closure but are *not* externa
 | Geometry-import parity | RASAero `ModifiedBarrowman` stability switch is parsed but not honored | Implement the alternate stability path |
 
 The headline corpus closure is dominated by drag and base-pressure terms, not by damping. Removing the $C_{mq}$ multiplier or the Gaussian augmentation degrades the apogee-turn signature on five flights but does not move the headline 4.49% by more than $\sim 0.5$ pp; the corpus is therefore mostly drag-validated, not damping-validated.
+
+#### 11.6.6 Sounding-Rocket / Multi-Stage Corpus Expansion (Seed)
+
+The 25-flight Rocket Flight Database v1.0 corpus is dominated by single-stage high-power amateur and SACup-class flights; only one entry (MESOS 293K, flight 25) is multi-stage. Expansion of the trajectory-validation envelope to a second corpus class -- *meteorological / sounding rockets* with documented mass properties, motor thrust curves, and aero coefficient tables -- is in progress. The seed for this expansion is AFCRL-TR-73-0412 / AD-766737 (Bollermann \& Walker 1973, Space Data Corp), *"Design, Development and Flight Test of the Super Loki Stable Booster Rocket Systems."* The report contains:
+
+- Time-resolved booster mass properties (CG and $I_{yy}$, Figures 4.2--4.3).
+- Motor thrust and chamber pressure vs time (Figure 3.4; sea-level firing in Table 3.3, average thrust 4757 lbf, $I_{sp}$ 228.7 s, action time 2.09 s).
+- Booster, vehicle, and dart aerodynamic coefficient curves -- $C_{N\alpha}$, $C_P$, $C_D$ vs $M$ from $M = 0$ to $M \approx 7$ (Figures 4.4--4.8).
+- Approximately 30 flight summaries across Super Loki Robin Dart (Table 8.2), Super Loki Instrumented Dart (Table 8.3), and Viper-3A Robin Dart (Table 8.4) configurations.
+
+The Super Loki Dart `.ork` model has been committed as the seed (commit `f8db50ff5`); ORP simulation runs against the digitized aero curves and trajectory data in AD-766737 are pending. This expansion is the planned content of Rocket Flight Database v2.0 and is recorded as the prospective sounding-rocket extension; the present manuscript reports it only as a documented seed, not as a closed validation. The schema decision for v2.0 is recorded at `paper/data/v2_schema_decision_proposal_2026_05_02.md` (Option B: keep the v1.0 schema and leave `apogee_rasaero_ft` blank for sounding rockets that have no RASAero II reference). The full candidate dossier is at `paper/data/sounding_rocket_corpus_candidates_2026_05_02.md`, with verified citations for the Super Loki / Loki-Dart family (AFCRL-TR-73-0412, NASA CR-61238) and the Arcas family (TN D-4013, TN D-4014, AD-235341).
 
 
 ### 11.7 Performance Benchmarks
@@ -1397,6 +1447,12 @@ A regression tolerance of $\pm 2$ percentage points per case is enforced by the 
 42. Whitcomb, R. T. (1956). "A Study of the Zero-Lift Drag-Rise Characteristics of Wing-Body Combinations Near the Speed of Sound." NACA Report 1273. `[CITATION-TODO: PDF/digitized data not in repo; cited only for the method name "Whitcomb area rule" used to label the off-status integrator in Table 12.2. Drop or attach before camera-ready.]`
 43. Zipfel, P. H. (2007). *Modeling and Simulation of Aerospace Vehicle Dynamics*, 2nd ed. AIAA Education Series.
 44. Chapman, D. R., Kuehn, D. M., and Larson, H. K. (1958). "Investigation of Separated Flows in Supersonic and Subsonic Streams with Emphasis on the Effect of Transition." NACA Report 1356. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the free-interaction SBLI theory at fin roots (Section 6.8). Verify and attach before camera-ready.]`
+45. Ferris, J. C. (1967). "Static Stability Investigation of a Single-Stage Sounding Rocket at Mach Numbers from 0.60 to 1.20." NASA TN D-4013, Langley Research Center, June 1967.
+46. Babb, C. D. and Fuller, D. E. (1967). "Static Stability Investigation of a Sounding-Rocket Vehicle at Mach Numbers from 1.50 to 4.63." NASA TN D-4014, Langley Research Center, June 1967.
+47. Bhagwandin, V. A. and Sahu, J. (2013). "Numerical Prediction of Pitch Damping Stability Derivatives for Finned Projectiles." ARL-TR-6725, US Army Research Laboratory, Aberdeen Proving Ground, MD, November 2013. DTIC Accession ADA592550. `[CITATION-TODO: PDF not yet in repo at commit time; AFF fin planform (Figure 3) is required for A-level promotion of the Cmq second-source comparator (Section 9.9.6). Verify and attach before camera-ready.]`
+48. Bunescu, I., Hothazie, M.-V., Stoican, M.-G., Pricop, M.-V., Onel, A.-I., and Afilipoae, T.-P. (2025). "Numerical Study of the Basic Finner Model in Rolling Motion." *Aerospace*, **12**(5), 371. DOI: 10.3390/aerospace12050371. Open access (CC BY 4.0).
+49. Bollermann, B. and Walker, R. L. (1973). "Design, Development and Flight Test of the Super Loki Stable Booster Rocket Systems." AFCRL-TR-73-0412 / AD-766737, Space Data Corp., Phoenix AZ, prepared for AFCRL Hanscom, 30 June 1973.
+50. Sahu, J., Nietubicz, C. J., and Steger, J. L. (1983). "Numerical Computation of Base Flow for a Projectile at Transonic Speed." ARBRL-TR-02495 / AD-A130-293, US Army Ballistic Research Laboratory, Aberdeen Proving Ground, MD, June 1983. Cited as the secondary CFD anchor for transonic base-flow validation; not exercised as a comparator in the present revision (Section 9.10).
 
 **External validation artifacts:**
 

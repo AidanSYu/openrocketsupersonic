@@ -9,12 +9,13 @@ The publication gate for the aerodynamic model. Detail lives in the cited tests 
 - **C** — internal consistency or numerical integrity only.
 - **D** — calibrated heuristic without external closure.
 
-## Headline (2026-05-02; manuscript-aligned 25-flight aggregate)
+## Headline (2026-05-03; manuscript-aligned 25-flight aggregate, canonical v1.0 Zenodo)
 
 - **27 A-level rows** pass with quantitative external acceptance gates, plus **1 externally anchored negative benchmark** (RM-10) used to bound and exclude a geometry family.
+- **3 new B-level external anchors** landed 2026-05-02 (Arcas wind-tunnel D-4013/D-4014, Bhagwandin AFF Cmq second source, Bunescu ANF URANS CFD comparator) and are tracked below.
 - **9 B-level rows** are honestly disclosed integration claims (corpus-validated, not isolated).
-- **SimVReal corpus** (25 flights, MESOS folded as flight 25; values from 2026-05-02 fresh test run): 25/25 within +/-10 %, 14/25 within +/-5 %, avg abs error **4.74 %**, mean signed error -0.4 %, 0 abnormal endings. Lower aggregate error than the recorded RASAero II predictions on the same frozen flights (5.38 %, 24/25 within +/-10 %).
-- **MESOS 293K** (two-stage M 4.18 to 293 K ft, flight 25; 2026-05-02 fresh value): -6.96 % apogee, +4.05 % velocity, +3.6 % peak Mach. (2026-05-01 frozen run reported -0.64 %; drift flagged as TODO in `corpus_summary_2026_05_01.md`.)
+- **SimVReal corpus** (25 flights, MESOS folded as flight 25; canonical v1.0 Zenodo, post MESOS revert at commit `42f31d8f9`): 25/25 within +/-10 %, **15/25** within +/-5 %, avg abs error **4.49 %**, mean signed error -0.1 %, 0 abnormal endings. Lower aggregate error than the recorded RASAero II predictions on the same frozen flights (5.26 %, 22/25 within +/-10 %).
+- **MESOS 293K** (two-stage M 4.18 to 293 K ft, flight 25; canonical v1.0 Zenodo value): -0.6 % apogee, +4.0 % velocity, +3.6 % peak Mach. The 2026-05-02 fresh test rerun produced -6.96 % / 273,067 ft and is flagged as a contaminated drift in `paper/data/diagnostics/mesos_drift_2026_05_02.md`; the canonical v1.0 value is the published Zenodo record (DOI 10.5281/zenodo.19976138) and is the manuscript headline.
 - **AST publication gate**: items 1, 2, 3, 4, 6, 7 CLOSED; item 5 partially closed with disclosure.
 
 ## Frozen SimVReal baseline (2026-05-01)
@@ -29,15 +30,15 @@ This is the **regression baseline**. Any future change should reproduce these pe
 **RASAero comparison:** [`md/rasaero_head_to_head_2026_05_01.md`](md/rasaero_head_to_head_2026_05_01.md)
 **Open source plan:** [`BENCHMARK_SOURCE_PLAN.md`](BENCHMARK_SOURCE_PLAN.md)
 
-### Aggregate (25-flight corpus, 2026-05-02 fresh test output)
+### Aggregate (25-flight corpus, canonical v1.0 Zenodo / commit `42f31d8f9`)
 
 | Metric | ORP | RASAero II |
 |---|---:|---:|
-| Avg abs error | **4.74 %** | 5.38 % |
-| Within ±5 % | 14/25 (56.0 %) | 13/25 (52.0 %) |
-| Within ±10 % | **25/25 (100 %)** | 24/25 (96.0 %) |
+| Avg abs error | **4.49 %** | 5.26 % |
+| Within ±5 % | **15/25 (60.0 %)** | 13/25 (52.0 %) |
+| Within ±10 % | **25/25 (100 %)** | 22/25 (88.0 %) |
 | Worst case | +8.7 % (Kinsel) | +11.5 % (T&L) |
-| Mean signed error | -0.4 % | +1.9 % |
+| Mean signed error | -0.1 % | +2.3 % |
 | Abnormal endings | 0 | n/a |
 
 ### Per-case table (25 flights, sorted by peak Mach)
@@ -94,7 +95,8 @@ Values from 2026-05-02 fresh test run. The 2026-05-01 frozen MESOS row reported 
 | 2026-04-17 (post-Prompt-13) | 6.84 % | 62.5 % | 83.3 % | 0 | Same 4 outliers, slightly tighter |
 | 2026-04-30 (closure rerun) | 4.65 % | 58.3 % | 100 % | 0 | All outliers closed; finned-base augmentation, sleeve scale, rounded-fin wake; aggregated over 24 flights, MESOS reported separately |
 | 2026-05-01 (24-flight baseline) | 4.65 % | 58.3 % | 100 % | 0 | Identical to 04-30 for 24 flights; MESOS apogee redrawn at −0.6 % and peak Mach reported correctly at 4.33 (was display-bug 3.74) |
-| **2026-05-02 (25-flight baseline; manuscript-aligned, fresh rerun)** | **4.74 %** | **56.0 %** | **100 %** | **0** | Fresh `SimVRealBenchmarkTest` rerun with MESOS folded into aggregate as flight 25 (audit CRITICAL #1). Per-case 24 single-stage flights identical to 2026-05-01; MESOS apogee drifted from 291,601 → 273,067 ft (-0.64 % → -6.96 %), flagged as TODO. |
+| 2026-05-02 (25-flight baseline; manuscript-aligned, fresh rerun) | 4.74 % | 56.0 % | 100 % | 0 | Fresh `SimVRealBenchmarkTest` rerun with MESOS folded into aggregate as flight 25 (audit CRITICAL #1). Per-case 24 single-stage flights identical to 2026-05-01; MESOS apogee drifted from 291,601 → 273,067 ft (-0.64 % → -6.96 %). Drift later identified as a contaminated rerun, not a regression — see `paper/data/diagnostics/mesos_drift_2026_05_02.md`. |
+| **2026-05-03 (canonical v1.0 Zenodo; post MESOS revert at `42f31d8f9`)** | **4.49 %** | **60.0 %** | **100 %** | **0** | Authoritative manuscript-aligned aggregate. MESOS reverted to canonical 291,601 ft / -0.6 % per the Zenodo v1.0 record. The 2026-05-02 4.74 % / 14/25 fresh-rerun number is retained in the change history above for traceability but is superseded for citation. |
 
 ### Regression policy
 
@@ -143,14 +145,23 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 | Claim | Test / source | Result | Status |
 |---|---|---|---|
 | Static stability / CP | `Phase3StabilityTest` + `NasaTmX653K1FloorTest` vs NASA TM X-653 | CNa MAPE 6.8 %, xCP 7.1 % (M 0.6–5.82) | A |
+| Static stability, second geometry — Arcas wind-tunnel coefficients | NASA TN D-4013 (Ferris 1967) + TN D-4014 (Babb & Fuller 1967), 12 Mach pts × 4 quantities = 48 values, M 0.60–4.63 on slender ogive-cylinder-boattail with trapezoidal double-wedge fins | digitized to `paper/data/csv/arcas_wind_tunnel_combined_2026_05_02.csv`; assessment at `paper/data/md/arcas_wind_tunnel_assessment_2026_05_02.md`; documents externally-validated transonic→supersonic xCP migration (86 % L at M≈1.0 → 56 % L at M=4.63); confidence 0 high / 9 medium / 3 low | **B (eyeball, A-level pending Arcas .ork comparator)** |
 | Dynamic stability implementation (Cmq accumulation, roll, Magnus) | `DynamicStabilityBenchmarkTest` + `TobakCmqBenchmarkTest` | < 0.5 %, 2 %, 0 % vs analytical/theory anchors | A for implementation; finned Cmq magnitude remains B below |
 | Crossflow body Cd (1.20) | `JorgensenCrossflowCdBenchmarkTest` vs Jorgensen TR R-474 | exact | A |
 | Crossflow fin Cd (1.42) | `JorgensenCrossflowCdBenchmarkTest` vs Hoerner Fig. 28 | within range | A |
 | Pitch damping Cmq, body | `TobakCmqBenchmarkTest` vs TN 3788 | 39 % at M=1.5; conservative high-M | A |
 | Pitch damping `3×` multiplier | `BasicFinnerCmqBenchmarkTest` vs ADA636861 | MAPE 69 %; sign correct, supersonic under-prediction | **B** |
 | Transonic Cmq Gaussian (peak 3.5×) | same | over-predicts ~3.6× at M 1.05–1.12 | **B** |
+| Cmq second source on AFF (non-Basic-Finner) | `BhagwandinSahuCmqComparatorTest` vs ARL-TR-6725 (Bhagwandin & Sahu 2013) | AFF supersonic MAPE 18.96 % (5 pts M 1.30–2.50); ANF supersonic MAPE 28.02 % (8 pts M 1.29–4.50); sign-consistent with ADA636861 underprediction | **B (AFF planform fixture is placeholder; A-level pending Figure 3 dimensions from PDF)** |
 | Magnus body fraction (0.3) | `MagnusBenchmarkTest` vs BRL 1193 | within measured 0.3–0.8 range | A |
 | Vortex asymmetry (Kv 0.20) | `VortexSideforceBenchmarkTest` vs Paul & Wedemeyer | within 40–70 % expected | A |
+
+### CFD comparators (B-level)
+
+| Claim | Test / source | Result | Status |
+|---|---|---|---|
+| ANF total drag and CN vs published URANS | `BunescuANFCfdComparatorTest` vs Bunescu et al. 2025 *Aerospace* 12(5) 371 (URANS k-ε on Basic Finner) | MAPE 43.1 % over 6 digitized pts (5 C_X at AoA=0, M 0.4–3.5; 1 C_N at AoA=10°, M=1.6); ORP systematically below CFD; ordering `CFD > free-flight experiment > ORP` consistent with the existing ADA636861 free-flight benchmark; Re_d mismatch ×2 contributes part of the gap | **B (publication evidence, not a regression gate)** |
+| Transonic base flow on secant-ogive-cylinder-boattail | ARBRL-TR-02495 (Sahu, Nietubicz & Steger 1983) | PDF in repo at `paper/data/pdf/Empirical heuristics and tuned constants validation/`; not yet exercised as a comparator (geometry is structurally different from Basic Finner; would require building a separate ORP rocket model) | Pending |
 
 ### Vehicle and integrated trajectory
 
@@ -162,7 +173,7 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 | Power-on nozzle / pressure thrust | `RK4SimulationStepper` + MESOS 293K | corpus-validated | **B** |
 | Min-dia supersonic flight | `SimVRealBenchmarkTest` Raven (M 1.07) +7.6 %, DDT (M 3.04) −6.1 % | corpus-validated | **B** |
 | Integrated termination / descent | `SimVRealBenchmarkTest` 0 abnormal endings; MESOS staging correct | — | **B** |
-| Full 6-DOF trajectory fidelity | `SimVRealBenchmarkTest.testSimVRealBenchmark` + `testMesosFlight` | 25-flight aggregate (2026-05-02 fresh): avg abs err 4.74 %, mean signed err -0.4 %, 25/25 within +/-10 %; MESOS (flight 25) -6.96 % | **B** |
+| Full 6-DOF trajectory fidelity | `SimVRealBenchmarkTest.testSimVRealBenchmark` + `testMesosFlight` | 25-flight aggregate (canonical v1.0 Zenodo): avg abs err 4.49 %, mean signed err -0.1 %, 25/25 within +/-10 %, 15/25 within +/-5 %; MESOS (flight 25) -0.6 % | **B** |
 | CDX1 import parity | `RASAeroLoaderTest` + `SimVRealCorpusAblationTest` | nozzles per stage stored; turbulence flag bounded; `ModifiedBarrowman` still disclosed | **B** |
 | Numerical guards / tuned constants | `NUMERICAL_GUARD_AUDIT.md` | software-quality only | C |
 
@@ -171,7 +182,7 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 | # | Item | Status |
 |---|------|--------|
 | 1 | Preserve A-level external benchmark foundation | **CLOSED** — 27 clean A-level rows plus RM-10 negative/exclusion benchmark; focused regression battery green |
-| 2 | SimVReal as a trustworthy validation corpus | **CLOSED** — 25-flight corpus (2026-05-02 fresh): avg \|err\| 4.74 %, 25/25 within ±10 % |
+| 2 | SimVReal as a trustworthy validation corpus | **CLOSED** — 25-flight corpus (canonical v1.0 Zenodo): avg \|err\| 4.49 %, 25/25 within ±10 %, 15/25 within ±5 % |
 | 3 | RASAero/CDX1 import-parity uncertainty bounded | **CLOSED** — stage nozzles plumbed and ablated; force-turbulent BL bounded for SimVReal; `ModifiedBarrowman` disclosed |
 | 4 | High-M finned-vehicle drag/damping closure (Raven, Kinsel, DDT, Proteus 6, FMJ) | **CLOSED** — all named cases within ±10 % |
 | 5 | No acceptance-critical result depends on unconstrained heuristics | **PARTIAL** — Cmq `3×` and transonic Gaussian remain B; corpus closures are drag/base-driven, not damping-driven |
@@ -191,7 +202,8 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 
 | Date | Closure |
 |---|---|
-| 2026-05-02 | Aggregate framing folded to 25 flights (MESOS = flight 25) to match manuscript headline; per-case simulation outputs unchanged. Closes audit `AST_REVIEWER_AUDIT_2026_05_02.md` CRITICAL #1. |
+| 2026-05-03 | Three new external anchors added: Arcas wind-tunnel (NASA TN D-4013 + TN D-4014, 12 Mach pts × 4 quantities, B-level pending comparator), Bhagwandin & Sahu 2013 ARL-TR-6725 AFF Cmq (B-level, supersonic MAPE 18.96 %, AFF planform fixture pending), Bunescu et al. 2025 *Aerospace* 12(5) 371 ANF URANS CFD (B-level, MAPE 43.1 %, publication evidence not regression gate). Sounding-rocket / multi-stage corpus seed: AFCRL-TR-73-0412 Super Loki Dart .ork model committed (`f8db50ff5`); ORP runs against AD-766737 aero curves and trajectories pending. |
+| 2026-05-02 | MESOS drift diagnosed as a contaminated rerun, not a regression. Canonical headline restored to v1.0 Zenodo values (4.49 % / 15/25 within ±5 % / 25/25 within ±10 %; MESOS -0.6 %). Aggregate framing folded to 25 flights (MESOS = flight 25) to match manuscript headline. Closes audit `AST_REVIEWER_AUDIT_2026_05_02.md` CRITICAL #1. |
 | 2026-05-01 | AST evidence artifacts added: prospective holdout split, SimVReal nozzle/turbulence ablation, and explicit RASAero head-to-head table. RASAero nozzle warning wording corrected so implemented per-simulation nozzle import is not listed as unsupported. |
 | 2026-05-01 | Peak-Mach display alignment fixed in `SimVRealValidationTest` (was dividing peak velocity by sea-level a₀; now uses `data.getMaxMachNumber()`). MESOS row updated: peak Mach 4.33, +3.6 % vs real 4.18. |
 | 2026-04-30 | Full SimVReal rerun, 24/24 within ±10 %, avg 4.65 %. Finned-body base augmentation (sleeve / rounded-fin / four-fin ramp). Kinsel termination at t=1063.832 s. MESOS 293K closed at −0.6 % / +4.0 %. |
