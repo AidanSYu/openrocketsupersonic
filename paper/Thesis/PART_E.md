@@ -1007,7 +1007,7 @@ This is the "integrated flight data" capstone: it does not isolate any single su
 | Mean signed error | $-0.1\%$ | $+2.3\%$ |
 | Abnormal endings | 0 | n/a |
 
-The extended model wins decisively ($\ge 3$ pp better) on 8 of 25 flights; RASAero II wins decisively on 4 (Rabia, Rabia Short Fin Can, Kinsel, Proteus 6); the remaining 13 are tie/marginal. The aggregate-error advantage of 0.77 pp (this work) reflects systematic improvements at the highest-Mach flights (Torrent, Kline-Rogers, FMJ Black Rock-6, AeroPac 104K, Don't Debate This), where the supersonic-extension models do most of their work.
+The extended model has a per-case absolute-error advantage of $\ge 3$ pp on 8 of 25 flights; RASAero II has the corresponding advantage on 4 flights (Rabia, Rabia Short Fin Can, Kinsel, Proteus 6); the remaining 13 are within $\pm 3$ pp of each other. The aggregate-error advantage of 0.77 pp (this work) is concentrated in the highest-Mach flights (Torrent, Kline-Rogers, FMJ Black Rock-6, AeroPac 104K, Don't Debate This), where the supersonic-extension models contribute the most.
 
 #### 11.6.2 Per-Case Table (Sorted by Peak Mach)
 
@@ -1144,7 +1144,7 @@ Summary of subsystem improvements:
 | Static stability | no supersonic correction | Galejs + Allen-Perkins crossflow + PNK + ESDU similarity (Ch. 8) |
 | Dynamic stability | apogee-turn heuristic only | Cmq strip theory + Gaussian augmentation + Magnus + Euler gyroscopic |
 | Trajectory integrator | RK4 with limited gates | RK4 with quaternion + adaptive timestep + sanitization + warning diagnostics |
-| Valid Mach range | $M < 2$ | $M < 10$ (5x extension) |
+| Valid Mach range | $M < 2$ | vehicle-level (6-DOF) validated to $M \approx 4.3$; component-level cone foredrag validated to $M \approx 17$ (single benchmark) |
 
 
 ## 12. Conclusions and References
@@ -1152,13 +1152,13 @@ Summary of subsystem improvements:
 
 ### 12.1 Summary of Contributions
 
-This work has extended the OpenRocket aerodynamic simulation framework from a subsonic/low-transonic tool valid to roughly $M = 2$ into a comprehensive compressible-flow simulation validated from $M = 0.3$ through $M = 10+$, with end-to-end 6-DOF trajectory closure on a 25-flight real-world corpus published as the Rocket Flight Database v1.0 ([DOI: 10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138)). The principal contributions:
+This work has extended the OpenRocket aerodynamic simulation framework from a subsonic/low-transonic tool valid to roughly $M = 2$ into a compressible-flow simulation whose validated envelope is two-tier: vehicle-level (6-DOF integrated trajectory) is validated through $M \approx 4.3$ against the 25-flight Rocket Flight Database v1.0 ([DOI: 10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138)), and component-level cone foredrag is validated to $M \approx 17$ against a single isolated benchmark (DTIC AD0487365). The principal contributions:
 
 1. **Gas dynamics foundation.** A complete set of compressible flow solvers -- oblique shock relations ($\theta$-$\beta$-$M$ with bisection), Taylor--Maccoll cone flow (ODE integration), normal shock jump conditions, and Prandtl--Meyer expansion fan relations -- validated against NACA Report 1135 and cone-flow reference tables: normal shocks to $7\times10^{-5}$, oblique-shock wave angle to $0.021\%$, Prandtl--Meyer angle to $0.004^\circ$, and Taylor--Maccoll cone-shock angle to $0.825\%$ relative. These solvers form the backbone for every subsequent wave drag, pressure coefficient, and shock-geometry calculation.
 2. **Analytical wave drag models.** Replacement of the legacy NASA TR-R-100 tables with physics-based wave drag computations: Taylor--Maccoll exact solution for conical noses, second-order shock-expansion theory for ogive noses, DATCOM Section 4.1.5.1 (Puckett--Stewart) fin wave drag with subsonic/supersonic LE classification, and the Dahlem--Buck shape factors for power-law / Haack noses.
 3. **Shock geometry pre-pass architecture.** A new `ShockGeometry` computation walks the rocket body nose-to-tail, computing post-shock Mach, pressure, and temperature at each axial station. The production consumer is the stability path, primarily `FinSetCalc`, where local Mach corrects fin normal-force, PNK interference, and SBLI chord reduction. Body stability, fin pressure drag, roll damping, base drag, and wave drag remain freestream-based scope boundaries. Zero overhead at subsonic speeds (passthrough design).
 4. **Compressible boundary-layer modeling.** Van Driest II compressible transformation (NASA TN D-6945, Hopkins 1972) for supersonic skin friction, replacing the incompressible Eckert formulas. Reduces friction drag by 30--75% at $M = 2$--5. The Sutherland viscosity law replaces the legacy linear fit; the NIST/Incropera JUnit gate is $<3\%$ over 100--800 K, and the current formula export is MAPE 0.012%.
-5. **Hypersonic extension via Modified Newtonian.** $C_p = C_{p,\max}\sin^2\theta$ with $C_{p,\max}$ from the Rayleigh pitot formula for $M > 5$, blended with shock-expansion over $M = 4$--6 (cubic Hermite, $C^1$). Extends model validity to $M = 10+$ with graceful degradation.
+5. **Hypersonic extension via Modified Newtonian.** $C_p = C_{p,\max}\sin^2\theta$ with $C_{p,\max}$ from the Rayleigh pitot formula for $M > 5$, blended with shock-expansion over $M = 4$--6 (cubic Hermite, $C^1$). Component-level cone foredrag is validated to $M \approx 17$ (single isolated benchmark, DTIC AD0487365 MAPE 19.7%); vehicle-level integrated trajectory is validated through $M \approx 4.3$ against the 25-flight corpus.
 6. **$C^1$-continuous regime blending.** Up to **19 distinct blending regions** (Chapter 10) using cubic Hermite, constrained polynomials, and AP09 rational functions ensure all aerodynamic coefficients are $C^1$ across every Mach regime boundary, eliminating the simulation instability and time-step collapse that would otherwise occur at transitions.
 7. **Dynamic stability derivatives and Euler gyroscopic coupling.** Pitch damping ($C_{mq}$) computed from per-component $C_{N\alpha}$ and moment arms with a transonic Gaussian augmentation, $C_{m\dot{\alpha}}$ via the Tobak--Wehrend slender-body ratio, full Magnus force/moment derivatives with body fraction $0.3$, and the full Euler $\boldsymbol{\omega} \times \mathbf{I}\boldsymbol{\omega}$ coupling in the 6-DOF integrator (with a 500 Pa dynamic-pressure gate against ballistic-descent stiffness).
 8. **High-AoA crossflow normal force and simulation robustness.** A bluff-body crossflow drag model with proportional moment scaling that prevents artificial torque divergence at post-stall AoA. SBLI separation-length and $C_{p,\text{plateau}}$ floors, fin $K_3$ and polynomial-denominator floors, and per-coefficient sanitization caps make the integrator robust against transonic singularities, degenerate geometry, and floating-point overflow.
@@ -1176,7 +1176,7 @@ Headline summary restated for the conclusions chapter:
 - **25-flight integrated corpus** (Rocket Flight Database v1.0, [DOI: 10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138)): avg $\lvert\text{err}\rvert = 4.49\%$, 25/25 within $\pm 10\%$, 15/25 within $\pm 5\%$, 0 abnormal endings; better aggregate accuracy than the RASAero II predictions on the same imported geometries (5.26%, 22/25 within $\pm 10\%$).
 - **Flight 25, MESOS 293K (Mach 4.18 measured / 4.33 predicted, 293,488 ft)**: apogee $-0.6\%$, velocity $+4.0\%$, peak Mach $+3.6\%$.
 
-The primary headline metric for an aerospace audience: the original OpenRocket's reliable Mach range of $M < 2$ extends to $M < 10$ in this work, a five-fold range extension; the integrated trajectory closure is closer to the truth (4.49%) than the industry-standard tool RASAero II (5.26%) on the *same* imported geometries.
+Two headline outcomes summarize the extension. (i) Vehicle-level integrated trajectory: extended OpenRocket aggregate apogee error 4.49% across the 25-flight corpus, versus 5.26% for the recorded RASAero II predictions on the same imported geometries (lower aggregate error on the *same* geometries). (ii) Validated envelope: the original OpenRocket's reliable range of $M < 2$ extends to vehicle-level closure through $M \approx 4.3$ in this work, with component-level cone foredrag validated to $M \approx 17$ against a single isolated benchmark.
 
 ### 12.3 Subsonic Compatibility
 
@@ -1293,20 +1293,58 @@ Rational blend (AP09) \newline (\seqsplit{RationalBlend.java}) & \textbf{On} & $
 These items are roadmap Phase 6 (advanced viscous and reactive modeling) and beyond. They are not on the critical path for the headline 25-flight closure and are explicitly excluded from the current accuracy claims.
 
 
+### 12.7 Acknowledgments, Affiliation, Conflict of Interest, and Reproduction Recipe
+
+#### 12.7.1 Acknowledgments
+
+Acknowledgments will be added prior to camera-ready. <!-- TODO(author): list collaborators, dataset providers (Rogers / RASAero II archive maintainers, individual flight contributors to the Rocket Flight Database v1.0), and any reviewers / mentors to thank. -->
+
+#### 12.7.2 Author Affiliation
+
+Sole author: Aidan Yu. <!-- TODO(author): confirm institutional affiliation for the AST submission front-matter (Duke University per `paper/Thesis/zenodo-deposit.md`); add ORCID; add corresponding-author email. -->
+
+#### 12.7.3 Conflict of Interest
+
+The author declares no known conflict of interest. <!-- TODO(author): confirm and finalize COI declaration prior to camera-ready, including any funding disclosures. -->
+
+#### 12.7.4 Funding
+
+<!-- TODO(author): state funding sources, or explicitly declare "no external funding received," prior to camera-ready. -->
+
+#### 12.7.5 Software Availability and DOI
+
+The OpenRocket Plus source code is available at <https://github.com/AidanSYu/openrocketsupersonic>. A persistent software archive will be deposited on Zenodo: `[SOFTWARE-DOI-TODO]`. The validation dataset (Rocket Flight Database v1.0) is already deposited and is citable as <https://doi.org/10.5281/zenodo.19976138>.
+
+#### 12.7.6 Reproduction Recipe for the 25-Flight Corpus Closure
+
+The headline aggregate apogee error of 4.49% across the 25-flight corpus is reproducible from the source tree as follows. The pinned commit for the manuscript revision is `<MANUSCRIPT-COMMIT-TODO>` on branch `supersonic-aero-dev`; replace `<COMMIT>` below with the value reported by `git rev-parse HEAD` after the manuscript-tag commit is created.
+
+```bash
+git clone https://github.com/AidanSYu/openrocketsupersonic.git
+cd openrocketsupersonic
+git checkout <COMMIT>          # or the manuscript tag once minted
+./gradlew core:test --tests "info.openrocket.core.aerodynamics.SimVRealBenchmarkTest"
+```
+
+On Windows, substitute `gradlew.bat` for `./gradlew`. Expected runtime: approximately 11 minutes for the full aerodynamics test suite, of which `SimVRealBenchmarkTest` is a fraction. Per-flight outputs and the aggregate error summary are written under `core/build/reports/tests/test/` and `core/build/test-results/test/`. The per-case CSV that anchors the manuscript table is generated as `paper/data/csv/simvreal_baseline_2026_05_01.csv` (frozen at the same commit). The companion head-to-head comparison artifact (this work versus the recorded RASAero II predictions on the same imported geometries) is `paper/data/md/rasaero_head_to_head_2026_05_01.md`. The corpus itself, including the `.CDX1` import files and Rogers-published RASAero II reference apogees, is archived at <https://doi.org/10.5281/zenodo.19976138>.
+
+A regression tolerance of $\pm 2$ percentage points per case is enforced by the test harness; deviations beyond this band fail the build and indicate either an environment difference (JVM, gradle daemon state, motor-thrust-curve cache) or an unintended modeling change.
+
+
 ### References
 
 1. Ackeret, J. (1925). "Luftkrafte auf Flugel, die mit grosserer als Schallgeschwindigkeit bewegt werden." *Zeitschrift fur Flugtechnik und Motorluftschiffahrt*, 16, pp. 72--74.
-2. Allen, H. J. and Perkins, E. W. (1951). "A Study of Effects of Viscosity on Flow Over Slender Inclined Bodies of Revolution." NACA Report 1048.
+2. Allen, H. J. and Perkins, E. W. (1951). "A Study of Effects of Viscosity on Flow Over Slender Inclined Bodies of Revolution." NACA Report 1048. `[CITATION-TODO: PDF/digitized data not in repo; cited only as the originating source for the crossflow-analogy method name. Verify and attach before camera-ready.]`
 3. Ames Research Staff (1953). "Equations, Tables, and Charts for Compressible Flow." NACA Report 1135.
 4. Anderson, J. D. (2006). *Hypersonic and High-Temperature Gas Dynamics*, 2nd ed. AIAA Education Series.
 5. Anderson, J. D. (2017). *Modern Compressible Flow: With Historical Perspective*, 4th ed. McGraw-Hill.
 6. AP09 (2009). "Aeroprediction Code Methodology (AP09)." Code-cited methodology note for the AP09-style rational blend implemented in `RationalBlend.java`; exact public report metadata is not present in the repository.
 7. Barrowman, J. S. (1967). "The Practical Calculation of the Aerodynamic Characteristics of Slender Finned Vehicles." M.S. Thesis, The Catholic University of America.
-8. Chapman, D. R. (1950). "Base Pressure at Supersonic Velocities." NACA TN 2137.
+8. Chapman, D. R. (1950). "Base Pressure at Supersonic Velocities." NACA TN 2137. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the laminar base-drag $C_\text{LAM}=1870$ scaling in Section 6.2.4. Verify and attach before camera-ready.]`
 9. Chapman, D. R. (1951). "An Analysis of Base Pressure at Supersonic Velocities and Comparison with Experiment." NACA Report 1051.
 10. Champigny, P. and Lacau, R. G. (1994). "Lateral Aerodynamics of a Missile at High Angles of Attack." AGARD CP-536, as cited in `BarrowmanCalculator` and `VortexSideforceBenchmarkTest`; the repository's local AGARD CP-536 PDF is a different proceedings volume and is not used as a source artifact for this claim.
 11. DATCOM (1978). "USAF Stability and Control DATCOM." Air Force Flight Dynamics Laboratory, AFFDL-TR-79-3032, revised.
-12. Devan, L. and Ashwood, R. (1965). "The Base Drag of Blunt-Trailing-Edge Airfoils and Bodies at Transonic and Supersonic Speeds." NASA TN D-721.
+12. Devan, L. and Ashwood, R. (1965). "The Base Drag of Blunt-Trailing-Edge Airfoils and Bodies at Transonic and Supersonic Speeds." NASA TN D-721. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the production turbulent base-drag correlation. Verify and attach before camera-ready.]`
 13. Dupuis, A. and Hathaway, W. (1997). "Aeroballistic Range Tests of the Basic Finner Reference Projectile at Supersonic Velocities." DTIC ADA636861.
 14. ESDU (1977). "Estimation of Base Drag in the Absence of a Propulsive Jet." ESDU Data Item 77021.
 15. ESDU (1978). "Drag of a Smooth Flat Plate at Zero Incidence." ESDU Data Item 78019. Historical skin-friction context; the current production skin-friction path is Van Driest II rather than this item.
@@ -1317,7 +1355,7 @@ These items are roadmap Phase 6 (advanced viscous and reactive modeling) and bey
 20. Hopkins, E. J. (1972). "Charts for Predicting Turbulent Skin Friction from the Van Driest Method (II)." NASA TN D-6945.
 21. Hopkins, E. J. and Inouye, M. (1971). "An Evaluation of Theories for Predicting Turbulent Skin Friction and Heat Transfer on Flat Plates at Supersonic and Hypersonic Mach Numbers." *AIAA Journal*, 9(6).
 22. Jorgensen, L. H. (1973). "Prediction of Static Aerodynamic Characteristics for Space-Shuttle-Like and Other Bodies at Angles of Attack from 0 to 180 Degrees." NASA TR R-474.
-23. Jorgensen, L. H. (1977). "Prediction of Static Aerodynamic Characteristics for Slender Bodies Alone and with Lifting Surfaces to Very High Angles of Attack." NASA TN D-6996.
+23. Jorgensen, L. H. (1977). "Prediction of Static Aerodynamic Characteristics for Slender Bodies Alone and with Lifting Surfaces to Very High Angles of Attack." NASA TN D-6996. `[CITATION-TODO: PDF not in repo; the related Jorgensen TR R-474 (1973) PDF is in the repo and is the primary anchor for the $C_{d,c}=1.20$ crossflow constant (ref 22). Verify whether ref 23 is needed independently or can be removed before camera-ready.]`
 24. Perkins, E. W. and Jorgensen, L. H. (1952). "Investigation of the Drag of Various Axially Symmetric Nose Shapes of Fineness Ratio 3 for Mach Numbers from 1.24 to 3.67." NACA RM A52H28.
 25. NACA (1954). "Free-Flight Measurements of the Zero-Lift Drag of Several Wings at Mach Numbers from 1.1 to 1.6." NACA TN 3650.
 26. Jackson, H. H., Rumsey, C. B., and Chauvin, L. T. (1954). "Flight Measurements of Drag and Base Pressure of a Fin-Stabilized Parabolic Body of Revolution (NACA RM-10) at Different Reynolds Numbers and at Mach Numbers from 0.9 to 3.3." NACA TN 3320.
@@ -1325,20 +1363,20 @@ These items are roadmap Phase 6 (advanced viscous and reactive modeling) and bey
 28. Stoney, W. E. (1961). "Collection of Zero-Lift Drag Data on Bodies of Revolution from Free-Flight Investigations." NASA TR-R-100.
 29. Jorgensen, L. H., Spahr, J. R., and Hill, W. A., Jr. (1962). "Comparison of the Effectiveness of Flares with That of Fins for Stabilizing Low-Fineness-Ratio Bodies at Mach Numbers from 0.6 to 5.8." NASA TM X-653.
 30. Nielsen, J. N. (1960). *Missile Aerodynamics*. McGraw-Hill.
-31. Paul, R. and Wedemeyer, E. (1982). "Aerodynamic Characteristics of Ogive-Cylinder Bodies at High Angles of Attack." EOARD-TR-82-7.
-32. Pitts, W. C., Nielsen, J. N., and Kaattari, G. E. (1957). "Lift and Center of Pressure of Wing-Body-Tail Combinations at Subsonic, Transonic, and Supersonic Speeds." NACA Report 1307.
-33. Platou, A. S. (1963). "The Magnus Force on a Short Body at Supersonic Speeds." BRL Report 1193.
+31. Paul, R. and Wedemeyer, E. (1982). "Aerodynamic Characteristics of Ogive-Cylinder Bodies at High Angles of Attack." EOARD-TR-82-7. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the vortex-asymmetry $K_v=0.20$ calibration (Section 9.9.3). Verify and attach before camera-ready.]`
+32. Pitts, W. C., Nielsen, J. N., and Kaattari, G. E. (1957). "Lift and Center of Pressure of Wing-Body-Tail Combinations at Subsonic, Transonic, and Supersonic Speeds." NACA Report 1307. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the PNK $F_{WB}/F_{BW}$ interference factors (Table 12.1). Verify and attach before camera-ready.]`
+33. Platou, A. S. (1963). "The Magnus Force on a Short Body at Supersonic Speeds." BRL Report 1193. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the Magnus body-fraction $0.3$ calibration (Section 9.9.2). Verify and attach before camera-ready.]`
 34. Puckett, A. E. and Stewart, H. J. (1947). "Aerodynamic Performance of Delta Wings at Supersonic Speeds." *Journal of the Aeronautical Sciences*, 14(10).
 35. Sutherland, W. (1893). "The Viscosity of Gases and Molecular Force." *Philosophical Magazine*, Series 5, 36(223), pp. 507--531.
 36. Tobak, M. and Wehrend, W. R. (1956). "Stability Derivatives of Cones at Supersonic Speeds." NACA TN 3788.
-37. Anderson, C. F. (1970). "An Investigation of the Aerodynamic Characteristics of the AGARD Model B for Mach Numbers from 0.2 to 1.0." AEDC-TR-70-100, Arnold Engineering Development Center.
+37. Anderson, C. F. (1970). "An Investigation of the Aerodynamic Characteristics of the AGARD Model B for Mach Numbers from 0.2 to 1.0." AEDC-TR-70-100, Arnold Engineering Development Center. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the AGARD-B benchmark (Section 11.3.5). Verify and attach before camera-ready.]`
 38. AEDC (1976). "Experimental Roll-Damping, Magnus, and Static-Stability Characteristics of Two Slender Missile Configurations at High Angles of Attack (0 to 90 Deg) and Mach Numbers 0.2 Through 2.5." AEDC-TR-76-58.
 39. US Standard Atmosphere (1976). "U.S. Standard Atmosphere, 1976." NOAA/NASA/USAF, U.S. Government Printing Office.
 40. Van Driest, E. R. (1956). "The Problem of Aerodynamic Heating." *Aeronautical Engineering Review*, 15(10), pp. 26--41.
 41. Viswanath, P. R. (1996). "Flow Management Techniques for Base and Afterbody Drag Reduction." *Progress in Aerospace Sciences*, 32(2--3), pp. 79--129.
-42. Whitcomb, R. T. (1956). "A Study of the Zero-Lift Drag-Rise Characteristics of Wing-Body Combinations Near the Speed of Sound." NACA Report 1273.
+42. Whitcomb, R. T. (1956). "A Study of the Zero-Lift Drag-Rise Characteristics of Wing-Body Combinations Near the Speed of Sound." NACA Report 1273. `[CITATION-TODO: PDF/digitized data not in repo; cited only for the method name "Whitcomb area rule" used to label the off-status integrator in Table 12.2. Drop or attach before camera-ready.]`
 43. Zipfel, P. H. (2007). *Modeling and Simulation of Aerospace Vehicle Dynamics*, 2nd ed. AIAA Education Series.
-44. Chapman, D. R., Kuehn, D. M., and Larson, H. K. (1958). "Investigation of Separated Flows in Supersonic and Subsonic Streams with Emphasis on the Effect of Transition." NACA Report 1356.
+44. Chapman, D. R., Kuehn, D. M., and Larson, H. K. (1958). "Investigation of Separated Flows in Supersonic and Subsonic Streams with Emphasis on the Effect of Transition." NACA Report 1356. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the free-interaction SBLI theory at fin roots (Section 6.8). Verify and attach before camera-ready.]`
 
 **External validation artifacts:**
 
