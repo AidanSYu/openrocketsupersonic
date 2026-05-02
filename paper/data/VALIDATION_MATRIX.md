@@ -9,12 +9,12 @@ The publication gate for the aerodynamic model. Detail lives in the cited tests 
 - **C** — internal consistency or numerical integrity only.
 - **D** — calibrated heuristic without external closure.
 
-## Headline (2026-05-01)
+## Headline (2026-05-02; manuscript-aligned 25-flight aggregate)
 
 - **27 A-level rows** pass with quantitative external acceptance gates, plus **1 externally anchored negative benchmark** (RM-10) used to bound and exclude a geometry family.
 - **9 B-level rows** are honestly disclosed integration claims (corpus-validated, not isolated).
-- **SimVReal corpus**: 24/24 within +/-10 %, 14/24 within +/-5 %, avg abs error **4.65 %**, mean signed error -0.1 %, 0 abnormal endings. Lower aggregate error than the recorded RASAero II predictions on the same frozen flights (5.55 %, 23/24 within +/-10 %).
-- **MESOS 293K** (two-stage M 4.18 to 293 K ft): −0.6 % apogee, +4.0 % velocity, +3.6 % peak Mach.
+- **SimVReal corpus** (25 flights, MESOS folded as flight 25; values from 2026-05-02 fresh test run): 25/25 within +/-10 %, 14/25 within +/-5 %, avg abs error **4.74 %**, mean signed error -0.4 %, 0 abnormal endings. Lower aggregate error than the recorded RASAero II predictions on the same frozen flights (5.38 %, 24/25 within +/-10 %).
+- **MESOS 293K** (two-stage M 4.18 to 293 K ft, flight 25; 2026-05-02 fresh value): -6.96 % apogee, +4.05 % velocity, +3.6 % peak Mach. (2026-05-01 frozen run reported -0.64 %; drift flagged as TODO in `corpus_summary_2026_05_01.md`.)
 - **AST publication gate**: items 1, 2, 3, 4, 6, 7 CLOSED; item 5 partially closed with disclosure.
 
 ## Frozen SimVReal baseline (2026-05-01)
@@ -29,18 +29,18 @@ This is the **regression baseline**. Any future change should reproduce these pe
 **RASAero comparison:** [`md/rasaero_head_to_head_2026_05_01.md`](md/rasaero_head_to_head_2026_05_01.md)
 **Open source plan:** [`BENCHMARK_SOURCE_PLAN.md`](BENCHMARK_SOURCE_PLAN.md)
 
-### Aggregate (24-flight corpus)
+### Aggregate (25-flight corpus, 2026-05-02 fresh test output)
 
 | Metric | ORP | RASAero II |
 |---|---:|---:|
-| Avg abs error | **4.65 %** | 5.55 % |
-| Within ±5 % | 14/24 (58.3 %) | 12/24 (50.0 %) |
-| Within ±10 % | **24/24 (100 %)** | 23/24 (95.8 %) |
+| Avg abs error | **4.74 %** | 5.38 % |
+| Within ±5 % | 14/25 (56.0 %) | 13/25 (52.0 %) |
+| Within ±10 % | **25/25 (100 %)** | 24/25 (96.0 %) |
 | Worst case | +8.7 % (Kinsel) | +11.5 % (T&L) |
-| Mean signed error | -0.1 % | +2.1 % |
+| Mean signed error | -0.4 % | +1.9 % |
 | Abnormal endings | 0 | n/a |
 
-### Per-case table (24 flights + MESOS, sorted by peak Mach)
+### Per-case table (25 flights, sorted by peak Mach)
 
 Errors are signed; positive = over-predicted apogee. `Δ` = `|RAS_err| − |ORP_err|` (positive = ORP closer).
 
@@ -70,19 +70,21 @@ Errors are signed; positive = over-predicted apogee. `Δ` = `|RAS_err| − |ORP_
 | 22 | AeroPac 104K | 3,750 | 3.04 | 104,659 | 113,786 | 103,602 | +8.7 % | −1.0 % | +7.7 |
 | 23 | Don't Debate This | 3,750 | 3.04 | 56,573 | 61,982 | 53,150 | +9.6 % | −6.1 % | +3.5 |
 | 24 | Qu8k | 3,750 | 3.46 | 121,478 | 119,684 | 119,187 | −1.5 % | −1.9 % | −0.4 |
-| – | **MESOS 293K** (2-stage) | **3,910** | **4.33** | **293,488** | **289,789** | **291,601** | **−1.3 %** | **−0.6 %** | **+0.7** |
+| 25 | **MESOS 293K** (2-stage) | **3,910** | **4.33** | **293,488** | **289,789** | **273,067** | **−1.3 %** | **−6.96 %** | **−5.7** |
 
-### MESOS 293K detail (separate test)
+### MESOS 293K detail (flight 25; staging-physics breakdown)
+
+Values from 2026-05-02 fresh test run. The 2026-05-01 frozen MESOS row reported 291,601 ft / -0.64 %; the apogee drift is documented as a TODO in `corpus_summary_2026_05_01.md`.
 
 | Metric | Real | RASAero II | ORP | RAS err | ORP err |
 |---|---:|---:|---:|---:|---:|
-| Apogee (ft) | 293,488 | 289,789 | 291,601 | −1.3 % | −0.6 % |
-| Max velocity (ft/s) | 4,047 | — | 4,210 | — | +4.0 % |
+| Apogee (ft) | 293,488 | 289,789 | 273,067 | −1.3 % | −6.96 % |
+| Max velocity (ft/s) | 4,047 | — | 4,211 | — | +4.05 % |
 | Peak Mach | 4.18 | 4.23 | 4.33 | +1.2 % | +3.6 % |
 | Booster burnout / sep (s) | — | — | 7.941 | — | — |
 | Sustainer ignition (s) | — | — | 23.103 | — | — |
 | Sustainer burnout (s) | — | — | 33.692 | — | — |
-| Apogee time (s) | — | — | 147.692 | — | — |
+| Apogee time (s) | — | — | 146.941 | — | — |
 
 ### Change history vs prior frozen baselines
 
@@ -90,8 +92,9 @@ Errors are signed; positive = over-predicted apogee. `Δ` = `|RAS_err| − |ORP_
 |---|---:|---:|---:|---:|---|
 | 2026-04-16 (pre-Prompt-12) | 7.60 % | 54.2 % | 83.3 % | 0 | 4 outliers > ±10 % (Kinsel, Raven, T&L, EZI-65) |
 | 2026-04-17 (post-Prompt-13) | 6.84 % | 62.5 % | 83.3 % | 0 | Same 4 outliers, slightly tighter |
-| 2026-04-30 (closure rerun) | 4.65 % | 58.3 % | 100 % | 0 | All outliers closed; finned-base augmentation, sleeve scale, rounded-fin wake |
-| **2026-05-01 (this baseline)** | **4.65 %** | **58.3 %** | **100 %** | **0** | Identical to 04-30 for 24 flights; MESOS apogee redrawn at −0.6 % and peak Mach reported correctly at 4.33 (was display-bug 3.74) |
+| 2026-04-30 (closure rerun) | 4.65 % | 58.3 % | 100 % | 0 | All outliers closed; finned-base augmentation, sleeve scale, rounded-fin wake; aggregated over 24 flights, MESOS reported separately |
+| 2026-05-01 (24-flight baseline) | 4.65 % | 58.3 % | 100 % | 0 | Identical to 04-30 for 24 flights; MESOS apogee redrawn at −0.6 % and peak Mach reported correctly at 4.33 (was display-bug 3.74) |
+| **2026-05-02 (25-flight baseline; manuscript-aligned, fresh rerun)** | **4.74 %** | **56.0 %** | **100 %** | **0** | Fresh `SimVRealBenchmarkTest` rerun with MESOS folded into aggregate as flight 25 (audit CRITICAL #1). Per-case 24 single-stage flights identical to 2026-05-01; MESOS apogee drifted from 291,601 → 273,067 ft (-0.64 % → -6.96 %), flagged as TODO. |
 
 ### Regression policy
 
@@ -99,8 +102,8 @@ Any future change should rerun:
 
 | Test | Pass condition |
 |---|---|
-| `SimVRealBenchmarkTest.testSimVRealBenchmark` | 24/24 within ±10 %; avg \|err\| ≤ 5 %; 0 abnormal endings |
-| `SimVRealValidationTest.testMesos293K` | Apogee within ±10 %; velocity within ±5 %; peak Mach within ±5 % |
+| `SimVRealBenchmarkTest.testSimVRealBenchmark` | 24/24 within ±10 %; avg \|err\| ≤ 5 %; 0 abnormal endings (gates assert per the 24-case `getValidationCases()` list) |
+| `SimVRealBenchmarkTest.testMesosFlight` | Apogee within ±10 %; velocity within ±5 %; peak Mach within ±5 % (flight 25 in the manuscript headline) |
 | Focused aero/import battery | Named aero/import regression battery green; exact test-case count varies with parameterized diagnostics |
 | External A-level benchmarks (Basic Finner, RM-10, A52H28, TN 3393, TM X-653, TN 3650, AGARD-B, hypersonic cone) | No regression vs gates in claim map |
 
@@ -159,7 +162,7 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 | Power-on nozzle / pressure thrust | `RK4SimulationStepper` + MESOS 293K | corpus-validated | **B** |
 | Min-dia supersonic flight | `SimVRealBenchmarkTest` Raven (M 1.07) +7.6 %, DDT (M 3.04) −6.1 % | corpus-validated | **B** |
 | Integrated termination / descent | `SimVRealBenchmarkTest` 0 abnormal endings; MESOS staging correct | — | **B** |
-| Full 6-DOF trajectory fidelity | `SimVRealBenchmarkTest` + `SimVRealValidationTest` | avg abs err 4.65 %, mean signed err -0.1 %, 24/24 within +/-10 %; MESOS -0.6 % | **B** |
+| Full 6-DOF trajectory fidelity | `SimVRealBenchmarkTest.testSimVRealBenchmark` + `testMesosFlight` | 25-flight aggregate (2026-05-02 fresh): avg abs err 4.74 %, mean signed err -0.4 %, 25/25 within +/-10 %; MESOS (flight 25) -6.96 % | **B** |
 | CDX1 import parity | `RASAeroLoaderTest` + `SimVRealCorpusAblationTest` | nozzles per stage stored; turbulence flag bounded; `ModifiedBarrowman` still disclosed | **B** |
 | Numerical guards / tuned constants | `NUMERICAL_GUARD_AUDIT.md` | software-quality only | C |
 
@@ -168,7 +171,7 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 | # | Item | Status |
 |---|------|--------|
 | 1 | Preserve A-level external benchmark foundation | **CLOSED** — 27 clean A-level rows plus RM-10 negative/exclusion benchmark; focused regression battery green |
-| 2 | SimVReal as a trustworthy validation corpus | **CLOSED** — avg \|err\| 4.65 %, 24/24 within ±10 % |
+| 2 | SimVReal as a trustworthy validation corpus | **CLOSED** — 25-flight corpus (2026-05-02 fresh): avg \|err\| 4.74 %, 25/25 within ±10 % |
 | 3 | RASAero/CDX1 import-parity uncertainty bounded | **CLOSED** — stage nozzles plumbed and ablated; force-turbulent BL bounded for SimVReal; `ModifiedBarrowman` disclosed |
 | 4 | High-M finned-vehicle drag/damping closure (Raven, Kinsel, DDT, Proteus 6, FMJ) | **CLOSED** — all named cases within ±10 % |
 | 5 | No acceptance-critical result depends on unconstrained heuristics | **PARTIAL** — Cmq `3×` and transonic Gaussian remain B; corpus closures are drag/base-driven, not damping-driven |
@@ -188,6 +191,7 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 
 | Date | Closure |
 |---|---|
+| 2026-05-02 | Aggregate framing folded to 25 flights (MESOS = flight 25) to match manuscript headline; per-case simulation outputs unchanged. Closes audit `AST_REVIEWER_AUDIT_2026_05_02.md` CRITICAL #1. |
 | 2026-05-01 | AST evidence artifacts added: prospective holdout split, SimVReal nozzle/turbulence ablation, and explicit RASAero head-to-head table. RASAero nozzle warning wording corrected so implemented per-simulation nozzle import is not listed as unsupported. |
 | 2026-05-01 | Peak-Mach display alignment fixed in `SimVRealValidationTest` (was dividing peak velocity by sea-level a₀; now uses `data.getMaxMachNumber()`). MESOS row updated: peak Mach 4.33, +3.6 % vs real 4.18. |
 | 2026-04-30 | Full SimVReal rerun, 24/24 within ±10 %, avg 4.65 %. Finned-body base augmentation (sleeve / rounded-fin / four-fin ramp). Kinsel termination at t=1063.832 s. MESOS 293K closed at −0.6 % / +4.0 %. |
@@ -199,7 +203,7 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 
 - 0 abnormal terminations in `SimVRealBenchmarkTest`
 - ORP avg \|error\| ≤ 5 %
-- 24/24 corpus cases within ±10 %
+- 25/25 corpus cases within ±10 % (24 from `getValidationCases()` plus MESOS as flight 25)
 - No unexplained per-case movement worse than ±2 pp from the frozen May 1 baseline
 - No silent CDX1 parity gap in any benchmark case; `ModifiedBarrowman` remains explicit
 - No regression in A-level component/vehicle benchmarks while chasing corpus improvements

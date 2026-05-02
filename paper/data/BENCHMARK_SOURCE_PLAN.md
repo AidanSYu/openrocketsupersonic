@@ -7,7 +7,7 @@ legacy notes or fitted constants.
 
 | Item | Current artifact | Status |
 |---|---|---|
-| SimVReal corpus baseline | `VALIDATION_MATRIX.md`, `corpus_summary_2026_05_01.md` | Frozen regression baseline: 24/24 within +/-10 %, avg abs error 4.65 %. |
+| SimVReal corpus baseline | `VALIDATION_MATRIX.md`, `corpus_summary_2026_05_01.md` | 25-flight regression baseline (24 cases plus MESOS as flight 25; 2026-05-02 fresh rerun): 25/25 within +/-10 %, avg abs error 4.74 %. |
 | Corpus ablation | `md/simvreal_corpus_ablation_2026_05_01.md` | Nozzle pressure-thrust is material; force-turbulent-BL is bounded for non-perfect-finish imports. |
 | RASAero head-to-head | `md/rasaero_head_to_head_2026_05_01.md` | Included as corpus-specific evidence, not a universal dominance claim. |
 | Prospective holdout split | `corpus_holdout_split_2026_05_01.md` | Freeze protocol for future tuning; does not retroactively promote the corpus to A-level. |

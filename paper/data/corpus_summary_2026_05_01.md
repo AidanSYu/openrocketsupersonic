@@ -1,52 +1,60 @@
 # SimVReal Corpus Frozen Baseline — 2026-05-01
 
-**Timestamp:** 2026-05-01
-**Source state:** May 1 working-tree validation snapshot on base commit `a1b79b6cd`; pin a manuscript tag before external review.
-**Scope:** 24-rocket SimVReal corpus + MESOS 293K validation case
-**Source tests:**
-- `info.openrocket.core.aerodynamics.SimVRealBenchmarkTest.testSimVRealBenchmark`
-- `info.openrocket.core.aerodynamics.SimVRealOutlierDiagnosticTest.testGenerateFullCorpusDiagnostics`
-- `info.openrocket.core.file.rasaero.importt.SimVRealValidationTest.testMesos293K`
+Updated 2026-05-02: regenerated to current 25-flight test output. Earlier 24-flight version removed from artifacts.
 
-**Diffable CSV:** [`csv/simvreal_baseline_2026_05_01.csv`](csv/simvreal_baseline_2026_05_01.csv)
+**Timestamp:** 2026-05-01 (snapshot date preserved); content refreshed 2026-05-02 from a fresh run of `SimVRealBenchmarkTest`.
+**Source state:** May 1 working-tree validation snapshot on base commit `a1b79b6cd`; pin a manuscript tag before external review.
+**Scope:** 25-flight SimVReal corpus (24 single-stage / single-burn cases from `SimVRealBenchmarkTest.getValidationCases()` plus MESOS 293K from `SimVRealBenchmarkTest.testMesosFlight` as flight 25).
+**Source tests (regenerated 2026-05-02):**
+- `info.openrocket.core.aerodynamics.SimVRealBenchmarkTest.testSimVRealBenchmark` (24 cases) — PASSED, 24/24 within ±10 %, avg \|err\| 4.65 %, 0 abnormal endings
+- `info.openrocket.core.aerodynamics.SimVRealBenchmarkTest.testMesosFlight` (MESOS 293K, flight 25) — PASSED, apogee 273,067 ft (−6.96 %), velocity +4.05 %, peak Mach 4.33
+- `info.openrocket.core.aerodynamics.SimVRealOutlierDiagnosticTest.testGenerateFullCorpusDiagnostics`
+
+**Diffable CSV:** [`csv/simvreal_baseline_2026_05_01.csv`](csv/simvreal_baseline_2026_05_01.csv) (25 rows; MESOS row regenerated from 2026-05-02 test output)
 **Ablation:** [`md/simvreal_corpus_ablation_2026_05_01.md`](md/simvreal_corpus_ablation_2026_05_01.md)
 **Holdout protocol:** [`corpus_holdout_split_2026_05_01.md`](corpus_holdout_split_2026_05_01.md)
 **RASAero head-to-head:** [`md/rasaero_head_to_head_2026_05_01.md`](md/rasaero_head_to_head_2026_05_01.md)
 
-**What changed since 2026-04-30:**
+**What changed since 2026-05-01 (24-flight) freeze:**
 
 | Area | Change |
 |---|---|
-| MESOS peak Mach reporting | `SimVRealValidationTest.reportResult` was dividing peak velocity by hardcoded sea-level a₀ (343 m/s) for *display only*. Replaced with `data.getMaxMachNumber()` (trajectory peak using altitude-correct speed of sound). Reported Mach 3.74 → 4.33; real Mach 4.18; new error +3.6 % vs −10.5 %. |
-| MESOS apogee | 289,835 → 291,601 ft (−1.2 % → −0.6 %). Drift is run-to-run integration noise; simulation logic unchanged. |
-| 24-rocket corpus | Unchanged. `SimVRealBenchmarkTest` already used `data.getMaxMachNumber()` correctly; the display bug was confined to the validation test. |
+| Aggregate framing | Folded MESOS into the headline as flight 25 to reconcile with the manuscript (`AST_REVIEWER_AUDIT_2026_05_02.md`, CRITICAL #1). Per-case 24-flight outputs unchanged. |
+| MESOS row | Regenerated from 2026-05-02 fresh test run. Apogee: 291,601 → 273,067 ft (−0.64 % → −6.96 %). Max velocity 4,210 → 4,211 ft/s (essentially unchanged). Peak Mach 4.33 unchanged. The drift between the 2026-05-01 frozen MESOS row and the 2026-05-02 fresh rerun is ~6.3 pp; both are within the per-flight regression policy gate of ±10 %, but it exceeds the ±2 pp internal regression policy and is flagged as a TODO below. |
+| 24 single-stage / single-burn flights | Per-case ORP errors identical to 2026-05-01 frozen CSV; aggregate over those 24 unchanged at 4.65 %. |
 
-## Aggregate metrics (24-flight corpus)
+## Aggregate metrics (25-flight corpus, 2026-05-02 fresh test output)
 
 | Metric | ORP | RASAero II | Δ |
 |---|---:|---:|---:|
-| Avg \|error\| | **4.65 %** | 5.55 % | ORP −0.90 pp |
-| Within ±5 % | **14/24 (58.3 %)** | 12/24 (50.0 %) | ORP +8.3 pp |
-| Within ±10 % | **24/24 (100.0 %)** | 23/24 (95.8 %) | ORP +4.2 pp |
+| Avg \|error\| | **4.74 %** | 5.38 % | ORP −0.64 pp |
+| Within ±5 % | **14/25 (56.0 %)** | 13/25 (52.0 %) | ORP +4.0 pp |
+| Within ±10 % | **25/25 (100.0 %)** | 24/25 (96.0 %) | ORP +4.0 pp |
 | Worst case | +8.7 % (Kinsel) | +11.5 % (T&L) | ORP wins |
-| Mean signed error | -0.1 % | +2.1 % | ORP closer to centered |
+| Mean signed error | −0.4 % | +1.9 % | ORP closer to centered |
 | Abnormal endings | 0 | n/a | — |
 
-## MESOS 293K (separate test)
+## MESOS 293K (flight 25; staging detail preserved)
+
+Values regenerated from 2026-05-02 fresh `testMesosFlight` run.
 
 | Metric | Real | RASAero II | ORP | RAS err | ORP err |
 |---|---:|---:|---:|---:|---:|
-| Apogee (ft) | 293,488 | 289,789 | 291,601 | −1.3 % | **−0.6 %** |
-| Max velocity (ft/s) | 4,047 | — | 4,210 | — | +4.0 % |
+| Apogee (ft) | 293,488 | 289,789 | 273,067 | −1.3 % | **−6.96 %** |
+| Max velocity (ft/s) | 4,047 | — | 4,211 | — | +4.05 % |
 | Peak Mach | 4.18 | 4.23 | 4.33 | +1.2 % | +3.6 % |
 | Booster burnout / sep (s) | — | — | 7.941 | — | — |
 | Sustainer ignition (s) | — | — | 23.103 | — | — |
+| Sustainer burnout (s) | — | — | 33.692 | — | — |
+| Apogee time (s) | — | — | 146.941 | — | — |
 
 Launch site: Black Rock Desert NV, 3,910 ft (read from CDX1 `<LaunchSite><Altitude>`).
 
-## Per-case corpus table (24 flights)
+MESOS is the only multi-stage powered-flight closure in the public corpus and is methodologically distinct (custom KIP motors loaded from `simvreal/Docs/Mesos/*.eng`; ignition delay and launch angle adjusted in the RAS reference). It is folded into the 25-flight aggregate while remaining flagged as a distinct case for staging-physics analysis. The MESOS test still passes the per-test gate (`orpApogeeFt > 240,000` and `velError < 5%`).
 
-Sorted by peak Mach ascending. Errors are signed; positive = over-predicted apogee.
+## Per-case corpus table (25 flights)
+
+Sorted by peak Mach ascending. Errors are signed; positive = over-predicted apogee. Values from 2026-05-02 test run; rows 1–24 identical to 2026-05-01 frozen CSV; row 25 (MESOS) refreshed.
 
 | # | Rocket | Launch ft | Peak M | Real ft | RAS ft | ORP ft | RAS err | ORP err | Δ (\|RAS\|−\|ORP\|) | Terminal |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
@@ -74,18 +82,18 @@ Sorted by peak Mach ascending. Errors are signed; positive = over-predicted apog
 | 22 | AeroPac 104K | 3,750 | 3.04 | 104,659 | 113,786 | 103,602 | +8.7 % | −1.0 % | **+7.7 ORP** | NORMAL |
 | 23 | Don't Debate This | 3,750 | 3.04 | 56,573 | 61,982 | 53,150 | +9.6 % | −6.1 % | **+3.5 ORP** | NORMAL |
 | 24 | Qu8k | 3,750 | 3.46 | 121,478 | 119,684 | 119,187 | −1.5 % | −1.9 % | −0.4 RAS | NORMAL |
-| – | **MESOS 293K** (2-stage) | **3,910** | **4.33** | **293,488** | **289,789** | **291,601** | **−1.3 %** | **−0.6 %** | **+0.7 ORP** | NORMAL |
+| 25 | **MESOS 293K** (2-stage) | **3,910** | **4.33** | **293,488** | **289,789** | **273,067** | **−1.3 %** | **−6.96 %** | **−5.7 RAS** | NORMAL |
 
-ORP wins decisively (≥3 pp better) on 8 flights. RASAero wins decisively on 0. Tie/marginal on 16.
+ORP wins decisively (≥3 pp better) on 8 flights. RASAero wins decisively on 3 (Rabia Short Fin Can, A-601 Kinsel, MESOS 293K). Tie/marginal on 14.
 
 ## Distributional view
 
 | Error band | ORP | RASAero II |
 |---|---:|---:|
-| Within ±2 % | 5/24 | 4/24 |
-| Within ±5 % | 14/24 | 12/24 |
-| Within ±7.5 % | 21/24 | 19/24 |
-| Within ±10 % | 24/24 | 23/24 |
+| Within ±2 % | 5/25 | 3/25 |
+| Within ±5 % | 14/25 | 13/25 |
+| Within ±7.5 % | 21/25 | 18/25 |
+| Within ±10 % | 25/25 | 24/25 |
 | Outside ±10 % | 0 | 1 (Thunder & Lightning) |
 
 ## Active mechanisms (what produced this state)
@@ -103,12 +111,16 @@ Any future change should rerun:
 
 | Test | Expected outcome |
 |---|---|
-| `SimVRealBenchmarkTest.testSimVRealBenchmark` | 24/24 within ±10 %, avg \|err\| ≤ 5 %, 0 abnormal endings |
-| `SimVRealValidationTest.testMesos293K` | Apogee within ±10 %, velocity within ±5 %, peak Mach within ±5 % |
+| `SimVRealBenchmarkTest.testSimVRealBenchmark` | 24/24 within ±10 %, avg \|err\| ≤ 5 %, 0 abnormal endings (gates assert per the 24-case `getValidationCases()` list; aggregate manuscript headline includes MESOS as flight 25) |
+| `SimVRealBenchmarkTest.testMesosFlight` | Apogee within ±10 %, velocity within ±5 %, peak Mach within ±5 % |
 | Focused aero/import battery | Named aero/import regression battery passes; exact parameterized test count varies with diagnostics |
 | External A-level benchmarks (Basic Finner, RM-10, A52H28, TN 3393, TM X-653, TN 3650, AGARD-B, hypersonic cone) | No regression |
 
 A change that moves any per-case ORP error by more than ±2 pp without an explicit mechanism note constitutes an unexplained regression.
+
+## TODO / open items
+
+- **MESOS apogee drift between 2026-05-01 (291,601 ft / −0.64 %) and 2026-05-02 fresh rerun (273,067 ft / −6.96 %).** No code change between the two runs (only `AST_REVIEWER_AUDIT_2026_05_02.md` and `cfd_inventory_2026_05_02.md` are untracked). Drift exceeds the ±2 pp internal regression policy. Source for the new value: `core/build/test-results/test/TEST-info.openrocket.core.aerodynamics.SimVRealBenchmarkTest.xml` (this run). Source for the old value: `paper/data/csv/simvreal_baseline_2026_05_01.csv` prior version (per git history). Investigate whether seed/state of the multi-stage simulation is fully deterministic; if not, decide whether to lock in the 2026-05-02 value or rerun with stricter determinism guarantees before manuscript submission.
 
 ## Where to find the detail
 
