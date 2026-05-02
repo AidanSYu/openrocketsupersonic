@@ -400,6 +400,77 @@ public class SupersonicTestRockets {
 		return rocket;
 	}
 
+	/**
+	 * Air Force Modified Finner (AFF) reference projectile.
+	 * <p>
+	 * Geometry from Bhagwandin &amp; Sahu (2013), "Numerical Prediction of Pitch
+	 * Damping Stability Derivatives for Finned Projectiles," ARL-TR-6725, US
+	 * Army Research Laboratory, November 2013 (DTIC ADA592550):
+	 * <ul>
+	 *   <li>Body diameter D = 0.030 m (1 caliber)</li>
+	 *   <li>Tangent ogive nose, 2.5 calibers long</li>
+	 *   <li>Cylindrical afterbody, 7.5 calibers long</li>
+	 *   <li>Total L/D = 10.0</li>
+	 *   <li>4 clipped-delta fins with sharp leading and trailing edges</li>
+	 *   <li>Mass 0.6643 kg, Ix = 7.197e-4 kg-m^2, Iy = 4.857e-3 kg-m^2</li>
+	 *   <li>CG located 4.8 calibers from the nose tip</li>
+	 * </ul>
+	 * AFF is geometrically distinct from the Army-Navy Basic Finner (ANF):
+	 * tangent ogive vs. 10-deg cone, clipped-delta fins vs. 1x1 cal square fins.
+	 * <p>
+	 * The fin planform dimensions are not given verbatim in the prompt context;
+	 * the values used here (root chord ~1.0 cal, tip chord ~0.5 cal, sweep
+	 * length ~0.5 cal, exposed semispan ~1.0 cal) are placeholders selected to
+	 * reproduce the "clipped-delta with sharp LE/TE" topology described in the
+	 * paper. They are NOT calibrated to AFF planform tables and should be
+	 * refined when those tables are digitized.
+	 */
+	public static Rocket makeAirForceModifiedFinner() {
+		Rocket rocket = new Rocket();
+		rocket.setName("Air Force Modified Finner (ARL-TR-6725)");
+		// Aeroballistic range / CFD model — treat as polished
+		rocket.setPerfectFinish(true);
+
+		AxialStage stage = new AxialStage();
+		stage.setName("Sustainer");
+		rocket.addChild(stage);
+
+		double d = 0.030; // 30 mm diameter (1 caliber)
+
+		// Tangent ogive nose, 2.5 calibers long
+		NoseCone nose = new NoseCone(Transition.Shape.OGIVE, 2.5 * d, d / 2.0);
+		nose.setShapeParameter(1.0);
+		nose.setName("Tangent Ogive Nose");
+		nose.setThickness(0.001);
+		nose.setFinish(ExternalComponent.Finish.POLISHED);
+		stage.addChild(nose);
+
+		// Cylindrical body, 7.5 calibers long
+		BodyTube body = new BodyTube(7.5 * d, d / 2.0, 0.001);
+		body.setName("Cylinder Afterbody");
+		body.setFinish(ExternalComponent.Finish.POLISHED);
+		stage.addChild(body);
+
+		// 4 clipped-delta fins. Geometry placeholder; see Javadoc note.
+		// Trailing edge flush with body base, sharp LE/TE -> HEXAGONAL (double-wedge).
+		double finRoot = 1.0 * d;
+		double finTip = 0.5 * d;
+		double finSweep = 0.5 * d;     // sweep distance from root LE to tip LE
+		double finSpan = 1.0 * d;      // exposed semispan
+		double finThickness = 0.08 * d;
+
+		TrapezoidFinSet fins = new TrapezoidFinSet(4, finRoot, finTip, finSweep, finSpan);
+		fins.setName("Clipped-Delta Fins");
+		fins.setCrossSection(FinSet.CrossSection.HEXAGONAL);
+		fins.setThickness(finThickness);
+		fins.setFinish(ExternalComponent.Finish.POLISHED);
+		fins.setAxialMethod(AxialMethod.BOTTOM);
+		body.addChild(fins);
+
+		rocket.enableEvents();
+		return rocket;
+	}
+
 	public static Rocket makeNasaTmX653SharpConeCylinderBluntFins() {
 		Rocket rocket = new Rocket();
 		rocket.setName("NASA TM X-653 NSCFB");

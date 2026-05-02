@@ -1,0 +1,71 @@
+# Pitch damping CFD predictions, ANF (Army-Navy Basic Finner) and AFF (Air Force Modified Finner)
+# Source: Bhagwandin, V.A. & Sahu, J., "Numerical Prediction of Pitch Damping Stability
+#         Derivatives for Finned Projectiles," ARL-TR-6725, US Army Research Laboratory,
+#         Aberdeen Proving Ground, MD, November 2013. DTIC Accession: ADA592550. Public release.
+# Tables: A-1 (ANF, delta=0 deg, fine grid) and A-2 (AFF, delta=0 deg).
+# Methods:
+#   planar_pitching   = forced planar pitch oscillation, A=0.25 deg, k=0.1
+#   lunar_coning      = lunar-coning motion, sigma=0.5 deg, Omega=0.0025 (Magnus-corrected)
+# Quantities (both nondimensional):
+#   PDM = (Cmq + Cmalpha_dot) sum, pitch damping moment coefficient sum
+#   PDF = (CNq + CNalpha_dot) sum, pitch damping force coefficient sum
+# Reference area: pi*D^2/4 with D = 0.03 m (1 caliber for both ANF and AFF).
+# Geometry summary (paper text):
+#   ANF: 10-deg cone (2.84 cal) + cylinder (7.16 cal), 1x1 caliber square fins, t=0.08 cal
+#   AFF: tangent ogive (2.5 cal) + cylinder (7.5 cal), 4 clipped-delta fins (sharp LE/TE)
+#        AFF mass=0.6643 kg, Ix=7.197e-4 kg-m^2, Iy=4.857e-3 kg-m^2, CG=4.8 cal from nose tip
+#
+# Columns: geometry, fin_cant_deg, method, mach, pdm, pdf, source
+geometry,fin_cant_deg,method,mach,pdm,pdf,source
+ANF,0,planar_pitching,0.50,-427.81,141.90,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,0.77,-480.28,152.95,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,0.93,-494.30,151.21,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,1.08,-478.35,144.87,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,1.11,-454.43,138.48,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,1.29,-440.19,132.62,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,1.50,-419.52,123.33,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,2.00,-341.93,95.02,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,2.50,-288.89,73.99,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,3.00,-249.34,57.65,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,3.50,-219.92,45.13,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,4.00,-192.52,34.48,ARL-TR-6725 Table A-1
+ANF,0,planar_pitching,4.50,-173.53,26.52,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,0.50,-392.14,144.71,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,0.77,-449.81,157.15,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,0.93,-463.48,153.81,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,1.08,-319.49,102.79,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,1.11,-339.80,110.48,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,1.29,-447.12,135.09,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,1.50,-445.80,130.95,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,2.00,-344.75,97.97,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,2.50,-339.60,88.23,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,3.00,-323.06,75.61,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,3.50,-216.74,46.43,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,4.00,-179.19,33.06,ARL-TR-6725 Table A-1
+ANF,0,lunar_coning,4.50,-143.24,20.38,ARL-TR-6725 Table A-1
+AFF,0,planar_pitching,0.60,-297.42,98.54,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,0.70,-307.85,100.53,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,0.80,-323.72,102.98,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,0.90,-355.21,107.59,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,0.95,-337.55,102.11,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,1.00,-338.09,101.77,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,1.05,-339.05,101.31,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,1.10,-331.43,98.98,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,1.30,-339.94,97.14,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,1.50,-342.18,93.62,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,1.75,-333.02,87.01,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,2.00,-319.02,79.69,ARL-TR-6725 Table A-2
+AFF,0,planar_pitching,2.50,-288.64,65.69,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,0.60,-280.74,115.45,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,0.70,-301.66,116.78,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,0.80,-320.50,124.79,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,0.90,-397.20,137.17,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,0.95,-297.70,106.60,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,1.00,-244.68,99.40,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,1.05,-271.70,102.84,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,1.10,-281.05,101.53,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,1.30,-274.58,100.75,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,1.50,-270.38,94.59,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,1.75,-284.81,87.86,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,2.00,-283.53,73.53,ARL-TR-6725 Table A-2
+AFF,0,lunar_coning,2.50,-280.74,115.45,ARL-TR-6725 Table A-2
