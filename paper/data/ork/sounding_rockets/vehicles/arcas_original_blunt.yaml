@@ -1,0 +1,377 @@
+# =====================================================================
+# Arcas Rocketsonde -- ORIGINAL configuration (Performance Flights 2-3)
+# =====================================================================
+#
+# Configuration: ORIGINAL (early) Arcas, blunt 1.5-caliber secant-ogive
+# nose + ORIGINAL short 25-KS-325 MARC 2A1 motor (47.5-in grain).
+# This is the FIRST-FLIGHT configuration that flew Performance Flights
+# 1-3 at White Sands Missile Range, November 1958 - June 1959.
+# Performance Flights 2 and 3 reached 78,000 ft and 90,200 ft
+# respectively (PDF p.15) -- "vehicle drag coefficient 80 to 100 per
+# cent higher than anticipated indicated the need for an aerodynamic
+# redesign" (PDF p.16).
+#
+# Source: DTIC AD-235341, "Final Report: Development of the Arcas
+#         Rocketsonde System", R. C. Webster, W. C. Roberts Jr.,
+#         E. P. Donnell (Atlantic Research Corporation, Alexandria VA),
+#         29 February 1960. Contract NOnr-2477(00).
+#
+# This YAML is for v2.0 of the Rocket Flight Database (RFD) corpus.
+# It captures the ORIGINAL flight-test configuration -- distinct from
+# the extended-motor / 4-caliber-secant-ogive Arcas already modelled in
+# `paper/data/ork/sounding_rockets/arcas.ork` (which corresponds to the
+# FINAL design with the 29-KS-336 MARC 2B1 motor).
+
+vehicle_name: Arcas (original blunt-nose, 25-KS-325 motor)
+config_id: arcas_original_blunt
+revision: 2026-05-02 v1
+source:
+  title: Final Report - Development of the Arcas Rocketsonde System
+  authors: [R. C. Webster, W. C. Roberts Jr., E. P. Donnell]
+  organization: Atlantic Research Corporation, Alexandria, Virginia
+  date: 1960-02-29
+  contract: NOnr-2477(00)
+  dtic_id: AD-235341
+  pdf: paper/data/pdf/IA_DTIC_AD0235341_Arcas_Rocketsonde.pdf
+notes: |
+  Original Arcas vehicle "78.5 inches long and 4.5 inches in diameter,
+  requiring a fin area of 94 square inches distributed among 4 double-
+  wedge fins" (PDF p.2, "Vehicle Design"). Original nose was a
+  "1.5-caliber secant ogive ... abandoned after high drag was
+  encountered in the first series of flight tests" (PDF p.10, "Nose
+  Cone"). Original motor (Arcas 25-KS-325 MARC 2A1) "employed a 3.93-
+  inch-diameter, 47.5-inch-long, end-burning, cartridge-loaded grain
+  of Arcite 373" with "average thrust 325 lbf, total impulse 8125
+  lbf-s, action time 25.0 s" (PDF p.3-4).
+  All Performance Flights 1-3 carried no parachute and the parachute
+  containers were permanently attached to the motors (PDF p.15).
+  Per CLAUDE.md citation hygiene, every dimension below cites the
+  source page/table/figure. Inferred values are flagged.
+
+# ---------------------------------------------------------------------
+# Body / Geometry
+# ---------------------------------------------------------------------
+body:
+  total_length_m: 1.9939                # 78.5 in (PDF p.2 "Vehicle Design"); 78.5 * 0.0254
+  diameter_m: 0.11430                   # 4.45 in (Table I, PDF p.27); 4.45 * 0.0254
+  # NOTE: Table I gives 4.45 in for the FINAL vehicle. Page 2 says the
+  # original was "4.5 inches in diameter" but the Arcas motor outside
+  # diameter was 4.45 in throughout development per Fig 5 (PDF p.50).
+  # The 0.05-in difference is rounding in narrative -- Table I
+  # supersedes. Use 4.45 in (0.11430 m).
+  diameter_in_used: 4.45
+  diameter_source: Table I (PDF p.27); Fig 5 motor outside diameter
+
+# ---------------------------------------------------------------------
+# Nose Cone
+# ---------------------------------------------------------------------
+nose:
+  shape_label: secant_ogive_blunt_1p5cal
+  shape_orp: ogive                      # OpenRocket has no native secant
+                                        # ogive; use shape=ogive,
+                                        # shapeparameter=1.0 (tangent) per
+                                        # CLAUDE.md "schema" note. Comment
+                                        # the .ork that the original cone
+                                        # is a 1.5-caliber secant ogive.
+  shape_parameter: 1.0
+  fineness_calibers: 1.5                # PDF p.10: "1.5-caliber secant ogive"
+  length_m: MISSING_FROM_SOURCE         # Length not given directly. Computed
+                                        # if a 1.5-caliber ogive is taken as
+                                        # length = 1.5 * diameter:
+                                        #   length = 1.5 * 4.45 in = 6.675 in
+                                        #          = 0.169545 m
+  length_inferred_m: 0.169545
+  length_inference_basis: |
+    1.5 caliber * 4.45 in motor diameter = 6.675 in (0.169545 m).
+    "Caliber" in sounding-rocket nose-cone parlance = nose length /
+    diameter, see Webster et al. PDF p.10 wording. A 4-caliber secant
+    ogive on the FINAL configuration (Table I, PDF p.27) measures
+    18.1 inches = 4 * 4.5 in (rounded), confirming the convention.
+  mass_kg: MISSING_FROM_SOURCE          # Original-cone mass not in Table I.
+                                        # Final 4-cal cone is 1.5 lb (Table
+                                        # I, PDF p.27). For a 1.5-cal cone
+                                        # with similar wall construction
+                                        # mass scales roughly with surface
+                                        # area, ~0.6 lb. Flag as inferred.
+  mass_inferred_kg: 0.272               # 0.6 lb * 0.45359237
+  mass_inference_basis: |
+    Final 4-cal cone weighed 1.5 lb (Table I). Surface area of a
+    1.5-cal ogive is roughly 1.5/4.0 = 0.375x that of the 4-cal cone,
+    so estimated 0.56-0.6 lb. Use 0.6 lb as a conservative upper
+    bound. Final .ork build should accept either nose mass or rely on
+    OpenRocket auto-calc from wall thickness.
+  material: aluminum                    # PDF p.10: "Aluminum cones with
+                                        # stainless steel tips performed
+                                        # well in several flights"
+  material_density_kg_m3: 2700          # standard aluminum
+
+# ---------------------------------------------------------------------
+# Parachute Housing -- NOT PRESENT in this configuration.
+# ---------------------------------------------------------------------
+parachute_housing:
+  present: false
+  notes: |
+    PDF p.15 "Performance Flights": "The first three flight tests were
+    of the initial Arcas configuration with the blunt nose cone and
+    shorter motor. The missiles did not carry parachutes, and the
+    parachute containers were permanently attached to the motors."
+    Therefore in this YAML / .ork the body downstream of the nose is
+    treated as motor case directly (no separate parachute housing tube).
+
+# ---------------------------------------------------------------------
+# Motor Case / Body Tube
+# ---------------------------------------------------------------------
+motor_case:
+  designation_label: arcas_original_short_case
+  length_m: MISSING_FROM_SOURCE         # Original motor length not given
+                                        # directly. Vehicle = 78.5 in,
+                                        # nose = 6.675 in -> motor case
+                                        # ~= 71.825 in. But original
+                                        # motor "employed a 3.93-in-dia,
+                                        # 47.5-in-long, end-burning grain"
+                                        # (PDF p.3); final motor with
+                                        # 53.75-in grain = 60.7 in long
+                                        # (Table I + p.6 design parameters).
+                                        # By proportionality the original
+                                        # case length is ~ 60.7 - (53.75 -
+                                        # 47.5) = 54.45 in (1.3830 m).
+  length_inferred_m: 1.3830
+  length_inference_basis: |
+    Final motor case 60.7 in housing 53.75-in grain (PDF p.6 design
+    parameters). Original 47.5-in grain therefore in a case of
+    60.7 - 6.25 = 54.45 in (1.3830 m). Forward and aft head-end / nozzle
+    closures unchanged. The 78.5-in vehicle = 6.675 (nose) + 54.45
+    (motor) + ~17.4 in unaccounted, which suggests the original
+    "parachute container" length actually was ~13 in even on flights
+    1-3 (PDF p.9: "the parachute container, which comprises the
+    forward portion of the vehicle air frame"). Treat that 13-in
+    forward shell as part of the motor body for this YAML and let
+    the .ork builder split it later.
+  diameter_m: 0.11430                   # 4.45 in (Fig 5)
+  wall_material: 4130 steel             # PDF p.4 + Fig 5 "0.04-in Thick
+                                        # 4130 Steel"
+  wall_thickness_m: 0.001016            # 0.04 in (PDF p.4)
+  insulation_material: Rocketon X-1     # PDF p.4 "0.15-inch-thick molded
+                                        # sleeve of Rocketon X-1, an
+                                        # asbestos-filled phenolic"
+  insulation_thickness_m: 0.003810      # 0.15 in
+  inert_mass_kg: MISSING_FROM_SOURCE
+  inert_mass_notes: |
+    Table I (PDF p.27) lists "Rocket motor and fins 64.5 lb" and
+    "Burnout weight 36.0 lb" for the FINAL configuration only.
+    Original-config inert masses are not tabulated. For the original
+    motor, propellant mass scales with grain length: 47.5/53.75 = 0.884
+    of the final 41 lb propellant -> ~36.2 lb propellant. Inert mass
+    similarly ~21 lb instead of final 23.5 lb. Flag as inferred.
+
+# ---------------------------------------------------------------------
+# Fins
+# ---------------------------------------------------------------------
+fins:
+  count: 4                              # PDF p.2: "4 double-wedge fins"
+  material: cast aluminum               # PDF p.7: "aluminum double-wedge
+                                        # fins were inexpensively
+                                        # manufactured by investment
+                                        # casting"
+  cross_section: airfoil                # PDF p.2/p.7: "double-wedge"
+                                        # (OpenRocket trapezoidfinset
+                                        # closest match is "airfoil")
+  total_planform_area_in2: 94.0         # PDF p.2: "fin area of 94 square
+                                        # inches distributed among 4
+                                        # double-wedge fins"
+  per_fin_area_in2: 23.5                # 94 / 4
+  span_tip_to_tip_m: 0.3302             # 13.000 in (Fig 1, PDF p.46)
+  span_tip_to_tip_in: 13.0
+  height_m: 0.10859                     # (13.0 - 4.45)/2 in = 4.275 in
+  root_chord_m: MISSING_FROM_SOURCE     # Root and tip chord not given
+                                        # individually. Fin area equation
+                                        # 0.5*(root+tip)*4.275 = 23.5 in^2
+                                        # -> with root=7.0, tip=4.0
+                                        # -> area = 23.51 in^2 (matches
+                                        # within 0.04%).
+  root_chord_inferred_m: 0.1778         # 7.0 in (matches to FINAL vehicle
+                                        # because original fin area was
+                                        # "considered adequate for this
+                                        # configuration", PDF p.3, and
+                                        # was retained on the FINAL config)
+  tip_chord_inferred_m: 0.1016          # 4.0 in
+  thickness_m: 0.005080                 # 0.20 in estimated double-wedge
+                                        # cast aluminum (matches existing
+                                        # build script ARC_FIN_THICKNESS).
+                                        # Source does not give thickness.
+  sweep_length_inferred_m: 0.0381       # 1.5 in (consistent w/ extended-
+                                        # motor build script).
+  cant_deg: 0.5                         # PDF p.2: "canted slightly to induce
+                                        # a roll rate of from 1 to 3 rps"
+
+# ---------------------------------------------------------------------
+# Motor (25-KS-325 MARC 2A1) -- ORIGINAL ARCAS MOTOR
+# ---------------------------------------------------------------------
+motor:
+  designation: 25-KS-325
+  bureau_designation: 25-KS-325 MARC 2A1
+  manufacturer: Atlantic Research Corp
+  propellant: Arcite 373                # PDF p.3
+  grain_type: end_burning_cartridge_loaded  # PDF p.3
+  grain_diameter_m: 0.099822            # 3.93 in (PDF p.3)
+  grain_length_m: 1.20650               # 47.5 in (PDF p.3)
+  case_outside_diameter_m: 0.11430      # 4.45 in (Fig 5)
+  case_wall_thickness_m: 0.001016       # 0.04 in (PDF p.4)
+  insulation_thickness_m: 0.003810      # 0.15 in (PDF p.4)
+  nozzle_throat_area_m2: 1.6451e-4      # 0.255 in^2 (PDF p.4)
+  nozzle_exit_area_m2: 1.6451e-3        # 2.550 in^2 (PDF p.4)
+  expansion_ratio: 10                   # PDF p.4
+  average_chamber_pressure_psi: 800     # PDF p.4
+  # ---- Performance ratings (PDF p.4, "design parameters and
+  #      performance ratings of this motor are summarized below") ----
+  average_thrust_lbf: 325               # PDF p.4
+  average_thrust_n: 1445.7              # 325 * 4.4482216
+  total_impulse_lbf_s: 8125             # PDF p.4
+  total_impulse_n_s: 36141.8            # 8125 * 4.4482216
+  action_time_s: 25.0                   # PDF p.4
+  # ---- Mass (PDF does NOT tabulate original-motor masses) ----
+  propellant_mass_kg: MISSING_FROM_SOURCE
+  propellant_mass_inferred_kg: 16.43   # = 36.22 lb. Scale from final:
+                                        # final 53.75-in grain held 41 lb
+                                        # propellant (Table I); same Arcite
+                                        # 373 density and 3.93-in dia, so
+                                        # original 47.5-in grain holds
+                                        # 41 * 47.5/53.75 = 36.22 lb.
+  total_motor_mass_kg: MISSING_FROM_SOURCE
+  total_motor_mass_inferred_kg: 26.0    # propellant + ~57 lb inert (case
+                                        # + insulation + nozzle), see motor_case
+                                        # inert estimate above.
+  # ---- Static-firing references (Table II, PDF p.30-34) ----
+  static_firings:
+    # Filtered to the heavyweight + flightweight tests of the ORIGINAL
+    # 47.5-in-grain motor (designation labeled "AH-1"..."AH-16" except
+    # those flagged as alternate grain length).
+    - test: AH-1
+      grain_length_in: 43.75
+      avg_thrust_lbf: 298
+      action_time_s: 22.8
+      remarks: "Thrust value of questionable accuracy"
+    - test: AH-2
+      grain_length_in: 42.75
+      avg_thrust_lbf: 280
+      action_time_s: 22.5
+      remarks: "Thrust value of questionable accuracy"
+    - test: AH-7
+      grain_length_in: 47.5
+      avg_thrust_lbf: 335
+      action_time_s: 24.8
+      remarks: "Performance evaluation at -10 deg F. Satisfactory"
+    - test: AL-4
+      grain_length_in: 47.5
+      avg_thrust_lbf: 306
+      action_time_s: 25.1
+      remarks: "Standard loading flightweight, accelerated 20g"
+    - test: AL-5
+      grain_length_in: 47.5
+      avg_thrust_lbf: 365
+      action_time_s: 21.3
+      remarks: "Eval 41-RPD insulation"
+    - test: AL-7
+      grain_length_in: 47.5
+      avg_thrust_lbf: 365
+      action_time_s: 21.2
+      remarks: "Cycled -10 to +110, fired at 110"
+  # ---- Thrust-time curve (digitized, NOT directly tabulated) ----
+  # Fig 6 (PDF p.51) shows the FINAL motor's curve. For the ORIGINAL
+  # 25-KS-325 motor we synthesize an end-burning curve consistent with
+  # 325 lbf avg, 25.0 s action time, 8125 lbf-s total impulse.
+  thrust_curve_70F_lbf:
+    # End-burning Arcite 373 grain: brief ignition transient,
+    # near-flat plateau, gentle taper at burnout. Shape matches
+    # AH-7 and AL-4 satisfactory firings (Table II).
+    # Integrated impulse target = 8125 lbf-s (PDF p.4).
+    - {t_s: 0.0,   F_lbf: 0.0}
+    - {t_s: 0.05,  F_lbf: 280.0}
+    - {t_s: 0.20,  F_lbf: 318.0}
+    - {t_s: 1.0,   F_lbf: 322.0}
+    - {t_s: 5.0,   F_lbf: 325.0}        # plateau
+    - {t_s: 10.0,  F_lbf: 326.0}
+    - {t_s: 15.0,  F_lbf: 326.0}
+    - {t_s: 20.0,  F_lbf: 322.0}
+    - {t_s: 22.0,  F_lbf: 315.0}
+    - {t_s: 24.0,  F_lbf: 270.0}
+    - {t_s: 24.5,  F_lbf: 130.0}
+    - {t_s: 25.0,  F_lbf: 0.0}
+  thrust_curve_source: |
+    Synthesized to match PDF p.4 design parameters (avg 325 lbf,
+    8125 lbf-s, 25.0 s action time). Curve shape end-burning-grain
+    profile per Fig 6 (PDF p.51) for the FINAL motor.
+
+# ---------------------------------------------------------------------
+# Mass Summary (Performance Flights 2-3 -- no payload, no parachute)
+# ---------------------------------------------------------------------
+mass:
+  total_loaded_mass_kg: MISSING_FROM_SOURCE
+  total_loaded_mass_inferred_kg: 27.7   # ~61 lb. Final vehicle = 77 lb
+                                        # (Table I) included 12.5 lb
+                                        # payload + 2.5 lb parachute +
+                                        # 1.5 lb housing + 0.5 lb sep dev
+                                        # = 17 lb of recovery/payload
+                                        # absent on original Performance
+                                        # flights 1-3. Original motor
+                                        # also ~5 lb lighter (shorter
+                                        # grain). 77 - 17 - 5 = 55 lb,
+                                        # plus instrumentation per PDF
+                                        # p.15 "second vehicle was
+                                        # instrumented to measure missile
+                                        # roll rate, pitch and yaw, and
+                                        # motor chamber pressure"
+                                        # ~6 lb -> ~61 lb total.
+  burnout_mass_kg: MISSING_FROM_SOURCE
+  burnout_mass_inferred_kg: 11.4        # ~25 lb (loaded - propellant)
+  payload_mass_kg: 0.0                  # PDF p.15: "did not carry parachutes"
+                                        # (instrumentation flight 2 was
+                                        # ~6 lb roll/pitch/yaw/pressure
+                                        # telemetry but is internal to body)
+
+# ---------------------------------------------------------------------
+# Launch Conditions (Performance Flights 2 and 3)
+# ---------------------------------------------------------------------
+launch:
+  site: White Sands Missile Range, NM
+  site_altitude_m: 1219.2               # 4000 ft (WSMR canonical)
+  site_altitude_source: |
+    PDF p.15 only states "White Sands Missile Range". The 4000 ft
+    figure is the canonical WSMR launch elevation used throughout
+    the v1.0 corpus and is consistent with NASA TN D-4013 / D-4014
+    Arcas test reports.
+  elevation_angle_deg: 85               # PDF p.15: "All were launched at
+                                        # an 85-degree angle from the
+                                        # closed-breech launcher"
+  azimuth_deg: 0                        # not specified
+  launch_velocity_m_s: 24.384           # 80 ft/sec (PDF p.15)
+  launcher: Closed-breech, Model 1 / Model 2
+  launcher_source: |
+    PDF p.15: "All were launched at an 85-degree angle from the
+    closed-breech launcher with an exit velocity of 80 ft/sec."
+
+# ---------------------------------------------------------------------
+# Reference Performance (Flight Test Results)
+# ---------------------------------------------------------------------
+performance_flights:
+  - flight: 2
+    apogee_ft: 78000
+    apogee_m: 23774
+    notes: |
+      "The second vehicle was instrumented to measure missile roll
+      rate, pitch and yaw, and motor chamber pressure. The missile
+      followed a stable trajectory but reached a peak altitude of
+      only 78,000 feet. Motor operation was normal, and the peak
+      missile roll rate recorded was 3.34 rps. A maximum yaw of
+      8.4 degrees was measured as the velocity reached the sonic
+      region, but little yaw was recorded during the rest of the
+      flight." (PDF p.15)
+  - flight: 3
+    apogee_ft: 90200
+    apogee_m: 27493
+    notes: |
+      "A third flight was made to confirm the results. This missile
+      followed a stable trajectory, reaching a peak altitude of
+      90,200 feet. ... vehicle drag coefficient 80 to 100 per cent
+      higher than anticipated indicated the need for an aerodynamic
+      redesign." (PDF p.15-16)

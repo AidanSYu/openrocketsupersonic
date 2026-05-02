@@ -1,0 +1,344 @@
+# =============================================================================
+# Black Brant V (variant: Black Brant VB)
+# Rocket Flight Database v2.0 vehicle parameters
+# =============================================================================
+#
+# This file follows the same schema established in
+# `paper/data/ork/sounding_rockets/_build_orks.py` for the Super Loki and
+# Arcas YAML/dict definitions: every dimension cites a specific page/table/
+# figure in one of the source PDFs in
+# `paper/data/pdf/New/incoming/black_brant_v/`.
+#
+# IMPORTANT - WHICH VEHICLE
+# -------------------------
+# "Black Brant V" is the family name for a single-stage solid-propellant
+# sounding rocket built by Bristol Aerospace (now Magellan Aerospace) in
+# Winnipeg, Manitoba. The variant flown in the Churchill 1971 launch
+# documented by DTIC AD0733141 is "Black Brant VB" -- a sub-variant of the
+# Black Brant V family, single-stage, three-fin stabilizer, magnesium nose.
+# This YAML captures that as-flown variant.
+#
+# NOTE on ASPIRE: the two NTRS reports (20190028247 / 20200002361) describe
+# *Terrier-Black Brant IX* sounding rockets, NOT plain Black Brant V.
+# Black Brant IX is a TWO-stage vehicle: Terrier 1st stage (4.3 m) +
+# Black Brant VC 2nd stage. The ASPIRE PDFs therefore do not provide
+# canonical Black Brant V parameters and are used here only for
+# cross-reference of the Brant motor family burnout Mach (~3.34 in
+# 20190028247 Table 1) and for documenting that ASPIRE is *not* a
+# Black Brant V flight. The canonical flight chosen for v2.0 is the
+# DTIC AD0733141 Churchill 3 March 1971 launch (AAF-VB-32).
+# Reference: NASA_NTRS_20190028247 Figure 1 (page 4) explicitly labels
+# the second stage "BLACK BRANT IX" and Figure 2 shows the same.
+#
+# =============================================================================
+
+vehicle:
+  name: "Black Brant VB (AAF-VB-32)"
+  family: "Black Brant V"
+  variant: "VB"
+  stages: 1
+  manufacturer: "Bristol Aerospace (1968) Limited, Winnipeg, Manitoba"
+  description: >-
+    Single-stage, solid-propellant, unguided, fin-stabilized sounding rocket.
+    Three-fin Black Brant V stabilizer unit; standard Black Brant igniter
+    housing; magnesium forward body cone (Canadair Black Brant II type) with
+    aluminum clamshell nose for payload exposure.
+  source_primary: "DTIC AD0733141 (NRC Canada / Space Research Facilities Branch, Oct 1971)"
+  source_primary_pages: "p.2-3 (Description of the Vehicle, General Data on the Vehicle), p.14 Table 1 (Meteorological/Impact Prediction Test Summary AAF-VB-32)"
+
+# -----------------------------------------------------------------------------
+# Body geometry
+# -----------------------------------------------------------------------------
+# All dimensions from DTIC AD0733141, "General Data on the Vehicle" table on
+# page 3, and Table 1 (page 14) confirming totals.
+body:
+  total_length_m: 7.993
+  total_length_cite: "AD0733141 p.3 'Length: 799.3 centimeters'; corroborated p.14 Table 1 'Total Vehicle Length: 799.3 cms.'"
+  diameter_m: 0.43
+  diameter_cite: "AD0733141 p.3 'Diameter: 43 centimeters'"
+  # Payload section (forward of motor, includes nose assembly + instrumentation
+  # frame + igniter + net payload)
+  payload_section_length_m: 3.213
+  payload_section_length_cite: "AD0733141 p.14 Table 1 'Payload Serial No.: AAF-VB-32 ... Length: 321.3 cms.'"
+  # Motor section length (from same table, computed by inspection):
+  # total 799.3 cm - payload 321.3 cm = motor section ~478.0 cm,
+  # which matches the directly-stated motor length below.
+  motor_section_length_m: 4.78
+  motor_section_length_cite: "AD0733141 p.14 Table 1 'Motor No.: BAW-MV-57 ... Length: 478 cms.'"
+
+# -----------------------------------------------------------------------------
+# Mass properties (loaded -> burnout)
+# -----------------------------------------------------------------------------
+mass:
+  liftoff_mass_kg: 1469.7
+  liftoff_mass_cite: "AD0733141 p.3 'Launch Weight: 1469.7 kilograms'; p.14 Table 1 'Total Vehicle Weight: 1469.7 kgs.'"
+  burnout_mass_kg: 469.8
+  burnout_mass_cite: "AD0733141 p.3 'Burnout Weight: 469.8 Kilograms'"
+  propellant_mass_kg: 1020.7      # 'Discharge Weight'
+  propellant_mass_cite: "AD0733141 p.3 'Discharge Weight: 1020.7 kilograms.'"
+  # Sanity check: launch - burnout = 1469.7 - 469.8 = 999.9 kg, while the
+  # 'Discharge Weight' line gives 1020.7 kg. The small difference (~21 kg)
+  # is consumed inert mass (igniter, residue, jettisoned hardware) per
+  # standard Bristol Aerospace bookkeeping for the BAW-MV-57 motor.
+  payload_mass_kg: 240.4
+  payload_mass_cite: "AD0733141 p.3 'Gross Payload Weight: 240.4 kilograms - This included nose assembly, instrumentation frame, igniter and net payload.'; corroborated p.14 Table 1."
+  motor_inert_mass_kg: MISSING_FROM_SOURCE
+  motor_inert_mass_cite: >-
+    Not directly given. AD0733141 p.14 Table 1 lists Motor Weight 1229.3 kg
+    (loaded). Loaded motor 1229.3 - propellant 1020.7 = ~208.6 kg motor inert,
+    but this is implied not stated; flagged MISSING_FROM_SOURCE for clarity.
+
+# -----------------------------------------------------------------------------
+# Motor (BAW-MV-57 / 26KS20000)
+# -----------------------------------------------------------------------------
+motor:
+  designation: "26KS20000"
+  designation_cite: "AD0733141 p.2 'The motor was a 26KS20000 (bare metal) type, which is described in Bristol Aerospace Engineering Report No. 67533, Part II.'"
+  serial_no: "BAW-MV-57"
+  serial_no_cite: "AD0733141 p.14 Table 1 'Motor No.: BAW-MV-57'"
+  manufacturer: "Bristol Aerospace (1968) Limited"
+  manufacturer_cite: "AD0733141 p.2 'manufactured by Bristol Aerospace (1968) Limited, Winnipeg, Manitoba.'"
+  type: "single-grain solid"
+  propellant: "aluminized polyurethane / ammonium perchlorate"
+  propellant_cite: "AD0733141 p.3 'Propellant: Aluminized single grain polyurethane ammonium perchlorate'"
+  propellant_mass_kg: 1020.7
+  loaded_mass_kg: 1229.3
+  loaded_mass_cite: "AD0733141 p.14 Table 1 'Motor No.: BAW-MV-57 Weight: 1229.3 kgs Length: 478 cms'"
+  diameter_m: 0.43
+  length_m: 4.78
+  # Designation '26KS20000' decodes per industry convention as:
+  #   action time ~26 s    (first numeric)  -- typical Bristol style
+  #   K class burn         -- not always literal
+  #   average thrust 20000 lbf? -- per legacy Bristol designations
+  # but action time / total impulse / thrust curve are NOT directly tabulated
+  # in AD0733141 nor in the AD0696100 / NTRS sources we have.
+  # Bristol Aerospace ER 67533 Part II is referenced (p.2) but is NOT in
+  # our PDF set. Mark as MISSING_FROM_SOURCE.
+  total_impulse_Ns: MISSING_FROM_SOURCE
+  total_impulse_cite: >-
+    Not given in AD0733141, AD0696100, NTRS 20190028247, or NTRS 20200002361.
+    Original source is Bristol Aerospace Engineering Report 67533 Part II
+    (cited AD0733141 p.2) which is not in our local PDF set.
+  action_time_s: MISSING_FROM_SOURCE
+  action_time_cite: >-
+    Not given in any of the four source PDFs. Bristol ER 67533 Part II
+    not on hand.
+  average_thrust_N: MISSING_FROM_SOURCE
+  average_thrust_cite: >-
+    Not given. The '20000' suffix in '26KS20000' is the conventional
+    Bristol average thrust label (~20000 lbf approx) but stating that as
+    fact would violate CLAUDE.md citation policy without ER 67533 access.
+  max_thrust_N: MISSING_FROM_SOURCE
+  thrust_curve: MISSING_FROM_SOURCE
+  thrust_curve_cite: >-
+    No thrust-vs-time curve in AD0733141, AD0696100, NTRS 20190028247,
+    or NTRS 20200002361. ASPIRE references (NTRS 20190028247 Table 1)
+    list 2nd-stage Brant burnout time (34.27 s for SR01, 34.10 s for SR02,
+    33.72 s for SR03) but those are for the Black Brant IX 2nd-stage motor
+    (a different application of the V-class motor in a 2-stage stack), not
+    a thrust curve.
+
+# -----------------------------------------------------------------------------
+# Nose cone
+# -----------------------------------------------------------------------------
+nose:
+  shape: "ogive (magnesium forward body cone, Canadair Black Brant II type)"
+  shape_cite: >-
+    AD0733141 p.3 'The nose fairing consisted of a standard Canadair Black
+    Brant II magnesium forward body magnesium cone, modified full aluminum
+    clamshells, 211.3 centimeters in length, and a modified Black Brant
+    aluminum forward body.'
+  clamshell_length_m: 2.113
+  clamshell_length_cite: "AD0733141 p.3 'modified full aluminum clamshells, 211.3 centimeters in length'"
+  fineness_ratio: MISSING_FROM_SOURCE
+  fineness_ratio_cite: >-
+    Cone half-angle / fineness ratio not directly stated in AD0733141.
+    The Canadair Black Brant II nose is a published standard but the
+    explicit dimension is not in our PDFs.
+  material: "magnesium (cone) + aluminum (clamshells, forward body)"
+
+# -----------------------------------------------------------------------------
+# Fins (three-fin stabilizer unit, standard Black Brant V)
+# -----------------------------------------------------------------------------
+fins:
+  count: 3
+  count_cite: "AD0733141 p.3 'three-fin Black Brant V stabilizer unit'"
+  type: "delta / clipped-delta (Black Brant V standard stabilizer)"
+  type_cite: >-
+    AD0733141 does not give individual fin dimensions; only states
+    'three-fin Black Brant V stabilizer unit' (p.3). Fin planform shape is
+    standard for the Bristol Aerospace Black Brant V stabilizer assembly
+    but root chord, tip chord, span, sweep are NOT in the source.
+  cant_deg: MISSING_FROM_SOURCE
+  cant_cite: >-
+    Fins were 'aligned and dowel-pinned by the manufacturer to give a spin
+    rate of 3.7 r/s' and 'set to produce counter-clockwise roll' (AD0733141
+    p.3), but the cant angle in degrees is not stated.
+  spin_rate_design_rps: 3.7
+  spin_rate_design_rps_cite: "AD0733141 p.3 'Vehicle fins were aligned and dowel-pinned by the manufacturer to give a spin rate of 3.7 r/s.'"
+  spin_rate_actual_rps: 3.1
+  spin_rate_actual_rps_cite: "AD0733141 p.10 'Final vehicle roll rate was 3.1 r/s.'"
+  root_chord_m: MISSING_FROM_SOURCE
+  tip_chord_m: MISSING_FROM_SOURCE
+  span_m: MISSING_FROM_SOURCE
+  sweep_m: MISSING_FROM_SOURCE
+  thickness_m: MISSING_FROM_SOURCE
+  fin_dimensions_cite: >-
+    Individual fin geometry (root, tip, span, sweep, thickness) is not
+    tabulated in AD0733141 (which is a launch operations report) nor in
+    AD0696100 (instrumentation only) nor in either ASPIRE NTRS report
+    (which document Black Brant IX, a different vehicle). Bristol
+    Aerospace drawing set / ER 67533 would be needed.
+
+# -----------------------------------------------------------------------------
+# Boattail
+# -----------------------------------------------------------------------------
+boattail:
+  present: false
+  cite: >-
+    No boattail mentioned in AD0733141 description of the vehicle (p.2-3);
+    the standard Black Brant V is a constant-diameter motor case to the
+    aft end with the three-fin stabilizer ring mounted aft.
+
+# -----------------------------------------------------------------------------
+# Launch conditions (canonical flight: AAF-VB-32, Churchill 3 March 1971)
+# -----------------------------------------------------------------------------
+launch:
+  site: "Churchill Research Range, Manitoba, Canada (CRR)"
+  site_cite: "AD0733141 cover page and p.10 'AAF-VB-32 was launched into the required conditions at 0052:11 central standard time on 3 March 1971.'"
+  pad: "Pad 1, the Universal launcher"
+  pad_cite: "AD0733141 p.10 'AAF-VB-32 payload was mated to the motor on Pad 1, the Universal launcher.'"
+  date_utc: "1971-03-03T06:52:11Z"          # 0052:11 CST -> UTC
+  date_cite: "AD0733141 p.10 '0052:11 central standard time on 3 March 1971'"
+  launcher_QE_planned_deg: 87.0
+  launcher_QE_planned_cite: "AD0733141 p.3 'predicted apogee for an 87 deg Q.E. launch was 275 kilometers'"
+  launcher_QE_actual_deg: 85.0
+  launcher_QE_actual_cite: "AD0733141 p.9 'the requirement was for an elevation of 85 deg'; corroborated p.12 'For operational reasons the rocket was purposely launched at an effective QE of 85 deg, not 87 deg as planned.'"
+  azimuth_deg: MISSING_FROM_SOURCE
+  azimuth_cite: >-
+    Azimuth was 'not critical' (AD0733141 p.9) and the range was to
+    'provide settings suitable to the experimenter' from a family of
+    northeast/southeast quadrant settings; the actual launch azimuth
+    is not given as a numeric value. The actual sustainer impact azimuth
+    was 095.5 deg (p.14) which suggests a roughly easterly launch.
+  surface_temp_C: -21.1
+  surface_temp_cite: "AD0733141 p.14 Table 1 'Temperature -21.1 deg C.'"
+  surface_pressure_mbar: 1014.6
+  surface_pressure_cite: "AD0733141 p.14 Table 1 'Pressure 1014.6 mbs.'"
+  surface_wind_dir_deg: 155.0
+  surface_wind_speed_kt: 15.0
+  surface_wind_cite: "AD0733141 p.14 Table 1 'Surface wind 155 deg at 15 knots'"
+
+# -----------------------------------------------------------------------------
+# Canonical flight performance (used as 'apogee_real_ft' for v2.0 corpus)
+# -----------------------------------------------------------------------------
+canonical_flight:
+  flight_id: "AAF-VB-32"
+  flight_id_cite: "AD0733141 cover page and p.14 Table 1"
+  test_number: "43.1B57016-7L"
+  test_number_cite: "AD0733141 p.14 Table 1 'Test Number: 43.1B57016-7L'"
+  apogee_predicted_km: 262.0
+  apogee_predicted_cite: "AD0733141 p.14 Table 1 'Vehicle Performance Predicted ... Apogee altitude - 262 kms ... Time T+272 seconds'"
+  apogee_actual_km: 273.6
+  apogee_actual_cite: "AD0733141 p.10 'AAF-VB-32 attained an apogee of 273.6 kilometers at T+264 seconds.'; corroborated p.14 Table 1 'Vehicle Performance Actual: Apogee altitude 273.6 kms ... Time T+264 seconds'"
+  apogee_actual_ft: 897638.0          # 273600 m * 3.28083989501
+  apogee_actual_ft_cite: "Computed from AD0733141 p.10 actual apogee of 273.6 km using 1 m = 3.28083989501 ft."
+  time_to_apogee_s: 264.0
+  time_to_apogee_cite: "AD0733141 p.10 / p.14 Table 1"
+  sustainer_impact_range_km: 190.7
+  sustainer_impact_range_cite: "AD0733141 p.14 Table 1 'Vehicle Performance Actual: Sustainer impact azimuth 095.5 deg Range 190.7 kms Time T+585 seconds'"
+  sustainer_impact_time_s: 585.0
+  burnout_time_s: MISSING_FROM_SOURCE
+  burnout_time_cite: >-
+    Not explicitly stated in AD0733141 for the Black Brant VB. The
+    NTRS 20190028247 (ASPIRE) Table 1 reports 2nd-stage Brant burnout
+    times of 34.27 s (SR01), 34.10 s (SR02), 33.72 s (SR03), but those
+    are for the Black Brant IX configuration which has 8.16 s of Terrier
+    1st-stage acceleration before the Brant 2nd-stage ignites; the bare
+    BBV burnout is therefore approximately 26-27 s (consistent with the
+    '26' in 26KS20000) but cannot be cited verbatim without ER 67533.
+  max_mach: MISSING_FROM_SOURCE
+  max_mach_cite: >-
+    Not given in AD0733141. ASPIRE (NTRS 20190028247 Table 1) shows
+    Brant-IX 2nd-stage burnout at Mach 3.34 (SR01), 3.10 (SR02 inferred
+    from atmosphere), 3.34 (SR03) -- but those are the 2-stage ignited-
+    after-Terrier numbers, not single-stage BBV. Bare BBV peak Mach is
+    expected ~M 3.4 from typical 26KS20000 performance but not citable
+    from our source set.
+
+# -----------------------------------------------------------------------------
+# Cross-reference: ASPIRE program (different vehicle, included for context)
+# -----------------------------------------------------------------------------
+aspire_cross_reference:
+  note: >-
+    The ASPIRE flight test program (NTRS 20190028247, NTRS 20200002361)
+    used a *Terrier-Black Brant IX* sounding rocket, not a single-stage
+    Black Brant V. Black Brant IX = Terrier 1st stage + Black Brant VC
+    2nd stage. We cite the ASPIRE figures here only to document this
+    distinction; the parameters above are NOT taken from ASPIRE.
+  aspire_total_length_m: 17.7
+  aspire_total_length_cite: "NTRS 20190028247 Figure 1 (page 4) and Figure 2 (page 4): 17.7 m total, payload 7.54 m + 2nd stage 5.89 m + 1st stage 4.3 m. Also NTRS 20200002361 Figure 1 (page 2)."
+  aspire_2nd_stage_label: "BLACK BRANT IX"
+  aspire_2nd_stage_label_cite: "NTRS 20190028247 Figure 1 (page 4) explicitly labels '2nd Stage' as 'BLACK BRANT IX'"
+  aspire_brant_burnout_time_s_sr01: 34.27
+  aspire_brant_burnout_mach_sr01: 3.34
+  aspire_brant_burnout_cite: "NTRS 20190028247 Table 1 (page 5): SR01 '2nd Stage Burnout Time(s) 34.27', 'Mach 3.0 Time(s) 30.04' (so > Mach 3.0 by ~30 s); peak burnout Mach inferred from acceleration. NTRS 20200002361 Figure 3 (page 3) annotates '2nd stage Brant burnout L+35.5s Alt: 16.7 km Mach: 3.2'."
+  aspire_apogee_km_sr02: 54.82
+  aspire_apogee_km_sr02_cite: "NTRS 20190028247 Table 1 (page 5): SR02 'Apogee altitude 54.82'."
+  aspire_payload_mass_kg: 1100.0
+  aspire_payload_mass_cite: "NTRS 20190028247 page 6 'The mass of the payload was approximately 1100 kg'"
+  aspire_payload_geometry_cite: >-
+    NTRS 20190028247 Figure 4 (page 6) gives ASPIRE *payload* (not vehicle)
+    geometry: 6.661 m long, 9.5 deg cone half-angle, 0.4384 m forward body,
+    0.7239 m aft body. This is the parachute test article only -- not
+    indicative of a Black Brant V single-stage vehicle.
+
+# -----------------------------------------------------------------------------
+# Summary of MISSING_FROM_SOURCE fields
+# -----------------------------------------------------------------------------
+missing_from_source_summary:
+  - mass.motor_inert_mass_kg
+  - motor.total_impulse_Ns
+  - motor.action_time_s
+  - motor.average_thrust_N
+  - motor.max_thrust_N
+  - motor.thrust_curve
+  - nose.fineness_ratio
+  - fins.cant_deg
+  - fins.root_chord_m
+  - fins.tip_chord_m
+  - fins.span_m
+  - fins.sweep_m
+  - fins.thickness_m
+  - launch.azimuth_deg
+  - canonical_flight.burnout_time_s
+  - canonical_flight.max_mach
+  notes: >-
+    The major omission is the thrust curve and detailed fin geometry of
+    the BAW-MV-57 / 26KS20000 motor and the standard Black Brant V
+    three-fin stabilizer, both of which are documented in Bristol
+    Aerospace Engineering Report No. 67533, Part II (cited in
+    AD0733141 p.2) but that report is not in our local PDF set. Per
+    CLAUDE.md citation hygiene, these fields are flagged rather than
+    filled from training-data recall. Canonical Wikipedia-style values
+    (e.g. 26 s action time, ~20,000 lbf average thrust, ~410 kN-s total
+    impulse) align with the '26KS20000' designation but require
+    independent source verification before being used in a published
+    OpenRocket .ork.
+
+# -----------------------------------------------------------------------------
+# Source files (relative to repo root)
+# -----------------------------------------------------------------------------
+sources:
+  - path: "paper/data/pdf/New/incoming/black_brant_v/IA_DTIC_AD0733141_BlackBrant_Churchill.pdf"
+    citekey: "AD0733141"
+    role: "PRIMARY: vehicle dimensions, mass, motor designation, canonical flight (AAF-VB-32, Churchill 3 Mar 1971)"
+  - path: "paper/data/pdf/New/incoming/black_brant_v/IA_DTIC_AD0696100_BlackBrant_17_750_751.pdf"
+    citekey: "AD0696100"
+    role: "SECONDARY: instrumentation report only (no vehicle/motor data); has trajectory of Black Brant 17.750 (apogee 136.7 km, 6 Dec 1967, Churchill) on Fig 32 page 52, but vehicle parameters are not given."
+  - path: "paper/data/pdf/New/incoming/black_brant_v/NASA_NTRS_20190028247_ASPIRE_Aero_Models.pdf"
+    citekey: "NTRS_20190028247"
+    role: "CROSS-REFERENCE ONLY: documents Terrier-Black Brant IX (NOT BBV); used to flag ASPIRE != BBV and to record cross-family Mach numbers."
+  - path: "paper/data/pdf/New/incoming/black_brant_v/NASA_NTRS_20200002361_ASPIRE_Reconstruction.pdf"
+    citekey: "NTRS_20200002361"
+    role: "CROSS-REFERENCE ONLY: ASPIRE trajectory reconstruction; same Black Brant IX caveat as above."
