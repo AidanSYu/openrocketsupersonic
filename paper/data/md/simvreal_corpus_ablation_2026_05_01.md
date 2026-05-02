@@ -4,12 +4,12 @@ Source test: `info.openrocket.core.aerodynamics.SimVRealCorpusAblationTest.testW
 
 Machine-readable CSV: `paper/data/csv/simvreal_corpus_ablation_2026_05_01.csv`
 
-This is a bounded AST publication ablation. It reruns the hardest high-M SimVReal cases from the frozen 24-flight corpus and toggles two imported CDX1 mechanisms:
+This is a bounded AST publication ablation. It reruns the hardest high-M SimVReal cases from the frozen 25-flight corpus (24 cases from `SimVRealBenchmarkTest.testSimVRealBenchmark` plus MESOS 293K as flight 25) and toggles two imported CDX1 mechanisms:
 
 - `no_nozzle_pressure_thrust`: clears all stage nozzle exit diameters before simulation.
 - `force_turbulent_bl_off`: disables RASAero `Turbulence=True` after import.
 
-MESOS 293K remains in `SimVRealValidationTest.testMesos293K`, because that case has custom two-stage motor loading and a dedicated staging event report.
+MESOS 293K's powered-flight closure is reported in detail by `SimVRealBenchmarkTest.testMesosFlight` (flight 25 in the manuscript headline) because that case has custom two-stage motor loading and a dedicated staging event report; this nozzle/turbulence ablation does not toggle MESOS itself.
 
 ## Results
 

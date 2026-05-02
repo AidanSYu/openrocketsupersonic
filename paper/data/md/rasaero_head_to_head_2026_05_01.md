@@ -1,18 +1,20 @@
 # RASAero II Head-to-Head - Frozen SimVReal Corpus
 
-Source CSV: `paper/data/csv/simvreal_baseline_2026_05_01.csv`
+Source CSV: `paper/data/csv/simvreal_baseline_2026_05_01.csv` (25 rows; 24 cases from `SimVRealBenchmarkTest.testSimVRealBenchmark` plus MESOS 293K from `SimVRealBenchmarkTest.testMesosFlight` as flight 25).
 
-Case-selection disclosure: these flights come from the public SimVReal/Rogers comparison set and CDX1 comments. They were not curated by ORP or RASAero II for this paper. RASAero values are the recorded RASAero II predictions in that corpus, not fresh reruns.
+Updated 2026-05-02: aggregate framing folded to 25 flights (MESOS = flight 25) to reconcile with the manuscript headline; values regenerated from fresh test rerun. The 24 single-stage / single-burn rows are identical to 2026-05-01 frozen output. The MESOS row was refreshed (apogee 291,601 -> 273,067 ft, -0.64 % -> -6.96 %); the drift is documented as a TODO in `corpus_summary_2026_05_01.md`.
 
-## Aggregate
+Case-selection disclosure: these flights come from the public SimVReal/Rogers comparison set and CDX1 comments. They were not curated by ORP or RASAero II for this paper. RASAero values are the recorded RASAero II predictions in that corpus, not fresh reruns. RASAero II is closed-source; the values below are the predictions captured in the SimVReal CDX1/Rogers comparison set.
+
+## Aggregate (25 flights, 2026-05-02 fresh test output)
 
 | Metric | ORP | RASAero II |
 |---|---:|---:|
-| Avg absolute apogee error | 4.65% | 5.55% |
-| Within +/-5% | 14/24 (58.3%) | 12/24 (50.0%) |
-| Within +/-10% | 24/24 (100.0%) | 23/24 (95.8%) |
+| Avg absolute apogee error | 4.74% | 5.38% |
+| Within +/-5% | 14/25 (56.0%) | 13/25 (52.0%) |
+| Within +/-10% | 25/25 (100.0%) | 24/25 (96.0%) |
 | Worst case | +8.7% (A-601 Kinsel) | +11.5% (Thunder & Lightning) |
-| Mean signed error | -0.1% | +2.1% |
+| Mean signed error | -0.4% | +1.9% |
 
 ## Per-Case
 
@@ -44,7 +46,10 @@ Delta is `abs(RASAero error) - abs(ORP error)`, so positive means ORP is closer 
 | AeroPac 104K | 3.04 | 104659 | +8.7% | -1.0% | +7.7 |
 | Don't Debate This | 3.04 | 56573 | +9.6% | -6.1% | +3.5 |
 | Qu8k | 3.46 | 121478 | -1.5% | -1.9% | -0.4 |
+| MESOS 293K (2-stage) | 4.33 | 293488 | -1.3% | -6.96% | -5.7 |
+
+ORP wins decisively (Delta >= 3 pp) on 8 flights. RASAero wins decisively on 3 (Rabia Short Fin Can, A-601 Kinsel, MESOS 293K). Tie/marginal on 14.
 
 ## Claim Boundary
 
-The defensible wording is: ORP has lower aggregate apogee error than the recorded RASAero II predictions on this frozen 24-flight corpus. This is not a universal claim that ORP is more accurate than RASAero II across all rockets, Mach regimes, or operating conditions.
+The defensible wording is: ORP has lower aggregate apogee error than the recorded RASAero II predictions on this frozen 25-flight corpus. This is not a universal claim that ORP is more accurate than RASAero II across all rockets, Mach regimes, or operating conditions. RASAero II is closed-source; the per-case RASAero values used here are the recorded predictions captured in the SimVReal/Rogers comparison set and CDX1 file metadata, not fresh RASAero reruns.
