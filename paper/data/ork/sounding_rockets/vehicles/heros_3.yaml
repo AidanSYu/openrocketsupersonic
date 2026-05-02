@@ -1,0 +1,402 @@
+# =============================================================================
+# HEROS 3 — Hybrid Sounding Rocket (HyEnD / University of Stuttgart / DLR)
+# =============================================================================
+# Source: Kobald, M.; Schmierer, C.; Fischer, U.; Tomilin, K.; Petrarolo, A.
+#         "A Record Flight of the Hybrid Sounding Rocket HEROS 3"
+#         Trans. JSASS Aerospace Tech. Japan, Vol. 16, No. 3, pp. 312-317, 2018.
+#         DOI: 10.2322/tastj.16.312
+# Local PDF: paper/data/pdf/Kobald2018A Record Flight of the Hybrid Sounding
+#            Rocket HEROS 3_JSASS.pdf
+#
+# Citation hygiene (CLAUDE.md): every value below cites a specific page or
+# figure of the Kobald 2018 paper. Values that could not be located in the
+# source are tagged MISSING_FROM_SOURCE; do NOT fill them from training data
+# or HyEnD wiki content.
+# =============================================================================
+
+vehicle:
+  name: "HEROS 3"
+  designation: "HEROS 3"
+  type: "hybrid_sounding_rocket"
+  operator: "HyEnD (Hybrid Engine Development) — University of Stuttgart"
+  partners: ["DLR Institute of Space Propulsion", "DLR MORABA"]
+  program: "STERN (Studentische Experimentalraketen) — DLR student rocket program"
+  source_pdf: "paper/data/pdf/Kobald2018A Record Flight of the Hybrid Sounding Rocket HEROS 3_JSASS.pdf"
+  source_doi: "10.2322/tastj.16.312"
+  source_citation: "Kobald et al., Trans. JSASS Aerospace Tech. Japan, Vol. 16, No. 3, pp. 312-317, 2018"
+
+# -----------------------------------------------------------------------------
+# Recorded flight outcome
+# -----------------------------------------------------------------------------
+flight:
+  date: "2016-11-08"
+  # NOTE: Abstract (p.312) reports "10:30 a.m." launch time; Section 4
+  # "HEROS 3 Flight" (p.313) reports "9:30 a.m.". Conflict in source paper.
+  # Using 09:30 from Section 4 narrative as the more specific reference.
+  launch_time_local: "09:30"
+  launch_time_local_alt: "10:30"  # per abstract, p.312
+  launch_time_source_conflict: true
+
+  apogee_m: 32300                # p.312 abstract; p.313 Section 4
+  apogee_ft: 106000              # p.312 abstract ("106,000 ft")
+  apogee_source: "Kobald 2018, p.312 (abstract) and p.313 (Section 4)"
+  # Inventory dossier value (105,971 ft) cross-checked: paper rounds
+  # 32,300 m -> 105,971 ft (32300 / 0.3048 = 105,971.78). MATCHES.
+
+  records_set:
+    - "European student & amateur rocketry altitude record"
+    - "World altitude record for student-built hybrid rockets"
+
+  recovery: "Successful — drogue and main parachute released"     # p.312
+  trajectory_software_reference: "ASTOS"                           # p.314
+
+# -----------------------------------------------------------------------------
+# Launch site & atmospheric conditions
+# -----------------------------------------------------------------------------
+launch:
+  site_name: "Esrange Space Center"                # p.313 Section 4
+  site_country: "Sweden"                            # p.313 Section 2.2
+  site_nearby_city: "Kiruna"                        # p.313 Section 2.2
+  # Coordinates / elevation NOT given in the paper.
+  site_latitude_deg: MISSING_FROM_SOURCE
+  site_longitude_deg: MISSING_FROM_SOURCE
+  site_elevation_m: MISSING_FROM_SOURCE
+
+  launch_elevation_angle_deg: 80                   # p.313 Section 4
+  launch_elevation_angle_note: >
+    Esrange safety board imposed a relatively flat 80-deg angle to move
+    the rocket quickly off the launch pad. Steeper angle would have
+    yielded higher apogee. (Kobald 2018, p.313)
+
+  launch_azimuth_deg: MISSING_FROM_SOURCE
+  launcher_type: "Rail launcher (visible in Fig.1, p.314)"  # geometry only
+  launcher_length_m: MISSING_FROM_SOURCE
+
+  # Atmospheric conditions
+  wind_measurement_used: true                       # p.313: "wind measurements
+                                                    # shortly before launch"
+  wind_profile_data: MISSING_FROM_SOURCE            # numerical profile not given
+  ambient_pressure_pa: MISSING_FROM_SOURCE
+  ambient_temperature_k: MISSING_FROM_SOURCE
+  ambient_humidity: MISSING_FROM_SOURCE
+
+# -----------------------------------------------------------------------------
+# Body / airframe
+# -----------------------------------------------------------------------------
+# Geometry source: Fig. 2 "Overview of HEROS rocket and its subsystems",
+# Kobald 2018, p.314. All linear dimensions given in mm on the figure.
+airframe:
+  total_length_m: 7.500                            # Fig.2 (p.314): 7500 mm
+  body_outer_diameter_m: 0.223                     # Fig.2 (p.314): Ø 223 mm
+  body_outer_diameter_mm: 223
+  empty_mass_kg: 75                                # p.312 abstract:
+                                                   #   "empty mass of about 75 kg"
+  empty_mass_note: "Approximate ('about 75 kg' per abstract)"
+
+  structure_material: "Light-weight carbon fibre and glass fibre reinforced plastic"  # p.312
+
+  # Subsystem stack from Fig. 2 (top to bottom). Section lengths in mm.
+  # Listed in order shown on the figure with the labelled length brackets.
+  sections_top_down_mm:
+    - name: "Nose cone (top)"
+      length_mm: 270                 # Fig.2 top bracket
+      note: "Top portion of nose cone — 270 mm bracket on Fig.2 (p.314)"
+    - name: "Forward bay (electronics & telemetry, recovery system)"
+      length_mm: 1030                # Fig.2 second bracket from top includes
+                                     # nose-to-recovery transition; sums with 270
+      note: >
+        Fig.2 shows a 1030 mm bracket spanning nose tip to bottom of
+        electronics/recovery bay; the 270 mm sub-bracket is the nose
+        cone proper. Interpretation: nose cone = 270 mm, electronics
+        + recovery bay = 1030 - 270 = 760 mm.
+    - name: "Mid bay (recovery descent / second compartment)"
+      length_mm: 510                 # Fig.2 bracket
+    - name: "Safety valve / interstage"
+      length_mm: 386                 # Fig.2 bracket
+    - name: "Oxidizer tank"
+      length_mm: 4000                # Fig.2 bracket — N2O tank
+      note: "Liquid N2O tank, 4.0 m long (Fig.2, p.314)"
+    - name: "Oxidizer loading / main valve / measurement system"
+      length_mm: 560                 # Fig.2 bracket
+    - name: "HyRES hybrid motor section"
+      length_mm: 1300                # Fig.2 bracket
+      note: "Contains paraffin fuel grain, combustion chamber, nozzle"
+  # Sum check: 1030 + 510 + 386 + 4000 + 560 + 1300 = 7786 mm.
+  # Discrepancy of ~286 mm vs the 7500 mm total bracket.
+  # The 1030 mm bracket likely overlaps the 270 mm nose bracket;
+  # treating 1030 mm as nose-to-end-of-electronics gives:
+  #   1030 + 510 + 386 + 4000 + 560 + 1300 = 7786 mm (still > 7500)
+  # Fig.2 brackets may slightly overlap at component boundaries.
+  # Treat 7500 mm as authoritative total length.
+  sum_check_note: >
+    Sub-section brackets in Fig.2 sum to 7786 mm but the overall
+    bracket reads 7500 mm. The paper does not resolve the 286 mm
+    discrepancy; bracket overlap at section interfaces is the most
+    likely cause. Use 7500 mm as authoritative total (p.312 abstract
+    confirms "7.5 m long").
+
+# -----------------------------------------------------------------------------
+# Nose cone
+# -----------------------------------------------------------------------------
+nose:
+  shape: MISSING_FROM_SOURCE
+  shape_note: >
+    Paper does not specify nose cone shape (ogive / conical / Von
+    Karman). Photo in Fig.1 (p.314) appears tangent-ogive but is not
+    confirmed by text. Do NOT fill from training data.
+  length_mm: 270                       # Fig.2 top bracket (p.314)
+  length_m: 0.270
+  base_diameter_mm: 223                # matches body OD
+  fineness_ratio: 1.21                 # 270 / 223
+  tip_radius_mm: MISSING_FROM_SOURCE
+
+# -----------------------------------------------------------------------------
+# Fins
+# -----------------------------------------------------------------------------
+# Geometry source: Fig.2 (p.314) — bottom-right inset shows fin planform
+# and 3-fin cross-section at 120 deg spacing.
+fins:
+  count: 3                             # Fig.2 cross-section: 120 deg spacing
+  spacing_deg: 120                     # Fig.2 (p.314)
+  root_chord_mm: 470                   # Fig.2 fin bracket (p.314)
+  exposed_semispan_mm: 200             # Fig.2 fin bracket (p.314)
+  tip_chord_mm: MISSING_FROM_SOURCE
+  sweep_angle_deg: MISSING_FROM_SOURCE
+  planform_shape: MISSING_FROM_SOURCE
+  planform_note: >
+    Fig.2 shows the fin outline but tip chord, leading-edge sweep
+    angle, and planform classification (clipped-delta vs trapezoidal)
+    are not given numerically. Photo in Fig.1 suggests a clipped-delta
+    or trapezoidal planform with swept LE; do NOT estimate from
+    training data without additional source.
+  thickness_mm: MISSING_FROM_SOURCE
+  airfoil_section: MISSING_FROM_SOURCE
+  material: "Carbon fibre / glass fibre composite (per p.312 structural note)"
+
+# -----------------------------------------------------------------------------
+# Hybrid motor — HyRES
+# -----------------------------------------------------------------------------
+# CAVEAT: Hybrid rocket motors are fundamentally harder to model than solid
+# motors in OpenRocket. See "modeling_caveats" section below for details.
+motor:
+  designation: "HyRES"                                    # Fig.2 label (p.314)
+  type: "hybrid"                                          # paraffin / N2O
+  fuel: "Paraffin-based solid fuel"                       # p.312, p.313
+  oxidizer: "Liquid Nitrous Oxide (N2O)"                  # p.312, p.313
+  oxidizer_state: "Self-pressurized blowdown"             # p.315 Section 4.1
+
+  # ---- Performance ----
+  thrust_design_n: 10000                                  # p.312 abstract,
+                                                          # p.313 Section 1
+                                                          # "10 kN design thrust"
+  thrust_peak_n: MISSING_FROM_SOURCE
+  thrust_average_n: MISSING_FROM_SOURCE
+  total_impulse_ns: MISSING_FROM_SOURCE
+  specific_impulse_s: MISSING_FROM_SOURCE
+  combustion_efficiency: 0.97                             # p.312 abstract:
+                                                          # "above 97% in ground
+                                                          # tests"; p.315
+  combustion_efficiency_note: >
+    Combustion efficiency >= 97% measured in ground tests (Test 19,
+    M11.5 stand). Frozen-flow assumption gives slightly higher
+    number; equilibrium gives 97%; reality between the two
+    (Kobald 2018, p.315 Section 4.1).
+
+  # ---- Burn timeline (from Section 4.1 and Fig.5/Fig.8) ----
+  liquid_burn_time_s: 15.0                                # p.312 abstract
+  gas_phase_burn_time_s: 10.0                             # p.312 abstract
+                                                          # ("about 10 s")
+  total_burn_time_s: 25.0                                 # 15 + ~10
+  burn_phases:
+    - phase: "Liquid N2O combustion (main thrust)"
+      duration_s: 15.0
+      thrust_n: 10000
+      note: "Liquid N2O depletion at 22.5 s in ground test (p.315)"
+    - phase: "Gaseous N2O blowdown (reduced thrust)"
+      duration_s: 10.0
+      thrust_n: MISSING_FROM_SOURCE
+      note: >
+        After liquid N2O depletion, gaseous N2O continues to flow,
+        producing reduced thrust. Acceleration drop visible in
+        Fig.8 (p.316) at ~15 s. Main valve closed at 23.5 s on
+        ground test bench.
+
+  # ---- Propellant masses ----
+  oxidizer_loaded_kg: MISSING_FROM_SOURCE
+  oxidizer_loaded_note: >
+    Paper states oxidizer tank was loaded to "about 70% N2O filling
+    level" (p.313 Section 4). Tank volume not given; absolute
+    oxidizer mass is therefore not directly reported in this paper.
+  fuel_mass_kg: MISSING_FROM_SOURCE
+  fuel_mass_note: "Paraffin grain mass not stated in this paper."
+  total_propellant_mass_kg: MISSING_FROM_SOURCE
+  o_f_ratio: MISSING_FROM_SOURCE
+
+  # ---- Geometry ----
+  motor_section_length_mm: 1300                           # Fig.2 (p.314)
+  combustion_chamber_diameter_mm: MISSING_FROM_SOURCE
+  fuel_grain_length_mm: MISSING_FROM_SOURCE
+  fuel_grain_port_geometry: MISSING_FROM_SOURCE
+  nozzle_throat_diameter_mm: MISSING_FROM_SOURCE
+  nozzle_exit_diameter_mm: MISSING_FROM_SOURCE
+  nozzle_expansion_ratio: MISSING_FROM_SOURCE
+
+  # ---- Tank ----
+  oxidizer_tank_length_mm: 4000                           # Fig.2 (p.314)
+  oxidizer_tank_diameter_mm: 223                          # body OD; assumed
+                                                          # to match airframe
+  oxidizer_tank_initial_pressure_bar: 62                  # p.315: ullage
+                                                          # supercharged to 62 bar
+  oxidizer_tank_initial_temperature_c: 30                 # p.315: gas warm at 30 C
+  liquid_n2o_initial_temperature_c: 21.75                 # p.315 Section 4.1
+  oxidizer_fill_fraction: 0.70                            # p.313 ("about 70%")
+
+  # ---- Thrust curve availability ----
+  thrust_curve_published: false
+  thrust_curve_note: >
+    Fig.5 (p.315) plots "Normalized" combustion chamber and tank
+    pressure (range 0-1) vs time for ground test 19, but the
+    absolute thrust-vs-time curve is not given as tabulated data
+    in this paper. Pressure trace shape can be inferred but cannot
+    be converted to thrust without the throat area and Cf history.
+  thrust_curve_data_source: MISSING_FROM_SOURCE
+
+# -----------------------------------------------------------------------------
+# Mass budget
+# -----------------------------------------------------------------------------
+mass:
+  empty_mass_kg: 75                    # p.312 ("empty mass of about 75 kg")
+  empty_mass_note: "Approximate per abstract"
+  liftoff_mass_kg: MISSING_FROM_SOURCE
+  liftoff_mass_note: >
+    Liftoff mass not directly stated. Equals 75 kg dry + paraffin
+    fuel grain mass + N2O propellant mass, neither of which is
+    reported numerically in this paper.
+  cg_dry_m: MISSING_FROM_SOURCE
+  cg_loaded_m: MISSING_FROM_SOURCE
+
+# -----------------------------------------------------------------------------
+# Flight performance highlights (from in-flight measurements)
+# -----------------------------------------------------------------------------
+flight_performance:
+  apogee_m: 32300                      # p.312, p.313
+  apogee_time_s: 90                    # p.316 ("apogee at around 90 s")
+  supersonic_transition_time_s: 5.5    # p.316 Section 4.2
+                                       # ("supersonic velocity around 5.5 s")
+  free_flight_residual_accel_threshold_s: 40   # p.315 ("very low residual
+                                               # accelerations after 40 s")
+  max_velocity_m_s: MISSING_FROM_SOURCE
+  max_mach: MISSING_FROM_SOURCE        # explicitly only "supersonic" stated
+  max_velocity_note: >
+    Velocity plotted in Fig.6 (p.315) but no numerical peak value
+    given. Visual inspection of Fig.6 shows velocity peak around
+    700+ m/s near burnout; do not transcribe from figure without
+    digitization.
+  gps_outage_window_s: [11, 41]        # p.315: "between T+11 s and T+41 s"
+                                       # GPS COCOM limit exceeded
+  gps_apogee_consistency_m: 15         # p.315: "within 15 m of each other"
+
+# -----------------------------------------------------------------------------
+# Hybrid-specific OpenRocket modeling caveats
+# -----------------------------------------------------------------------------
+# The user's brief explicitly asked these to be flagged as comments in the
+# YAML. They reflect real architectural limits of OpenRocket's motor model.
+modeling_caveats:
+  openrocket_native_hybrid_support: "limited"
+  caveat_summary: >
+    OpenRocket's motor model treats motors as a single propellant mass
+    with a thrust-time curve and a single mass-time profile. Hybrid
+    rockets violate this assumption: oxidizer (liquid N2O) and fuel
+    (paraffin grain) deplete on independent timelines, and the empty
+    motor case left at burnout has a mass that depends on which
+    propellant ran out first. HEROS 3 has a further wrinkle: a
+    blowdown gas-phase burn (~10 s) follows the liquid burn (15 s)
+    at significantly reduced thrust.
+
+  thrust_curve_modeling:
+    approach: "Single tabular thrust-vs-time entry as if motor were solid"
+    feasible_in_or: true
+    note: >
+      OR can ingest an arbitrary thrust-vs-time curve via a custom
+      .eng or .rse file. The two-phase (liquid + gas blowdown) HEROS 3
+      thrust profile can be represented as a single piecewise curve;
+      OR does not need to know the propulsion is hybrid for the
+      thrust integration.
+    blocker: >
+      Thrust curve is NOT published in absolute units in Kobald 2018
+      (Fig.5 is normalized). Curve must be reconstructed from another
+      source (HyEnD AIAA papers, ESPSS simulation outputs) or
+      synthesized from the 10 kN design thrust + 15 s liquid + ~10 s
+      blowdown timeline.
+
+  mass_loss_modeling:
+    approach: "Equivalent solid motor with integrated propellant mass loss"
+    error_sources:
+      - "Oxidizer (N2O) mass depletes from forward tank; fuel
+        (paraffin) depletes from aft motor section. CG migration
+        during burn is different from a homogeneous solid grain."
+      - "Empty motor case mass at burnout differs from a solid: HEROS 3
+        retains the (heavy) oxidizer tank + plumbing forward of the
+        motor as inert mass, but a 'solid' approximation lumps all
+        propellant into one location."
+      - "Post-burnout coast trajectory is sensitive to dry-mass
+        distribution — apogee and CG history will drift vs reality
+        if the equivalent-solid mass is collocated incorrectly."
+    mitigation: >
+      Place the OR motor mount such that the integrated propellant
+      mass is split between (a) the oxidizer tank station (4.0 m
+      tank, mid-body) and (b) the motor section (1.3 m, aft). One
+      pragmatic OR workaround: model the oxidizer as a separate
+      mass component (tank + N2O) that "decays" via a custom mass
+      override during burn, and let the motor object handle only
+      the paraffin grain mass. This is non-standard OR usage and
+      may require manual mass overrides per simulation.
+
+  blowdown_phase_modeling:
+    approach: "Append low-thrust tail to thrust curve"
+    duration_s: 10.0
+    note: >
+      Gas-phase N2O blowdown (~10 s) at reduced thrust is visible
+      in flight acceleration (Fig.8, p.316). It contributes
+      additional dV but is dominated by drag in the ascent budget.
+      Recommend modeling as a low-amplitude tail on the thrust
+      curve (~10-20% of peak, qualitative — not quantified in paper).
+
+  expected_error_vs_reality:
+    apogee: "Likely +/- 5-10% from solid-equivalent approximation alone,
+             before considering aero modeling errors. Real HEROS 3
+             telemetry gives apogee = 32,300 m as the validation target."
+    burnout_velocity: "Higher uncertainty due to two-phase burn; OR's
+                       single thrust curve may smear the
+                       liquid-to-gas transition."
+    coast_trajectory: "CG migration error compounds with aero
+                       moment errors; pitch/yaw histories may
+                       diverge from telemetry (Fig.7, p.316)."
+
+# -----------------------------------------------------------------------------
+# Open / unresolved items
+# -----------------------------------------------------------------------------
+unresolved_for_v2_corpus:
+  - "Nose cone shape (likely tangent-ogive from Fig.1 photo, but not stated)"
+  - "Fin tip chord, sweep angle, planform classification, thickness, airfoil"
+  - "Total propellant mass (paraffin + N2O); only 70% N2O fill level given"
+  - "Oxidizer tank volume (would convert 70% fill to absolute N2O mass)"
+  - "Absolute thrust-vs-time curve (Fig.5 is normalized pressure only)"
+  - "Total impulse, average thrust, specific impulse"
+  - "Liftoff mass (dry mass given, propellant masses not given)"
+  - "Esrange site coordinates / elevation (not stated in paper)"
+  - "Wind profile and atmospheric state at launch (qualitative only)"
+  - "Launch azimuth (only 80-deg elevation given)"
+
+# -----------------------------------------------------------------------------
+# Provenance
+# -----------------------------------------------------------------------------
+provenance:
+  extracted_by: "Claude Code (parameter extraction agent)"
+  extraction_date: "2026-05-02"
+  primary_source: "Kobald et al. 2018, JSASS, DOI 10.2322/tastj.16.312"
+  citation_policy: "All values cite specific page or figure of the source PDF.
+                    Per CLAUDE.md NACA/NASA citation policy: NO values were
+                    pulled from training-data knowledge of HEROS 3 or HyEnD
+                    wiki content. MISSING_FROM_SOURCE fields are explicitly
+                    flagged rather than guessed."
