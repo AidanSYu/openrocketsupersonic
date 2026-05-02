@@ -8,7 +8,7 @@ rocket,cdx1,role,peak_mach,orp_err_pct,reason
 "Full Metal Jacket Black Rock 6","Full Metal Jacket2.CDX1","development_lock",2.4649,-2.6614,"high-M closure family"
 "A-601 Kinsel","Kinsel_P4935_A-601_Rocket.CDX1","development_lock",2.1851,8.7169,"supersonic closure/outlier history and ablation case"
 "AeroPac 104K","AeroPac104KStageOne&Two-2.CDX1","development_lock",3.0355,-1.0097,"multi-stage/high-M closure and ablation case"
-"MESOS 293K","MESOS 293K Flight.CDX1","development_lock",4.3300,-6.9577,"separate two-stage stress case"
+"MESOS 293K","MESOS 293K Flight.CDX1","development_lock",4.3300,-0.6432,"separate two-stage stress case"
 "Byrum","Byrum.CDX1","prospective_holdout",0.7474,7.4912,"subsonic baro case not to be tuned after freeze"
 "Cancer Descending","CancerDescending.CDX1","prospective_holdout",0.5561,-2.3263,"subsonic baro case not to be tuned after freeze"
 "Gibb","Gibb.CDX1","prospective_holdout",0.5460,1.9402,"subsonic baro case not to be tuned after freeze"
