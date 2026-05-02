@@ -1,0 +1,41 @@
+# SUPERSEDED 2026-05-02 by paper/data/csv/arcas_wind_tunnel_combined_2026_05_02.csv
+# The combined CSV adds CN_alpha (digitized from D-4013 Fig 7(b)) and Cm_alpha (Fig 7(c)),
+# extends Mach coverage to 4.63 using D-4014 (Babb & Fuller, 1967), and corrects the schema
+# to match other Arcas anchors. Values below are retained for archival comparison only.
+#
+mach,cn_alpha,ca0,cp_caliber,source_table,source_figure
+# NASA TN D-4013 (Ferris, Langley, June 1967) - Static Stability Investigation of a Single-Stage
+# Sounding Rocket (Arcas) at Mach Numbers from 0.60 to 1.20.
+#
+# IMPORTANT: TN D-4013 presents wind-tunnel results AS PLOTTED FIGURES, not numerical tables.
+# Values below are visual digitizations (eyeball reading) of Figures 11 and 12 (xCP and CA,corr
+# vs Mach summary plots), short and long Arcas models, fins-on at delta_F=0, alpha approx 0 deg.
+# Reference area = max body cross section.
+# Moment reference center = 70 percent of body length (per report Symbols section).
+# x_cp expressed as PERCENT BODY LENGTH from nose (NOT calibers; report convention).
+# CA0 = axial-force coefficient corrected for base axial force at alpha~0 (CA,corr in report).
+# CN_alpha is NOT plotted vs Mach summary in D-4013; it must be extracted from per-Mach figures
+# 7(b)/8(b)/9(b)/10(b) at small alpha. Left blank below pending figure-by-figure digitization.
+# Estimated digitization tolerance: +/-0.02 on CA, +/-2 percent body length on xCP.
+# Tabulating short-model values (fineness ratio 18.2) which is the Arcas Robin variant.
+#
+# Schema note: cp_caliber column header retained for cross-target consistency, but values are
+# given as percent of body length (xcp_pct_L). Convert with body length = 18.20 calibers.
+mach,cn_alpha,ca0,cp_pct_L,source_table,source_figure
+0.60,,0.30,76.5,N/A_figs_only,Fig11_short_dF0
+0.80,,0.31,75.0,N/A_figs_only,Fig11_short_dF0
+0.90,,0.34,73.5,N/A_figs_only,Fig11_short_dF0
+0.95,,0.42,72.5,N/A_figs_only,Fig11_short_dF0
+1.00,,0.55,75.0,N/A_figs_only,Fig11_short_dF0
+1.05,,0.65,80.0,N/A_figs_only,Fig11_short_dF0
+1.10,,0.69,84.5,N/A_figs_only,Fig11_short_dF0
+1.20,,0.59,86.5,N/A_figs_only,Fig11_short_dF0
+# Long-model (fineness ratio 23.8) - Arcas with bioscience payload
+# (separate digitization, Fig 12, fins-on dF=0, alpha~0)
+1.20,,0.62,82.0,N/A_figs_only,Fig12_long_dF0
+# CN_alpha values would require per-Mach digitization of Figs 7(b), 8(b), 9(b), 10(b).
+# Each figure shows CN vs alpha (deg) at one Mach for both fin-on/off and 3 roll angles.
+# Slope at small alpha (0-4 deg) gives CN_alpha. Estimated values pending digitization:
+#   M=0.60: CN_alpha approx 0.045 /deg (fins-on, short)
+#   M=1.20: CN_alpha approx 0.060 /deg (fins-on, short)
+# These approximations should NOT be used for validation without proper figure digitization.
