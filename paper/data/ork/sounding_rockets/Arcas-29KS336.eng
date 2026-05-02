@@ -1,0 +1,20 @@
+; Arcas 4.5 EX2 MOD 0 / 29-KS-336 MARC 2B1 rocket motor
+; Source: DTIC AD-235341, Table I (p.6) and Figure 6
+; End-burning Arcite 373D propellant, 70 deg F
+; Total impulse 9089 lbf-s; action time 29.0 s; avg thrust 336 lbf
+; Curve schematized from Fig 6 narrative; integrated I = 9103 lbf-s
+29-KS-336 113.0 1541.8 P 18.5973 29.2567 AtlanticResearch
+   0.000 0.00
+   0.050 1289.98
+   0.200 1445.67
+   1.000 1467.91
+   5.000 1459.02
+   10.000 1445.67
+   15.000 1432.33
+   20.000 1423.43
+   25.000 1401.19
+   27.000 1370.05
+   28.000 1112.06
+   28.500 578.27
+   29.000 0.00
+;
