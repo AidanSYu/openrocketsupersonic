@@ -157,7 +157,7 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 | Claim | Test / source | Result | Status |
 |---|---|---|---|
 | Basic Finner total drag | `BasicFinnerDragBenchmarkTest` vs ADA636861 | MAPE 11.9 %, 8 pts M 1.08--4.30; aggregate gate, four pointwise residuals exceed 14 % | A |
-| RM-10 excluded geometry family | `NacaRm10FinnedBodyDragBenchmarkTest` vs TN 3320 | MAPE 80 %; high-fineness parabolic + tapered afterbody + swept-arc fins formally excluded from headline claim | Excluded / negative external benchmark |
+| RM-10 excluded geometry family | `NacaRm10FinnedBodyDragBenchmarkTest` vs TN 3320 | MAPE 80 %; out-of-envelope reference, retained for transparency, not used to validate the headline claim. Diagnostic (`paper/data/legacy/rm10_vs_basic_finner_diagnostic.md`) and closure (`paper/data/outlier_closure/rm10_closure.md`) decompose the deficit across three sub-model envelope violations: Viswanath boattail $\eta_\text{bt}$ extrapolated outside 6-16 deg; finned-body base augmentation over-credits suction when an upstream boattail-relief is present (calibration is flat-base Basic Finner); DATCOM 4.1.5.1 has no calibrated $K$ entry for sharp-LE 10 % circular-arc biconvex fins. | Excluded / negative external benchmark |
 | Finned-body base drag augmentation | `BarrowmanDragCalculator.calculateFinnedBaseAugmentation()` | corpus-anchored | **B** |
 | Power-on nozzle / pressure thrust | `RK4SimulationStepper` + MESOS 293K | corpus-validated | **B** |
 | Min-dia supersonic flight | `SimVRealBenchmarkTest` Raven (M 1.07) +7.6 %, DDT (M 3.04) −6.1 % | corpus-validated | **B** |
