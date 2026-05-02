@@ -1,0 +1,343 @@
+# =====================================================================
+# Arcas Rocketsonde -- INTERMEDIATE configuration (Performance Flights 4-5)
+# =====================================================================
+#
+# Configuration: 4-caliber secant-ogive nose substituted for the blunt
+# 1.5-cal nose, but the ORIGINAL short 25-KS-325 MARC 2A1 motor was
+# RETAINED ("the rocket motor was not modified", PDF p.16).
+# This is an *intermediate* configuration -- distinct from BOTH the
+# original-blunt config (`arcas_original_blunt.yaml`) AND the FINAL
+# extended-motor config already modelled in
+# `paper/data/ork/sounding_rockets/arcas.ork` (which uses the longer
+# 29-KS-336 MARC 2B1 motor, total impulse 9089 lbf-s).
+#
+# Performance Flights 4 and 5 reached 178,000 ft and 171,400 ft
+# respectively (PDF p.16) -- a "significant improvement" over the
+# blunt-nose flights but "modification of the propulsion system was
+# necessary to meet performance requirements". Performance flights
+# 6-7 (different YAML, not generated here) used the FINAL extended
+# motor + 4-cal nose and reached 215,000 / 249,000 ft.
+#
+# Source: DTIC AD-235341, "Final Report: Development of the Arcas
+#         Rocketsonde System", R. C. Webster, W. C. Roberts Jr.,
+#         E. P. Donnell (Atlantic Research Corporation), 29 Feb 1960.
+
+vehicle_name: Arcas (4-cal secant ogive, 25-KS-325 original motor)
+config_id: arcas_secant_ogive_original_motor
+revision: 2026-05-02 v1
+source:
+  title: Final Report - Development of the Arcas Rocketsonde System
+  authors: [R. C. Webster, W. C. Roberts Jr., E. P. Donnell]
+  organization: Atlantic Research Corporation, Alexandria, Virginia
+  date: 1960-02-29
+  contract: NOnr-2477(00)
+  dtic_id: AD-235341
+  pdf: paper/data/pdf/IA_DTIC_AD0235341_Arcas_Rocketsonde.pdf
+notes: |
+  Per PDF p.16: "The fourth and fifth flight vehicles incorporated
+  the new 4-caliber secant-ogive nose cone which was expected to
+  reduce vehicle drag by 75 per cent; the rocket motor was not
+  modified. Both missiles were launched at an 85-degree angle and
+  followed normal flight paths, reaching peak altitudes of 178,000
+  and 171,400 feet respectively."
+
+  This config DIFFERS from the existing `arcas.ork` extended-motor
+  variant in TWO ways:
+    (1) Motor: 25-KS-325 MARC 2A1 (47.5-in grain, 8125 lbf-s, 25 s)
+        instead of 29-KS-336 MARC 2B1 (53.75-in grain, 9089 lbf-s,
+        29 s) -- 11% less total impulse.
+    (2) Vehicle length: ~88.7 in (added 18.1 - 6.7 = 11.4 in of
+        nose) instead of FINAL 92.3 in (which also has the longer
+        motor case).
+  Fin geometry, body diameter, and launch procedure are unchanged.
+
+  Per CLAUDE.md citation hygiene, every dimension below cites the
+  source page/table/figure. Inferred values are flagged.
+
+# ---------------------------------------------------------------------
+# Body / Geometry
+# ---------------------------------------------------------------------
+body:
+  total_length_m: MISSING_FROM_SOURCE
+  total_length_inferred_m: 2.2530       # 88.7 in. Original blunt vehicle
+                                        # was 78.5 in (PDF p.2). Adding
+                                        # the 4-cal nose (18.1 in, Table I
+                                        # / PDF p.27) and removing the
+                                        # 1.5-cal nose (6.675 in inferred):
+                                        # 78.5 - 6.675 + 18.1 = 89.925 in.
+                                        # PDF p.3: "the motor and propellant
+                                        # grain were lengthened ... resulting
+                                        # in an over-all vehicle length of
+                                        # 92.3 inches" -- this is the FINAL
+                                        # vehicle. Original-motor + new-nose
+                                        # length therefore = 92.3 - (60.7 -
+                                        # 54.45) = 86.05 in OR using the
+                                        # nose-swap path 89.9 in. Use the
+                                        # nose-swap value as primary and
+                                        # round down slightly to 88.7 in.
+  diameter_m: 0.11430                   # 4.45 in (Table I, PDF p.27;
+                                        # Fig 5, PDF p.50)
+  diameter_in_used: 4.45
+
+# ---------------------------------------------------------------------
+# Nose Cone
+# ---------------------------------------------------------------------
+nose:
+  shape_label: secant_ogive_4cal
+  shape_orp: ogive                      # OpenRocket has no native secant
+                                        # ogive distinct from tangent;
+                                        # use shape=ogive,
+                                        # shapeparameter=1.0 per CLAUDE.md
+                                        # schema note. Comment the .ork
+                                        # that the cone is a 4-caliber
+                                        # secant ogive per source.
+  shape_parameter: 1.0
+  fineness_calibers: 4.0                # PDF p.10: "A 4-caliber secant
+                                        # ogive was substituted, providing
+                                        # a considerable reduction in the
+                                        # drag of the vehicle."
+  length_m: 0.45974                     # 18.1 in (Table I, PDF p.27;
+                                        # also Fig 7 PDF p.52: 18.122 in)
+  length_in: 18.1
+  length_source: Table I (PDF p.27); Fig 7 nose cone assembly (PDF p.52)
+  detailed_shape_dimensions_in:         # From Fig 7 (PDF p.52)
+    overall_length_in: 18.122
+    base_diameter_in: 4.133             # inside diameter of cone shoulder
+    nose_tip_radius_in: 2.500           # truncated tip section
+    instrument_volume_in3: 140
+  mass_kg: 0.6804                       # 1.5 lb (Table I, PDF p.27)
+                                        # 1.5 * 0.45359237
+  material: aluminum                    # PDF p.10: "Aluminum cones with
+                                        # stainless steel tips performed
+                                        # well in several flights"
+  material_density_kg_m3: 2700
+
+# ---------------------------------------------------------------------
+# Parachute Housing -- NOT PRESENT in this configuration.
+# ---------------------------------------------------------------------
+parachute_housing:
+  present: false
+  notes: |
+    PDF p.16: "Both missiles were launched at an 85-degree angle and
+    followed normal flight paths, reaching peak altitudes of 178,000
+    and 171,400 feet respectively." Earlier in PDF p.15 for flights
+    1-3: "The missiles did not carry parachutes, and the parachute
+    containers were permanently attached to the motors." Flights 4-5
+    text does not explicitly re-state the parachute status, but the
+    fact that the motor-and-nose change is the only modification
+    described, and that flights 5-7 (PDF p.16) onward "incorporated
+    all of the modifications, including the higher performance motor.
+    Both units carried parachutes" -- implies flights 4 and 5 did NOT
+    carry parachutes, only flights 5-7 did. (Note PDF labels both a
+    "fourth and fifth" pair AND a "fifth and sixth" pair; the report
+    appears to use overlapping flight numbering. Flight 5 in the first
+    pair = same ordinal but pre-modification; flight 5 in the second
+    pair = post-extended-motor.) For YAML purposes assume no parachute
+    on flights 4-5 in their original-motor configuration.
+
+# ---------------------------------------------------------------------
+# Motor Case / Body Tube
+# ---------------------------------------------------------------------
+motor_case:
+  designation_label: arcas_original_short_case
+  length_m: MISSING_FROM_SOURCE
+  length_inferred_m: 1.3830             # 54.45 in. Original 47.5-in grain
+                                        # in case scaled from FINAL 60.7 in
+                                        # / 53.75 in grain: 60.7 - 6.25 =
+                                        # 54.45 in.
+  diameter_m: 0.11430                   # 4.45 in (Fig 5, PDF p.50)
+  wall_material: 4130 steel             # PDF p.4 + Fig 5 "0.04-in Thick
+                                        # 4130 Steel"
+  wall_thickness_m: 0.001016            # 0.04 in (PDF p.4)
+  insulation_material: Rocketon X-1     # PDF p.4 (early motors used X-1;
+                                        # later AH-12+ used 41-RPD)
+  insulation_thickness_m: 0.003810      # 0.15 in (PDF p.4)
+  inert_mass_kg: MISSING_FROM_SOURCE
+  inert_mass_inferred_kg: 9.5           # ~21 lb. Final motor + fins inert
+                                        # = 64.5 - 41 = 23.5 lb (Table I).
+                                        # Original motor case is 6.25 in
+                                        # shorter -> ~21 lb inert.
+
+# ---------------------------------------------------------------------
+# Fins (UNCHANGED from original blunt config)
+# ---------------------------------------------------------------------
+fins:
+  count: 4                              # PDF p.2 + Table I
+  material: cast aluminum               # PDF p.7
+  cross_section: airfoil                # PDF p.2 "double-wedge"
+  total_planform_area_in2: 94.0         # Table I "Fin area-4 fins, in^2 = 94"
+  per_fin_area_in2: 23.5
+  span_tip_to_tip_m: 0.3302             # 13.000 in (Fig 1, PDF p.46)
+  height_m: 0.10859                     # 4.275 in
+  root_chord_inferred_m: 0.1778         # 7.0 in (consistent with extended
+                                        # variant build script)
+  tip_chord_inferred_m: 0.1016          # 4.0 in
+  root_chord_source: |
+    Root and tip individually not given. Total fin area 94 in^2 / 4
+    = 23.5 in^2 per fin (Table I). Solving 0.5*(root+tip)*4.275 =
+    23.5 with root=7.0, tip=4.0 gives area = 23.51 in^2 (matches
+    Table I within 0.04%). Same values used in existing
+    `_build_orks.py` for the FINAL Arcas config.
+  thickness_m: 0.005080                 # 0.20 in estimated (matches
+                                        # extended-motor build script)
+  sweep_length_inferred_m: 0.0381       # 1.5 in
+  cant_deg: 0.5                         # PDF p.2: roll rate 1-3 rps
+
+# ---------------------------------------------------------------------
+# Motor (25-KS-325 MARC 2A1) -- ORIGINAL ARCAS MOTOR (UNCHANGED)
+# ---------------------------------------------------------------------
+motor:
+  designation: 25-KS-325
+  bureau_designation: 25-KS-325 MARC 2A1
+  manufacturer: Atlantic Research Corp
+  propellant: Arcite 373                # PDF p.3
+  grain_type: end_burning_cartridge_loaded
+  grain_diameter_m: 0.099822            # 3.93 in (PDF p.3)
+  grain_length_m: 1.20650               # 47.5 in (PDF p.3)
+  case_outside_diameter_m: 0.11430      # 4.45 in (Fig 5)
+  case_wall_thickness_m: 0.001016       # 0.04 in (PDF p.4)
+  insulation_thickness_m: 0.003810      # 0.15 in (PDF p.4)
+  nozzle_throat_area_m2: 1.6451e-4      # 0.255 in^2 (PDF p.4)
+  nozzle_exit_area_m2: 1.6451e-3        # 2.550 in^2 (PDF p.4)
+  expansion_ratio: 10                   # PDF p.4
+  average_chamber_pressure_psi: 800     # PDF p.4
+  # ---- Performance ratings (PDF p.4) ----
+  average_thrust_lbf: 325               # PDF p.4
+  average_thrust_n: 1445.7
+  total_impulse_lbf_s: 8125             # PDF p.4
+  total_impulse_n_s: 36141.8
+  action_time_s: 25.0                   # PDF p.4
+  # ---- Mass ----
+  propellant_mass_kg: MISSING_FROM_SOURCE
+  propellant_mass_inferred_kg: 16.43   # 36.22 lb. Scale from final motor:
+                                        # 41 lb propellant in 53.75-in
+                                        # grain (Table I) -> 47.5/53.75 *
+                                        # 41 = 36.22 lb in original grain.
+  total_motor_mass_kg: MISSING_FROM_SOURCE
+  total_motor_mass_inferred_kg: 26.0
+  # ---- Static-firing references (Table II, PDF p.30-34) ----
+  # Same set as `arcas_original_blunt.yaml` (motor unchanged).
+  static_firings:
+    - test: AH-1
+      grain_length_in: 43.75
+      avg_thrust_lbf: 298
+      action_time_s: 22.8
+      remarks: "Thrust value of questionable accuracy"
+    - test: AH-7
+      grain_length_in: 47.5
+      avg_thrust_lbf: 335
+      action_time_s: 24.8
+      remarks: "Performance evaluation at -10 deg F. Satisfactory"
+    - test: AL-4
+      grain_length_in: 47.5
+      avg_thrust_lbf: 306
+      action_time_s: 25.1
+      remarks: "Standard loading flightweight, accelerated 20g"
+    - test: AL-5
+      grain_length_in: 47.5
+      avg_thrust_lbf: 365
+      action_time_s: 21.3
+      remarks: "Eval 41-RPD insulation"
+    - test: AL-7
+      grain_length_in: 47.5
+      avg_thrust_lbf: 365
+      action_time_s: 21.2
+      remarks: "Cycled -10 to +110, fired at 110 deg F"
+  # ---- Thrust-time curve ----
+  thrust_curve_70F_lbf:
+    # Same shape as `arcas_original_blunt.yaml`: end-burning Arcite
+    # 373, ignition transient + plateau + gentle taper.
+    # Integrated impulse target = 8125 lbf-s (PDF p.4).
+    - {t_s: 0.0,   F_lbf: 0.0}
+    - {t_s: 0.05,  F_lbf: 280.0}
+    - {t_s: 0.20,  F_lbf: 318.0}
+    - {t_s: 1.0,   F_lbf: 322.0}
+    - {t_s: 5.0,   F_lbf: 325.0}
+    - {t_s: 10.0,  F_lbf: 326.0}
+    - {t_s: 15.0,  F_lbf: 326.0}
+    - {t_s: 20.0,  F_lbf: 322.0}
+    - {t_s: 22.0,  F_lbf: 315.0}
+    - {t_s: 24.0,  F_lbf: 270.0}
+    - {t_s: 24.5,  F_lbf: 130.0}
+    - {t_s: 25.0,  F_lbf: 0.0}
+  thrust_curve_source: |
+    Synthesized to match PDF p.4 design parameters (avg 325 lbf,
+    8125 lbf-s, 25.0 s). Curve shape end-burning per Fig 6 (FINAL
+    motor, PDF p.51) which has the same propellant chemistry and
+    grain geometry, only different length.
+
+# ---------------------------------------------------------------------
+# Mass Summary (Performance Flights 4-5)
+# ---------------------------------------------------------------------
+mass:
+  total_loaded_mass_kg: MISSING_FROM_SOURCE
+  total_loaded_mass_inferred_kg: 28.6   # ~63 lb. Original blunt vehicle
+                                        # est. 61 lb, plus the 1.5-cal
+                                        # cone (~0.6 lb) replaced by the
+                                        # 4-cal cone (1.5 lb) = +0.9 lb,
+                                        # plus possibly a heavier
+                                        # instrument package -> ~63 lb.
+  burnout_mass_kg: MISSING_FROM_SOURCE
+  burnout_mass_inferred_kg: 12.2        # ~27 lb (loaded - propellant)
+  payload_mass_kg: 0.0                  # No parachute or instruments
+                                        # explicitly mentioned for flights
+                                        # 4-5; but per PDF p.10 "longer
+                                        # cone furnished a volume of
+                                        # 140 in^3 for instruments"
+                                        # -- if instruments were carried
+                                        # they were minor.
+
+# ---------------------------------------------------------------------
+# Launch Conditions (Performance Flights 4-5)
+# ---------------------------------------------------------------------
+launch:
+  site: White Sands Missile Range, NM
+  site_altitude_m: 1219.2               # 4000 ft (WSMR canonical)
+  site_altitude_source: |
+    PDF p.15-16 only states "White Sands Missile Range". The 4000 ft
+    figure is the canonical WSMR launch elevation used throughout the
+    v1.0 corpus.
+  elevation_angle_deg: 85               # PDF p.16: "Both missiles were
+                                        # launched at an 85-degree angle"
+  azimuth_deg: 0                        # not specified
+  launch_velocity_m_s: 24.384           # 80 ft/sec assumed; PDF does not
+                                        # restate launch velocity for
+                                        # flights 4-5 but they used the
+                                        # SAME closed-breech launcher as
+                                        # flights 1-3 (PDF p.13-14, "Model
+                                        # I Arcas Launcher"). 125 ft/sec
+                                        # only applies to flights 5-7
+                                        # which used the modified motor
+                                        # whose higher operating pressure
+                                        # accelerated the launcher gas
+                                        # generation (PDF p.14).
+  launch_velocity_source: |
+    Inferred 80 ft/sec from flights 1-3 spec. PDF p.14: "With the
+    increased operating pressure of the modified Arcas motor, the
+    rate of gas generation in the launcher increased, resulting in
+    launch velocities of 125 ft/sec from the same launcher
+    configuration." Implies pre-modified-motor (flights 1-5) launch
+    velocity = 80 ft/sec.
+  launcher: Closed-breech, Model 1 / Model 2
+
+# ---------------------------------------------------------------------
+# Reference Performance (Flight Test Results, PDF p.16)
+# ---------------------------------------------------------------------
+performance_flights:
+  - flight: 4
+    apogee_ft: 178000
+    apogee_m: 54254
+    notes: |
+      "The fourth and fifth flight vehicles incorporated the new
+      4-caliber secant-ogive nose cone which was expected to reduce
+      vehicle drag by 75 per cent; the rocket motor was not modified.
+      Both missiles were launched at an 85-degree angle and followed
+      normal flight paths, reaching peak altitudes of 178,000 and
+      171,400 feet respectively. This represented a significant
+      improvement, but modification of the propulsion system was
+      necessary to meet performance requirements." (PDF p.16)
+  - flight: 5
+    apogee_ft: 171400
+    apogee_m: 52242
+    notes: |
+      Same configuration as Flight 4. Apogee 171,400 ft.
