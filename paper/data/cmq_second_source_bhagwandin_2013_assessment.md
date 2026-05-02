@@ -164,8 +164,52 @@ material.
   `paper/data/csv/bhagwandin_sahu_2013_anf_aff_cmq.csv` was provided by the
   user verbatim from Tables A-1 and A-2 of the report and is sufficient for
   re-running the comparator without the PDF.
-- AFF fin planform dimensions are placeholders (see Verdict section).
 - HISA archive page numerical content has not been ingested.
+
+### AFF fin planform — needs-list (2026-05-02 follow-up)
+
+A subsequent agent attempted to verify the AFF clipped-delta fin planform
+dimensions against a primary source so that `makeAirForceModifiedFinner`
+in `core/src/test/java/info/openrocket/core/aerodynamics/SupersonicTestRockets.java`
+could be re-calibrated. Result: **could not verify**. Disposition:
+
+- **PDF not in repo.** Searched `paper/data/pdf/**` for `ADA592550`,
+  `ARL-TR-6725`, and `Bhagwandin` — no match. The PDF still needs to be
+  dropped into `paper/data/pdf/` (preferably under
+  `paper/data/pdf/Empirical heuristics and tuned constants validation/`
+  alongside other ARL/AEDC dynamic-stability sources).
+- **WebFetch blocked.** The agent attempted to fetch the DTIC citation
+  page (`https://apps.dtic.mil/sti/citations/ADA592550`) and the HISA
+  archive page (`https://hisa.gitlab.io/archive/asc/modifiedFinner/notes/modifiedFinner.html`).
+  Both calls returned permission denied — WebFetch is not available in
+  the current sandbox profile. WebSearch returned only summaries, none
+  of which contained dimensional fin planform values (root chord, tip
+  chord, sweep length / sweep angle, exposed semispan, thickness) that
+  could be cited verbatim to a figure or page.
+- **What is needed before the fixture can be updated.** Either:
+  1. The user drops `ADA592550.pdf` into `paper/data/pdf/` and points the
+     next agent at Figure 3 (page ~9 of the report body, per the prompt
+     context), or
+  2. The user enables WebFetch for `apps.dtic.mil` and `hisa.gitlab.io`
+     so an agent can read the dimensional callouts directly, or
+  3. The user provides the planform values verbatim (root chord, tip
+     chord, leading-edge sweep angle, exposed semispan, thickness, all
+     in calibers or mm) along with the figure/page citation.
+- **Until then,** the placeholder values in `makeAirForceModifiedFinner`
+  (root 1.0 cal, tip 0.5 cal, sweep length 0.5 cal, span 1.0 cal,
+  thickness 0.08 cal, HEXAGONAL cross-section) remain in place. Per
+  CLAUDE.md citation hygiene ("Never cite NACA, NASA, AGARD, or AEDC
+  report numbers, titles, authors, or data from training knowledge
+  alone"), the agent declined to populate the fixture from web summaries
+  or training-data recall, since fabricated dimensional values
+  contaminate the comparator and would inflate the AFF MAPE numbers
+  with non-physics geometry error.
+- **Comparator impact.** The AFF supersonic MAPE = 18.96 % reported in
+  the Verdict section was computed against the placeholder planform.
+  When the planform is corrected, the comparator must be re-run and the
+  Verdict numbers updated. The current ablation test running in the
+  background is not affected (it operates on `makeBasicFinner`, not
+  `makeAirForceModifiedFinner`).
 
 ## Files added by this commit
 
