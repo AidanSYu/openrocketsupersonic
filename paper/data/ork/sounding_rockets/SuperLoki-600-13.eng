@@ -1,0 +1,22 @@
+; Stable Super Loki rocket motor (SDC P/N 600-13)
+; Source: AFCRL-TR-73-0412 / DTIC AD-766737, Table 3.3, Figure 3.4
+; Sea-level firing at +59 deg F
+; Total impulse 9944 lbf-s; action time 2.09 s; max thrust 5954 lbf
+; Curve digitized from Fig 3.4; integrated I = 9989 lbf-s
+SuperLoki-600-13 101.6 2242.8 P 19.7222 27.4968 SpaceDataCorp
+   0.000 0.00
+   0.050 17792.89
+   0.100 19572.18
+   0.200 20017.00
+   0.400 19572.18
+   0.700 19572.18
+   1.000 20017.00
+   1.300 21351.46
+   1.500 23575.57
+   1.700 26466.92
+   1.850 25799.69
+   2.000 20017.00
+   2.090 11120.55
+   2.200 2224.11
+   2.300 0.00
+;
