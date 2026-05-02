@@ -1,0 +1,3 @@
+vehicle,source_doc,apogee_real_ft,apogee_orp_ft,err_pct,note
+"Super Loki Robin Dart","AFCRL-TR-73-0412 Table 8.2 (median of 13 Wallops flights, 318k-394k ft)",348000,0,-100.00,"ZERO APOGEE: maxAlt=0.000m, branches=1, hasMotors=false, flightTime=0.0s, warnings=Messages[No recovery device defined in the simulation.,Discontinuity in rocket body diameter:  ""Dart body (steel tube + Thermolag coating)"", ""Stable Super Loki motor case (SDC P/N 600-13)""]"
+"Arcas Performance Flight 7","DTIC AD-235341 p.16-17 (extended-motor final config, peak Mach 3.6)",249000,0,-100.00,"ZERO APOGEE: maxAlt=0.000m, branches=1, hasMotors=false, flightTime=0.0s, warnings=Messages[]"
