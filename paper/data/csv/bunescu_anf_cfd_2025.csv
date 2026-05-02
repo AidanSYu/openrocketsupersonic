@@ -1,0 +1,15 @@
+mach,aoa_deg,coefficient,value,figure_ref
+# Digitized from Bunescu et al. 2025, "Numerical Study of the Basic Finner Model in Rolling Motion,"
+# Aerospace 12(5), 371. MDPI, CC BY 4.0. https://doi.org/10.3390/aerospace12050371
+# URANS k-epsilon realizable on Army-Navy Basic Finner (60 mm dia, 600 mm length, 10-deg cone).
+# Figure 10f: C_X (axial-force coefficient) vs Mach at AoA = 0 deg, averaged over roll angle.
+# Reference area S = pi*d^2/4. Coefficients are dimensionless and roll-averaged.
+# Digitization read by hand from Figure 10f (red squares, AoA=0); estimated +/- 0.03 read uncertainty.
+0.40,0.0,C_X,0.46,Bunescu2025_Fig10f
+0.95,0.0,C_X,0.91,Bunescu2025_Fig10f
+1.60,0.0,C_X,0.78,Bunescu2025_Fig10f
+2.50,0.0,C_X,0.55,Bunescu2025_Fig10f
+3.50,0.0,C_X,0.39,Bunescu2025_Fig10f
+# Figure 10e: C_N (normal-force coefficient) vs Mach at AoA = 10 deg (yellow squares).
+# Single high-AoA point added as cross-check on lift slope behavior.
+1.60,10.0,C_N,3.40,Bunescu2025_Fig10e
