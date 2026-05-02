@@ -597,7 +597,9 @@ public class FinSetCalc extends RocketComponentCalc {
 		// Supersonic case
 		else if (mach >= CNA_SUPERSONIC) {
 			double k1eff = K1.getValue(mach);
-			if (ar < 1.8 && cosGammaLead > 0) {
+			// AST 2026-05-02 ablation hook: skip K1 floor when toggle is set.
+			boolean k1FloorDisabled = info.openrocket.core.aerodynamics.AblationConfig.disableK1Floor;
+			if (!k1FloorDisabled && ar < 1.8 && cosGammaLead > 0) {
 				// Subsonic-LE K1 floor for swept low-AR fins.
 				// mLe = M·cos(Γ_LE) is the Mach component normal to the leading edge.
 				// For mLe < 1 (subsonic LE): K1=2/β underpredicts; full floor = 0.85.
@@ -1019,6 +1021,10 @@ public class FinSetCalc extends RocketComponentCalc {
 	 */
 	static double datcomWaveDragCD(double mach, double tau,
 								   double cosLambdaLE, FinSet.CrossSection section) {
+		// AST 2026-05-02 ablation hook: zero out fin wave drag.
+		if (info.openrocket.core.aerodynamics.AblationConfig.disableDatcomFinWaveDrag) {
+			return 0.0;
+		}
 		if (mach <= 1.0001 || tau < 1e-6 || cosLambdaLE < 1e-6) {
 			return 0.0;
 		}

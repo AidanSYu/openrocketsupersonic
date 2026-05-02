@@ -515,6 +515,14 @@ public class BarrowmanDragCalculator implements DragCalculator {
 				: incompressibleCf(Re, false);
 		double CfSubsonic = CfBase * subsonicCfCorrection(mach, Re, perfectFinish);
 
+		// AST 2026-05-02 ablation hook: disable Van Driest II. Revert to the
+		// pre-VD2 baseline by extending the subsonic incompressible+correction
+		// branch across all Mach (matches the simple PNS baseline used before
+		// 2026-04 introduced the compressible transformation).
+		if (AblationConfig.disableVanDriestII) {
+			return CfSubsonic;
+		}
+
 		if (mach <= 0.9) {
 			return CfSubsonic;
 		}
@@ -1110,6 +1118,12 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	 */
 	static double calculateFinnedBaseAugmentation(SymmetricComponent s,
 			ArrayList<InstanceContext> sContexts, InstanceMap imap, double mach) {
+		// AST 2026-05-02 ablation hook: disable finned-body base augmentation
+		// (corpus-anchored sleeve / rounded-fin / four-fin ramp). Returning 1.0
+		// reverts to the pre-augmentation baseline used before April 30 closures.
+		if (AblationConfig.disableFinnedBaseCore) {
+			return 1.0;
+		}
 		// Fins near the base disrupt wake recompression at all speeds, but the
 		// effect is modest at subsonic (Hoerner Ch. 16: ~10-20%) and strongest
 		// at supersonic (ADA636861: ~40-60%).  Below M=0.2 the effect is negligible.
