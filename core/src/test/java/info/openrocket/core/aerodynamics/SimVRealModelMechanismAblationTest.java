@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
 import info.openrocket.core.document.OpenRocketDocument;
@@ -49,6 +50,7 @@ import info.openrocket.core.util.BaseTestCase;
  * (nozzle pressure-thrust, force-turbulent-BL) on the high-M subset; this
  * test is the model-mechanism complement on the full corpus.
  */
+@Isolated("AblationConfig static volatile flags must not be observed by concurrent tests")
 @ResourceLock("AERO_CPU_HEAVY")
 public class SimVRealModelMechanismAblationTest extends BaseTestCase {
 
