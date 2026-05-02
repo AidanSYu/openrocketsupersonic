@@ -8,7 +8,7 @@
 - Target: within ±10% (ideally ±5%)
 - Regime: transonic (peak M = 1.07)
 - Source: `core/build/reports/simvreal-outliers/Raven.md`
-- Note on data freshness: this sheet supersedes the April 17 open-outlier state (`+24.22%`). The current headline value is from `paper/data/corpus_summary_2026_04_30.md` and `core/build/reports/simvreal-outliers/Raven.md`.
+- Note on data freshness: this sheet supersedes the April 17 open-outlier state (`+24.22%`). The current headline value is from `paper/data/corpus_summary_2026_05_01.md` and `core/build/reports/simvreal-outliers/Raven.md`. The April 30 snapshot is now archived at `paper/data/snapshots/corpus_summary_2026_04_30.md`.
 
 ## Import parity warnings
 

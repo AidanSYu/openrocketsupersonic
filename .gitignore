@@ -11,6 +11,8 @@
 /thesis
 /rawdump
 /tmp
+/.tmp
+/build-tmp
 /loganalysis
 
 # /core/

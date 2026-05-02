@@ -84,11 +84,9 @@ public class RASAeroCommonConstants {
     public static final String FIN_TIP_CHORD = "TipChord";
     public static final String FIN_THICKNESS = "Thickness";
     public static final String FIN_LE_RADIUS = "LERadius";
-    public static final String FIN_AIRFOIL_SECTION = "AirfoilSection";
     public static final String FIN_FX1 = "FX1";
     public static final String FIN_FX3 = "FX3";
     public static final String AIRFOIL_SECTION = "AirfoilSection";
-    //// LERadius, FX1 and FX3 not used
     public static final String CROSS_SECTION_SQUARE = "Square";
     public static final String CROSS_SECTION_ROUNDED = "Rounded";
     public static final String CROSS_SECTION_SUBSONIC_NACA = "Subsonic NACA";
@@ -214,10 +212,10 @@ public class RASAeroCommonConstants {
     /**
      * Temperature conversion from OpenRocket units to RASAero units.  RASAero is in Fahrenheit, OpenRocket in Kelvin.
      */
-    public static final double RASAERO_TO_OPENROCKET_TEMPERATURE(Double input) {
+    public static double RASAERO_TO_OPENROCKET_TEMPERATURE(Double input) {
         return (input + 459.67) * 5.0 / 9.0;
     }
-    public static final double OPENROCKET_TO_RASAERO_TEMPERATURE(Double input) {
+    public static double OPENROCKET_TO_RASAERO_TEMPERATURE(Double input) {
         return input * 9.0 / 5.0 - 459.67;
     }
 

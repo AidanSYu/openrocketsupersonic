@@ -152,16 +152,17 @@ public class SimulationHandler extends AbstractElementHandler {
 
         // Add motors to the rocket
         MotorMount sustainerMount = addMotorToStage(0, sustainerEngine, sustainerIgnitionDelay, fcid, true, warnings);
-        MotorMount booster1Mount = addMotorToStage(1, booster1Engine, booster1IgnitionDelay, fcid, includeBooster1,
-                warnings);
-        MotorMount booster2Mount = addMotorToStage(2, booster2Engine, 0.0, fcid, includeBooster2, warnings);
+        MotorMount booster1Mount = addMotorToStage(1, booster1Engine, booster1IgnitionDelay, fcid,
+                Boolean.TRUE.equals(includeBooster1), warnings);
+        MotorMount booster2Mount = addMotorToStage(2, booster2Engine, 0.0, fcid,
+                Boolean.TRUE.equals(includeBooster2), warnings);
 
         // Set separation settings
         setSeparationDelay(0, 0.0, fcid);
-        if (includeBooster1) {
+        if (Boolean.TRUE.equals(includeBooster1)) {
             setSeparationDelay(1, booster1SeparationDelay, fcid);
         }
-        if (includeBooster2) {
+        if (Boolean.TRUE.equals(includeBooster2)) {
             setSeparationDelay(2, booster2SeparationDelay, fcid);
         }
 
@@ -244,16 +245,6 @@ public class SimulationHandler extends AbstractElementHandler {
             config.setSeparationDelay(separationDelay);
         }
         config.setSeparationEvent(StageSeparationConfiguration.SeparationEvent.BURNOUT);
-    }
-
-    private void warnIfNonZero(WarningSet warnings, String element, String content) {
-        try {
-            if (Math.abs(Double.parseDouble(content)) > 1.0e-12) {
-                warnings.add("Ignoring unsupported RASAero setting " + element + "=" + content + ".");
-            }
-        } catch (NumberFormatException ignored) {
-            // Numeric-format validation is handled by the parser for supported fields.
-        }
     }
 
     /**
@@ -548,7 +539,7 @@ public class SimulationHandler extends AbstractElementHandler {
      * Extracts the CG of a stage from a combined CG of the stage and stage motor.
      * 
      * @param stage      the stage
-     * @param combinedCG the combiend CG of the stage and its motor
+     * @param combinedCG the combined CG of the stage and its motor
      * @param mount      the motor mount of the stage that holds the motor
      * @param motor      the motor
      * @param fcid       the flight configuration ID of this simulation

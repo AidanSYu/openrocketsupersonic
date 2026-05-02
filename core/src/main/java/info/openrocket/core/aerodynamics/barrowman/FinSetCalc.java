@@ -859,26 +859,6 @@ public class FinSetCalc extends RocketComponentCalc {
 		return effectiveChord / macLength;
 	}
 
-	/**
-	 * Returns the SBLI plateau pressure drag increment.
-	 *
-	 * @param conditions flight conditions
-	 * @return SBLI pressure drag coefficient increment (referenced to S_ref)
-	 */
-	double calculateSBLIPressureDrag(FlightConditions conditions) {
-		// SBLI pressure drag is disabled: the free-interaction model scales drag by
-		// L_sep × span, but the SBLI interaction height is O(10× BL momentum
-		// thickness),
-		// far smaller than fin span. Using full span overestimates SBLI drag 5–20×.
-		// RASAero II (our accuracy benchmark) folds these effects into empirical
-		// correlations rather than adding a separate SBLI term, so we suppress it here
-		// to avoid systematic supersonic drag overestimation.
-		// The SBLI chord reduction (cachedSBLI_Lsep applied in
-		// computeSBLIChordReduction)
-		// is kept as it correctly reduces effective fin chord at the leading-edge.
-		return 0.0;
-	}
-
 	@Override
 	public double calculateFrictionCD(FlightConditions conditions, double componentCf, WarningSet warnings) {
 		// a fin with 0 area contributes no drag
@@ -1005,53 +985,7 @@ public class FinSetCalc extends RocketComponentCalc {
 			cd += waveCdPlanform * finArea / conditions.getRefArea();
 		}
 
-		// Add SBLI plateau pressure drag
-		cd += calculateSBLIPressureDrag(conditions);
-
 		return cd;
-	}
-
-	/**
-	 * Ackeret wave drag coefficient for a thin fin cross-section at supersonic
-	 * speeds.
-	 * <p>
-	 * {@code Cdw = 4 * tau^2 / beta}
-	 * <p>
-	 * where {@code tau = t/c} (thickness ratio) and {@code beta = sqrt(M^2 - 1)}.
-	 * The result is referenced to the fin planform area (one side) and represents
-	 * the integrated wave drag from both the upper and lower surface pressure
-	 * distributions for a symmetric profile at zero angle of attack.
-	 * <p>
-	 * Reference: Ackeret (1925); Anderson, "Fundamentals of Aerodynamics", Ch. 15.
-	 *
-	 * @param mach the Mach number (must satisfy M >= WAVE_DRAG_HIGH > 1)
-	 * @param tau  the fin thickness ratio (thickness / MAC length)
-	 * @return Ackeret wave drag coefficient referenced to planform area
-	 */
-	private static double ackeretWaveDragCD(double mach, double tau) {
-		if (mach <= 1.0001)
-			return 0.0;
-		double beta = Math.sqrt(mach * mach - 1.0);
-		return 4.0 * tau * tau / beta;
-	}
-
-	/**
-	 * Derivative of the Ackeret wave drag coefficient with respect to Mach number.
-	 * <p>
-	 * {@code d/dM [4*tau^2 / sqrt(M^2-1)] = -4*tau^2 * M / (M^2-1)^(3/2)}
-	 * <p>
-	 * Used to compute the slope boundary condition for the transonic Hermite blend.
-	 *
-	 * @param mach the Mach number
-	 * @param tau  the fin thickness ratio
-	 * @return d(Cdw)/dM
-	 */
-	private static double ackeretWaveDragSlope(double mach, double tau) {
-		if (mach <= 1.0001)
-			return 0.0;
-		double betaSq = mach * mach - 1.0;
-		double beta = Math.sqrt(betaSq);
-		return -4.0 * tau * tau * mach / (beta * betaSq);
 	}
 
 	// ==================== DATCOM 4.1.5.1 Supersonic Wave Drag ====================

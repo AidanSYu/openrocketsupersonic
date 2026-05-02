@@ -2,6 +2,8 @@ package info.openrocket.core.aerodynamics;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,7 +16,11 @@ import com.google.inject.Module;
 import info.openrocket.core.ServicesForTesting;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.plugin.PluginModule;
+import info.openrocket.core.rocketcomponent.BodyTube;
+import info.openrocket.core.rocketcomponent.InstanceContext;
+import info.openrocket.core.rocketcomponent.InstanceMap;
 import info.openrocket.core.rocketcomponent.Rocket;
+import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.startup.Application;
 
 /**
@@ -132,5 +138,27 @@ public class AgardBDragBenchmarkTest {
 		assertTrue(baseFraction > 0.30 && baseFraction < 0.80,
 				String.format("Base drag fraction at M=0.5 = %.1f%% (expected 30-80%%)",
 						baseFraction * 100));
+	}
+
+	@Test
+	void testForwardWingDoesNotTriggerFinnedBaseAugmentation() {
+		Rocket rocket = SupersonicTestRockets.makeAgardB();
+		var config = rocket.getSelectedConfiguration();
+
+		BodyTube body = null;
+		for (RocketComponent component : config.getAllComponents()) {
+			if (component instanceof BodyTube bt) {
+				body = bt;
+			}
+		}
+		assertNotNull(body, "AGARD-B body tube not found");
+
+		InstanceMap imap = config.getActiveInstances();
+		ArrayList<InstanceContext> bodyContexts = imap.get(body);
+		assertNotNull(bodyContexts, "AGARD-B body tube not in active instance map");
+
+		double aug = BarrowmanDragCalculator.calculateFinnedBaseAugmentation(body, bodyContexts, imap, 0.95);
+		assertEquals(1.0, aug, 1e-12,
+				"AGARD-B's forward delta wing should not be treated as an aft fin-can base-drag augmenter");
 	}
 }

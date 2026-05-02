@@ -3,6 +3,11 @@
 This artifact is now a **real sim-vs-published-data benchmark** rather than a scaffold.
 The placeholder ordinates have been replaced with digitized experimental `C_DF(M)` points from NACA RM A52H28 Figures 11(b), 11(c), and 15.
 
+**Current-code note.** The aggregate metrics table below is a preserved
+pre-Van-Driest/Eckert export artifact. The current Java regression benchmark
+(`NacaRmA52H28BenchmarkTest`) is the manuscript source of truth: aggregate
+MAE is approximately **0.029** in $C_D$ with a gate of **0.035**.
+
 ## Benchmark Boundary
 
 - Geometry closure is strong: the ORP bodies are exact matches to the tested nose-shape family (`cone`, `power`, `Haack`, `ogive`) at `L/D ~= 3`.
@@ -11,17 +16,27 @@ The placeholder ordinates have been replaced with digitized experimental `C_DF(M
 - The ORP export now matches the published Reynolds envelope on a per-Mach representative basis, which materially reduces the old tunnel-state mismatch.
 - Remaining caveat: the source includes dual Reynolds-number conditions at `M = 1.44`, while the sparse published figure points do not resolve every duplicate condition cleanly, so the exact transition state at that Mach is still only approximately closed.
 
-## Overall Agreement
+## Current Regression Status
 
 | Metric | Value |
 | --- | --- |
 | Total digitized points | 25 |
-| Overall MAE | 0.0147 |
-| Overall RMSE | 0.0190 |
-| Overall MAPE | 12.5% |
-| First-pass gate | pass |
+| Current JUnit aggregate MAE | approx. 0.029 |
+| Current JUnit gate | < 0.035 |
+| Status | pass |
 
-## Per-Shape Metrics
+## Legacy Export Metrics
+
+These values are retained only as provenance for the older export and should not be
+used as the current benchmark headline.
+
+| Metric | Value |
+| --- | --- |
+| Legacy overall MAE | 0.0147 |
+| Legacy overall RMSE | 0.0190 |
+| Legacy overall MAPE | 12.5% |
+
+## Legacy Per-Shape Metrics
 
 | Shape | n | MAE | RMSE | MAPE | Max % | Gate |
 | --- | --- | --- | --- | --- | --- | --- |

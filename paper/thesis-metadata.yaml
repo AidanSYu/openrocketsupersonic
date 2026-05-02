@@ -5,7 +5,7 @@ author:
   - "Aidan Yu"
 institute:
   - "Independent Researcher"
-date: "April 2026"
+date: "May 2026"
 # Default Pandoc LaTeX template (report = \chapter for #, \section for ##)
 documentclass: report
 classoption:
@@ -42,6 +42,65 @@ header-includes: |
   \usepackage{textcomp}
   \providecommand{\degree}{\ensuremath{^{\circ}}}
   \DeclareUnicodeCharacter{00B0}{\ensuremath{^{\circ}}}
+  \DeclareUnicodeCharacter{00B1}{\ensuremath{\pm}}
+  \DeclareUnicodeCharacter{00B2}{\ensuremath{^{2}}}
+  \DeclareUnicodeCharacter{00B5}{\ensuremath{\mu}}
+  \DeclareUnicodeCharacter{2113}{\ensuremath{\ell}}
+  \DeclareUnicodeCharacter{2212}{\ensuremath{-}}
+  \DeclareUnicodeCharacter{00D7}{\ensuremath{\times}}
+  \DeclareUnicodeCharacter{00F7}{\ensuremath{\div}}
+  \DeclareUnicodeCharacter{2190}{\ensuremath{\leftarrow}}
+  \DeclareUnicodeCharacter{2192}{\ensuremath{\rightarrow}}
+  \DeclareUnicodeCharacter{2194}{\ensuremath{\leftrightarrow}}
+  \DeclareUnicodeCharacter{21D2}{\ensuremath{\Rightarrow}}
+  \DeclareUnicodeCharacter{2202}{\ensuremath{\partial}}
+  \DeclareUnicodeCharacter{2207}{\ensuremath{\nabla}}
+  \DeclareUnicodeCharacter{2208}{\ensuremath{\in}}
+  \DeclareUnicodeCharacter{2211}{\ensuremath{\sum}}
+  \DeclareUnicodeCharacter{220F}{\ensuremath{\prod}}
+  \DeclareUnicodeCharacter{221A}{\ensuremath{\sqrt{}}}
+  \DeclareUnicodeCharacter{221E}{\ensuremath{\infty}}
+  \DeclareUnicodeCharacter{222B}{\ensuremath{\int}}
+  \DeclareUnicodeCharacter{2248}{\ensuremath{\approx}}
+  \DeclareUnicodeCharacter{2260}{\ensuremath{\neq}}
+  \DeclareUnicodeCharacter{2261}{\ensuremath{\equiv}}
+  \DeclareUnicodeCharacter{2264}{\ensuremath{\leq}}
+  \DeclareUnicodeCharacter{2265}{\ensuremath{\geq}}
+  \DeclareUnicodeCharacter{226A}{\ensuremath{\ll}}
+  \DeclareUnicodeCharacter{226B}{\ensuremath{\gg}}
+  \DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha}}
+  \DeclareUnicodeCharacter{03B2}{\ensuremath{\beta}}
+  \DeclareUnicodeCharacter{03B3}{\ensuremath{\gamma}}
+  \DeclareUnicodeCharacter{03B4}{\ensuremath{\delta}}
+  \DeclareUnicodeCharacter{03B5}{\ensuremath{\varepsilon}}
+  \DeclareUnicodeCharacter{03B6}{\ensuremath{\zeta}}
+  \DeclareUnicodeCharacter{03B7}{\ensuremath{\eta}}
+  \DeclareUnicodeCharacter{03B8}{\ensuremath{\theta}}
+  \DeclareUnicodeCharacter{03B9}{\ensuremath{\iota}}
+  \DeclareUnicodeCharacter{03BA}{\ensuremath{\kappa}}
+  \DeclareUnicodeCharacter{03BB}{\ensuremath{\lambda}}
+  \DeclareUnicodeCharacter{03BC}{\ensuremath{\mu}}
+  \DeclareUnicodeCharacter{03BD}{\ensuremath{\nu}}
+  \DeclareUnicodeCharacter{03BE}{\ensuremath{\xi}}
+  \DeclareUnicodeCharacter{03C0}{\ensuremath{\pi}}
+  \DeclareUnicodeCharacter{03C1}{\ensuremath{\rho}}
+  \DeclareUnicodeCharacter{03C3}{\ensuremath{\sigma}}
+  \DeclareUnicodeCharacter{03C4}{\ensuremath{\tau}}
+  \DeclareUnicodeCharacter{03C5}{\ensuremath{\upsilon}}
+  \DeclareUnicodeCharacter{03C6}{\ensuremath{\varphi}}
+  \DeclareUnicodeCharacter{03C7}{\ensuremath{\chi}}
+  \DeclareUnicodeCharacter{03C8}{\ensuremath{\psi}}
+  \DeclareUnicodeCharacter{03C9}{\ensuremath{\omega}}
+  \DeclareUnicodeCharacter{0393}{\ensuremath{\Gamma}}
+  \DeclareUnicodeCharacter{0394}{\ensuremath{\Delta}}
+  \DeclareUnicodeCharacter{0398}{\ensuremath{\Theta}}
+  \DeclareUnicodeCharacter{039B}{\ensuremath{\Lambda}}
+  \DeclareUnicodeCharacter{039E}{\ensuremath{\Xi}}
+  \DeclareUnicodeCharacter{03A0}{\ensuremath{\Pi}}
+  \DeclareUnicodeCharacter{03A3}{\ensuremath{\Sigma}}
+  \DeclareUnicodeCharacter{03A6}{\ensuremath{\Phi}}
+  \DeclareUnicodeCharacter{03A8}{\ensuremath{\Psi}}
+  \DeclareUnicodeCharacter{03A9}{\ensuremath{\Omega}}
   \usepackage{mathptmx}
   \usepackage{courier}
   \usepackage{microtype}
@@ -49,6 +108,7 @@ header-includes: |
   \setlist{itemsep=0.25em, parsep=0pt, topsep=0.5em}
   \usepackage{etoolbox}
   \usepackage{graphicx}
+  \usepackage{pdflscape}
   \usepackage{tikz}
   \usetikzlibrary{arrows.meta,positioning,calc,patterns,decorations.pathreplacing}
   \usepackage{pgfplots}
@@ -73,19 +133,48 @@ header-includes: |
     \footnotesize
     \setlength{\tabcolsep}{3pt}%
     \renewcommand{\arraystretch}{1.15}%
+    \sloppy
   }
   \setlength{\LTleft}{0pt plus 1fill}
   \setlength{\LTright}{0pt plus 1fill}
-  \emergencystretch=4em
+  \emergencystretch=12em
+  \PassOptionsToPackage{hyphens}{url}
+  \usepackage{seqsplit}
+  \usepackage{tabularx}
+  \usepackage{xltabular}
+  \usepackage{booktabs}
+  \makeatletter
+  \AtBeginDocument{%
+    \let\origpassthrough\passthrough
+    \renewcommand{\passthrough}[1]{\sloppy\hbadness=10000\relax\origpassthrough{#1}}%
+  }
+  \makeatother
+  \renewcommand{\maketitle}{}
 
 include-before: |
-  \newpage
-  \thispagestyle{empty}
-  \vspace*{\fill}
-  \begin{center}
-  \large\textit{The pages that follow contain the math. No one asked for it, but the physics we chase demanded it. These equations are merely the shadow; the truth they describe is waiting out there in the sand.}
-  \end{center}
-  \vspace*{\fill}
-  \newpage
+  \begin{titlepage}
+    \thispagestyle{empty}
+    \centering
+    \vspace*{2cm}
+    {\Huge\bfseries Supersonic and Hypersonic\\[0.3em]
+      Aerodynamic Extensions for OpenRocket\par}
+    \vspace{1cm}
+    {\Large\itshape Technical Report\par}
+    \vspace{2.5cm}
+    {\Large\bfseries Aidan Yu\par}
+    \vspace{0.3cm}
+    {\large Independent Researcher\par}
+    \vspace{1.2cm}
+    {\large May 2026\par}
+    \vfill
+    \begin{minipage}{0.78\textwidth}
+      \centering
+      \itshape\small
+      The pages that follow contain the math. No one asked for it, but the
+      physics we chase demanded it. These equations are merely the shadow;
+      the truth they describe is waiting out there in the sand.
+    \end{minipage}
+    \vspace{2cm}
+  \end{titlepage}
 
 ---

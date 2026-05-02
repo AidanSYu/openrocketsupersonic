@@ -43,9 +43,6 @@ public abstract class FinSet extends ExternalComponent
 	private static final int MAX_ROOT_DIVISIONS = 100;
 	private static final int MAX_ROOT_DIVISIONS_LOW_RES = MAX_ROOT_DIVISIONS / 5;
 
-    public void setOverrideMass() {
-    }
-
     public enum CrossSection {
 		//// Square
 		SQUARE(trans.get("FinSet.CrossSection.SQUARE"), 1.00),

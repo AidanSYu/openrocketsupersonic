@@ -2,7 +2,7 @@
 
 ## Abstract
 
-OpenRocket is a widely used open-source rocket flight simulator whose aerodynamic core, based on the 1967 Barrowman slender-body method, is reliable at subsonic speeds but fails above approximately Mach 0.8. This work extends OpenRocket with physics-based aerodynamic models valid from subsonic through hypersonic flight (Mach 0 to 17+). The central architectural innovation is a shock geometry pre-pass that computes the oblique shock and expansion fan field along the rocket axis once per timestep, distributing locally corrected flow conditions to all downstream component calculators. This eliminates the 5--35% errors that arise when supersonic fin aerodynamics and body pressure drag are evaluated at freestream rather than post-shock conditions. The model suite includes Taylor-Maccoll cone flow, Prandtl-Meyer isentropic expansion, Van Driest II compressible skin friction, DATCOM Section 4.1.5.1 fin wave drag, Devan-Ashwood/Chapman/Viswanath base drag, and Modified Newtonian hypersonic pressure, with C1-continuous polynomial blending at all regime transitions to prevent simulation instabilities near Mach 1. Validation against the claim-mapped benchmark suite demonstrates: shock relations matching NACA Report 1135 to better than 0.01%; nose wave drag achieving MAE = 0.029 against NACA RM A52H28 wind-tunnel data; fin normal force slope achieving MAPE of 6.8% and center-of-pressure MAPE of 7.1% against NASA TM X-653; and Basic Finner vehicle-level drag MAPE of 11.9% against free-flight ballistic range data without geometry-specific calibration. Open geometry-family gaps, including RM-10 and the Raven/Kinsel flight outliers, are retained as explicit limitations. The complete source code is available as an open-source fork.
+OpenRocket is a widely used open-source rocket flight simulator whose aerodynamic core, based on the 1967 Barrowman slender-body method, is reliable at subsonic speeds but fails above approximately Mach 0.8. This work extends OpenRocket with a claim-mapped set of supersonic and hypersonic aerodynamic models for slender finned rockets. The central architectural innovation is a shock geometry pre-pass that computes the oblique shock and expansion fan field along the rocket axis once per timestep, distributing locally corrected flow conditions to downstream component calculators. The model suite includes Taylor-Maccoll cone flow, Prandtl-Meyer expansion, Van Driest II compressible skin friction, DATCOM Section 4.1.5.1 fin wave drag, Devan-Ashwood/Chapman/Viswanath base drag, and Modified Newtonian hypersonic pressure, with C1-continuous blending at regime transitions. Validation demonstrates: shock relations matching NACA Report 1135 to 0.021% on the oblique-shock angle benchmark; nose wave drag MAE = 0.029 against NACA RM A52H28 wind-tunnel data; fin normal-force slope MAPE = 6.8% and center-of-pressure MAPE = 7.1% against NASA TM X-653; Basic Finner vehicle drag MAPE = 11.9% against ADA636861 free-flight data; and DTIC cone foredrag MAPE = 19.7% through Mach 17.2. A 24-flight SimVReal corpus provides B-level integrated trajectory evidence: avg absolute apogee error 4.65%, 24/24 flights within +/-10%, and lower aggregate error than the recorded RASAero II predictions on the same frozen corpus. Component validation reaches Mach 17.2; integrated flight validation reaches MESOS peak Mach 4.33. RM-10 and the current Cmq damping heuristics are retained as explicit limitations rather than headline claims. The complete source code is available as an open-source fork.
 
 ---
 
@@ -16,7 +16,7 @@ The aerodynamic model at the core of OpenRocket was adequate for the original ta
 
 The commercial state-of-the-art for supersonic amateur rocket simulation is RASAero II, developed by Charles E. Rogers [3]. RASAero II incorporates empirical and semi-empirical supersonic drag models calibrated against extensive wind-tunnel and range data. However, it is closed-source, which limits educational value, prevents independent verification of the models, and makes contribution from the research community difficult.
 
-No open-source tool exists that provides production-quality supersonic and hypersonic aerodynamic capability for slender finned vehicles, combined with the accessibility, modularity, and 6-DOF simulation framework of OpenRocket. The aerodynamic extensions described here address this gap.
+Few open-source tools provide internally computed, claim-mapped supersonic aerodynamic models for slender finned vehicles inside a general 6-DOF trajectory simulator. The aerodynamic extensions described here address that narrower gap while retaining OpenRocket's accessibility and modularity.
 
 ### 1.2 Limitations of the Original Implementation
 
@@ -38,7 +38,7 @@ Six specific deficiencies rendered the original OpenRocket aerodynamic models un
 
 Three principles governed the development of the extended aerodynamic model.
 
-**Incremental validation with regression gates.** Each model was implemented, tested, and validated against both analytical solutions and experimental data before the next model was begun. Analytical validation confirms correct mathematical implementation; experimental validation confirms correct physical modeling. Both are necessary: correct mathematics applied to an incorrect model still produces wrong predictions. A 72-file regression test suite prevented newly introduced code from degrading previously correct behavior.
+**Incremental validation with regression gates.** Each model was implemented, tested, and validated against analytical solutions, experimental data, or corpus-level flight evidence before the next model was begun. Analytical validation confirms correct mathematical implementation; experimental validation confirms physical fidelity within the tested geometry family. Both are necessary: correct mathematics applied to an incorrect model still produces wrong predictions. The current focused validation battery prevents newly introduced code from degrading previously correct behavior.
 
 **C1-continuous regime blending.** Every transition between aerodynamic regimes uses smooth polynomial interpolation continuous in both value and first derivative. Discontinuities in aerodynamic coefficients cause the RK4 trajectory integrator to oscillate when repeatedly crossing the discontinuity near Mach 1. Table 1 lists all blending regions and their methods.
 
@@ -50,7 +50,7 @@ Three principles governed the development of the extended aerodynamic model.
 |:-----------------|:-------------------|:-------|
 | Compressibility factor $\beta$ | 0.95–1.05 | Cubic Hermite spline |
 | Skin friction coefficient | 0.9–1.1 | Polynomial interpolation |
-| Base drag | 0.85–1.3 | C1 cubic blend |
+| Base drag | 0.85–1.5 | Hart-anchored transonic blend |
 | Fin wave drag onset | 0.9–1.2 | C1 Hermite blend |
 | Fin $C_{N_\alpha}$ | 0.9–1.5 | Hermite blend |
 | Body $C_{N_\alpha}$ and CP | 0.8–1.3 | Hermite blend |
@@ -357,9 +357,9 @@ The equations of motion are integrated with fourth-order Runge-Kutta, representi
 
 ### 8.1 Validation Strategy
 
-Validation is organized across two categories: (1) analytical benchmarks against exact solutions and authoritative tabulated values, which confirm mathematical correctness; and (2) experimental benchmarks against wind-tunnel pressure measurements, free-flight ballistic range data, and aeroballistic instrumentation campaigns, which confirm physical fidelity. Both categories are necessary and neither is sufficient alone. In the validation figures, the label "ORP" denotes the present model predictions (OpenRocket Plus).
+Validation is organized across three evidence classes: (1) analytical benchmarks against exact solutions and authoritative tabulated values, which confirm mathematical correctness; (2) experimental benchmarks against wind-tunnel pressure measurements, free-flight ballistic range data, and aeroballistic instrumentation campaigns, which confirm physical fidelity for a geometry family; and (3) integrated flight-corpus replay, which validates end-to-end trajectory behavior but remains B-level because atmosphere, motor, mass, instrumentation, and import-parity uncertainties are coupled. In the validation figures, the label "ORP" denotes the present model predictions (OpenRocket Plus).
 
-Table 5 summarizes the complete validation matrix. Sections 8.2–8.8 discuss the most important results in detail.
+Table 5 summarizes the validation matrix. The following sections discuss the most important analytical, component, vehicle, and integrated-corpus results in detail.
 
 **Table 5. Validation summary for aerodynamic subsystems implemented in this work.**
 
@@ -381,7 +381,8 @@ Table 5 summarizes the complete validation matrix. Sections 8.2–8.8 discuss th
 | Fin $C_{N_\alpha}$ and $x_{CP}$ | NASA TM X-653 [14] | MAPE | CNa 6.8%, xCP 7.1% |
 | AGARD-B total $C_D$ | AGARD-B experimental [24] | Component-level | See Fig. 12, 13 |
 | Basic Finner total drag | ADA636861 [25] | MAPE M 1.08–4.30 | 11.9% |
-| Hypersonic cone drag | DTIC AD0487365 [26] | MAPE M 6.5–17.2 | 16.7% (16 deg within 11%) |
+| Hypersonic cone drag | DTIC AD0487365 [26] | MAPE M 6.5–17.2 | 19.7% with source Re_L matched |
+| SimVReal flight corpus | Rogers / SimVReal public cases | Apogee error, 24 flights | 4.65% avg abs error; 24/24 within +/-10% |
 
 ### 8.2 Shock Relations
 
@@ -476,11 +477,19 @@ The MAPE of the present implementation's total drag prediction against the 8 ADA
 
 ### 8.11 Hypersonic Cone Drag: DTIC AD0487365
 
-Hypersonic cone foredrag is validated against DTIC AD0487365 [26] (Grabow, 1965), which provides ballistic range drag measurements for cones with half-angles of 8, 12, and 16 degrees at Mach 6.5–17.2 — a regime where real-gas effects begin to affect shock relations (Fig. 17). The aggregate MAPE across 11 data points is 16.7%, and the 16-degree cone data is within 11%. The 8-degree and 12-degree cones are less well-predicted because friction and base drag become a larger fraction of total drag and the reference data likely includes boundary-layer state effects not fully specified by the geometry. The Modified Newtonian theory, used above Mach 5, correctly captures the asymptotic behavior as $M \to \infty$ where $C_p \to C_{p,\text{max}} \sin^2\theta$.
+Hypersonic cone foredrag is validated against DTIC AD0487365 [26] (Grabow, 1965), which provides ballistic range drag measurements for cones with half-angles of 8, 12, and 16 degrees at Mach 6.5–17.2 — a regime where real-gas effects begin to affect shock relations (Fig. 17). The benchmark fixture uses the tabulated length Reynolds number for each row and marks the range models as perfect-finish to match the laminar source conditions. The aggregate MAPE across 11 data points is 19.7%, just inside the current 20% diagnostic gate, with the largest pointwise residual at the 8-degree, Mach 6.5 low-Re row (+57.0%). The 8-degree and 12-degree cones are less well-predicted because friction and base drag become a larger fraction of total drag and the reference data likely includes boundary-layer state effects not fully specified by the geometry. The Modified Newtonian theory, used above Mach 5, correctly captures the asymptotic behavior as $M \to \infty$ where $C_p \to C_{p,\text{max}} \sin^2\theta$.
 
-![Hypersonic cone foredrag coefficient versus Mach number for half-angles 8, 12, and 16 degrees. Present model vs. DTIC AD0487365 ballistic range data. MAPE = 16.7% aggregate; 16-degree cones are within 11%.](data/png/hypersonic_cone_drag.png)
+![Hypersonic cone foredrag coefficient versus Mach number for half-angles 8, 12, and 16 degrees. Present model vs. DTIC AD0487365 ballistic range data. MAPE = 19.7% aggregate.](data/png/hypersonic_cone_drag.png)
 
-### 8.12 Dynamic Stability Derivatives
+### 8.12 Integrated Flight-Corpus Validation
+
+The 24-flight SimVReal corpus is used as an integrated trajectory regression benchmark rather than as isolated aerodynamic truth. The cases come from the public SimVReal/Rogers comparison set and CDX1 comments; they were not selected by either tool for this manuscript. On the frozen May 1 corpus, the present model achieves 4.65% average absolute apogee error, 24/24 flights within +/-10%, and 14/24 within +/-5%. The recorded RASAero II predictions on the same flights have 5.55% average absolute error and 23/24 within +/-10%.
+
+This comparison should be read narrowly: ORP has lower aggregate error than the recorded RASAero II predictions on this frozen corpus. It is not a universal claim of higher accuracy than RASAero II across all rocket geometries or conditions. The corpus peaks at Mach 3.46, while the separate MESOS 293K two-stage case reaches peak Mach 4.33 and closes at -0.6% apogee, +4.0% velocity, and +3.6% peak Mach.
+
+Ablation rows isolate two import mechanisms. Clearing stage nozzle exit diameters moves AeroPac 104K by -13.53 percentage points, Qu8k by -6.39 percentage points, Proteus 6 by -5.33 percentage points, and Kinsel by -3.02 percentage points, confirming that stage-aware nozzle pressure-thrust is an active mechanism. Disabling RASAero `Turbulence=True` moves the tested non-perfect-finish SimVReal imports by <=0.05 percentage points, bounding that flag for this corpus while retaining its effect for synthetic perfect-finish laminar fixtures.
+
+### 8.13 Dynamic Stability Derivatives
 
 Figs. 18--20 present the dynamic stability derivative validation described in Section 7. Fig. 18 shows the transonic augmentation of pitch damping, with the Gaussian factor peaking at 3.5x at Mach 1.0. Fig. 19 compares the strip-theory $C_{mq}$ prediction to the Tobak and Wehrend exact slender-body theory, illustrating the systematic 5--10x overprediction discussed in Section 7.1. Fig. 20 shows the Magnus side force and yawing moment derivatives versus Mach number.
 
@@ -508,7 +517,7 @@ Several near-sonic singularities were identified and guarded during development.
 
 ### 9.3 Limitations
 
-**High-M finned-vehicle drag remains open.** Basic Finner is now within 11.9% MAPE against the 8 ADA636861 multiple-fit points, but the broader vehicle family is not closed: RM-10 is overpredicted by about 80.5% MAPE and Raven/Kinsel remain large flight outliers. This means the manuscript may claim a guarded Basic Finner benchmark, not a universally closed high-M finned-body model.
+**High-M finned-vehicle drag remains geometry-family bounded.** Basic Finner is within 11.9% MAPE against the 8 ADA636861 multiple-fit points, and the SimVReal high-M flight cases are within +/-10% apogee. The broader vehicle family is not closed: RM-10 is overpredicted by about 80% MAPE. The RM-10 family--high-fineness parabolic nose, tapered afterbody, and 60-degree swept-arc fins--is therefore excluded from the headline claim rather than tuned against Basic Finner.
 
 **Transonic band.** The transonic band from Mach 0.8 to 1.3 is the hardest regime to predict accurately. Wave drag onset is highly geometry-dependent; the transonic base drag peak is sensitive to experimental conditions that are difficult to characterize analytically; and the fin $C_{N_\alpha}$ peak requires the transonic similarity parameter, which is itself an approximation. The 7.1% fin $x_{CP}$ MAPE from NASA TM X-653 is concentrated in this region, while the 6.8% $C_{N_\alpha}$ MAPE reflects calibration of the K1 decay against this dataset.
 
@@ -516,13 +525,13 @@ Several near-sonic singularities were identified and guarded during development.
 
 **Real-gas effects at $M > 7$.** The effective gamma model captures the first-order vibrational excitation effect through a piecewise linear fit. Chemical dissociation of O$_2$ above approximately 2500 K stagnation temperature and of N$_2$ above 4000 K would require a full thermochemical equilibrium computation. This is outside the current scope but would be necessary for accurate predictions at Mach 10+ at low altitude.
 
-**AGARD-B and Basic Finner are not sounding rockets.** The primary validation geometries (AGARD-B, Basic Finner) are projectile/test shapes rather than actual sounding rockets. Validation against real sounding rocket flight data — where the full 6-DOF trajectory and atmospheric variability are additional sources of scatter — remains to be performed.
+**Integrated flight validation is B-level.** The SimVReal corpus and MESOS case are real flight replays, but they couple aerodynamic, motor, mass, launch-condition, atmosphere, and instrumentation uncertainties. They support the end-to-end trajectory claim but do not replace isolated component validation.
 
 ### 9.4 Comparison with RASAero II
 
-A direct numerical comparison with RASAero II on the same geometries is not presented in this paper because RASAero II is closed-source and its specific algorithms are not documented. The author has compared the present implementation and RASAero II qualitatively on several sounding rocket geometries and finds generally consistent drag trends in the supersonic regime, with typical differences of 5–15%. The extended model tends to produce slightly higher drag in the transonic band near Mach 1, which may reflect the conservative base drag peak model.
+A direct numerical comparison with the recorded RASAero II predictions is presented for the frozen 24-flight SimVReal corpus. Those cases come from the public SimVReal/Rogers comparison set and CDX1 comments, not from a case set curated by this work. ORP achieves 4.65% average absolute apogee error and 24/24 flights within +/-10%, compared with 5.55% and 23/24 for the recorded RASAero II predictions. This is a corpus-specific result, not a general dominance claim.
 
-The advantage of the present approach over RASAero II is transparency: every model has a documented physical derivation, validated implementation, and cited reference. The specific corrections applied -- shock geometry local conditions, Van Driest II skin friction, PNK Mach-dependent interference -- can be individually examined, validated, and improved. The disadvantage is that without empirical recalibration against a comprehensive drag database, systematic biases from first-principles models accumulate into vehicle-level errors larger than those achievable by a well-calibrated empirical tool.
+The advantage of the present approach is transparency: each model has a documented derivation, implementation test, cited reference, or explicit evidence class. The specific corrections applied -- shock geometry local conditions, Van Driest II skin friction, PNK Mach-dependent interference, and pressure-thrust nozzle handling -- can be individually examined, validated, ablated, and improved. The disadvantage is that systematic biases remain for geometry families not represented by the current component benchmarks.
 
 ---
 
@@ -542,11 +551,11 @@ The aerodynamic extensions described here extend the classical Barrowman aerodyn
 
 6. **C1-continuous blending throughout is necessary for simulation stability.** The cubic Hermite spline through the sonic transonic band, together with singularity guards at multiple near-sonic poles, prevents the RK4 integrator from diverging during Mach 1 crossings in trajectory simulation.
 
-7. **Vehicle-level drag accuracy is limited by base drag and transonic complexity.** The Basic Finner 11.9% MAPE is encouraging, but RM-10, Raven, and Kinsel show that high-M finned-body drag is not closed across geometry families. Component-level validations are substantially stronger than the current integrated vehicle-family claim.
+7. **Vehicle-level drag accuracy is geometry-family bounded.** Basic Finner reaches 11.9% MAPE and all frozen SimVReal high-M flight cases are within +/-10% apogee, but RM-10 shows that high-fineness parabolic/tapered-afterbody/swept-arc-fin vehicles are not closed by the current model. That family is excluded from the headline claim.
 
-8. **All source code is open, validated, and documented.** The 17 validated subsystems summarized in Table 5, 72-file regression test suite, and complete source availability distinguish this work from closed-source alternatives and enable community contribution and improvement.
+8. **The strongest claim is claim-mapped, not universal.** Component and subsystem validation reaches Mach 17.2 for hypersonic cone foredrag; integrated flight-corpus validation reaches MESOS peak Mach 4.33. The full 6-DOF trajectory result is B-level corpus evidence, not a universal Mach 0-17 vehicle-level validation.
 
-Future work includes Whitcomb area rule integration for transonic wave drag, validation against actual sounding rocket flight data, real-gas dissociation chemistry above Mach 7, and improved transonic base drag modeling through additional experimental correlation.
+Future work includes a second independent Cmq holdout source before damping recalibration, a separate model for the RM-10 geometry family, real-gas dissociation chemistry above Mach 7, and additional isolated finned-body base-pressure validation.
 
 ---
 
@@ -646,7 +655,7 @@ The author thanks the original OpenRocket development team, particularly Sampo N
 
 **Fig. 16.** Total drag coefficient $C_D$ versus Mach for the Basic Finner projectile. Present model predictions compared to ADA636861 free-flight data. MAPE = 11.9% across the 8 multiple-fit points, Mach 1.08--4.30.
 
-**Fig. 17.** Hypersonic cone foredrag coefficient versus Mach number for half-angles 8, 12, and 16 degrees. Present model compared to DTIC AD0487365 ballistic range data. MAPE = 16.7% aggregate; 16-degree cones are within 11%.
+**Fig. 17.** Hypersonic cone foredrag coefficient versus Mach number for half-angles 8, 12, and 16 degrees. Present model compared to DTIC AD0487365 ballistic range data. MAPE = 19.7% aggregate with source Reynolds numbers matched row-by-row.
 
 **Fig. 18.** Transonic augmentation of pitch damping derivative $C_{mq}$. The Gaussian augmentation factor peaks at 3.5x at Mach 1.0, decaying to unity within ±0.3 Mach.
 
