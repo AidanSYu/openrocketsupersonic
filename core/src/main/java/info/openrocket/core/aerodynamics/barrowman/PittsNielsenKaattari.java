@@ -45,6 +45,10 @@ public class PittsNielsenKaattari {
 	 */
 	public static double computeF_WB(double mach, double bodyRadius, double finSemispan,
 									  double rootChord, double sweepAngleLE) {
+		// AST 2026-05-02 ablation hook: disable PNK; revert to original Barrowman.
+		if (info.openrocket.core.aerodynamics.AblationConfig.disablePNK) {
+			return 1.0;
+		}
 		if (mach < M_BLEND_LOW) {
 			return 1.0;
 		}
@@ -73,6 +77,10 @@ public class PittsNielsenKaattari {
 	 */
 	public static double computeF_BW(double mach, double bodyRadius, double finSemispan,
 									  double rootChord) {
+		// AST 2026-05-02 ablation hook: disable PNK; revert to original Barrowman.
+		if (info.openrocket.core.aerodynamics.AblationConfig.disablePNK) {
+			return 1.0;
+		}
 		if (mach < M_BLEND_LOW) {
 			return 1.0;
 		}

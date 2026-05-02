@@ -112,6 +112,12 @@ public class ShockGeometry {
 	 */
 	public static ShockGeometry compute(FlightConfiguration configuration,
 			FlightConditions conditions) {
+		// AST 2026-05-02 ablation hook: disable supersonic pre-pass entirely.
+		// Production default is false; only flipped by the model-mechanism ablation
+		// test to measure how much corpus error the local-flow correction prevents.
+		if (AblationConfig.disableShockGeometry) {
+			return SUBSONIC;
+		}
 		double mach = conditions.getMach();
 		if (mach <= 1.0) {
 			return SUBSONIC;
