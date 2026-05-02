@@ -1,0 +1,318 @@
+# =============================================================================
+#  Viper-3A Robin Dart  (vehicle designation E4.5-1)
+# =============================================================================
+#  Source document : AFCRL-TR-73-0412 / DTIC AD-766737
+#                    "Design, Development and Flight Test of the Super Loki
+#                     Stable Booster Rocket Systems"
+#                    B. Bollermann, R. L. Walker, Space Data Corporation
+#                    30 June 1973.
+#  PDF in repo     : paper/data/pdf/RRS_Super_Loki_Stable_Booster_1973.pdf
+#
+#  Primary references inside this document:
+#    - Section 8.6 "Viper 3A Vehicle"        (p.71)
+#    - Figure 8.5 "Viper IIIA Stable Booster Vehicle Configuration"  (p.72)
+#    - Appendix Table 1  "Viper 3A Dimensions and Mass Properties"   (p.A-3)
+#    - Appendix Table 2  "Viper 3A Rocket Motor Data"                (p.A-6)
+#    - Appendix Table 3  "Viper 3A Thrust and Pressure Vs. Time"     (p.A-7)
+#    - Table 8.4         "Flight Test Summary - Viper 3A Robin Dart" (p.81)
+#
+#  The Viper 3A is a SCALED-UP version of the SDC Super Loki rocket motor:
+#  4.5-inch diameter (vs 4.0 in for Super Loki) and a longer case. Per
+#  Section 8.6 (p.71): "The Viper 3A rocket motor is a 4.5-inch diameter
+#  scaled-up version of the SDC 4.0-inch diameter Super Loki motor.
+#  The propellant weight is increased from 37.2 pounds of the standard
+#  Super Loki to 57.0 pounds." With a heavy ballasted headcap-interstage
+#  (4.00 lb) and large thermally-protected fins (46.87 in^2 per panel),
+#  the Viper 3A produced ~120 km dart apogee with the 1.625-in Robin dart.
+#
+#  Citation hygiene: every numeric value below is annotated with its source
+#  table, figure, or page in AFCRL-TR-73-0412. Inferences from drawing
+#  proportions are flagged "[INFERRED]". Truly missing data is flagged
+#  MISSING_FROM_SOURCE so the .ork generator can substitute defaults.
+# =============================================================================
+
+vehicle_name: "Viper-3A Robin Dart"
+designation: "E4.5-1"
+source_doc: "AFCRL-TR-73-0412 (DTIC AD-766737), Bollermann & Walker, 30 June 1973"
+source_pdf: "paper/data/pdf/RRS_Super_Loki_Stable_Booster_1973.pdf"
+source_tables:
+  - "Section 8.6 (p.71)"
+  - "Figure 8.5 (p.72)"
+  - "Appendix Table 1 (p.A-3) -- dimensions & mass properties"
+  - "Appendix Table 2 (p.A-6) -- rocket motor data"
+  - "Appendix Table 3 (p.A-7) -- digital thrust/pressure vs time"
+  - "Table 8.4 (p.81) -- flight test summary"
+
+# Section 8.6 p.71: "The darts all reached an apogee of about 120 km".
+# Table 8.4 p.81: actual dart apogees on flights 1-4, 1-5, 1-6 = 380, 397,
+# 394 kft (= 116, 121, 120 km).  Predicted = 388 kft (118 km).
+# Apogee corresponds to ballistic dart coast; peak Mach occurs at booster
+# burnout ~Mach 5+ (analogous to Super Loki, Sec 8.2 p.65).
+peak_mach_reported: ">5.0"   # not explicitly stated; analogous to Super Loki Sec 8.2
+
+# -----------------------------------------------------------------------------
+#                              Stages
+# -----------------------------------------------------------------------------
+stages:
+
+  # ---------------------------------------------------------------------------
+  # Stage 0 (sustainer): 1.625-inch Robin Dart
+  # IDENTICAL to the Super Loki Robin Dart sustainer (Section 8.6 p.71:
+  # "The second stage is the same 1.625-inch diameter Robin dart as is being
+  # used with the Super Loki motor.")
+  # Source: Section 4.3 (p.24); Figure 4.1 (p.15); Figure 8.5 (p.72);
+  #         Table 4.1 (p.16); Appendix Table 1 (p.A-3).
+  # ---------------------------------------------------------------------------
+  - name: "Robin Dart (sustainer)"
+    role: "sustainer"
+
+    # Total dart length: Figure 8.5 station 13.0 to 43.85 plus nose tip at
+    # station 0  -> dart length 43.85 in (Figure 8.5).
+    # Appendix Table 1 reports Dart Length = 48.2 in. The Figure 8.5
+    # 43.85 in measurement corresponds to nose-tip to fin-leading-edge;
+    # 48.2 in corresponds to nose-tip to dart aft (with fins). Use 48.2 in.
+    # Robin Dart in Super Loki Fig 4.1 is reported as 43.655 in long --
+    # essentially the same as Fig 8.5's 43.85 in. Use the Appendix Table 1
+    # value 48.2 in as the canonical "dart length".
+    total_length_in: 48.2            # Appendix Table 1 (p.A-3)
+    body_diameter_in: 1.63           # Appendix Table 1 (p.A-3); = 1.625 nominal
+
+    # Mass (Appendix Table 1)
+    overridemass_lb: 13.50           # Appendix Table 1, "Dart Weight"
+    cg_in_from_nose_tip: 22.00       # Appendix Table 1, "Dart CG From Nose Tip"
+    pitch_moi_slug_ft2: 0.450        # Appendix Table 1
+    roll_moi_slug_ft2: 0.001234      # Appendix Table 1
+
+    # Note: the Super Loki Robin dart (Section 4.3) reports 14.15 lb total
+    # weight (Table 4.1). The Viper-3A "13.5 lb dart" (Appendix Table 1)
+    # is a slightly lighter Robin dart configuration -- the original 1-5/8
+    # Robin without the heavier interstage adapter ring used in the Super
+    # Loki Stable variant.
+
+    components:
+
+      # ---- Nose cone (steel ogive) ----------------------------------------
+      # Section 4.3 p.24: "steel ogive containing lead ballast, a cylindrical
+      # steel tubular body". Same dart as PWN-12A (p.24).
+      # Nose length not directly given in Fig 4.1 or Fig 8.5; estimated from
+      # drawing proportions to be ~10 in. [INFERRED]
+      - type: nosecone
+        name: "Dart nose cone (steel ogive with lead ballast)"
+        shape: ogive
+        shape_parameter: 1.0
+        length_in: 10.0              # [INFERRED from Fig 4.1 / Fig 8.5]
+        length_in_confidence: low
+        aft_radius_in: 0.8125        # = 1.625 / 2 (Fig 4.1)
+        material: Steel
+        material_density_kg_m3: 7850.0
+        thickness: filled            # contains lead ballast (Section 4.3 p.24)
+        finish: polished
+
+      # ---- Dart body tube --------------------------------------------------
+      # Section 4.3 p.24: "cylindrical steel tubular body... aluminum tail
+      # section... mounted four steel fins... body is coated with 0.075-inch
+      # of Thermolag, ablative coating."
+      # Body length = total - nose ~= 48.2 - 10.0 = 38.2 in.
+      - type: bodytube
+        name: "Dart body (steel tube, Thermolag ablative coat)"
+        length_in: 38.2              # = 48.2 - nose 10.0 [INFERRED nose len]
+        radius_in: 0.8125            # Fig 4.1, dia 1.625 in
+        thickness_in: 0.060          # MISSING_FROM_SOURCE; typical thin steel
+        thickness_in_confidence: low
+        material: Steel              # Section 4.3 p.24
+        material_density_kg_m3: 7850.0
+        ablative_coating_in: 0.075   # Section 4.3 p.24, "0.075-inch of Thermolag"
+        finish: normal
+
+        subcomponents:
+
+          # ---- Dart fins ---------------------------------------------------
+          # Figure 4.1 (p.15): "4.95 in^2 Per Fin (4 Ea.)"  -- same dart in
+          # Super Loki and Viper 3A. Appendix Table 1 reports Dart Fin Span
+          # = 4.62 in (tip-to-tip), so half-span (height) = (4.62-1.63)/2
+          # = 1.495 in.  Combined with area constraint 4.95 in^2:
+          #   0.5*(root+tip)*1.495 = 4.95  =>  root+tip = 6.62 in.
+          # Specific root/tip not given. Assume root = 4.0, tip = 2.62 [INFERRED].
+          # Verification: 0.5*(4.0+2.62)*1.495 = 4.95  OK
+          - type: trapezoidfinset
+            name: "Dart fins (4x steel, 4.95 in^2 each)"
+            count: 4                  # Figure 4.1
+            area_per_fin_in2: 4.95    # Figure 4.1
+            fin_span_tip_to_tip_in: 4.62  # Appendix Table 1
+            height_in: 1.495          # = (4.62 - 1.63) / 2
+            root_chord_in: 4.0        # [INFERRED]
+            tip_chord_in: 2.62        # [INFERRED to satisfy area]
+            sweep_length_in: 0.69     # [INFERRED, root-tip / 2]
+            geometry_confidence: low  # only span+area documented
+            thickness_in: 0.060       # MISSING_FROM_SOURCE; typical steel dart fin
+            thickness_confidence: low
+            cross_section: square
+            material: Steel
+            material_density_kg_m3: 7850.0
+
+  # ---------------------------------------------------------------------------
+  # Stage 1: Viper 3A Booster (4.5-inch diameter scaled Super Loki)
+  # Source: Section 8.6 p.71; Figure 8.5 p.72; Appendix Tables 1, 2, 3.
+  # ---------------------------------------------------------------------------
+  - name: "Viper 3A Booster (Stable)"
+    role: "booster"
+    separation_event: "burnout"
+    separation_delay_s: 0.0
+
+    # Booster geometry (Appendix Table 1 p.A-3)
+    motor_case_length_in: 96.0       # Appendix Table 1, "Rocket Motor Length"
+    motor_case_diameter_in: 4.50     # Appendix Table 1, "Rocket Motor Diameter"; Fig 8.5
+    motor_case_wall_thickness_in: MISSING_FROM_SOURCE  # not specified for Viper 3A
+    motor_case_material: "Steel or aluminum (not explicitly specified for Viper 3A)"
+    motor_case_material_confidence: low
+    # Note: AFCRL-TR-73-0412 does not state Viper 3A case material in the
+    # appendix. Standard Super Loki uses 2014-T6 aluminum (Table 3.1). For
+    # the scaled-up Viper 3A motor, builder default to 2014-T6 aluminum.
+    motor_case_material_default: "Aluminum 2014-T6 (assumed by analogy to Super Loki)"
+    motor_case_material_density_kg_m3: 2810.0
+
+    # Mass properties (Appendix Table 1 p.A-3)
+    booster_loaded_weight_lb: 76.67  # Appendix Table 1, "Loaded Motor Weight"
+    booster_expended_weight_lb: 19.72  # Appendix Table 1, "Expended Motor Weight"
+    booster_loaded_cg_in_from_nep: 44.15   # Appendix Table 1; NEP = nozzle exit plane
+    booster_expended_cg_in_from_nep: 37.71  # Appendix Table 1
+    booster_loaded_pitch_moi_slug_ft2: 11.486  # Appendix Table 1
+    booster_expended_pitch_moi_slug_ft2: 4.491  # Appendix Table 1
+    interstage_ballast_weight_lb: 4.00  # Appendix Table 1, "Interstage Ballast Weight"
+    # Section 8.6 p.71: "a ballast-weighted motor headcap-interstage (4.00
+    # pounds), together with larger booster fins (46.87 in^2 per panel)
+    # which were thermally protected... were used to reliably produce a
+    # stable booster flight after burnout and staging."
+
+    components:
+
+      - type: bodytube
+        name: "Viper 3A motor case (4.5-in dia, 96.0-in long)"
+        length_in: 96.0              # Appendix Table 1
+        radius_in: 2.25              # = 4.5 / 2 (Appendix Table 1)
+        thickness_in: 0.083          # MISSING_FROM_SOURCE; assumed same as Super Loki Table 3.1
+        thickness_confidence: low
+        material: "Aluminum 2014-T6 (assumed)"
+        material_density_kg_m3: 2810.0
+        finish: normal
+        # Override mass = expended motor (19.72) + interstage ballast (4.00)
+        # = 23.72 lb. This matches "Booster Stage Weight = 23.72 lb" in
+        # Appendix Table 1 "Expended Booster Stage Mass Properties".
+        overridemass_lb: 23.72       # Appendix Table 1, "Booster Stage Weight"
+        overridesubcomponentsmass: true
+
+        subcomponents:
+
+          - type: trapezoidfinset
+            name: "Viper 3A booster fins (4x, 46.87 in^2 each, thermally protected)"
+            count: 4                  # Figure 8.5 (4 fins shown)
+            area_per_fin_in2: 46.87   # Section 8.6 p.71
+            fin_span_tip_to_tip_in: 9.50  # Appendix Table 1, "Motor Fin Span"
+            # Half-span (fin height) = (9.50 - 4.50) / 2 = 2.50 in.
+            height_in: 2.50           # derived from span + dia
+            # Root/tip chords not directly given. Solve from area:
+            #   0.5*(root+tip)*2.50 = 46.87  =>  root+tip = 37.50 in.
+            # Drawing Fig 8.5 shows fins approx triangular trapezoid similar
+            # in proportion to Super Loki (root/tip = 16.6/14.8 = 1.12).
+            # Apply same ratio: tip = 37.50 / (1 + 1.12) = 17.69, root = 19.81.
+            # Check: 0.5*(19.81+17.69)*2.50 = 46.87  OK  [INFERRED]
+            root_chord_in: 19.81      # [INFERRED from area + Super Loki proportions]
+            tip_chord_in: 17.69       # [INFERRED]
+            sweep_length_in: 1.06     # [INFERRED, root-tip / 2]
+            geometry_confidence: low  # only area+span are documented
+            thickness_in: 0.060       # MISSING_FROM_SOURCE; analogous to Super Loki
+            thickness_confidence: low
+            cross_section: square
+            material: "Aluminum + Thermolag T-230 cuff"  # Section 8.6 p.71 + analogy
+            material_density_kg_m3: 2810.0
+            finish: normal
+
+    # ---- Booster motor data (Appendix Table 2 p.A-6) --------------------
+    motor:
+      designation: "Viper-3A"
+      manufacturer: "Space Data Corporation (scaled Super Loki)"
+      part_number: MISSING_FROM_SOURCE  # not given an explicit P/N in Appendix
+      diameter_m: 0.11430              # = 4.50 in
+      length_m: 2.4384                 # = 96.0 in
+      propellant_mass_lb: 56.98        # Appendix Table 2
+      total_mass_lb: 72.73             # Appendix Table 2
+      expended_mass_lb: 15.75          # Appendix Table 2 (less fins and interstage)
+      total_impulse_lbf_s: 13058       # Appendix Table 2
+      action_time_s: 2.21              # Appendix Table 2
+      total_time_s: 2.29               # Appendix Table 2
+      avg_thrust_lbf: 5908             # Appendix Table 2
+      max_thrust_lbf: 7410             # Appendix Table 2
+      avg_chamber_pressure_psia: 1395  # Appendix Table 2
+      specific_impulse_s: 229.2        # Appendix Table 2
+      exhaust_velocity_fps: 4496       # Appendix Table 2
+      nozzle_throat_area_in2: 3.108    # Appendix Table 2
+      nozzle_exit_area_in2: 15.00      # Appendix Table 2
+      nozzle_discharge_coefficient: 0.940  # Appendix Table 2
+      propellant: "Same family as Super Loki: polysulfide / ammonium perchlorate (Section 8.6 p.71 implies same propellant scaled up)"
+      firing_conditions: "Sea level (Appendix Table 3 header)"
+
+      # Thrust curve directly from Appendix Table 3 (p.A-7), digital values
+      # at 0.1 s spacing. SEA LEVEL.  Time / Thrust(lbf) / Pressure(psia)
+      thrust_curve_source: "Appendix Table 3 (p.A-7), tabular digital data, sea level"
+      thrust_curve_lbf:
+        - [0.0000,    0.000]
+        - [0.1000, 4424.900]
+        - [0.2000, 4566.790]
+        - [0.3000, 4721.795]
+        - [0.4000, 4930.645]
+        - [0.5000, 5143.495]
+        - [0.6000, 5368.687]
+        - [0.7000, 5602.058]
+        - [0.8000, 5897.233]
+        - [0.9000, 6192.407]
+        - [1.0000, 6473.346]
+        - [1.1000, 6702.191]
+        - [1.2000, 6866.176]
+        - [1.3000, 6986.668]
+        - [1.4000, 7078.452]
+        - [1.5000, 7188.784]
+        - [1.6000, 7311.772]
+        - [1.7000, 7354.120]
+        - [1.8000, 7376.685]
+        - [1.9000, 7407.177]
+        - [2.0000, 6346.914]
+        - [2.1000, 4031.340]
+        - [2.2000, 1062.025]
+
+# -----------------------------------------------------------------------------
+#                              Launch
+# -----------------------------------------------------------------------------
+# Appendix p.A-1 ("Vehicle Performance"): "The launch velocity is 145 fps
+# from the 14-foot helical rail, and the launch spin rate is 6.80 rps."
+# Table 8.4 p.81: all flights at 80 deg QE.
+launch:
+  site_alt_ft: 0                     # Implicit; Appendix Table 3 thrust curve is sea-level
+  elevation_deg: 80                  # Table 8.4 p.81 (all 4 flights at 80 deg)
+  launch_rail_length_ft: 14.0        # Appendix p.A-1, "14-foot helical rail"
+  launch_rail_type: "helical"        # Appendix p.A-1
+  launch_velocity_fps: 145           # Appendix p.A-1
+  launch_spin_rate_rps: 6.80         # Appendix p.A-1
+
+# -----------------------------------------------------------------------------
+#                          Reference performance
+# -----------------------------------------------------------------------------
+# Table 8.4 p.81: Viper 3A Robin Dart Vehicle, all flights 80 deg QE.
+nominal_trajectory:
+  qe_deg: 80
+  predicted_dart_apogee_kft: 388      # Table 8.4 (also Section 8.6 p.71: ~120 km)
+  flights:
+    - {flight: "1-4", date: "27 SEP 72", vehicle: "E4.5-1", actual_dart_apogee_kft: 380, booster_apogee_ft: 25900, booster_stable: yes}
+    - {flight: "1-5", date: "27 SEP 72", vehicle: "E4.5-1", actual_dart_apogee_kft: 397, booster_apogee_ft: 36600, booster_stable: yes}
+    - {flight: "1-6", date: "02 OCT 72", vehicle: "E4.5-1", actual_dart_apogee_kft: 394, booster_apogee_ft: 34000, booster_stable: yes}
+    - {flight: "1-7", date: "02 OCT 72", vehicle: "E4.5-1A (no thermal protection)", actual_dart_apogee_kft: 39, booster_stable: no, comment: "Late dart separation, no booster fin thermal protection"}
+  # Vehicle launch / burnout state (Appendix Table 1)
+  launch_weight_lb: 94.17            # Appendix Table 1
+  burnout_weight_lb: 37.22           # Appendix Table 1
+  launch_cg_station_in: 78.37        # Appendix Table 1, vehicle station
+  burnout_cg_station_in: 65.68       # Appendix Table 1
+  launch_pitch_moi_slug_ft2: 24.758  # Appendix Table 1
+  burnout_pitch_moi_slug_ft2: 15.266  # Appendix Table 1
+
+# -----------------------------------------------------------------------------
+#                                  END
+# -----------------------------------------------------------------------------

@@ -1,0 +1,303 @@
+# =============================================================================
+#  Super Loki Instrumented Dart  (vehicle designation F4-1)
+# =============================================================================
+#  Source document : AFCRL-TR-73-0412 / DTIC AD-766737
+#                    "Design, Development and Flight Test of the Super Loki
+#                     Stable Booster Rocket Systems"
+#                    B. Bollermann, R. L. Walker, Space Data Corporation
+#                    30 June 1973.
+#  PDF in repo     : paper/data/pdf/RRS_Super_Loki_Stable_Booster_1973.pdf
+#
+#  This is the "instrumented dart" variant: a 2.125-inch diameter steel dart
+#  that carries a transponder rocketsonde payload + Starute decelerator.
+#  The booster is the same Stable Super Loki rocket motor (SDC P/N 600-13)
+#  used with the Robin dart variant. Section 5; Figure 5.1; Table 5.1.
+#  Per Section 8.7.3 (p.73), this F4-1 vehicle reached ~71 km dart apogee
+#  in flight (predicted 241 kft = 73.5 km, actual 230-240 kft).
+#
+#  Citation hygiene: every numeric value below is annotated with its source
+#  table, figure, or page in AFCRL-TR-73-0412. Inferences from drawing
+#  proportions are flagged "[INFERRED]". Truly missing data is flagged
+#  MISSING_FROM_SOURCE so the .ork generator can substitute defaults.
+# =============================================================================
+
+vehicle_name: "Super Loki Instrumented Dart"
+designation: "F4-1"
+source_doc: "AFCRL-TR-73-0412 (DTIC AD-766737), Bollermann & Walker, 30 June 1973"
+source_pdf: "paper/data/pdf/RRS_Super_Loki_Stable_Booster_1973.pdf"
+source_tables:
+  - "Table 3.1 (booster motor design)"
+  - "Table 3.3 (booster motor performance)"
+  - "Table 5.1 (instrumented dart vehicle mass properties)"
+  - "Table 6.1 (nominal trajectory, 80 deg QE)"
+  - "Figure 3.4 (thrust vs time at +59 F)"
+  - "Figure 5.1 (instrument dart vehicle config)"
+
+# Reported peak Mach (Section 8.2 p.65, Section 5.2): the booster burnout
+# velocity exceeds Mach 5.0 (reported above Mach 5.0 in Section 8.2);
+# instrumented-dart vehicle burnout time = 2.1 s (Table 6.1).
+peak_mach_reported: ">5.0"  # AFCRL-TR-73-0412 p.65, Sec 8.2
+notes_payload_mass: |
+  Section 5.3 (p.35) states the instrumented dart contains the transponder
+  sonde + Starute decelerator packaged in split steel staves within the
+  steel cylindrical body. The dart total weight (19.00 lb, Table 5.1) is
+  given as a single mass; individual payload-vs-structure breakdown is
+  MISSING_FROM_SOURCE.
+
+# -----------------------------------------------------------------------------
+#                              Stages
+# -----------------------------------------------------------------------------
+stages:
+
+  # ---------------------------------------------------------------------------
+  # Stage 0 (sustainer): 2.125-inch Instrumented Dart
+  # Source: Section 5.2-5.3 (pp.25, 35); Figure 5.1 (p.26); Table 5.1 (p.27)
+  # ---------------------------------------------------------------------------
+  - name: "Instrumented Dart (sustainer)"
+    role: "sustainer"
+
+    # Total dart length (Figure 5.1, p.26): 51.894 in.
+    total_length_in: 51.894          # Figure 5.1
+    body_diameter_in: 2.125          # Figure 5.1; Section 5.1 p.25 ("2.125-inch diameter")
+
+    # Mass (Table 5.1 p.27)
+    overridemass_lb: 19.00           # Table 5.1, "Instrumented Dart Weight"
+    cg_in_from_aft: 31.75            # Table 5.1, "C.G. from aft end of dart"
+    pitch_moi_slug_ft2: 0.727        # Table 5.1, pitch moment of inertia
+
+    components:
+
+      # ---- Nose cone (steel ogive) ----------------------------------------
+      # Section 5.3 p.35: "consists of a steel cylindrical body with a steel
+      # ogive and an aluminum tail piece. The cylindrical body contains the
+      # payload which is packaged into split steel staves. The ogive is
+      # retained at the forward end of the body with shear screws."
+      # The exact nose length is not dimensioned in Figure 5.1; only the
+      # total dart length (51.894 in) is given. Figure 5.1 proportions show
+      # a long pointed ogive similar to the Robin dart's 10-in nose at
+      # 1.625-in dia; scaled to 2.125-in the nose is ~13 in. [INFERRED]
+      - type: nosecone
+        name: "Dart nose cone (steel ogive, retained by shear screws)"
+        shape: ogive
+        shape_parameter: 1.0
+        length_in: 13.0              # [INFERRED from Fig 5.1 proportions]
+        length_in_confidence: low    # not dimensioned in source; estimated
+        aft_radius_in: 1.0625        # = 2.125 / 2 (Figure 5.1)
+        material: Steel              # Section 5.3 p.35
+        material_density_kg_m3: 7850.0
+        thickness: filled            # ogive contains payload retainer & shear screws
+        finish: polished
+
+      # ---- Body tube (steel cylinder + aluminum boattail tail) -------------
+      # Section 5.3 p.35: "the aft end of the dart tail is boattailed to
+      # reduce aerodynamic drag and to be used to mate the dart to the
+      # booster." The boattail is part of the aluminum tail piece; explicit
+      # boattail diameter and length are NOT given.
+      # Body length = total dart - nose ~= 51.894 - 13.0 = 38.894 in.
+      # Section 4.1 (Robin dart) says dart body has 0.075-in Thermolag coat.
+      # Section 5.3 (p.35) says the instrumented dart in development used
+      # NO ablative coating (internal air gaps instead); "ablative coating
+      # on the dart exterior probable in the future". So baseline = no coat.
+      - type: bodytube
+        name: "Dart body (steel tube, payload staves inside)"
+        length_in: 38.894            # = 51.894 - nose 13.0 [INFERRED nose len]
+        radius_in: 1.0625            # Figure 5.1
+        thickness_in: 0.060          # MISSING_FROM_SOURCE; typical steel dart wall
+        thickness_in_confidence: low
+        material: Steel              # Section 5.3 p.35
+        material_density_kg_m3: 7850.0
+        finish: normal
+        # Aft boattail / taper: the dart "is boattailed" per Section 5.3 p.35,
+        # but explicit boattail dimensions (length, aft diameter) are
+        # MISSING_FROM_SOURCE. Builder can either omit (cylinder to base) or
+        # add a short transition.
+        boattail_present: true       # Section 5.3 p.35
+        boattail_length_in: MISSING_FROM_SOURCE
+        boattail_aft_diameter_in: MISSING_FROM_SOURCE
+
+        subcomponents:
+
+          # ---- Dart fins -------------------------------------------------
+          # Figure 5.1 (p.26): "9.45 in^2 Per Fin (4 Ea.)"
+          # Section 5.3 p.35: "Four steel fins are roll-pinned into the
+          # dart tail for flight stability."
+          # Individual fin chord/span/sweep are NOT given; only area & count.
+          # Geometry below preserves the 9.45 in^2 area.
+          - type: trapezoidfinset
+            name: "Dart fins (4x steel, 9.45 in^2 each)"
+            count: 4                  # Figure 5.1
+            area_per_fin_in2: 9.45    # Figure 5.1
+            # Trapezoidal planform inferred from drawing; specific
+            # root/tip/span MISSING_FROM_SOURCE -- area only is reported.
+            # Builder estimate (consistent with 9.45 in^2 area and the
+            # 2.125-in dart proportions in Fig 5.1):
+            root_chord_in: 4.2        # [INFERRED from Fig 5.1]
+            tip_chord_in: 2.1         # [INFERRED from Fig 5.1]
+            height_in: 3.0            # [INFERRED from Fig 5.1]
+            # Verification: 0.5*(4.2+2.1)*3.0 = 9.45 in^2  OK
+            sweep_length_in: 1.05     # [INFERRED, root-tip / 2]
+            geometry_confidence: low  # area-only is the documented constraint
+            thickness_in: 0.060       # MISSING_FROM_SOURCE; typical steel
+            thickness_confidence: low
+            cross_section: square
+            material: Steel
+            material_density_kg_m3: 7850.0
+
+  # ---------------------------------------------------------------------------
+  # Stage 1: Stable Super Loki Booster (SDC P/N 600-13)
+  # Same motor as Super Loki Robin Dart variant (Section 3, Tables 3.1-3.3).
+  # Mass properties for THIS instrumented-dart vehicle from Table 5.1 p.27.
+  # ---------------------------------------------------------------------------
+  - name: "Stable Super Loki Booster"
+    role: "booster"
+    separation_event: "burnout"
+    separation_delay_s: 0.0
+
+    # Booster geometry (Table 3.1 p.8)
+    motor_case_length_in: 88.3       # Table 3.1
+    motor_case_diameter_in: 4.000    # Table 3.1; Figure 4.1 / 5.1
+    motor_case_wall_thickness_in: 0.083  # Table 3.1, "0.083 in. 2014-T6 Aluminum"
+    motor_case_material: "Aluminum 2014-T6"
+    motor_case_material_density_kg_m3: 2810.0
+
+    # Mass properties (Table 5.1 p.27 -- "Booster" subsection):
+    booster_loaded_weight_lb: 61.05  # Table 5.1
+    booster_expended_weight_lb: 16.12  # Table 5.1
+    booster_loaded_cg_in_from_aft: 42.16  # Table 5.1
+    booster_expended_cg_in_from_aft: 41.38  # Table 5.1
+    booster_loaded_pitch_moi_slug_ft2: 8.292  # Table 5.1
+    booster_expended_pitch_moi_slug_ft2: 3.466  # Table 5.1
+
+    # Inert booster mass (case + nozzle + headcap + interstage + fins, no prop)
+    # Per Table 3.1: Lined Case 13.33 lb; Headcap+Interstage 3.81 lb;
+    # Loaded 60.62 lb, Propellant 43.48 lb -> inert = 60.62 - 43.48 = 17.14 lb.
+    # The 16.12 lb "expended weight" (Table 5.1) is the same after igniter and
+    # liner ablation losses.
+    inert_motor_mass_lb: 17.14       # Table 3.1 derived
+    headcap_interstage_mass_lb: 3.81  # Table 3.1
+
+    components:
+
+      - type: bodytube
+        name: "Stable Super Loki motor case (SDC P/N 600-13)"
+        length_in: 88.3              # Table 3.1
+        radius_in: 2.000             # Table 3.1, dia 4.0 in
+        thickness_in: 0.083          # Table 3.1
+        material: "Aluminum 2014-T6"
+        material_density_kg_m3: 2810.0
+        finish: normal
+        # Override mass = inert motor + headcap+interstage (= 17.14 + 3.81)
+        # Note: for this F4-1 vehicle Table 5.1 reports 16.12 lb expended,
+        # so use 16.12 + 3.81 = 19.93 lb total inert when configured per F4-1.
+        overridemass_lb: 19.93       # = 16.12 + 3.81 (Table 5.1 + Table 3.1)
+        overridesubcomponentsmass: true
+
+        subcomponents:
+
+          - type: trapezoidfinset
+            name: "Booster fins (4x, 31.4 in^2 each, Al 2014-T6 + Thermolag)"
+            count: 4                  # Table 3.1, "Fin Area (each) 31.4 in^2 per fin"; Fig 4.1 says 4 fins
+            # Note: Sec 8.2 p.65 says total area increased from 10 in^2 each
+            # (standard) to 30 in^2 each (initial enlarged design); final
+            # Table 3.1 value is 31.40 in^2 per fin.
+            fin_span_tip_to_tip_in: 8.0  # Table 3.1
+            fin_height_in: 2.0        # = (8.0 - 4.0) / 2 from Table 3.1 span and dia
+            tip_chord_in: 14.8        # Table 3.1
+            root_chord_in: 16.6       # Table 3.1
+            area_per_fin_in2: 31.40   # Table 3.1
+            # Sweep length: not given directly. Trailing edge approximately
+            # coincident with motor aft end per Fig 4.1 / 5.1 drawings.
+            # LE sweep length ~ root - tip = 1.8 in [INFERRED].
+            sweep_length_in: 1.8      # [INFERRED from Fig 5.1]
+            sweep_confidence: medium
+            # Verification: 0.5*(16.6+14.8)*2.0 = 31.4 in^2  OK
+            thickness_in: 0.060       # MISSING_FROM_SOURCE; Sec 3.4 mentions 0.030-in Thermolag coat over fin
+            thickness_confidence: low
+            cross_section: square
+            material: "Aluminum 2014-T6 + Thermolag T-230 cuff"
+            # Sec 3.4 p.5: "specially insulated leading edge cuffs and an
+            # 0.030-inch thickness of an ablative coating of Thermolag"
+            # Sec 8.2 p.65-67, Fig 8.2 cuff dwg
+            material_density_kg_m3: 2810.0
+            finish: normal
+
+    # ---- Booster motor data (SDC P/N 600-13, Table 3.3 p.12) ------------
+    motor:
+      designation: "SuperLoki-600-13"
+      manufacturer: "Space Data Corporation"
+      part_number: "SDC P/N 600-13"
+      diameter_m: 0.10160              # 4.0 in (Table 3.1)
+      length_m: 2.24282                # 88.3 in (Table 3.1)
+      propellant_mass_lb: 43.48        # Table 3.1
+      total_mass_lb: 60.62             # Table 3.1, "Overall Rocket Weight"
+      total_impulse_lbf_s: 9944        # Table 3.3
+      action_time_s: 2.09              # Table 3.3
+      avg_thrust_lbf: 4757             # Table 3.3
+      max_thrust_lbf: 5954             # Table 3.3
+      avg_chamber_pressure_psia: 1291  # Table 3.3
+      max_chamber_pressure_psia: 1512  # Table 3.3
+      specific_impulse_s: 228.7        # Table 3.3
+      nozzle_throat_area_in2: 2.666    # Table 3.1
+      propellant: "Polysulfide polymer / ammonium perchlorate (Table 3.2 p.9)"
+      firing_conditions: "Sea level firing at +59 deg F (Figure 3.4 p.13)"
+
+      # Thrust curve digitized from Figure 3.4 (p.13) -- SAME curve as the
+      # Robin Dart variant (motor is identical). Curve in lbf vs seconds.
+      # Smoothly rises from 0, plateaus near ~4500 lbf, peaks ~5950 lbf at
+      # t=1.7 s, terminates at action time t=2.09 s with tail to ~2.3 s.
+      # Total integrated impulse target = 9944 lbf-s (Table 3.3).
+      thrust_curve_source: "Figure 3.4 (p.13), digitized; same curve as Robin variant"
+      thrust_curve_lbf:
+        - [0.00,    0.0]
+        - [0.05, 4000.0]
+        - [0.10, 4400.0]
+        - [0.20, 4500.0]
+        - [0.40, 4400.0]
+        - [0.70, 4400.0]
+        - [1.00, 4500.0]
+        - [1.30, 4800.0]
+        - [1.50, 5300.0]
+        - [1.70, 5950.0]   # max thrust per Table 3.3
+        - [1.85, 5800.0]
+        - [2.00, 4500.0]
+        - [2.09, 2500.0]   # action time
+        - [2.20,  500.0]
+        - [2.30,    0.0]
+
+# -----------------------------------------------------------------------------
+#                              Launch
+# -----------------------------------------------------------------------------
+# Table 6.1 (p.37) header: "SUPER LOKI INSTRUMENTED DART, 80 deg QE SEA LEVEL LAUNCH"
+launch:
+  site_alt_ft: 0                     # Table 6.1, "SEA LEVEL LAUNCH"
+  elevation_deg: 80                  # Table 6.1, "80 deg QE"
+  # Launch rail -- Section 8.5 (p.67) discusses the universal rail concept;
+  # specific rail length / type for instrumented dart F4-1 is
+  # MISSING_FROM_SOURCE in this report (a 14-foot helical rail is mentioned
+  # for Viper 3A in Appendix A-1; instrumented Super Loki rail length is not
+  # directly stated). Builder uses default helical rail.
+  launch_rail_length_in: MISSING_FROM_SOURCE
+  launch_rail_type: "helical (per program convention; specific length not stated)"
+
+# -----------------------------------------------------------------------------
+#                          Reference performance
+# -----------------------------------------------------------------------------
+# Table 6.1 (p.37): nominal trajectory at 80 deg QE sea level.
+nominal_trajectory:
+  qe_deg: 80
+  burnout_altitude_ft: 4731          # Table 6.1
+  burnout_range_ft: 886              # Table 6.1
+  burnout_time_s: 2.1                # Table 6.1
+  dart_apogee_altitude_ft: 232000    # Table 6.1 (~70.7 km)
+  dart_apogee_range_ft: 90000        # Table 6.1
+  dart_apogee_time_s: 120            # Table 6.1
+  dart_impact_range_ft: 165000       # Table 6.1
+  dart_impact_time_s: 245            # Table 6.1
+  booster_apogee_altitude_ft: 23466  # Table 6.1
+  booster_impact_range_ft: 9756      # Table 6.1
+  booster_impact_time_s: 81          # Table 6.1
+  max_acceleration_g: 135            # Table 5.1, "Maximum Vehicle Acceleration"
+
+# -----------------------------------------------------------------------------
+#                                  END
+# -----------------------------------------------------------------------------
