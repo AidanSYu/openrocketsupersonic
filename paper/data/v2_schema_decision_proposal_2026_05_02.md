@@ -2,8 +2,21 @@
 
 **Date:** 2026-05-02
 **Author:** Aidan Yu
-**Status:** Proposal — no production schema changes yet
+**Status:** **DECIDED — Option B (keep schema, allow `apogee_rasaero_ft` blank for sounding rockets)**
 **Sibling repo:** `c:\Code\OpenRocket Plus\rocket-flight-database\` (Zenodo concept DOI 10.5281/zenodo.19976138)
+
+## Decision (2026-05-02)
+
+The user selected **Option B**, overriding the proposal's Option C recommendation. Rationale: keep the existing `apogee_rasaero_ft` column name to preserve the visible record of *where the RAS comparison data came from* (Rogers' published set) and *where it doesn't exist* (sounding-rocket flights pulled from DTIC / NTRS). A blank cell for sounding rockets is more transparent than a generalized `reference_simulator` enum because it makes the RAS-comparable subset of the corpus immediately visible at a glance.
+
+**Implementation impact:**
+- No column rename. v1.0 rows untouched.
+- New sounding-rocket rows added with `apogee_rasaero_ft`, `err_rasaero_pct`, and `abs_err_delta_pp` left blank (empty string in CSV).
+- Aggregates that compare ORP vs RAS must filter out rows with blank `apogee_rasaero_ft`. The aggregate over `apogee_thiswork_ft` is unaffected.
+- README needs a one-paragraph note explaining that v2.0 contains rows without RAS reference predictions and how aggregates handle them.
+- Zenodo: v2.0 version DOI under the existing concept DOI is still appropriate (the row count grows substantially even though the schema is column-stable).
+
+The Options C and D analyses below are kept for the record but are not the chosen path.
 
 ## Problem statement
 
