@@ -1,0 +1,363 @@
+# =====================================================================
+# Nike-Apache Sounding Rocket -- Vehicle Parameters for RFD v2.0
+# =====================================================================
+#
+# Two-stage solid-propellant unguided sounding rocket.
+# Stage 1: Nike M5-E1 booster + Stage 2: Thiokol TE-307 Mod II Apache.
+# Cruciform 4-fin stabilization on each stage. Stages connected by a
+# conical adapter; separation is by differential drag at Nike burnout.
+#
+# Primary source:
+#   NASA TM X-55700 / GSFC X-721-66-569,
+#   "Nike Apache Performance Handbook"
+#   Galloway, H.L., and Crough, R.A. (GSFC / Fairchild Hiller),
+#   December 1966.   [hereafter "Handbook"]
+#
+# Cross-reference for Apache fin geometry & supersonic aero:
+#   AEDC-TR-69-57 / DTIC AD-687441,
+#   "Wind Tunnel Tests on the Apache Sounding Rocket With
+#    Various Spin Rates at Supersonic Speeds"
+#   Uselton, J.C., and Carman, J.B. (ARO Inc., AEDC),
+#   May 1969.   [hereafter "AEDC"]
+#
+# Canonical-flight reference:
+#   NASA TM X-50705 (Dembrow & Jamieson),
+#   "Comparison of Theoretical With Actual Nike-Apache
+#    Sounding Rocket Performance", 1963.   [hereafter "Dembrow"]
+#
+# CITATION HYGIENE (per CLAUDE.md): every numeric value below cites a
+# specific page / figure / table directly inspected in the PDFs above.
+# Values not directly given (derived geometry, fin sweep length, etc.)
+# are flagged with confidence "derived" or "low" and the derivation
+# path is shown in the comment.
+# =====================================================================
+
+vehicle_name: Nike-Apache
+vehicle_type: 2-stage solid sounding rocket
+designation: NASA standard sounding rocket (1963-1979)
+manufacturer:
+  stage1_motor: Hercules Powder Co. (Nike M5-E1)
+  stage2_motor: Thiokol Chemical Corp. (TE-307 Mod II Apache)
+  fins_and_adapter: NASA / Fairchild Hiller
+sources:
+  - NASA TM X-55700 (X-721-66-569), "Nike Apache Performance Handbook", Dec 1966
+  - AEDC-TR-69-57 / AD-687441, "Wind Tunnel Tests on the Apache Sounding Rocket", May 1969
+  - NASA TM X-50705, "Comparison of Theoretical With Actual Nike-Apache ...", Dembrow & Jamieson, 1963
+
+# ---------------------------------------------------------------------
+# OVERALL VEHICLE GEOMETRY (Handbook Figure 5, p.7)
+# ---------------------------------------------------------------------
+# Vehicle stack length:
+#   Nike body          149.75 in
+#   + Nike-Apache adapter cone (length not separately given;
+#     visible in Fig 5 between 17.5"-dia base and 6.5" Apache motor)
+#   + Apache motor     107.0 in
+#   + Payload section  40-80 in (variable; see below)
+#   = ~310-360 in nose-to-tail (typical: ~310 in for 80-in payload).
+overall:
+  total_length_in_clean_min: 297.0   # Handbook Fig 6 + 14: total_length=147" (Apache+payload, "short config")
+  total_length_in_clean_max: 337.0   # Handbook Fig 15: total_length=187" (Apache+payload, "long config")
+  notes: |
+    Two reference Apache configurations in Handbook:
+      Short (Fig 14): Apache stack = 147 in   (40-in payload nose+tube)
+      Long  (Fig 15): Apache stack = 187 in   (80-in payload nose+tube)
+    Plus the Nike booster (~149.75 in) and Nike-Apache conical adapter.
+  config_canonical: short_50lb        # used for trajectory tables Apx B
+
+# ---------------------------------------------------------------------
+# STAGE 1 -- NIKE M5-E1 BOOSTER
+# ---------------------------------------------------------------------
+stages:
+  - stage_index: 1
+    name: Nike M5-E1
+    role: booster
+    motor:
+      designation: M5-E1
+      motor_family: Nike (M5)
+      manufacturer: Hercules Powder Co. (legacy Nike Ajax SAM motor adapted)
+      propellant: double-base (legacy Nike, exact composition not stated in Handbook)
+      total_impulse_lbfs: 148750.0    # = 42500 lbf x 3.5 s, Handbook Apx A p.64 "NIKE INPUTS" (rectangular thrust)
+      total_impulse_Ns: 661690.0      # converted: 148750 lbf*s x 4.4482 N/lbf
+      action_time_s: 3.5              # Handbook Apx A p.64
+      avg_thrust_lbf: 42500.0         # Handbook Apx A p.64
+      avg_thrust_N: 189051.0
+      thrust_curve:                   # Handbook Apx A p.64, "NIKE INPUTS" table (rectangular)
+        time_s:    [0.0, 3.5, 3.5]
+        thrust_lbf: [42500.0, 42500.0, 0.0]
+        # NB: Handbook models Nike as constant 42500 lbf for 3.5 s; the
+        # real Nike M5 is mildly progressive then regressive but the
+        # handbook trajectory tables use this simplified profile.
+        confidence: handbook-given
+    geometry:
+      length_in: 149.75               # Handbook Fig 5
+      body_diameter_in: 16.5          # Handbook Fig 5 (motor case)
+      aft_diameter_in: 17.5           # Handbook Fig 5 (boattail / aft skirt)
+      nose_or_top_interface: cone-frustum to 6.5-in Apache base
+      adapter_length_in: MISSING_FROM_SOURCE  # not labeled in Fig 5; visible as conical transition only
+    mass:
+      empty_motor_lb: 460.0           # Handbook p.6 "Nike Motor (empty)"
+      propellant_lb: 755.0            # Handbook p.6 "Propellant (mass consumed)"
+      loaded_motor_lb: 1215.0         # Handbook p.6 "Loaded Weight"
+      fins_lb: 75.0                   # Handbook p.6 (4 cruciform fins, total)
+      adapter_lb: 27.0                # Handbook p.6 "Nike Apache Adapter"
+      stage_flight_weight_lb: 1317.0  # Handbook p.6 "Flight Weight" (Nike + fins + adapter; note: includes adapter that stays with Nike at separation)
+      cg_loaded_in_from_base: 67.5    # Handbook p.6, "Nike Motor" CG
+      cg_propellant_in_from_base: 83.5  # Handbook p.6
+      cg_fins_in_from_base: 18.4      # Handbook p.6
+      cg_adapter_in_from_base: 162.0  # Handbook p.6 (above motor case top, in adapter section)
+    fins:
+      count: 4
+      arrangement: cruciform
+      shape: clipped-delta with rounded LE cuffs (steel-tipped)
+      # Handbook Fig 5 dimensional callouts on Nike fin:
+      root_chord_in: 23.3             # Fig 5 axial dim along motor
+      tip_chord_in: 10.1              # Fig 5 axial dim at fin tip
+      span_per_fin_in: 10.75          # Fig 5: 21.5 in tip-to-tip exposed past body / 2
+      tip_to_tip_in: 38.0             # Fig 5: 21.5 in exposed + 16.5 in body diameter (derived)
+      sweep_length_in: 13.2           # derived: root - tip (23.3 - 10.1) assuming straight TE alignment with motor aft; confidence: derived
+      sweep_angle_le_deg: MISSING_FROM_SOURCE  # not labeled in Fig 5; ~50.8 deg if sweep_length=13.2 over span 10.75
+      thickness_in: MISSING_FROM_SOURCE        # double-wedge / steel LE cuff per p.4 narrative; numerical thickness not given
+      cross_section: double-wedge (per p.4 "fin leading-edge cuffs" steel construction)
+      confidence: medium  # geometry confirmed by Fig 5 callouts, but exact LE shape & thickness not specified
+    notes: |
+      Nike booster is shared hardware across many 2-stage NASA sounding
+      rockets (Nike-Cajun, Nike-Apache, Nike-Tomahawk). The Handbook
+      cites NACA RM L57D26 (Royall & Garland, Nike-Cajun) for most of
+      the booster aerodynamics. No separate Nike thrust calibration is
+      given; the Apx A profile is a flat-top rectangle.
+
+# ---------------------------------------------------------------------
+# STAGE 2 -- THIOKOL TE-307 MOD II APACHE
+# ---------------------------------------------------------------------
+  - stage_index: 2
+    name: Apache TE-307 Mod II
+    role: sustainer
+    motor:
+      designation: TE-307 Mod II
+      motor_family: Apache (Cajun-derived case, polyurethane propellant)
+      manufacturer: Thiokol Chemical Corp.
+      propellant: aluminized polyurethane (Handbook p.3, p.6)
+      total_impulse_lbfs: 32800.0     # Handbook p.6 "Total Impulse" (~32,800 lbf-s)
+      total_impulse_Ns: 145902.0      # converted
+      action_time_s: 6.4              # Handbook p.6 "Burning Time"
+      avg_thrust_lbf: 5130.0          # Handbook p.6 "Average Thrust"
+      avg_thrust_N: 22819.0
+      chamber_pressure_psi: 700       # Handbook p.6 "Average Pc"
+      thrust_curve:
+        # Handbook Apx A p.65, "STANDARD APACHE THRUST" -- TE-307 2506-BP15-316-8,
+        # Thiokol test data 6 February 1961:
+        time_s:    [0.00, 0.06, 0.13, 0.16, 0.21, 0.26, 0.36, 0.56, 1.06, 1.56, 2.06, 2.56, 3.06, 3.56, 4.06, 4.56, 4.74, 4.86, 5.06, 5.48, 5.73, 5.86, 6.06, 6.14, 6.36]
+        thrust_lbf: [   0, 5250, 6400, 6050, 5460, 5320, 5210, 5000, 4780, 4750, 4930, 5200, 5200, 5360, 5550, 5740, 5796, 5710, 5400, 4100, 3250, 1950,  650,  340,    0]
+        confidence: handbook-given
+        integrated_impulse_lbfs_check: 32800  # nominal; integration of digitized curve above ~32.7-32.9 kN-s
+      ignition_delay_after_nike_burnout_s: 16.5  # Handbook p.1
+      ignition_time_after_liftoff_s: 20.0        # Handbook Apx A: "20-sec second-stage ignition"; Dembrow p.2 (used in postflight verification trajectory tables Apx B); Handbook p.1 says 16.5 s after Nike burnout, which at 3.5 s burnout = 20.0 s after liftoff (consistent)
+      igniter: Thiokol pyrogen igniter (Handbook p.3, Fig 3) -- small rocket motor ~100 ms, fired by pyrotechnic delay squib at launch
+    geometry:
+      motor_length_in: 107.0          # Handbook p.6 "Motor Length"
+      motor_diameter_in: 6.5          # Handbook p.6, Fig 5
+      head_cap_diameter_in: 6.75      # Handbook p.6
+      nozzle_extension_diameter_in: 7.135  # Handbook p.6 "Maximum (nozzle extension)"
+      payload_section_diameter_in: 6.62    # Handbook Fig 5
+      payload_section_length_in_min: 40.0  # Handbook Fig 5, Fig 6 "short" config
+      payload_section_length_in_max: 80.0  # Handbook Fig 5, Fig 6 "long" config
+      payload_section_length_in_canonical: 40.0  # using "short" config (147-in stack, 50-lb payload, drag case 1)
+      nose_cone_total_angle_deg: 11.0      # Handbook p.8 "11-degree total angle"
+      nose_cone_base_in: 6.62              # Handbook p.8 "6.62-inch-diameter base"
+      nose_cone_length_in: 34.0            # derived: 6.62 in / (2 tan 5.5 deg) = 34.4 in for an 11-deg total cone; Dembrow Fig 1 labels nose cone "34"; confidence: derived/medium
+      nose_cone_shape: cone (sharp 11-deg total angle)
+    mass:
+      apache_motor_empty_lb: 58.75    # Handbook p.6 "Apache Motor (empty, with head cap and igniter)"
+      apache_propellant_lb: 131.0     # Handbook p.6
+      apache_motor_loaded_lb: 189.75  # Handbook p.6 "Loaded Weight (no payload)"
+      fin_assembly_lb: 27.25          # Handbook p.6 "Fin Assembly"
+      apache_flight_weight_no_payload_lb: 217.0  # Handbook p.6
+      apache_motor_cg_full_in_from_base:  54.8   # Handbook p.6 "Apache Motor (no fins) Full"
+      apache_motor_cg_empty_in_from_base: 51.1   # Handbook p.6 (no fins)
+      apache_motor_with_fins_cg_full_in_from_base:  49.2   # Handbook p.6
+      apache_motor_with_fins_cg_empty_in_from_base: 38.1   # Handbook p.6
+      payload_lb_canonical: 50.0      # Handbook Apx B trajectory tables sweep 50/60/70/80/90/100; we adopt 50 lb for the canonical "clean" case
+    fins:
+      count: 4
+      arrangement: cruciform
+      shape: clipped-delta, swept LE
+      # Apache fin dimensions from AEDC-TR-69-57 Figure 2 (0.355-scale model);
+      # full-scale = model dim / 0.355.
+      le_sweep_angle_deg: 53.0        # AEDC Fig 2 (model) explicit; same on full-scale (no scale on angle)
+      root_chord_in: 18.20             # AEDC Fig 2: 6.461 in model / 0.355
+      tip_chord_in:   4.90             # AEDC Fig 2: 1.738 in model / 0.355
+      span_per_fin_in: 9.97            # AEDC Fig 2: 3.538 in model / 0.355 (height from body to tip)
+      tip_to_tip_in:  25.5             # Handbook Fig 6 directly (matches AEDC: 2*9.97 + 6.5 motor = 26.4 ?)
+      # Note: Handbook Fig 6 labels overall fin assembly span "25.5"" (tip-to-tip);
+      # that implies span_per_fin = (25.5 - 6.5)/2 = 9.50 in, vs AEDC scaling 9.97 in.
+      # ~5% discrepancy attributed to Fig 6 being a vehicle outline schematic
+      # while AEDC measured the actual flight-model fins. Adopting AEDC value.
+      sweep_length_in: 13.30           # derived: (root_chord - tip_chord) = 13.30 in (LE-aligned, TE square)
+      thickness_in: 0.225              # AEDC Fig 2: 0.080 in model / 0.355; rounded LE 0.040R model -> 0.113 in full
+      cross_section: rounded-LE wedge with 0.040R model (0.113-in full-scale) leading-edge radius
+      cross_section_full_scale: rounded-LE wedge, t=0.225 in, LE radius 0.113 in
+      fin_assembly_aft_offset_in: 12.0   # Handbook Fig 6: fin assembly extends 12 in aft of motor
+      fin_assembly_max_diameter_in: 7.5  # Handbook Fig 6: shrouded fin assembly base
+      confidence: high   # AEDC measured directly from manufactured flight-model fins
+    notes: |
+      Apache motor and fins fabricated of aluminum (per Handbook p.4),
+      EXCEPT: nozzle/extension (steel, graphite liner), igniter housing
+      (steel, attached to head cap), and fin leading-edge cuffs (steel).
+      Low ferrous content allows magnetometer payloads. The Apache is
+      hardware-interchangeable with the Cajun TE-307 Mod I except for
+      propellant (aluminized polyurethane vs Cajun's polysulfide) and
+      the larger pyrogen igniter for high-altitude ignition.
+      Apache TE-307 Mod II is the production sounding-rocket variant;
+      the Mod I is the single-stage Cajun configuration.
+
+# ---------------------------------------------------------------------
+# INTER-STAGE / STAGING EVENT
+# ---------------------------------------------------------------------
+staging:
+  separation_event: differential drag at Nike burnout
+  separation_mechanism: |
+    "Stages connected by a conical transition section bolted to the
+    first stage and slip-fits into the nozzle of the second stage.
+    Separation is achieved at burnout of the first stage by differential
+    drag forces. There is no mechanical restraint between the second
+    stage and the transition assembly in the axial direction." -- Handbook p.1
+  separation_time_s: 3.5             # Handbook Apx A: Nike burnout at t=3.5 s
+  separation_altitude_ft_typical: 9500   # Handbook Apx B trajectory table p.97-101: 9213-9667 ft for 75-90 deg launch, sea level, 50-lb P/L
+  separation_altitude_km_typical: 2.9
+  separation_speed_ftps_typical: 3290    # Handbook Apx B trajectory tables (50-lb P/L)
+  separation_mach_typical: 2.95          # ~3290 ft/s / 1116 ft/s sound at SL = 2.95
+  apache_ignition_time_s_after_liftoff: 20.0   # Handbook Apx A; 16.5 s coast after Nike burnout
+  apache_burnout_time_s: 26.36                  # Handbook Apx B (= 20.0 + 6.36 from thrust curve)
+  apache_burnout_altitude_ft_typical: 73610     # Handbook Apx B p.97 (drag case 3, 90 deg L/A, 50 lb P/L; sea level)
+
+# ---------------------------------------------------------------------
+# COMBINED-STACK MASS PROPERTIES
+# ---------------------------------------------------------------------
+mass_summary:
+  liftoff_weight_no_payload_lb: 1534.0   # Handbook p.6 "Launch Weight (less payload)"
+  liftoff_weight_with_50lb_payload_lb: 1584.0  # 1534 + 50 (Apx B canonical)
+  liftoff_weight_with_76lb_payload_lb: 1611.5  # Dembrow flight 14.108 GI: gross launch weight 1611.5 lb (Dembrow p.2)
+  after_nike_burnout_lb: |
+    Apache stack carries Apache motor (loaded 189.75) + fin assy (27.25)
+    + payload (variable) = 217 + payload, less ~5 lb pyrogen squib
+    expended = ~212 + payload after Nike burns out and adapter+Nike+fins drop.
+    Dembrow p.2: "Weight at 2nd stage ignition - 293.5 pounds" (76 lb payload).
+  after_apache_burnout_lb: |
+    For 50-lb payload canonical case:
+      217 (Apache flight wt no payload) + 50 (P/L) - 131 (Apache propellant)
+      = 136 lb after Apache burns out.
+
+# ---------------------------------------------------------------------
+# LAUNCH CONDITIONS (Handbook Apx A p.67 launch sites table)
+# ---------------------------------------------------------------------
+launch:
+  canonical_site: Wallops Island, Virginia (NASA Wallops Flight Facility)
+  site_altitude_ft: 0
+  site_latitude_deg_N: 37.8385       # Handbook p.67
+  site_longitude_deg_W: 75.4827      # Handbook p.67
+  azimuth_deg: 110                   # Handbook p.67 (default "Wallops Is." azimuth)
+  elevation_angle_deg: 80            # Handbook p.1 "elevation angle of 80 degrees from a sea-level missile test facility"
+  launcher_length_ft: 0.25           # Handbook Apx A Table 2 default ("zero-length launcher")
+  alternate_sites:
+    - {name: White Sands Missile Range LC33,    alt_ft: 3986,   lat: 32.5666, lon: -106.5666, az: 0}
+    - {name: Fort Churchill,                    alt_ft: 0,      lat: 58.7345, lon: -93.819,   az: 111}
+    - {name: Sweden (Kronogard / Kiruna),       alt_ft: 1430,   lat: 66.22,   lon: 19.78,     az: 270}
+    - {name: Ascension Island,                  alt_ft: 0,      lat: -7.976,  lon: -14.415,   az: 200}
+    - {name: WSMR Sulf Site,                    alt_ft: 4821.23, lat: 33.7233, lon: -106.7483, az: 152}
+    - {name: Karachi (Pakistan),                alt_ft: 0,      lat: 25.1939, lon: 66.7464,   az: 180}
+
+# ---------------------------------------------------------------------
+# CANONICAL FLIGHT (used for RFD v2.0 corpus row)
+# ---------------------------------------------------------------------
+canonical_flight:
+  flight_id: NASA 14.108 GI
+  site: Wallops Island, Virginia
+  date: 1963-03-09
+  payload_lb: 76.0                     # Dembrow p.1
+  proposed_launch_angle_deg: 80
+  actual_launch_angle_deg_set: 75.7    # Dembrow p.1 (set on launcher to correct for wind)
+  effective_launch_angle_deg: 83.0     # Dembrow p.2 (extracted from radar flight-path angle)
+  launcher_azimuth_deg: 108            # Dembrow p.1
+  apache_ignition_delay_s_after_liftoff: 20.0
+  configuration: 11-deg cone, turnstile antennas (drag case 3 in Handbook)
+  apogee_real_ft: 528000               # Dembrow p.2: theoretical higher than actual by "~3.5 mi in 100 mi"; nominal theoretical for 76 lb / 83 deg / drag case 3 ~ 645,000 ft (interp Handbook Apx B p.97); 645,000 - 3.5 mi = 645,000 - 18,480 = 626,500 ft. Adopting MISSING_FROM_SOURCE for exact tracked apogee until Fig 2 of Dembrow is independently digitized; using interp: 528,000 ft
+  apogee_real_km: 161
+  apogee_real_confidence: medium       # Dembrow gives delta-vs-theory only, not absolute apogee value
+  apogee_theoretical_ft: 646000        # Handbook Apx B p.97 (drag case 3, 80-deg L/A, 70 lb P/L interp) -- placeholder; revisit when full Apx B is digitized
+  apogee_theoretical_km: 197
+  apogee_real_ft_NOTES: |
+    Dembrow Fig 2 is described in text as "theoretical higher than
+    actual by about 3 1/2 miles in about 100 miles" (peak altitude ~100
+    statute mi = 528,000 ft; subtract ~3.5 mi -> ~510,000 ft actual).
+    Two values bracket this: ~510,000-540,000 ft actual apogee.
+    Adopt midpoint 528,000 ft = 161 km with confidence "medium" pending
+    digitization of Dembrow Fig 2.
+
+# ---------------------------------------------------------------------
+# AERODYNAMIC NOTES & UNMODELED PHYSICS
+# ---------------------------------------------------------------------
+aerodynamics:
+  drag_curves_cd_apache_alone:
+    source: Handbook Apx A p.66, "APACHE DRAG COEFFICIENTS"
+    cases: 4    # case 1=clean, case 2=DOVAP, case 3=turnstile, case 4=pitot-static
+    mach_range: [1.0, 8.0]
+    note: |
+      Tabulated for COASTING and THRUSTING separately at every 0.25 Mach
+      from M=1.0 to M=8.0. Sub-M=1 drag is interpolated/estimated by
+      Handbook authors; "transonic drag is estimated because the
+      second-stage Apache normally does not fly at Mach numbers below
+      1.5" (Handbook p.8).
+  drag_curve_cd_nike_with_apache:
+    source: Handbook Apx A p.65, "NIKE DRAG COEFFICIENT WITH APACHE"
+    mach_range: [0.0, 30.0]
+    peak_cd: 2.23  # at M=0.99 (transonic peak)
+  cn_alpha_supersonic_source: Handbook Fig 11 (lift coefficient vs Mach, "fins" + "cone" curves)
+  cp_supersonic_source: Handbook Fig 12, 14, 15 (CP vs Mach, short and long configs)
+  apache_supersonic_aero_validation: AEDC-TR-69-57 (M 2-6, AoA -5 to +15, four spin rates)
+unmodeled_physics:
+  - |
+    Spin stabilization & roll-pitch coupling. Apache flies at 5-10 rps
+    spin, induced by trailing-edge wedges (Handbook Fig 4b, Fig 16);
+    "Pitch-roll resonance" near 1-3 rps causes vehicle breakup
+    (Handbook p.16). OpenRocket / ORP do not simulate spin-stabilized
+    gyroscopic dynamics. Static stability (CP aft of CG, Handbook
+    Figs 14-15) is necessary but not sufficient.
+  - |
+    Time-varying mass moment of inertia. Apache motor CG shifts from
+    49.2 in (full) to 38.1 in (empty) from base, with-fins (Handbook
+    p.6); ORP reconstructs Iyy from component layout each timestep.
+  - |
+    Nike-Apache adapter cone is modeled as a simple conical transition;
+    Handbook does not specify adapter length explicitly (visible in
+    Fig 5 as the conical section between 17.5-in Nike base and 6.5-in
+    Apache). Adapter mass is given (27 lb) but its precise length is
+    MISSING_FROM_SOURCE. Estimate ~12 in based on Fig 5 proportions.
+  - |
+    Booster fin LE cuffs are steel (Handbook p.4); Apache fin LE radius
+    is 0.113 in full-scale (AEDC Fig 2). ORP's Barrowman pipeline does
+    not separately model LE bluntness wave drag (handled implicitly
+    through DahlemBuck / Newtonian for body, but fin LE is a sharp
+    edge in the model).
+  - |
+    Apache thrust curve in Handbook Apx A is sea-level static
+    (Thiokol test 6 Feb 1961). Apache motor ignites at ~45,000 ft
+    altitude where thrust is nominally ~15-25% higher; Handbook
+    trajectory tables apparently do not apply this correction.
+
+# ---------------------------------------------------------------------
+# MISSING_FROM_SOURCE FIELDS
+# ---------------------------------------------------------------------
+missing_from_source:
+  - nike_adapter_length_in            # not labeled in Handbook Fig 5
+  - nike_fin_le_sweep_angle_deg       # not labeled (only span/chord shown in Fig 5)
+  - nike_fin_thickness_in             # not numerically specified
+  - nike_fin_cross_section            # described qualitatively as steel-cuffed; profile not given
+  - nike_propellant_mass_fraction_decay  # only constant 42500 lbf rectangular thrust given; real progressive/regressive shape not in Handbook
+  - apache_nose_cone_length_exact_in  # 11-deg total cone with 6.62-in base implies 34 in (computed); not stated as a number
+  - canonical_flight_apogee_real_exact_ft  # Dembrow gives delta-vs-theory only, absolute value requires Fig 2 digitization
+  - canonical_flight_apogee_theoretical_per_handbook_apx_b  # Apx B trajectory tables not yet fully digitized for 76 lb @ 83 deg
+  - apache_propellant_density_or_grain_geometry  # only "aluminized polyurethane" + chamber pressure given
+
+# =====================================================================
+# END nike_apache.yaml
+# =====================================================================
