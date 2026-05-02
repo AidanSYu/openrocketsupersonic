@@ -36,6 +36,8 @@ From `core/build/reports/rm10_vs_basic_finner_component_cd.csv` (regenerated 202
 | Fins (4x, ROUNDED mapping, $t/c = 5\%$, $\Lambda_\text{LE} = 60°$) | 0.0044 | 0.0471 | 0.0056 | 0.0571 |
 | **TOTAL** | **0.0676** | **0.2368** | **0.0847** | **0.3891** |
 
+> **Note on the 57.5° terminal contraction.** This row is an artefact of the legacy diagnostic geometry hard-coded in [`Rm10VsBasicFinnerDiagnosticTest.java`](../../../core/src/test/java/info/openrocket/core/aerodynamics/Rm10VsBasicFinnerDiagnosticTest.java) lines 131–139 — a 2 cm closing-taper primitive that produces $\arctan(0.031419 / 0.02) = 57.51°$ as a placeholder bridging the constant-radius fin-mount tube down to the reported base diameter. **It is not a CDX1 import bug.** The current production benchmark `NacaRm10FinnedBodyDragBenchmarkTest.makeNacaRm10FullScale()` already replaced this with a single ~2.4° tapered afterbody. See [`rm10_import_57deg_diagnosis_2026_05_02.md`](rm10_import_57deg_diagnosis_2026_05_02.md) for the full trace through `BoattailHandler.java` confirming no implicit closing-taper insertion on the import path. The 80% MAPE in the production benchmark persists for the other three documented mechanisms below (Viswanath envelope, fin wave-drag K mapping, finned-body base augmentation).
+
 ## Mechanism breakdown (why it fails)
 
 Three independent sub-model envelope violations, each documented against the implementation source:
