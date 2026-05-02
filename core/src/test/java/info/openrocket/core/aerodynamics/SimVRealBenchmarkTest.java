@@ -416,13 +416,13 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
         System.out.println("TARGET: Match RASAero II accuracy (avg ~3.5%, 80% within ±10%)");
         System.out.println("=".repeat(120));
 
-        // ==================== Prompt 20 Headline Gates ====================
-        // Regression-locks the Prompt 19 frozen audited corpus headline metrics
-        // (paper/data/corpus_summary_2026_04_17.md, git SHA 4fe8a41):
-        //   avg |error| = 6.84 %, within ±10 % = 83.3 %, within ±5 % = 62.5 %,
-        //   abnormal endings = 0 (all 24 terminal note NORMAL)
-        // Gates below are set at modest headroom from the frozen values so that
-        // any future change that regresses the corpus materially will trip.
+        // ==================== May 1 AST Headline Gates ====================
+        // Regression-locks the May 1 frozen audited corpus headline metrics
+        // (paper/data/corpus_summary_2026_05_01.md):
+        //   avg |error| = 4.65 %, within ±10 % = 100.0 %, within ±5 % = 58.3 %,
+        //   abnormal endings = 0 (all 24 terminal note NORMAL).
+        // These gates intentionally match the paper/data validation matrix rather
+        // than the older Prompt-19 exploratory threshold.
         //
         // These gates protect the aggregate AST-readiness story. Individual
         // outlier closure is regression-locked separately in
@@ -434,18 +434,18 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
         double withinFive = 100.0 * orpUnder5 / total;
 
         assertEquals(0, abnormalEnds,
-                "SimVReal corpus abnormal endings must stay at 0 (Prompt 19 frozen). "
+                "SimVReal corpus abnormal endings must stay at 0 (May 1 frozen). "
                         + "Any SIM_ABORT or MAXTIME without ground hit breaks the AST stability claim.");
-        assertTrue(avgOrpError <= 7.5,
-                String.format("SimVReal corpus avg |error| = %.2f%% exceeds Prompt-20 gate 7.5%% "
-                        + "(Prompt 19 frozen value 6.84%%). See paper/data/corpus_summary_2026_04_17.md.",
+        assertTrue(avgOrpError <= 5.0,
+                String.format("SimVReal corpus avg |error| = %.2f%% exceeds May 1 gate 5.0%% "
+                        + "(frozen value 4.65%%). See paper/data/corpus_summary_2026_05_01.md.",
                         avgOrpError));
-        assertTrue(withinTen >= 80.0,
-                String.format("SimVReal within ±10%% = %.1f%% fell below gate 80%% "
-                        + "(Prompt 19 frozen value 83.3%%).", withinTen));
+        assertTrue(withinTen >= 100.0,
+                String.format("SimVReal within ±10%% = %.1f%% fell below May 1 gate 100%% "
+                        + "(frozen value 100.0%%).", withinTen));
         assertTrue(withinFive >= 58.0,
-                String.format("SimVReal within ±5%% = %.1f%% fell below gate 58%% "
-                        + "(Prompt 19 frozen value 62.5%%).", withinFive));
+                String.format("SimVReal within ±5%% = %.1f%% fell below May 1 gate 58%% "
+                        + "(frozen value 58.3%%).", withinFive));
     }
 
     private static String describeTerminalState(Simulation sim, FlightData data) {

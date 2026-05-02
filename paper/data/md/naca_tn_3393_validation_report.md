@@ -1,5 +1,10 @@
 # NACA TN 3393 Base Pressure Benchmark
 
+This note preserves the legacy Devan-Ashwood diagnostic against the TN 3393
+base-pressure data. The current production laminar validation is the Chapman
+benchmark in `core/src/test/java/info/openrocket/core/aerodynamics/ChapmanLaminarBaseDragTest.java`,
+which is the one cited in the manuscript for the 4.4% laminar closure.
+
 ## Coefficient Basis
 
 Both the experimental and OpenRocket data are now on the same coefficient basis:
@@ -12,6 +17,8 @@ The OR export column `baseCD` is the absolute value of the Devan-Ashwood
 base drag model output, referenced to base area, which is the same quantity.
 
 ## Agreement Metrics
+
+Legacy Devan-Ashwood diagnostics:
 
 Collected metrics per boundary-layer state:
 

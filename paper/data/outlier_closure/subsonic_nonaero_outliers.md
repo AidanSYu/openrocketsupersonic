@@ -41,7 +41,7 @@ The April 30 full-corpus rerun reports avg \|error\| = 4.65%, 100% within ±10%,
 ## Cross-references
 
 - `paper/data/VALIDATION_MATRIX.md` — trajectory validation and AST readiness rows
-- `paper/data/corpus_summary_2026_04_30.md`
+- `paper/data/corpus_summary_2026_05_01.md` (current); `paper/data/snapshots/corpus_summary_2026_04_30.md` (prior)
 - `paper/data/outlier_closure/raven_closure.md`
 - `paper/data/outlier_closure/kinsel_closure.md`
-- `paper/data/AST_PARALLEL_AGENT_ROADMAP.md` — Prompt 13 session log (blocked), Prompt 14 session log (RM-10 finding)
+- `paper/data/legacy/AST_PARALLEL_AGENT_ROADMAP.md` — historical handoff board with Prompt 13 session log (blocked) and Prompt 14 session log (RM-10 finding)

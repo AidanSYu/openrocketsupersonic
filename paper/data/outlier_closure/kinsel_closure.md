@@ -8,7 +8,7 @@
 - Target: within ±10% (ideally ±5%)
 - Regime: supersonic (peak M = 2.19)
 - Source: `core/build/reports/simvreal-outliers/Kinsel_P4935_A-601_Rocket.md`
-- Note on data freshness: this sheet supersedes the April 17 open-outlier state (`+28.14%`). The current headline value is from `paper/data/corpus_summary_2026_04_30.md` and `core/build/reports/simvreal-outliers/Kinsel_P4935_A-601_Rocket.md`.
+- Note on data freshness: this sheet supersedes the April 17 open-outlier state (`+28.14%`). The current headline value is from `paper/data/corpus_summary_2026_05_01.md` and `core/build/reports/simvreal-outliers/Kinsel_P4935_A-601_Rocket.md`. The April 30 snapshot is now archived at `paper/data/snapshots/corpus_summary_2026_04_30.md`.
 
 ## Import parity warnings
 
@@ -17,7 +17,7 @@
   - `Ignoring unsupported RASAero setting ModifiedBarrowman=True`
   - `Ignoring unsupported RASAero setting Turbulence=True`
   - `Ignoring unsupported RASAero setting SustainerNozzle=3.09`
-- Prompt 3 / Prompt 4 bounding (`paper/data/CDX1_UNSUPPORTED_SETTINGS_SENSITIVITY.md`):
+- Prompt 3 / Prompt 4 bounding (`paper/data/legacy/CDX1_UNSUPPORTED_SETTINGS_SENSITIVITY.md`):
   - `SustainerNozzleDiameter` IS correctly applied via `SimulationHandler.setNozzleExitDiameter()`; the `SustainerNozzle=3.09` warning is the *redundant* `<RocketDesign>` copy. Live sensitivity on Kinsel = 0.0% apogee delta.
   - `Turbulence=True` analytical bound: <1.2% apogee (5% laminar cap bounds the impact).
   - `ModifiedBarrowman=True` analytical bound: <2% apogee (ORP Phase 3 provides equivalent corrections and it is a stability-only flag).

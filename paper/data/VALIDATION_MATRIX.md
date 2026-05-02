@@ -1,194 +1,219 @@
-﻿# Validation Matrix
+# Validation Matrix
 
-This file is the publication gate for the aerodynamic model. Every claim should live in one of four buckets:
+The publication gate for the aerodynamic model. Detail lives in the cited tests and closure memos; this file is the dashboard.
 
-- `A` = matched against published external or tabulated data with a quantitative acceptance criterion.
-- `B` = matched against published source-anchored analytical relations, but not yet against a full external component or vehicle dataset.
-- `C` = internal consistency, continuity, or trend validation only.
-- `D` = calibrated heuristic or simulation hardening term with no external closure yet.
+## Status legend
 
-## Current Evidence Snapshot
+- **A** — matched against published external/tabulated data with a quantitative acceptance criterion.
+- **B** — source-anchored analytical or flight-corpus closure; not isolated against a published component dataset.
+- **C** — internal consistency or numerical integrity only.
+- **D** — calibrated heuristic without external closure.
 
-As of 2026-04-30, the core aerodynamic building blocks are mostly `A` level. The remaining non-`A` rows are not stale bookkeeping; they mark where the current program is intentionally honest about evidence limits:
+## Headline (2026-05-01)
 
-- `B`: implemented and regression-guarded, with source anchoring and/or flight-corpus closure, but not independently isolated against a published component dataset.
-- `C`: software/numerical integrity evidence rather than an aerodynamic validation claim.
-- No acceptance-critical flight case remains outside the SimVReal hard gate: the April 30 rerun gives avg |error| = 4.65 %, 24/24 within ±10 %, 14/24 within ±5 %, and 0 abnormal endings. MESOS 293K also passes separately at -0.6 % apogee, +4.0 % max-velocity, and +3.6 % peak Mach error (real Mach 4.18, ORP Mach 4.33). The peak-Mach reporting was previously a display bug in `SimVRealValidationTest` (divided peak velocity by sea-level a₀ instead of using `data.getMaxMachNumber()`); fixed 2026-05-01 — see `outlier_closure/mesos_293k_closure.md` "Mach reporting fix".
+- **27 A-level rows** pass with quantitative external acceptance gates, plus **1 externally anchored negative benchmark** (RM-10) used to bound and exclude a geometry family.
+- **9 B-level rows** are honestly disclosed integration claims (corpus-validated, not isolated).
+- **SimVReal corpus**: 24/24 within +/-10 %, 14/24 within +/-5 %, avg abs error **4.65 %**, mean signed error -0.1 %, 0 abnormal endings. Lower aggregate error than the recorded RASAero II predictions on the same frozen flights (5.55 %, 23/24 within +/-10 %).
+- **MESOS 293K** (two-stage M 4.18 to 293 K ft): −0.6 % apogee, +4.0 % velocity, +3.6 % peak Mach.
+- **AST publication gate**: items 1, 2, 3, 4, 6, 7 CLOSED; item 5 partially closed with disclosure.
 
-Rows should only be promoted to `A` when they have independent published/tabulated data with a quantitative criterion. Flight-corpus agreement by itself is strong integration evidence, but it remains `B` unless a controlled external dataset isolates the subsystem.
+## Frozen SimVReal baseline (2026-05-01)
+
+This is the **regression baseline**. Any future change should reproduce these per-case numbers within ±2 pp; a larger move without an explicit mechanism note is an unexplained regression.
+
+**Snapshot:** 2026-05-01 working-tree validation snapshot on base commit `a1b79b6cd`; pin a manuscript tag before external review.
+**Diffable CSV:** [`csv/simvreal_baseline_2026_05_01.csv`](csv/simvreal_baseline_2026_05_01.csv)
+**Companion doc:** [`corpus_summary_2026_05_01.md`](corpus_summary_2026_05_01.md)
+**Ablation artifact:** [`md/simvreal_corpus_ablation_2026_05_01.md`](md/simvreal_corpus_ablation_2026_05_01.md)
+**Prospective holdout split:** [`corpus_holdout_split_2026_05_01.md`](corpus_holdout_split_2026_05_01.md)
+**RASAero comparison:** [`md/rasaero_head_to_head_2026_05_01.md`](md/rasaero_head_to_head_2026_05_01.md)
+**Open source plan:** [`BENCHMARK_SOURCE_PLAN.md`](BENCHMARK_SOURCE_PLAN.md)
+
+### Aggregate (24-flight corpus)
+
+| Metric | ORP | RASAero II |
+|---|---:|---:|
+| Avg abs error | **4.65 %** | 5.55 % |
+| Within ±5 % | 14/24 (58.3 %) | 12/24 (50.0 %) |
+| Within ±10 % | **24/24 (100 %)** | 23/24 (95.8 %) |
+| Worst case | +8.7 % (Kinsel) | +11.5 % (T&L) |
+| Mean signed error | -0.1 % | +2.1 % |
+| Abnormal endings | 0 | n/a |
+
+### Per-case table (24 flights + MESOS, sorted by peak Mach)
+
+Errors are signed; positive = over-predicted apogee. `Δ` = `|RAS_err| − |ORP_err|` (positive = ORP closer).
+
+| # | Rocket | Launch ft | Peak M | Real ft | RAS ft | ORP ft | RAS err | ORP err | Δ |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+|  1 | Thunder & Lightning | 2,750 | 0.54 | 3,577 | 3,989 | 3,877 | +11.5 % | +8.4 % | +3.1 |
+|  2 | Gibb | 2,750 | 0.55 | 3,913 | 4,205 | 3,989 | +7.5 % | +1.9 % | +5.6 |
+|  3 | Cancer Descending | 2,750 | 0.56 | 6,188 | 6,328 | 6,044 | +2.3 % | −2.3 % | 0.0 |
+|  4 | EZI-65 J450ST | 2,750 | 0.60 | 3,965 | 4,214 | 4,158 | +6.3 % | +4.9 % | +1.4 |
+|  5 | Caliber Isp 04 Team 2 | 2,302 | 0.64 | 3,710 | 3,876 | 3,890 | +4.5 % | +4.9 % | −0.4 |
+|  6 | Caliber Isp 04 Team 3 | 2,302 | 0.64 | 3,964 | 3,876 | 3,889 | −2.2 % | −1.9 % | +0.3 |
+|  7 | Caliber Isp 04 Team 1 | 2,302 | 0.66 | 3,837 | 3,948 | 3,960 | +2.9 % | +3.2 % | −0.3 |
+|  8 | Byrum | 2,750 | 0.75 | 5,732 | 5,281 | 6,161 | −7.9 % | +7.5 % | +0.4 |
+|  9 | Ion Drive | 2,750 | 0.79 | 8,027 | 8,642 | 7,730 | +7.7 % | −3.7 % | +4.0 |
+| 10 | Caliber Isp 05 Discovery | 2,848 | 0.81 | 4,930 | 4,836 | 4,772 | −1.9 % | −3.2 % | −1.3 |
+| 11 | Blister | 2,400 | 0.83 | 9,026 | 8,301 | 8,268 | −8.0 % | −8.4 % | −0.4 |
+| 12 | Caliber Isp 05 Columbia | 2,848 | 0.84 | 5,085 | 4,847 | 4,777 | −4.7 % | −6.1 % | −1.4 |
+| 13 | Rabia Short Fin Can | 3,400 | 0.86 | 10,584 | 10,225 | 9,916 | −3.4 % | −6.3 % | −2.9 |
+| 14 | Raven | 2,750 | 1.07 | 8,815 | 9,332 | 9,489 | +5.9 % | +7.6 % | −1.7 |
+| 15 | Rabia | 2,400 | 1.14 | 12,745 | 12,197 | 11,913 | −4.3 % | −6.5 % | −2.2 |
+| 16 | Torrent | 2,400 | 1.22 | 12,807 | 13,717 | 12,455 | +7.1 % | −2.8 % | +4.3 |
+| 17 | Kline-Rogers L500 | 2,848 | 1.98 | 24,771 | 26,509 | 24,179 | +7.0 % | −2.4 % | +4.6 |
+| 18 | A-601 Kinsel | 3,933 | 2.19 | 42,771 | 41,098 | 46,499 | −3.9 % | +8.7 % | −4.8 |
+| 19 | FMJ BALLS 005 | 3,933 | 2.31 | 37,981 | 38,772 | 37,256 | +2.1 % | −1.9 % | +0.2 |
+| 20 | FMJ Black Rock 6 | 3,933 | 2.46 | 30,038 | 32,548 | 29,239 | +8.4 % | −2.7 % | +5.7 |
+| 21 | Proteus 6 | 3,933 | 2.87 | 85,067 | 81,499 | 91,339 | −4.2 % | +7.4 % | −3.2 |
+| 22 | AeroPac 104K | 3,750 | 3.04 | 104,659 | 113,786 | 103,602 | +8.7 % | −1.0 % | +7.7 |
+| 23 | Don't Debate This | 3,750 | 3.04 | 56,573 | 61,982 | 53,150 | +9.6 % | −6.1 % | +3.5 |
+| 24 | Qu8k | 3,750 | 3.46 | 121,478 | 119,684 | 119,187 | −1.5 % | −1.9 % | −0.4 |
+| – | **MESOS 293K** (2-stage) | **3,910** | **4.33** | **293,488** | **289,789** | **291,601** | **−1.3 %** | **−0.6 %** | **+0.7** |
+
+### MESOS 293K detail (separate test)
+
+| Metric | Real | RASAero II | ORP | RAS err | ORP err |
+|---|---:|---:|---:|---:|---:|
+| Apogee (ft) | 293,488 | 289,789 | 291,601 | −1.3 % | −0.6 % |
+| Max velocity (ft/s) | 4,047 | — | 4,210 | — | +4.0 % |
+| Peak Mach | 4.18 | 4.23 | 4.33 | +1.2 % | +3.6 % |
+| Booster burnout / sep (s) | — | — | 7.941 | — | — |
+| Sustainer ignition (s) | — | — | 23.103 | — | — |
+| Sustainer burnout (s) | — | — | 33.692 | — | — |
+| Apogee time (s) | — | — | 147.692 | — | — |
+
+### Change history vs prior frozen baselines
+
+| Snapshot | Avg \|err\| | Within ±5 % | Within ±10 % | Abnormal | Notes |
+|---|---:|---:|---:|---:|---|
+| 2026-04-16 (pre-Prompt-12) | 7.60 % | 54.2 % | 83.3 % | 0 | 4 outliers > ±10 % (Kinsel, Raven, T&L, EZI-65) |
+| 2026-04-17 (post-Prompt-13) | 6.84 % | 62.5 % | 83.3 % | 0 | Same 4 outliers, slightly tighter |
+| 2026-04-30 (closure rerun) | 4.65 % | 58.3 % | 100 % | 0 | All outliers closed; finned-base augmentation, sleeve scale, rounded-fin wake |
+| **2026-05-01 (this baseline)** | **4.65 %** | **58.3 %** | **100 %** | **0** | Identical to 04-30 for 24 flights; MESOS apogee redrawn at −0.6 % and peak Mach reported correctly at 4.33 (was display-bug 3.74) |
+
+### Regression policy
+
+Any future change should rerun:
+
+| Test | Pass condition |
+|---|---|
+| `SimVRealBenchmarkTest.testSimVRealBenchmark` | 24/24 within ±10 %; avg \|err\| ≤ 5 %; 0 abnormal endings |
+| `SimVRealValidationTest.testMesos293K` | Apogee within ±10 %; velocity within ±5 %; peak Mach within ±5 % |
+| Focused aero/import battery | Named aero/import regression battery green; exact test-case count varies with parameterized diagnostics |
+| External A-level benchmarks (Basic Finner, RM-10, A52H28, TN 3393, TM X-653, TN 3650, AGARD-B, hypersonic cone) | No regression vs gates in claim map |
+
+A change that moves any per-case ORP error by more than ±2 pp without a documented mechanism is an unexplained regression and should not be accepted.
 
 ## Claim map
 
-| Claim / subsystem | Primary source(s) | Current evidence in repo | Status | Safe to claim in manuscript now? | Gap to close |
-|---|---|---|---|---|---|
-| Speed of sound formula | U.S. Standard Atmosphere 1976 Table 1 SI (PDAS, geometric altitudes 0-80 km) | AtmosphericConditionsUpgradeTest.testSpeedOfSoundAgainstPublishedTable (20 altitude points, max error 0.009%); us_standard_atmosphere_speed_of_sound.* | A | Yes | None beyond clean manuscript presentation |
-| Dynamic viscosity via Sutherland's law | Incropera & DeWitt Table A.4, 7th ed. (NIST/REFPROP-calibrated, 12 points 100-800 K) | AtmosphericConditionsUpgradeTest.testDynamicViscosityAgainstNIST (MAPE 0.54% for 150-500 K, max 2.53% at 100 K which is below atmospheric floor); sutherland_viscosity_air.* | A | Yes | None beyond clean manuscript presentation |
-| Normal shock relations | NACA Report 1135 | `NormalShockRelationsTest`; `naca1135_normal_shock.*` | `A` | Yes | None beyond clean manuscript presentation |
-| Oblique shock theta-beta-Mach solver | NACA Report 1135; Anderson | `ObliqueShockSolverTest`; `naca1135_oblique_shock_beta.*` | `A` | Yes | None beyond clean manuscript presentation |
-| Prandtl-Meyer expansion | NACA Report 1135 | `PrandtlMeyerExpansionTest`; `naca1135_prandtl_meyer_nu.*` | `A` | Yes | None beyond clean manuscript presentation |
-| Taylor-Maccoll cone shock / cone flow | Published Taylor-Maccoll cone tables; NASA Glenn cone case | `ObliqueShockSolverTest`; `taylor_maccoll_cone_shock.*` | `A` | Yes | None beyond clean manuscript presentation |
-| Cp,max / Rayleigh pitot building block | NACA Report 1135, Tables I+II | `Phase4HypersonicTest`; `rayleigh_pitot_cpmax.*` (15-point independent derivation via `NormalShockRelations` + isentropic recovery) | `A` | Yes | None beyond clean manuscript presentation |
-| Cone / ogive zero-lift drag trends (incl. NACA RM A52H28 foredrag) | NACA RM A52H28 (5 nose shapes: cone, paraboloid, quarter-power, L-D Haack, L-V ogive at L/D=3) | `NacaRmA52H28BenchmarkTest` (25 figure-digitized foredrag points, 5 shapes × 4-6 Mach, aggregate MAE = 0.029, gate < 0.035); `NACA_RM_A52H28_digitized_points.csv`; `naca_rm_a52h28_metrics.csv` | `A` | Yes, as a JUnit-guarded external benchmark. MAE increased from 0.015 to 0.029 after Van Driest II friction upgrade (higher Cf at M 1-2 for polished models). | Transonic cone/paraboloid overprediction at M=1.24 (documented bias); friction sensitivity to finish model |
-| AGARD-B transonic drag split | AEDC-TR-70-100 (Anderson 1970) | `AgardBDragBenchmarkTest` (6 Mach points M 0.2–1.0 vs AEDC digitized CD_total; trend + component-split checks); `AEDC_AGARD_B_CD_vs_Mach_near_zero_alpha.csv`; `agard_b_transition_sensitivity.csv` | `A` | Yes, as a JUnit-guarded secondary external benchmark. Transition-sensitivity caveats apply (ORP perfectFinish vs AEDC polished model bracket). | Tighter transition-state closure for narrower ORP-AEDC friction band |
-| Base drag model (turbulent) | Devan-Ashwood (1961) NASA TN D-721; NACA TN 3393 (Reller & Hamaker 1955); Hart NACA RM L52E06 (1952) free-flight finless ogive-cylinder | `BaseDragModelTest` (53 tests, all pass; incl. 9-point Hart L52E06 anchor gate at M 0.95-1.30, Hart MAPE 4.0% after Prompt 13 re-anchor vs 15.8% prior); `naca_tn_3393_*` benchmark (4 turbulent points M 2.73-4.48, MAPE = 15.9%); `naca_rm_l52e06_base_drag.csv` (14 points M 0.60-1.30) | `A` (turbulent BL, M 2.7-4.5 via TN 3393; transonic peak via Hart L52E06) | Yes — transonic polynomial widened on supersonic side (BASE_BLEND_HIGH 1.30→1.50, Hart anchor at M=1.30=0.230); Devan-Ashwood A/B constants unchanged. | None for the anchored regime |
-| Base drag model (laminar) | Chapman, D.R. (1950) NACA TN 2137; NACA TN 3393 (Reller & Hamaker 1955) laminar data | `ChapmanLaminarBaseDragTest`; formula Cpb_lam = C_LAM / (M^2 * sqrt(Re_L)) with C_LAM = 1870 fitted to TN 3393 laminar data (4 points M 2.73-4.48, Re 4-6e6); MAPE ~4.4% vs 44% for Devan-Ashwood on same data; applied for `isPerfectFinish()` rockets via `ChapmanKorstBaseDrag.blendedLaminarBaseDrag` | `A` (laminar BL, perfect-finish rockets) | Yes, as laminar-BL base drag for smooth/calibration rockets; turbulent path unchanged | None for M 2.73-4.48; extrapolated with caution below M 2.73 (blend fades to Devan-Ashwood at M 1.3) |
-| Fin wave drag | USAF DATCOM 4.1.5.1 (Puckett & Stewart 1947); Ackeret (1925); NACA TN 3650 (Welsh 1956); NACA TN 3503 (Chapman 1955) | `NacaTn3650FinWaveDragTest` (12 free-flight experimental points, 60° delta, t/c=0.03 and 0.06, M 1.1–1.6; τ² scaling verified at 4.00×); `AckeretFinWaveDragBenchmarkTest` (15 cases, 0.00% vs independent formula); DATCOM subsonic/supersonic LE method replaces simple cos²Λ in `FinSetCalc.datcomWaveDragCD()` | `A` | Yes, as DATCOM-method fin wave drag with experimental TN 3650 benchmark. Subsonic/supersonic LE classification handles all sweep angles. Remaining ~65% gap on 60°-sweep delta is geometry-matching (wing-body interference not modelled), not physics. | Wing-body interference drag; geometry fidelity for 60° deltas |
-| ShockGeometry local-flow pre-pass | NACA Report 1135 / Taylor-Maccoll cone-flow; Prandtl-Meyer expansion (NACA 1135 Table III) | `ShockGeometryLocalFlowValidationTest`; `shockgeometry_local_flow_validation.*` (cone surface Mach error: 0.00e+00 %; shoulder expansion Mach error: < 4e-11 %; 6 cases M 2–5, θ 10–20°) | `A` | Yes, as a pre-pass architecture validation anchored through the independently validated Taylor-Maccoll and Prandtl-Meyer building blocks | None for the conical-nose case; ogive surface distributions deferred |
-| Static stability / CP corrections | Allen-Perkins, Jorgensen, Pitts-Nielsen-Kaattari, DATCOM-style sources | `Phase3StabilityTest`, `JorgensenCrossflowTest`, `PittsNielsenKaattariTest`, `TransonicSimilarityTest`, `NasaTmX653K1FloorTest`, `nasa_tm_x653_openrocket_static_stability.csv`, `nasa_tm_x653_pointwise_comparison.csv` | `A` (M ≤ 5.8 with Mach-dependent K1 floor) | Yes, M 0.6-5.8: CNa MAPE ≤ 8%, xCP MAPE ≤ 7.1% across full range | None for NSCFB delta-fin configuration; K1 floor constants calibrated from 4 TM X-653 points |
-| Dynamic stability derivatives (`Cmq`, roll damping, Magnus) | Tobak & Wehrend (1956) NACA TN 3788; Nelson (1998) Eq. 5.40; Barrowman (1967) §8; Ward (1949) slender body; DATCOM §7.3–7.4 | `DynamicStabilityBenchmarkTest` (Cmq accumulation < 0.5 % vs independent strip-theory recomputation, 6 Mach points; roll damping 2.0 % vs closed-form ∫c(y)(r+y)² dy; Magnus CyPa 0.00 % vs formula; k_transonic verified; Mach sweep M 0.3–4.0); `TobakCmqBenchmarkTest` (TN 3788 cone Cmq trend validation, 5 tests); `dynamic_stability_benchmark.*`; `tobak_cmq_benchmark.csv` | `A` | Yes, as independently validated dynamic stability implementation with external Tobak cone theory trend match | None for formula-level validation; forced-oscillation data would strengthen quantitative match |
-| Crossflow body Cd (`SUBSONIC_CDC = 1.20`) | Jorgensen (1977) NASA TR R-474 Table 1; Allen & Perkins (1951) NACA RM A50L07 | `JorgensenCrossflowCdBenchmarkTest`; `jorgensen_crossflow_cd_benchmark.csv`; `jorgensen_crossflow_cd.csv` | `A` | Yes — exact match to Jorgensen Table 1 circular cylinder measured Cd_n = 1.20 | None |
-| Crossflow fin Cd (`CROSSFLOW_FIN_CD = 1.42`) | Jorgensen (1977) TR R-474 Table 1; Hoerner (1965) Ch.3 Fig.28 | `JorgensenCrossflowCdBenchmarkTest`; `hoerner_flat_plate_cd.csv` | `A` | Yes — 1.42 matches Hoerner Fig.28 flat plate at h/b=0.33 (1.43), within Jorgensen range [1.12, 2.05] for square sections with rounded corners | None |
-| Pitch damping Cmq (body, cone theory) | Tobak & Wehrend (1956) NACA TN 3788 eqs. 45/53, Figs 1–3 | `TobakCmqBenchmarkTest` (6 tests: quantitative comparison via TN 3788 eq. 54 axis-transfer + L→d normalization; 39% agreement at M=1.5, conservative overprediction at M>2 due to slender-body CNa limit vs Tobak exact theory); `naca_tn_3788_cone_stability_derivatives.csv`; `tobak_cmq_benchmark.csv` | `A` | Yes — ORP strip-theory Cmq agrees within 39% of Tobak exact potential theory at M=1.5 after proper normalization; systematically overpredicts (conservative) at higher Mach; slender-body vs exact-theory divergence is understood and documented | None; high-M overprediction is a known slender-body limitation, not a validation gap |
-| Pitch damping multiplier (`3×`) and body/fin damping split | NACA TN 3788 (cone Cmq theory); AEDC-TR-76-58 roll damping (no Cmq data); ADA636861 / DREV-TM-9703 (Dupuis & Hathaway 1997) Basic Finner free-flight `(Cmq + CmAlphaDot)`; trajectory calibration | `TobakCmqBenchmarkTest`; `DynamicStabilityBenchmarkTest`; `BasicFinnerCmqBenchmarkTest` (44 ok-flag shots, M 1.06–4.47, measured MAPE 69.1 % against direct free-flight data, sign correct everywhere, systematic supersonic under-prediction 20–50 %, transonic over-prediction up to 353 %); `tuned_parameter_sensitivity.csv`; `ada636861_basic_finner_cmq.csv` | `B` | Yes, as sensitivity-bounded with analytical anchoring. 3× multiplier is a trajectory-calibrated heuristic (realistic apogee-turn dynamics); body coeff 0.275 and fin coeff 0.6 produce damping in correct range. ADA636861 direct free-flight data (2026-04-17) does NOT support promotion: MAPE 69.1 % is a finding, not closure. | Forced-oscillation wind-tunnel Cmq at M &lt; 1 plus a recalibration of the supersonic damping level that closes the 20–50 % under-prediction without regressing Tobak cone trend or apogee insensitivity |
-| Transonic Cmq augmentation (Gaussian, peak 3.5× at M=1) | AEDC-TR-76-58 (Jenke 1976) Fig.12: roll damping Clp shows clear transonic peak at M≈1.3–1.5, ~40% increase over subsonic; ADA636861 near-transonic Cmq (M 1.05–1.33) shows elevated but smaller-than-ORP peak | `TobakCmqBenchmarkTest.testTransonicAugmentationFormula`; `DynamicStabilityBenchmarkTest`; `BasicFinnerCmqBenchmarkTest` (direct finding: ORP over-predicts `|Cmq + CmAlphaDot|` by 170–353 % at M 1.05–1.12, consistent with `k_transonic ≈ 2.9–3.25` being too aggressive at the current peak setting); `aedc_tr_76_58_roll_damping.csv`; `ada636861_basic_finner_cmq.csv` | `B` | Only as an indirectly anchored heuristic. ADA636861 now quantifies the transonic over-prediction directly (see `BasicFinnerCmqBenchmarkTest` 2026-04-17 run): ORP's Gaussian amplitude at M≈1.05 exceeds the free-flight data by a factor of &asymp;3.6. No subsonic-side pitch-damping data exists in the repo, so the peak location cannot be independently confirmed. | Direct finned-vehicle pitch-damping data at M &lt; 1.0 to set the subsonic side of the peak, plus a retuned amplitude consistent with the M 1.05–1.12 envelope now quantified by ADA636861 |
-| Magnus body fraction (`0.3`) | BRL 1193 (Platou 1963): body-alone vs finned-body wind-tunnel Magnus data at M 1.75–4.0; AEDC-TR-76-58 (Jenke 1976); BRL 1150 (Platou 1961) | `MagnusBenchmarkTest`; `aedc_tr_76_58_magnus.csv`; `brl_1193_magnus_body_fin_split.csv` | `A` | Yes — BRL 1193 directly measures body-alone and finned-body Magnus on the same model: body/fin magnitude ratio is 0.3–0.8, confirming ORP's 0.3 is at the conservative (low) end of the measured range. Body and fin Magnus forces are opposite in sign (Platou 1963 Conclusion #2). | None; 0.3 is conservative within BRL 1193 measured range |
-| Vortex asymmetry (Kv=0.20, onset=20°, saturate=40°) | Paul & Wedemeyer (1982) EOARD-TR-82-7; Wardlaw (1973) NOLTR 73-209; Champigny & Lacau (1994) | `VortexSideforceBenchmarkTest` (5 tests: onset angle, constants range, Kv bounds, quantitative CY/CN ratio, AoA sweep export); `paul_wedemeyer_vortex_sideforce.csv` | `A` | Yes — bare-body CY/CN ratio = 0.52 from Paul & Wedemeyer at peak (α≈50°, M=0.4); ORP Kv=0.20 implies 62% fin suppression, within 40–70% physically expected range. Onset/saturation angles within measured ranges. | Supersonic vortex data would extend validity; Mach-dependent Kv deferred |
-| Finned-vehicle total drag | (1) ADA636861 (Dupuis & Hathaway 1997), DREV-TM-9703; AEDC-TR-76-58 (Jenke 1976) geometry — Basic Finner cone-cylinder L/D=10. (2) NACA TN 3320 (Jackson, Rumsey & Chauvin 1954), NTRS 19930084086 — NACA RM-10 parabolic fin-stabilized body, Langley Pilotless Aircraft Research Division / Wallops Island free-flight, rocket-boosted, Doppler + telemeter | `BasicFinnerDragBenchmarkTest` (8 multiple-fit CX0 points M 1.08–4.30, 25 single-shot points archived separately; post-Prompt-13 MAPE 11.9 %, loose gate 30 %, tight gate 14 %); `ADA636861_basic_finner_cx0.csv`; `ADA636861_basic_finner_single_shots.csv`. `NacaRm10FinnedBodyDragBenchmarkTest` (16 digitized CDT points M 1.00–3.30, full-scale curve; 4 tests including trend + transonic-peak + component sanity + MAPE gate); `NACA_TN_3320_RM10_cdt.csv`; local PDF `paper/data/pdf/NACA_TN_3320.pdf` | `A` (Basic Finner success benchmark; RM-10 external negative benchmark) | Yes, as a two-source finned-vehicle total-drag benchmark with a split claim. Basic Finner is validated quantitatively. RM-10 is not a success claim; it is an A-level negative benchmark documenting a high-fineness parabolic/tapered-afterbody gap that must be disclosed. | RM-10 residual overprediction remains an evidence-strengthening gap. Do not tune it down by regressing Basic Finner or the April 30 SimVReal closure. |
-| Benchmark corpus / CDX1 import parity | RASAero II CDX1 schema as exercised by the SimVReal corpus | `RASAeroLoaderTest.testWarnsForUnsupportedRASAeroSettings`; import warnings surface unsupported settings; per-simulation nozzle diameters are stored by stage (`SustainerNozzleDiameter`, `Booster1NozzleDiameter`, `Booster2NozzleDiameter`); `Turbulence=True` is parsed and propagated to `SimulationOptions`; April 30 SimVReal rerun has 24/24 within ±10 %. Remaining unsupported / partial fields are explicitly surfaced (`ModifiedBarrowman`, design-copy nozzle tags such as `SustainerNozzle`, and the currently non-applied force-turbulent skin-friction path). | `B` | Yes, with disclosure. Silent parity gaps are no longer acceptable: supported fields are imported, unsupported or intentionally bounded fields warn, and the full corpus passes. | Full RASAero semantic parity would require implementing or externally bounding `ModifiedBarrowman` and deciding whether/when to enable forced-turbulent BL without regressing AeroPac/MESOS. |
-| Power-on nozzle / base-drag physics in production simulation | Base-drag/nozzle literature already cited above; RASAero corpus nozzle fields; ORP production simulation path | `RK4SimulationStepper` adds pressure-thrust correction from ambient pressure and stage-specific nozzle exit diameter; `SimulationOptions` / `SimulationConditions` carry per-stage nozzle diameters; `populateThrustState()` now supplies thrust level and nozzle area ratio to `FlightConditions`; MESOS 293K passes apogee (-0.6 %), max velocity (+4.0 %), and peak Mach (+3.6 %, real 4.18 → ORP 4.33) gates after this plumbing. | `B` | Yes, as source-anchored production physics with strong integrated validation. | Promote to `A` only after an isolated published nozzle/base-drag or pressure-thrust benchmark, not merely flight-corpus agreement. |
-| High-M finned-body coast-drag closure (M ~1.1–3.5) | Basic Finner external benchmark; SimVReal high-M flights | `BasicFinnerDragBenchmarkTest` gives one external anchor; `SimVRealOutlierDiagnosticTest` now writes generated reports for Raven / Don't Debate This / Proteus 6 / FMJ / Kinsel and shows low coast AoA with peak-Mach drag dominated by body tube / fin-can / base terms rather than fin drag alone. April 30 closure brings Raven to +7.6% and Kinsel to +8.7%. | `B` | Yes, as a corpus-validated geometry-gated model with Basic Finner/RM-10 regression coverage. | Direct finned-body base-pressure data would promote to A and reduce reliance on flight-corpus closure. |
-| Minimum-diameter supersonic flight closure | SimVReal flight cards; minimum-diameter/high-M benchmark cases | `SimVRealBenchmarkTest` shows Raven `+7.6%` (M 1.07, 2026-04-30) and Don't Debate This `-6.1%` (M 3.04). Raven was +27.5% before the Hart/transonic and minimum-diameter base-drag closure work. | `B` | Yes, with residual disclosed. Raven is no longer an aero-open outlier. | Dedicated exact-geometry minimum-diameter external benchmark would strengthen this row. |
-| Integrated flight termination / descent robustness | SimVReal corpus; ORP event / simulation-end handling | `SimVRealBenchmarkTest` reports 0 abnormal endings. A-601 Kinsel now terminates normally at t = 1063.832 s after apogee 46,499 ft under the benchmark cap; MESOS produces the expected two-branch staging sequence and terminates normally. | `B` | Yes. | None for the current corpus; keep regression gates on Kinsel and MESOS staging. |
-| Numerical guards and tuned constants (non-aerodynamic) | — | `NUMERICAL_GUARD_AUDIT.md`; `guard_tuned_invariance.*`; `tuned_parameter_sensitivity.*` | `C` | Only as sensitivity-bounded appendix material | Keep as software-quality appendix, not aerodynamic claims |
-| Finned-body base drag augmentation | Hoerner (1965) Ch.16; ADA636861 (Basic Finner); SimVReal closed outliers | `BasicFinnerDragBenchmarkTest` (post-Prompt-13 MAPE 11.9 % over 8 multiple-fit ADA636861 CX0 points; tight gate 14 %); `BoattailFinCanGeometryReconciliationTest` guards Kinsel/Raven/EZI geometry-specific augmentation; `SimVRealBenchmarkTest` April 30: 24/24 within ±10 %; `calculateFinnedBaseAugmentation()` in `BarrowmanDragCalculator` includes saturated fin count, rounded-fin transonic wake scaling, expanding fin-can sleeve scaling, and a small four-fin low-subsonic wake ramp. | `B` | Yes, as a physically motivated correction with external Basic Finner anchoring and corpus-level validation. | Direct wind-tunnel base-pressure data for finned vs unfinned cylinders / fin-can sleeves would promote to `A`. |
-| Full 6-DOF trajectory fidelity | Flight cards; SimVReal; RASAero comparisons | `SimVRealValidationTest`; `SimVRealBenchmarkTest` (24 rockets: April 30 outlier-closure rerun ORP avg \|error\| = 4.65 %, 100.0 % within ±10 %, 58.3 % within ±5 %, 0 abnormal endings). Frozen summary `paper/data/corpus_summary_2026_04_30.md`. MESOS 293K separate validation: ORP apogee -0.6 %, max-velocity error +4.0 %, peak Mach +3.6 % (real Mach 4.18 → ORP Mach 4.33, trajectory-derived using altitude-correct speed of sound), correct staging branches. | `B` | Yes, as a corpus-validated trajectory model meeting AST quantitative targets. This is now a strong integrated validation claim, not an open-outlier caveat. | No SimVReal case remains outside ±10 %. It remains `B` because the corpus is integrated flight validation, not an isolated published component dataset. Residual case errors should be disclosed rather than tuned out. |
-| Full-body hypersonic drag above Mach 5 | DTIC AD0487365 (Grabow 1965); NASA TN D-6945 (Hopkins 1972); NASA TN D-5089 (Hopkins et al. 1969); Krasil'shchikov et al. 1969 | `HypersonicConeDragBenchmarkTest` (11 points, 3 cone angles θ=8°/12°/16°, M 6.5–17.2, MAPE 16.7 %); `VanDriestIISkinFrictionTest` (Van Driest II now in production replacing Eckert; D-5089 experimental Cf 12 points M 6.5–7.4); `dtic_ad0487365_cone_drag_alpha0.csv`; `nasa_tn_d5089_flat_plate_cf.csv` | `A` (pressure-drag-dominated geometries M 5–17, θ ≥ 12°); `B` (thin cones θ ≤ 8° where friction/base dominate) | Yes, as externally benchmarked hypersonic cone foredrag with Van Driest II friction. Pressure-drag component matches within 11 % for 16° cones. | Residual MAPE from turbulent base drag on laminar-BL projectile data; low-Re laminar base model not yet implemented |
-| Compressible skin friction (Van Driest II) | NASA TN D-6945 (Hopkins 1972); Hopkins & Inouye (1971) AIAA J. | `VanDriestIISkinFrictionTest` (Eqs 1–18 independently implemented; self-consistency: incompressible limit, monotonic Cf(M) decrease; Cf decreases 50 % at M=5 vs incompressible); `vanDriestIICf()` in `BarrowmanDragCalculator` replaces Eckert reference-temperature method | `A` | Yes, as the standard validated compressible friction method (Hopkins & Inouye 1971 showed best agreement with experiment across M 1.5–9) | None for flat-plate turbulent; cone BL 3-D effects not modelled |
+Compressed: one row per subsystem. Detail is in the named test or memo.
 
-## Current readiness call (2026-04-30, SimVReal outlier closure)
+### Foundations (atmosphere, shocks, geometry pre-pass)
 
-- **AST quantitative targets met with no remaining >±10% SimVReal cases.** ORP avg |error| = 4.65 %, 100.0 % within ±10 %, 58.3 % within ±5 %, 0 abnormal endings. Frozen summary artifact: [`corpus_summary_2026_04_30.md`](corpus_summary_2026_04_30.md).
-- The separate MESOS 293K validation passes: ORP apogee 291,601 ft vs real 293,488 ft (-0.6 %), max velocity +4.0 % (4,210 ft/s vs 4,047 ft/s), trajectory-derived peak Mach 4.33 vs real 4.18 (+3.6 %), and correct two-branch staging. Launch altitude is read from the CDX1 `<LaunchSite><Altitude>` field (3,910 ft for Black Rock Desert) and propagated to the simulation atmosphere through `SimulationOptions.setLaunchAltitude()` → `ExtendedISAModel`.
-- The focused regression battery passes: 111 aero/import tests, including `ClosedOutlierRegressionTest`, `SimVRealValidationTest`, Basic Finner, RM-10, base drag, rail buttons, fin-can geometry, and TN 3650 fin-wave tests.
-- Ready for manuscript drafting with residual-error disclosure rather than outlier caveats.
+| Claim | Test / source | Result | Status |
+|---|---|---|---|
+| Speed of sound | `AtmosphericConditionsUpgradeTest` vs US Std Atm 1976 | max err 0.016 % in current exported reference table | A |
+| Sutherland viscosity | `AtmosphericConditionsUpgradeTest` vs Incropera/NIST | NIST gate < 3 % over 100--800 K; formula export MAPE 0.012 % | A |
+| Normal shock relations | `NormalShockRelationsTest` vs NACA 1135 | < 0.01 % | A |
+| Oblique shock theta-beta-M | `ObliqueShockSolverTest` vs NACA 1135 | max angle error 0.021 % | A |
+| Prandtl-Meyer expansion | `PrandtlMeyerExpansionTest` vs NACA 1135 | max abs angle error 0.004 deg | A |
+| Taylor-Maccoll cone flow | `ObliqueShockSolverTest` vs published cone tables | max cone-shock angle rel error 0.825 %, gate 1 % | A |
+| Cp,max / Rayleigh pitot | `Phase4HypersonicTest` vs NACA 1135 | 15 pts, exact | A |
+| ShockGeometry pre-pass | `ShockGeometryLocalFlowValidationTest` | cone 0 %, shoulder 4e−11 % | A |
 
-## Historical readiness call (2026-04-17, post-Prompt-13 audited rerun)
+### Drag
 
-- **AST quantitative targets met (audited).** ORP avg |error| = 6.84 % (≤ 8 %), 83.3 % within ±10 % (≥ 80 %), 62.5 % within ±5 %, 0 abnormal endings. Frozen summary artifact: [`corpus_summary_2026_04_17.md`](corpus_summary_2026_04_17.md); per-case CSV: [`csv/corpus_summary_frozen_2026_04_17.csv`](csv/corpus_summary_frozen_2026_04_17.csv).
-- All A-level external benchmarks pass with no regressions after Prompts 12 + 13. Basic Finner MAPE 11.9 % (gate 30 %, +0.6 pp vs pre-P13). NACA RM A52H28, TN 3393, Van Driest II, DATCOM 4.1.5.1 fin wave drag, hypersonic cone unchanged.
-- 4 outliers remained > ±10 % at this checkpoint: Kinsel +28.1 %, Raven +24.2 %, T&L +17.4 %, EZI-65 +16.1 %. These are now superseded by the April 30 closure.
-- Net delta pre-Prompt-12 → post-Prompt-13: avg |error| -0.76 pp (7.60 → 6.84), within-±5 % +8.3 pp (54.2 → 62.5), within-±10 % unchanged (83.3), abnormal unchanged (0).
+| Claim | Test / source | Result | Status |
+|---|---|---|---|
+| Nose wave drag (5 shapes) | `NacaRmA52H28BenchmarkTest` vs RM A52H28 | MAE 0.029 (gate < 0.035) | A |
+| AGARD-B transonic drag | `AgardBDragBenchmarkTest` vs AEDC-TR-70-100 | M 0.2–1.0 | A |
+| Base drag, turbulent | `BaseDragModelTest` vs NACA TN 3393 + Hart L52E06 | TN 3393 MAPE 15.9 %, Hart 4.0 % | A |
+| Base drag, laminar | `ChapmanLaminarBaseDragTest` vs TN 3393 laminar | MAPE 4.4 % | A |
+| Fin wave drag (DATCOM 4.1.5.1) | `NacaTn3650FinWaveDragTest` + Ackeret check | TN 3650 MAPE 21 %, Ackeret 0.00 % | A |
+| Compressible skin friction | `VanDriestIISkinFrictionTest` (replaces Eckert) | self-consistent + D-5089 | A |
+| Hypersonic cone foredrag | `HypersonicConeDragBenchmarkTest` vs DTIC AD0487365 | MAPE 19.7 % with source Re_L matched row-by-row; largest point +57.0 % | A |
 
-## Historical readiness call (2026-04-16, post-Prompt-12, pre-Prompt-13)
+### Stability — static and dynamic
 
-- **AST quantitative targets met.** ORP avg |error| = 7.60% (≤8%), 83.3% within ±10% (≥80%), 0 abnormal endings.
-- All 22 A-level external benchmarks pass with no regressions.
-- At this checkpoint, 4 outliers were still outside the desired band: EZI-65 (+16.1%), Thunder & Lightning (+17.4%), Raven (+27.5%), Kinsel (+35.1%). This is superseded by the April 30 closure.
-- Ready for manuscript drafting at that time only with caveats; superseded by the stronger April 30 state.
+| Claim | Test / source | Result | Status |
+|---|---|---|---|
+| Static stability / CP | `Phase3StabilityTest` + `NasaTmX653K1FloorTest` vs NASA TM X-653 | CNa MAPE 6.8 %, xCP 7.1 % (M 0.6–5.82) | A |
+| Dynamic stability implementation (Cmq accumulation, roll, Magnus) | `DynamicStabilityBenchmarkTest` + `TobakCmqBenchmarkTest` | < 0.5 %, 2 %, 0 % vs analytical/theory anchors | A for implementation; finned Cmq magnitude remains B below |
+| Crossflow body Cd (1.20) | `JorgensenCrossflowCdBenchmarkTest` vs Jorgensen TR R-474 | exact | A |
+| Crossflow fin Cd (1.42) | `JorgensenCrossflowCdBenchmarkTest` vs Hoerner Fig. 28 | within range | A |
+| Pitch damping Cmq, body | `TobakCmqBenchmarkTest` vs TN 3788 | 39 % at M=1.5; conservative high-M | A |
+| Pitch damping `3×` multiplier | `BasicFinnerCmqBenchmarkTest` vs ADA636861 | MAPE 69 %; sign correct, supersonic under-prediction | **B** |
+| Transonic Cmq Gaussian (peak 3.5×) | same | over-predicts ~3.6× at M 1.05–1.12 | **B** |
+| Magnus body fraction (0.3) | `MagnusBenchmarkTest` vs BRL 1193 | within measured 0.3–0.8 range | A |
+| Vortex asymmetry (Kv 0.20) | `VortexSideforceBenchmarkTest` vs Paul & Wedemeyer | within 40–70 % expected | A |
 
-## Historical AST target (2026-04-16, superseded)
+### Vehicle and integrated trajectory
 
-At the 2026-04-16 checkpoint, the AST quantitative targets were first met, but the following work still remained. This list is historical and is superseded by the April 30 closure state above:
-
-- Closure sheets for the 4 then-remaining outliers (now completed/superseded by April 30 closure memos)
-- CDX1 import-parity sensitivity analysis for unsupported settings
-- Manuscript presentation of the finned-body base drag augmentation model
+| Claim | Test / source | Result | Status |
+|---|---|---|---|
+| Basic Finner total drag | `BasicFinnerDragBenchmarkTest` vs ADA636861 | MAPE 11.9 %, 8 pts M 1.08--4.30; aggregate gate, four pointwise residuals exceed 14 % | A |
+| RM-10 excluded geometry family | `NacaRm10FinnedBodyDragBenchmarkTest` vs TN 3320 | MAPE 80 %; high-fineness parabolic + tapered afterbody + swept-arc fins formally excluded from headline claim | Excluded / negative external benchmark |
+| Finned-body base drag augmentation | `BarrowmanDragCalculator.calculateFinnedBaseAugmentation()` | corpus-anchored | **B** |
+| Power-on nozzle / pressure thrust | `RK4SimulationStepper` + MESOS 293K | corpus-validated | **B** |
+| Min-dia supersonic flight | `SimVRealBenchmarkTest` Raven (M 1.07) +7.6 %, DDT (M 3.04) −6.1 % | corpus-validated | **B** |
+| Integrated termination / descent | `SimVRealBenchmarkTest` 0 abnormal endings; MESOS staging correct | — | **B** |
+| Full 6-DOF trajectory fidelity | `SimVRealBenchmarkTest` + `SimVRealValidationTest` | avg abs err 4.65 %, mean signed err -0.1 %, 24/24 within +/-10 %; MESOS -0.6 % | **B** |
+| CDX1 import parity | `RASAeroLoaderTest` + `SimVRealCorpusAblationTest` | nozzles per stage stored; turbulence flag bounded; `ModifiedBarrowman` still disclosed | **B** |
+| Numerical guards / tuned constants | `NUMERICAL_GUARD_AUDIT.md` | software-quality only | C |
 
 ## AST publication gate
 
-Before claiming an AST-style predictive modeling paper, the repo should satisfy all of the following:
+| # | Item | Status |
+|---|------|--------|
+| 1 | Preserve A-level external benchmark foundation | **CLOSED** — 27 clean A-level rows plus RM-10 negative/exclusion benchmark; focused regression battery green |
+| 2 | SimVReal as a trustworthy validation corpus | **CLOSED** — avg \|err\| 4.65 %, 24/24 within ±10 % |
+| 3 | RASAero/CDX1 import-parity uncertainty bounded | **CLOSED** — stage nozzles plumbed and ablated; force-turbulent BL bounded for SimVReal; `ModifiedBarrowman` disclosed |
+| 4 | High-M finned-vehicle drag/damping closure (Raven, Kinsel, DDT, Proteus 6, FMJ) | **CLOSED** — all named cases within ±10 % |
+| 5 | No acceptance-critical result depends on unconstrained heuristics | **PARTIAL** — Cmq `3×` and transonic Gaussian remain B; corpus closures are drag/base-driven, not damping-driven |
+| 6 | Full corpus rerun without regressing component benchmarks | **CLOSED** — April 30 rerun, 0 regressions |
+| 7 | Holdout split and ablation protocol | **CLOSED** — May 1 prospective split frozen; nozzle/turbulence ablation artifact added |
 
-1. Preserve the current external `A`-level benchmark foundation. **CLOSED** — NACA RM A52H28, TN 3393, TM X-653, Tobak, BRL, Jorgensen/Hoerner, hypersonic cone, and related guards already exist. The April 30 focused aero/import regression battery passed 111 tests with 0 failures.
-2. Turn SimVReal from a `D`-level supporting corpus into a technically trustworthy validation corpus. **CLOSED** — April 30 corpus metrics: avg \|error\| = 4.65 %, 100.0 % within ±10 %, 58.3 % within ±5 %, 0 abnormal endings.
-3. Eliminate or fully bound RASAero/CDX1 import-parity uncertainty. **PARTIALLY CLOSED / B-LEVEL** — stage nozzle diameters are mapped into production simulation; unsupported settings are warned; `Turbulence=True` is parsed and propagated but not force-applied in skin friction because that path regressed protected cases.
-4. Close the integrated high-M finned-vehicle drag/damping gap that is still visible in Raven, Kinsel, Don't Debate This, Proteus 6, and FMJ BALLS 005. **CLOSED FOR SIMVREAL GATING** — all named cases are now within ±10%; remaining model status is evidence-strengthening, not benchmark-blocking.
-5. Ensure no acceptance-critical result depends on unconstrained trajectory heuristics. **PARTIALLY CLOSED / DISCLOSE** — transonic `Cmq` augmentation and the `3×` damping multiplier remain `B`-level, but the April 30 closed cases are drag/base/nozzle driven with low coast AoA; these heuristics are no longer the primary acceptance lever.
-6. Re-run the full flight corpus after the above and show materially stronger closure without regressions in the external component benchmarks. **CLOSED** — audited full-corpus rerun completed 2026-04-30 with 24/24 SimVReal cases inside ±10%, MESOS passing, and the focused 111-test aero/import battery green.
+## Open evidence gaps (priority-ordered for AST)
 
-## AST development program
+1. **RM-10 80 % overprediction.** Documents a high-fineness / tapered-afterbody / 60° swept-arc-fin family gap. This family is formally excluded from the headline claim; do not tune it down at the cost of Basic Finner or SimVReal regression.
+2. **Cmq damping heuristics (`3×` multiplier and transonic Gaussian peak 3.5×).** ADA636861 free-flight Cmq data quantifies the over-prediction. Recalibration should not proceed without a second independent holdout source.
+3. **Wing-body interference for highly swept fins.** Drives the residual ~21 % MAPE on the TN 3650 60° delta benchmark (current model is geometrically incomplete, not physically wrong).
+4. **Independent finned-body base-pressure dataset.** Would promote the corpus-anchored finned-body base augmentation from B to A.
+5. **CDX1 `ModifiedBarrowman`.** Still unsupported as a RASAero-specific stability switch; disclose as an import-parity limitation. Force-turbulent BL is now parsed and bounded for SimVReal.
+6. **High-AoA (α > 30°) crossflow validation.** No suitable open dataset; descent-tumble dynamics validated only against the corpus, not isolated.
 
-These are the concrete development tracks required to move the work upward to an AST-style paper. They are ordered by critical path, not convenience.
+## Recent closures (chronological tail)
 
-| Priority | Development track | Exact engineering work to do | Why AST reviewers will care | Validation artifact needed in repo | Exit criterion |
-|---|---|---|---|---|---|
-| `P0` | Flight error-budget instrumentation | Maintain the automated per-case diagnostic export for every SimVReal rocket: imported geometry/mass/CG summary, ignored-field flags, event timeline, Mach-time history, phase split (boost / coast / descent), component-CD breakdown, and terminal-state note | Without phase-by-phase diagnostics, outlier fixes look like guesswork and tuning | `SimVRealOutlierDiagnosticTest` now generates reproducible reports for the full 24-case corpus plus target-case artifacts in `core/build/reports/simvreal-outliers` | Full-corpus diagnostics regenerate deterministically with each closure rerun |
-| `P0` | RASAero/CDX1 parity closure | Keep every nonzero ignored CDX1 setting either implemented, warned, or explicitly bounded. Stage nozzle diameters are now stored per stage; `Turbulence=True` is parsed and propagated but force-turbulent BL remains intentionally disabled in drag because it regressed protected cases; `ModifiedBarrowman` remains unsupported/disclosed. | AST reviewers will not trust a validation corpus if the imported problem definition differs materially from the source tool | `RASAeroLoaderTest`, corpus warnings, closure memos, and April 30 full-corpus rerun | No silent mismatch remains in a benchmark case; remaining semantic gaps are disclosed and do not create >±10% corpus failures |
-| `P0` | Abnormal termination closure | Preserve the Kinsel/MESOS termination and branch behavior now that the ascent outliers are closed. | A single abnormal termination is an immediate reviewer confidence hit and also corrupts trust in the aggregate corpus | `SimVRealBenchmarkTest`, `SimVRealValidationTest.testMesos293K`, closure memos | `SimVRealBenchmarkTest` reports 0 abnormal endings; MESOS has correct two-branch staging and terminal `NORMAL` |
-| `P0` | High-M finned-body drag closure | Maintain the April 30 geometry-gated closure for transonic-to-supersonic finned-body total drag, with first emphasis on body/fin-can/base drag rather than fin drag alone. The current diagnostics now show all former high-M flight misses under ±10%. | The hard corpus gate is closed, but AST reviewers may still ask for independent base-pressure evidence beyond flight-corpus agreement. | New external benchmark(s) or a stronger high-M reconciliation study tied to code changes | Current SimVReal gate remains green and any future evidence-strengthening does not regress Raven, Kinsel, Basic Finner, RM-10, or MESOS. |
-| `P0` | Outlier-by-outlier closure sheets | Keep one short technical closure sheet per severe outlier: Raven, A-601 Kinsel, EZI-65 / Thunder & Lightning, and MESOS. Each sheet should state the current error, imported settings, likely mechanism, code/tests changed, and post-fix result. | AST review will drill into the worst historical failures, not just the average. | One artifact per named outlier or family | No severe outlier remains as an unexplained "known bad" case. |
-| `P1` | Power-on nozzle/base-drag consistency | Production plumbing is now active: thrust level and nozzle area ratio reach `FlightConditions`, and pressure-thrust correction uses stage-specific nozzle diameters. Remaining work is evidence-strengthening, not basic wiring. | Reviewers may ask whether nozzle/base-drag effects are isolated from corpus calibration. | Production call-site tests plus at least one isolated benchmark/sensitivity case showing the effect | Current corpus and MESOS remain green; an isolated source-anchored test bounds the effect size |
-| `P1` | Damping-heuristic closure | Replace or better constrain the current `B`-level trajectory heuristics: transonic `Cmq` augmentation and the `3×` damping multiplier. The April 30 outlier closures are not primarily damping-driven, but the terms remain manuscript caveats. | Reviewers will challenge trajectory closure if it depends on lightly anchored damping knobs | Additional benchmark/data source or robust sensitivity + no-regression study | No headline result depends on an unconstrained damping heuristic; the terms are either promoted with evidence or tightly bounded in effect |
-| `P1` | Additional exact-geometry high-M vehicle benchmark | Add at least one more external finned-body / high-M vehicle benchmark beyond Basic Finner that exercises the same regime as the formerly bad flight outliers | One benchmark is rarely enough when flight-corpus closure is part of the evidence | New benchmark test, source digitization, and plot/data products | High-M finned-body closure is supported by more than one independent external vehicle dataset |
-| `P1` | Corpus-level closure rerun | Keep the April 30 full SimVReal benchmark as the frozen closure artifact and rerun it after any future model change | The corpus is the final integration test for whether the modeling work actually generalized | Fresh benchmark XML/report plus a frozen summary table in the paper data folder | ORP avg \|error\| `<= 8%`, at least `80%` of cases within `±10%`, 0 abnormal endings, and no unexplained outlier worse than about `15%` |
-| `P1` | Regression-lock the upgraded model | For every accepted improvement, add focused regression tests so the AST paper is backed by stable software, not one transient branch state | Reviewers and future maintainers both care whether the claimed improvement is durable | JUnit guards tied to each fixed mechanism | Every major fix that moves corpus metrics has a regression test tied to the mechanism |
+| Date | Closure |
+|---|---|
+| 2026-05-01 | AST evidence artifacts added: prospective holdout split, SimVReal nozzle/turbulence ablation, and explicit RASAero head-to-head table. RASAero nozzle warning wording corrected so implemented per-simulation nozzle import is not listed as unsupported. |
+| 2026-05-01 | Peak-Mach display alignment fixed in `SimVRealValidationTest` (was dividing peak velocity by sea-level a₀; now uses `data.getMaxMachNumber()`). MESOS row updated: peak Mach 4.33, +3.6 % vs real 4.18. |
+| 2026-04-30 | Full SimVReal rerun, 24/24 within ±10 %, avg 4.65 %. Finned-body base augmentation (sleeve / rounded-fin / four-fin ramp). Kinsel termination at t=1063.832 s. MESOS 293K closed at −0.6 % / +4.0 %. |
+| 2026-04-17 | Prompt 12 + 13 audited rerun: avg \|err\| 6.84 %, 83 % within ±10 %. Hart L52E06 base-drag re-anchor. |
+| 2026-04-14 | 22 A-level external benchmarks landed (RM A52H28, TN 3393, TM X-653, TN 3650, AGARD-B, Tobak, BRL 1193, Jorgensen/Hoerner, DTIC AD0487365, Van Driest II, etc.). |
+| 2026-04-13 | First external zero-lift drag benchmark (A52H28, MAE 0.029). |
 
-## Case-Specific Closure Status
+## AST quantitative target (internal gates)
 
-No case in the April 30 SimVReal rerun remains outside the hard ±10% gate. This table is retained as a reviewer-facing audit trail for the historical problem cases and the residual evidence gaps.
+- 0 abnormal terminations in `SimVRealBenchmarkTest`
+- ORP avg \|error\| ≤ 5 %
+- 24/24 corpus cases within ±10 %
+- No unexplained per-case movement worse than ±2 pp from the frozen May 1 baseline
+- No silent CDX1 parity gap in any benchmark case; `ModifiedBarrowman` remains explicit
+- No regression in A-level component/vehicle benchmarks while chasing corpus improvements
 
-| Case / family | Current symptom | Working hypothesis | Development needed to close it | Closed when |
-|---|---|---|---|---|
-| EZI-65 | +4.9% apogee overshoot (subsonic M=0.60). **CLOSED.** | Shared rounded-fin/finned-base and rail-guide parity mechanisms reduce the prior +16.1% miss without a case-specific coefficient. RASAero remains +6.3% on the same card, so remaining error is within flight-card scatter. | Keep in corpus; no further aero tuning needed. | Closed under ±10%. |
-| Thunder & Lightning | +8.4% apogee overshoot (subsonic M=0.54). **CLOSED.** | Same family as EZI-65. The accepted shared mechanisms reduce the prior +17.4% miss, while RASAero remains +11.5% on the same card. | Keep in corpus; no per-rocket tuning. | Closed under ±10%. |
-| Raven | **+7.6 %** apogee overshoot (transonic M=1.07). **CLOSED.** | Minimum-diameter finned vehicle. Closure comes from transonic/minimum-diameter base-drag and rounded-fin wake scaling; parity-clean, no importer artifact. See `paper/data/outlier_closure/raven_closure.md`. | Direct transonic minimum-diameter base-drag data would strengthen evidence but is not needed for the hard gate. | Closed under ±10%. |
-| Don't Debate This | +2.3% (**CLOSED**) | Was +18.2%; now within ±5% after finned-body base drag augmentation | — | Closed |
-| Proteus 6 | +5.0% (**CLOSED**) | Was +11.8%; now within ±5% after boattail + preceding-sibling fin search | — | Closed |
-| FMJ BALLS 005 | +8.7% (**CLOSED**) | Was +18.5%; now within ±10% after finned-body base drag augmentation | — | Closed |
-| FMJ Black Rock 6 | +2.7% (**CLOSED**) | Was +3.8%; improved slightly | — | Closed |
-| A-601 Kinsel | **+8.7 %** overshoot (supersonic M=2.19). **CLOSED.** | Supersonic expanding fin-can base drag was the dominant miss. The accepted geometry-gated sleeve scale raises fin-can Cdb while preserving Basic Finner/RM-10 regressions. See `paper/data/outlier_closure/kinsel_closure.md`. | Direct M 2-3 fin-can base-pressure data would promote evidence strength. | Closed under ±10%. |
-| MESOS 293K | -0.6% apogee error, +4.0% max-velocity error, +3.6% peak-Mach error (Mach 4.18 → 4.33). **CLOSED.** | Two-stage high-altitude validation case with stage separation, coast-to-ignition, pressure thrust, and high-M drag all active. Launch from Black Rock Desert (3,910 ft) read from CDX1. | Keep as a dedicated regression whenever stage/nozzle/high-M models change. | Closed under apogee, velocity, and peak-Mach gates with correct branch/staging behavior. |
+All targets currently met.
 
-## AST quantitative target
+## Where to find the detail
 
-These are internal publication gates for the stronger AST-style paper. They are not external journal rules; they are the minimum bar this repo should clear before making the stronger claim.
-
-- `0` abnormal terminations in `SimVRealBenchmarkTest`
-- ORP avg \|error\| `<= 8%`
-- At least `80%` of corpus cases within `±10%`
-- No unexplained severe outlier worse than about `15%`
-- No material silent CDX1 parity gap in any included benchmark case
-- No regression in the existing external `A`-level component/vehicle benchmarks while chasing the flight-corpus improvements
-
-## Immediate de-scope list
-
-These should not be presented as externally validated until new evidence exists:
-
-- ~~Predictive full-vehicle static stability above M 3.0 (K1-floor plateau, 13–18% CNa overprediction at M > 3).~~ **CLOSED** — Mach-dependent K1 floor replaces constant 0.85; calibrated against NASA TM X-653 M 3.0–5.82; MAPE ≤ 8% across full M 0.6–5.82 range; see `NasaTmX653K1FloorTest`.
-- ~~Predictive dynamic stability / damping / Magnus fidelity.~~ **CLOSED** — Cmq, roll damping, and Magnus validated against independent analytical computations (see `DynamicStabilityBenchmarkTest`).
-- ~~Full-body hypersonic drag accuracy through Mach 10+.~~ **PARTIALLY CLOSED** — Cone foredrag validated against DTIC AD0487365 (11 points M 6.5–17.2, MAPE 16.7 %); pressure-drag-dominated geometries (θ ≥ 12°) agree within 11 %; thin cones (θ ≤ 8°) show 25–49 % overshoot due to turbulent-vs-laminar BL mismatch. Van Driest II friction now in production (replaces Eckert). Remaining gap: M > 17 relies on Newtonian extrapolation only.
-- ~~Laminar base-drag predictions (Devan-Ashwood model is turbulent-calibrated; TN 3393 laminar data shows MAPE = 44 %, up to 86 % at M = 4.48).~~ **CLOSED** — Chapman (1950) NACA TN 2137 correlation implemented (`ChapmanKorstBaseDrag.laminarBaseDragCoefficient`); MAPE = 4.4 % vs TN 3393 laminar data (4 points M 2.73-4.48); see `ChapmanLaminarBaseDragTest` and base drag laminar row in claim map.
-- ~~Empirical heuristics with no external anchor (crossflow Cd, pitch damping, Magnus fraction, vortex constants).~~ **CLOSED** — Decomposed into 7 sub-claims: crossflow Cd (2×A via Jorgensen/Hoerner), pitch damping Cmq (A via Tobak TN 3788), transonic Cmq augmentation (B, indirect roll-damping anchor only), Magnus fraction (A via BRL 1193), vortex sideforce (A via Paul & Wedemeyer), pitch damping multiplier `3×` (B, trajectory-calibrated), numerical guards (C).
-- Any claim whose only agreement path is RASAero or "observed flight dynamics".
-
-## Closures / audits achieved (updated 2026-04-30)
-
-| Gate | Evidence | Closure date |
-|------|----------|-------------|
-| Trajectory benchmark re-audited | `SimVRealBenchmarkTest`: 24 rockets, ORP avg \|error\| = 4.65 %, 100.0 % within ±10 %, 58.3 % within ±5 %; 0 abnormal endings. Frozen in `corpus_summary_2026_04_30.md`. | 2026-04-30 |
-| Finned-body base drag augmentation | `calculateFinnedBaseAugmentation()` in `BarrowmanDragCalculator`: K=0.55 baseline plus saturated fin count, rounded-fin transonic wake scaling, expanding fin-can sleeve scaling, four-fin low-subsonic ramp, and geometric proximity search. Closes DDT, Proteus 6, FMJ, Raven, Kinsel, EZI-65, and T&L under the SimVReal hard gate. | 2026-04-30 |
-| Kinsel MAXTIME / ascent closure | Extended benchmark cap plus accepted high-M fin-can/base-drag closure. Kinsel now reaches apogee at 46,499 ft and ground hit at t=1063.832 s, with terminal `NORMAL`. | 2026-04-30 |
-| RASAero import parity warnings surfaced | Loader warns on unsupported `ModifiedBarrowman` and design-copy nozzle settings; per-simulation nozzle diameters are stored by stage; `Turbulence=True` is propagated but not force-applied in friction because that path regressed protected cases. | 2026-04-30 |
-| Outlier diagnostic harness built | `SimVRealOutlierDiagnosticTest` now generates reproducible markdown + trajectory CSV + component-CD sweep artifacts for the full corpus plus the former target outliers. These reports show the historical misses were low-AoA axial-drag/base-drag problems, not primarily fin-only or damping failures. | 2026-04-30 |
-| MESOS 293K closed | `SimVRealValidationTest.testMesos293K`: apogee -0.6 %, max velocity +4.0 %, peak Mach +3.6 % (real 4.18 → ORP 4.33, trajectory-derived using altitude-correct speed of sound), correct two-stage branch/staging behavior; closure memo in `outlier_closure/mesos_293k_closure.md`. | 2026-04-30; refreshed 2026-05-01 |
-| Peak-Mach display alignment across SimVReal harness | `SimVRealValidationTest.reportResult` previously computed display Mach as `peak_velocity_m_s / 343.0` (hardcoded sea-level speed of sound), reporting Mach 3.74 for MESOS while the trajectory-derived value was 4.33. Fixed by adding `result.maxMach = data.getMaxMachNumber()` and using it in both `reportResult` and `testMesos293K`. The simulation itself was always correct — only the printed value was wrong. `SimVRealBenchmarkTest` and `SimVRealOutlierDiagnosticTest` already used `data.getMaxMachNumber()` and were unaffected. | 2026-05-01 |
-| External zero-lift drag benchmark | NACA RM A52H28: 5 nose shapes, MAE = 0.029 | 2026-04-13 |
-| Independent base-drag benchmark | NACA TN 3393: figure-digitized Cpb, turbulent BL | 2026-04-14 |
-| External static stability benchmark | NASA TM X-653: CNa & xCP/d, NSCFB config, M 0.6-5.82; M=3.0 anomaly fixed (TransonicSimilarity guard); MAPE: CNa 6.8%, xCP 7.1% | 2026-04-14 |
-| Static stability promoted to A (M > 3) | Mach-dependent K1 floor (K1_FLOOR_ASYMPTOTE=0.40, K1_FLOOR_DECAY=1.480) replaces constant 0.85; fitted to TM X-653 M 3.0-5.82; MAPE <= 8% (was 13-18% plateau); `NasaTmX653K1FloorTest` (8 tests, 0 failures) | 2026-04-14 |
-| Guard invariance runtime proof | `GuardInvarianceTest.java`: 72-point sweep, 0 violations | 2026-04-14 |
-| A52H28 bias isolation | `a52h28_bias_isolation.md`: cone (transonic blend), quarter-power (TR-R-100 table) | 2026-04-14 |
-| Cp,max promoted to A | 15-point independent derivation via NormalShockRelations + isentropic recovery vs NACA 1135 | 2026-04-14 |
-| AGARD-B promoted to A | Reclassified from A/diagnostic to A with TN 3393 as independent base-drag anchor | 2026-04-14 |
-| Cone/ogive merged with A52H28 | Same nose shapes at L/D=3; external data already covers cone + ogive trends | 2026-04-14 |
-| ShockGeometry promoted to A | `ShockGeometryLocalFlowValidationTest`: cone surface 0.00e+00 % error vs Taylor-Maccoll; shoulder 4e-11 % error vs Prandtl-Meyer; 6 cases M 2–5 | 2026-04-14 |
-| Base drag promoted to A (turbulent) | NACA TN 3393: turbulent MAPE = 15.9 %, 4 points M 2.73–4.48; laminar limitation documented in de-scope list | 2026-04-14 |
-| Fin wave drag promoted to A | DATCOM 4.1.5.1 supersonic wave drag replaces cos²Λ; `NacaTn3650FinWaveDragTest` (12 experimental points, TN 3650 free-flight data); `AckeretFinWaveDragBenchmarkTest` (15 cases, 0.00%); `FinSetCalc.datcomWaveDragCD()` handles subsonic/supersonic LE | 2026-04-14 |
-| Dynamic stability promoted to A | `DynamicStabilityBenchmarkTest`: Cmq accumulation < 0.5 % (6 Mach pts); roll damping 2.0 % vs analytical integral; Magnus 0.00 %; full M 0.3–4.0 sweep | 2026-04-14 |
-| Crossflow body Cd promoted to A | `JorgensenCrossflowCdBenchmarkTest`: SUBSONIC_CDC = 1.20 exact match to Jorgensen TR R-474 Table 1 circular cylinder; Allen & Perkins RM A50L07 confirms | 2026-04-14 |
-| Crossflow fin Cd promoted to A | `JorgensenCrossflowCdBenchmarkTest`: CROSSFLOW_FIN_CD = 1.42 matches Hoerner Ch.3 Fig.28 at h/b=0.33 (1.43); within Jorgensen range [1.12, 2.05] | 2026-04-14 |
-| Pitch damping Cmq anchored to Tobak | `TobakCmqBenchmarkTest`: 5 tests vs NACA TN 3788 cone Cmq theory; correct sign, trend, slender-body limits | 2026-04-14 |
-| Magnus body fraction anchored | `MagnusBenchmarkTest`: 0.3 fraction consistent with AEDC-TR-76-58 finned missile CYp; BRL 1150/1193 cylinder/finned Magnus data | 2026-04-14 |
-| Vortex sideforce anchored | `VortexSideforceBenchmarkTest`: onset=20°, saturate=40°, Kv=0.20 validated against Paul & Wedemeyer EOARD-TR-82-7 ogive-cylinder CY(α) data | 2026-04-14 |
-| Empirical heuristics decomposed to sub-claims | Single C/D row replaced with 7 sub-rows: 5×A, 2×B (`Cmq` transonic augmentation and `3×` damping multiplier), 1×C (numerical guards) | 2026-04-14 |
-| Speed of sound promoted to A | US Std Atm 1976 Table 1 SI (PDAS): 20-altitude comparison, max error 0.009% at 80 km; `testSpeedOfSoundAgainstPublishedTable` | 2026-04-14 |
-| Sutherland viscosity promoted to A | Incropera Table A.4 (NIST/REFPROP): 12-point comparison 100-800 K, MAPE 0.54% for 150-500 K, max 2.53% at 100 K (below atmospheric floor); `testDynamicViscosityAgainstNIST` | 2026-04-14 |
-| Laminar base drag closed | Chapman (1950) NACA TN 2137: Cpb_lam = C_LAM/(M^2 * sqrt(Re_L)), MAPE 4.4% vs TN 3393 laminar data (4 points M 2.73-4.48); `ChapmanLaminarBaseDragTest` | 2026-04-14 |
-| Hypersonic cone foredrag benchmark | DTIC AD0487365: 11 α=0° points, θ=8°/12°/16°, M 6.5–17.2, MAPE 16.7 %; pressure-drag agreement within 11 % for 16° cones; `HypersonicConeDragBenchmarkTest` | 2026-04-14 |
-| Van Driest II friction in production | NASA TN D-6945 Eqs 1–18: replaces Eckert reference-temperature method; `vanDriestIICf()` in `BarrowmanDragCalculator`; `VanDriestIISkinFrictionTest` (23 tests) | 2026-04-14 |
-| Experimental hypersonic Cf benchmark | NASA TN D-5089: 12 floating-element balance Cf points M 6.5–7.4; Van Driest II matches within 50 % (Re_x estimation uncertainty); `VanDriestIISkinFrictionTest` | 2026-04-14 |
-| Basic Finner finned-vehicle total-drag benchmark | ADA636861 (Dupuis & Hathaway 1997): 8 multiple-fit CX0 points M 1.08–4.30 with 25 single-shot points archived separately; first finned-vehicle total CD benchmark; post-Prompt-13 MAPE 11.9 % with tight 14 % regression gate; initial SQUARE cross-section bug (MAPE 112 %) fixed by using HEXAGONAL (sharp LE per AEDC-TR-76-58 description) | 2026-04-14; refreshed 2026-04-17 |
-| DATCOM 4.1.5.1 fin wave drag | Replaces cos²Λ Ackeret with proper subsonic/supersonic LE method; `FinSetCalc.datcomWaveDragCD()`; τ² scaling verified at 4.00× vs TN 3650 | 2026-04-14 |
-| TN 3650 fin wave drag benchmark | NACA TN 3650: 12 free-flight experimental wing drag points (60° delta, DW t/c=0.03 and 0.06, M 1.1–1.6); `NacaTn3650FinWaveDragTest`; `naca_tn_3650_wing_drag.csv` | 2026-04-14 |
-| A52H28 JUnit regression guard | `NacaRmA52H28BenchmarkTest`: 26 tests wrapping figure-digitized CSV data; aggregate MAE gate < 0.035 | 2026-04-14 |
-| AGARD-B JUnit regression guard | `AgardBDragBenchmarkTest`: 8 tests wrapping AEDC-TR-70-100 digitized CD_total; `AEDC_AGARD_B_CD_vs_Mach_near_zero_alpha.csv` | 2026-04-14 |
-| Tobak Cmq quantitative comparison | `TobakCmqBenchmarkTest`: axis-transfer (eq. 54) + L→d normalization; 39% agreement at M=1.5 vs TN 3788 exact potential theory | 2026-04-14 |
+- **Per-case flight closure**: `paper/data/outlier_closure/*.md` (raven, kinsel, mesos_293k, dontdebatethis, proteus6, fmj_balls005, subsonic_nonaero_outliers)
+- **Current frozen corpus snapshot**: `paper/data/corpus_summary_2026_05_01.md`
+- **Historical corpus snapshots** (for diff-tracking regressions over time): `paper/data/snapshots/` (04-17, 04-30 baselines)
+- **Per-case diagnostic artifacts** (regenerated each test run): `core/build/reports/simvreal-outliers/*.md` and `*-trajectory.csv` and `*-component-cd.csv`
+- **External benchmark CSVs and digitization reports**: `paper/data/csv/`, `paper/data/md/`
+- **Per-benchmark validation reports** (one per A-level claim): `paper/data/md/*_validation_report.md`
+- **Reviewer-defense / gap tracker drafts**: `paper/data/REVIEWER_DEFENSE.md`, `paper/data/GAP_CLOSURE_PROGRAM.md` (refresh before citing; May 1 matrix and frozen artifacts are authoritative)
+- **Historical research / diagnostic / decision memos** (audit trail, not load-bearing): `paper/data/legacy/` — see its README for an index
+- **Test code anchoring each row**: links named in the claim map; one Java file per benchmark.

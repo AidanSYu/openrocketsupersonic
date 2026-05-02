@@ -109,7 +109,7 @@ All new/modified tests ran and passed against branch
 
 ## Cross-reference
 
-* Roadmap: `paper/data/AST_PARALLEL_AGENT_ROADMAP.md` Prompt Status Board row 20, Session Log "Prompt 20 Regression Lock".
-* Frozen corpus: `paper/data/corpus_summary_2026_04_17.md`, `paper/data/csv/corpus_summary_frozen_2026_04_17.csv`.
-* Hunt evidence base: `paper/data/transonic_base_drag_source_hunt.md`.
-* Decision memo: `paper/data/candidate_fixes_decision_memo.md`.
+* Roadmap (archived): `paper/data/legacy/AST_PARALLEL_AGENT_ROADMAP.md` Prompt Status Board row 20, Session Log "Prompt 20 Regression Lock".
+* Frozen corpus snapshot (archived): `paper/data/snapshots/corpus_summary_2026_04_17.md`, `paper/data/csv/corpus_summary_frozen_2026_04_17.csv`. Current baseline: `paper/data/corpus_summary_2026_05_01.md`.
+* Hunt evidence base (archived): `paper/data/legacy/transonic_base_drag_source_hunt.md`.
+* Decision memo (archived): `paper/data/legacy/candidate_fixes_decision_memo.md`.

@@ -70,34 +70,35 @@ public class RASAeroLoaderTest extends BaseTestCase {
             assertTrue(finSet instanceof TrapezoidFinSet, "Body tube child should be trapezoid fin set");
 
             RocketComponent booster1Tube = booster1.getChild(0);
-            assertTrue(booster1Tube instanceof BodyTube, "Booster child should be nose cone");
+            assertTrue(booster1Tube instanceof BodyTube, "Booster 1 child should be body tube");
             assertEquals(1, booster1Tube.getChildCount());
             RocketComponent booster1FinSet = booster1Tube.getChild(0);
             assertTrue(booster1FinSet instanceof TrapezoidFinSet, "Booster 1 tube child should be trapezoid fin set");
 
             RocketComponent booster2Tube = booster2.getChild(0);
-            assertTrue(booster2Tube instanceof BodyTube, "Booster child should be nose cone");
+            assertTrue(booster2Tube instanceof BodyTube, "Booster 2 child should be body tube");
             assertEquals(1, booster2Tube.getChildCount());
             RocketComponent booster2FinSet = booster2Tube.getChild(0);
-            assertTrue(booster2FinSet instanceof TrapezoidFinSet, "Booster 1 tube child should be trapezoid fin set");
+            assertTrue(booster2FinSet instanceof TrapezoidFinSet, "Booster 2 tube child should be trapezoid fin set");
 
             // Test component parameters
             assertEquals(rocket.getName(), "Three-stage rocket");
 
             //// Sustainer
             NoseCone nose = (NoseCone) noseCone;
+            ExternalComponent.Finish expectedRasaeroSmoothFinish = ExternalComponent.Finish.OPTIMUM;
             assertEquals(Transition.Shape.OGIVE, nose.getShapeType());
             assertEquals(0.0125, nose.getBaseRadius(), EPSILON);
             assertEquals(0.1, nose.getLength(), EPSILON);
             assertEquals(0.002, nose.getThickness(), EPSILON);
-            assertEquals(ExternalComponent.Finish.MIRROR, nose.getFinish());
+            assertEquals(expectedRasaeroSmoothFinish, nose.getFinish());
 
             BodyTube tube = (BodyTube) bodyTube;
             assertEquals(0.0125, tube.getOuterRadius(), EPSILON);
             assertTrue(tube.isOuterRadiusAutomatic());
             assertEquals(0.3, tube.getLength(), EPSILON);
             assertEquals(0.002, tube.getThickness(), EPSILON);
-            assertEquals(ExternalComponent.Finish.MIRROR, tube.getFinish());
+            assertEquals(expectedRasaeroSmoothFinish, tube.getFinish());
 
             TrapezoidFinSet fins = (TrapezoidFinSet) finSet;
             assertEquals(4, fins.getFinCount());
@@ -108,7 +109,7 @@ public class RASAeroLoaderTest extends BaseTestCase {
             assertEquals(0.6947, fins.getSweepAngle(), EPSILON);
             assertEquals(FinSet.CrossSection.SQUARE, fins.getCrossSection());
             assertEquals(0.00201, fins.getThickness(), EPSILON);
-            assertEquals(ExternalComponent.Finish.MIRROR, fins.getFinish());
+            assertEquals(expectedRasaeroSmoothFinish, fins.getFinish());
 
             //// Booster 1
             BodyTube tube1 = (BodyTube) booster1Tube;
@@ -116,7 +117,7 @@ public class RASAeroLoaderTest extends BaseTestCase {
             assertFalse(tube1.isOuterRadiusAutomatic());
             assertEquals(0.08, tube1.getLength(), EPSILON);
             assertEquals(0.002, tube1.getThickness(), EPSILON);
-            assertEquals(ExternalComponent.Finish.MIRROR, tube1.getFinish());
+            assertEquals(expectedRasaeroSmoothFinish, tube1.getFinish());
 
             TrapezoidFinSet fins1 = (TrapezoidFinSet) booster1FinSet;
             assertEquals(4, fins1.getFinCount());
@@ -127,7 +128,7 @@ public class RASAeroLoaderTest extends BaseTestCase {
             assertEquals(0.6947, fins1.getSweepAngle(), EPSILON);
             assertEquals(FinSet.CrossSection.SQUARE, fins1.getCrossSection());
             assertEquals(0.00201, fins1.getThickness(), EPSILON);
-            assertEquals(ExternalComponent.Finish.MIRROR, fins1.getFinish());
+            assertEquals(expectedRasaeroSmoothFinish, fins1.getFinish());
 
             //// Booster 2
             BodyTube tube2 = (BodyTube) booster2Tube;
@@ -135,7 +136,7 @@ public class RASAeroLoaderTest extends BaseTestCase {
             assertFalse(tube2.isOuterRadiusAutomatic());
             assertEquals(0.08, tube2.getLength(), EPSILON);
             assertEquals(0.002, tube2.getThickness(), EPSILON);
-            assertEquals(ExternalComponent.Finish.MIRROR, tube2.getFinish());
+            assertEquals(expectedRasaeroSmoothFinish, tube2.getFinish());
 
             TrapezoidFinSet fins2 = (TrapezoidFinSet) booster2FinSet;
             assertEquals(4, fins2.getFinCount());
@@ -146,7 +147,8 @@ public class RASAeroLoaderTest extends BaseTestCase {
             assertEquals(0.5584, fins2.getSweepAngle(), EPSILON);
             assertEquals(FinSet.CrossSection.SQUARE, fins2.getCrossSection());
             assertEquals(0.00201, fins2.getThickness(), EPSILON);
-            assertEquals(ExternalComponent.Finish.MIRROR, fins2.getFinish());
+            assertEquals(expectedRasaeroSmoothFinish, fins2.getFinish());
+            assertFalse(rocket.isPerfectFinish(), "RASAero smooth finish should not enable ORP perfect-finish laminar flow");
         } catch (IllegalStateException ise) {
             fail(ise.getMessage());
         } catch (RocketLoadException | IOException e) {
@@ -264,9 +266,15 @@ public class RASAeroLoaderTest extends BaseTestCase {
         // the flag.
         assertTrue(warnings.contains("RASAero Turbulence=True honored: forcing fully-turbulent boundary layer"
                 + " in skin-friction model."), warnings);
-        assertTrue(warnings.contains("Ignoring unsupported RASAero setting SustainerNozzle=1.25."),
+        assertTrue(warnings.contains("RASAero design-level SustainerNozzle=1.25 noted; "
+                        + "per-simulation nozzle diameter fields are imported when present."),
                 warnings);
-        assertTrue(warnings.contains("Ignoring unsupported RASAero setting Booster1Nozzle=0.75."),
+        assertTrue(warnings.contains("RASAero design-level Booster1Nozzle=0.75 noted; "
+                        + "per-simulation nozzle diameter fields are imported when present."),
+                warnings);
+        assertFalse(warnings.contains("Ignoring unsupported RASAero setting SustainerNozzle=1.25."),
+                warnings);
+        assertFalse(warnings.contains("Ignoring unsupported RASAero setting Booster1Nozzle=0.75."),
                 warnings);
         // Per-simulation nozzle diameters are consumed and stored by stage, so
         // the *NozzleDiameter fields no longer emit unsupported-setting warnings.

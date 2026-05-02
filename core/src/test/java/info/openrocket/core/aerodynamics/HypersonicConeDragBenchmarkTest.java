@@ -13,9 +13,11 @@ import com.google.inject.Module;
 
 import info.openrocket.core.ServicesForTesting;
 import info.openrocket.core.logging.WarningSet;
+import info.openrocket.core.models.atmosphere.AtmosphericConditions;
 import info.openrocket.core.plugin.PluginModule;
 import info.openrocket.core.rocketcomponent.AxialStage;
 import info.openrocket.core.rocketcomponent.BodyTube;
+import info.openrocket.core.rocketcomponent.ExternalComponent;
 import info.openrocket.core.rocketcomponent.NoseCone;
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.rocketcomponent.Transition;
@@ -36,18 +38,16 @@ import info.openrocket.core.startup.Application;
  * to approximate a pure cone geometry.
  * <p>
  * The DTIC data was obtained from ballistic-range free-flight measurements
- * at Re_L = 143k-2.15M, with laminar BL conditions. ORP assumes turbulent
- * BL by default, so friction will differ. The primary validation target is
- * the pressure drag component trend and magnitude.
+ * at Re_L = 143k-2.15M, with laminar boundary-layer conditions. The benchmark
+ * fixture marks the range models as perfect-finish and sets the atmospheric
+ * pressure row-by-row so ORP sees the tabulated length Reynolds number.
  */
 public class HypersonicConeDragBenchmarkTest {
 
 	/** Tolerance for total CD comparison. DTIC experiments were at laminar BL
-	 *  conditions (Re_L ~ 0.1-2M), while ORP assumes turbulent BL. This causes
-	 *  systematic overprediction of friction and base drag, especially for thin
-	 *  cones where these components dominate. We use 50% tolerance to accommodate
-	 *  this BL-state mismatch; the primary validation target is the pressure drag
-	 *  trend and the MAPE across all 11 points (target: < 20%). */
+	 *  conditions (Re_L ~ 0.1-2M), while ORP's hypersonic skin-friction branch
+	 *  remains turbulent. We use 50% tolerance for point scatter; the primary
+	 *  quantitative gate is the MAPE across all 11 points (target: < 20%). */
 	private static final double TOTAL_CD_TOLERANCE = 0.50;
 
 	/** Tighter tolerance for pressure-drag-only comparison. */
@@ -79,6 +79,7 @@ public class HypersonicConeDragBenchmarkTest {
 
 		Rocket rocket = new Rocket();
 		rocket.setName("Cone-" + halfAngleDeg + "deg");
+		rocket.setPerfectFinish(true);
 
 		AxialStage stage = new AxialStage();
 		stage.setName("Sustainer");
@@ -87,21 +88,41 @@ public class HypersonicConeDragBenchmarkTest {
 		NoseCone nose = new NoseCone(Transition.Shape.CONICAL, coneLength, BASE_RADIUS);
 		nose.setName("Cone");
 		nose.setThickness(0.001);
+		nose.setFinish(ExternalComponent.Finish.POLISHED);
 		stage.addChild(nose);
 
 		// Minimal body tube — just enough to have a base
 		BodyTube body = new BodyTube(0.001, BASE_RADIUS, 0.001);
 		body.setName("Base");
+		body.setFinish(ExternalComponent.Finish.POLISHED);
 		stage.addChild(body);
 
 		rocket.enableEvents();
 		return rocket;
 	}
 
+	private static AtmosphericConditions atmosphereForReL(double mach, double length, double reL) {
+		AtmosphericConditions standard = new AtmosphericConditions();
+		double velocity = mach * standard.getMachSpeed();
+		double targetNu = velocity * length / reL;
+		double pressure = standard.getDynamicViscosity()
+				* AtmosphericConditions.R
+				* standard.getTemperature()
+				/ targetNu;
+		return new AtmosphericConditions(standard.getTemperature(), pressure);
+	}
+
 	/**
 	 * Compute CD and component breakdown at a given Mach for a cone geometry.
 	 */
 	private CdBreakdown computeCd(double halfAngleDeg, double mach) {
+		return computeCd(halfAngleDeg, mach, Double.NaN);
+	}
+
+	/**
+	 * Compute CD and component breakdown while matching a source length Reynolds number.
+	 */
+	private CdBreakdown computeCd(double halfAngleDeg, double mach, double reL) {
 		Rocket rocket = makeCone(halfAngleDeg);
 		var config = rocket.getSelectedConfiguration();
 		var calc = new BarrowmanCalculator();
@@ -110,6 +131,9 @@ public class HypersonicConeDragBenchmarkTest {
 		var conditions = new FlightConditions(config);
 		conditions.setMach(mach);
 		conditions.setAOA(0.0);
+		if (Double.isFinite(reL) && reL > 0) {
+			conditions.setAtmosphericConditions(atmosphereForReL(mach, config.getLengthAerodynamic(), reL));
+		}
 
 		AerodynamicForces total = calc.getAerodynamicForces(config, conditions, warnings);
 
@@ -132,7 +156,7 @@ public class HypersonicConeDragBenchmarkTest {
 			double thetaDeg, double lambda, double mach, double reL,
 			double twTt, double cdExp, double cdLam) {
 
-		CdBreakdown result = computeCd(thetaDeg, mach);
+		CdBreakdown result = computeCd(thetaDeg, mach, reL);
 
 		// Log the comparison for diagnostics
 		System.out.printf("DTIC θ=%2.0f° M=%4.1f: CD_exp=%.4f  CD_orp=%.4f  " +
@@ -220,22 +244,28 @@ public class HypersonicConeDragBenchmarkTest {
 		System.out.println("----  ----  ------  ------  -------  -------  -------  --------");
 
 		double[][] data = {
-				{8, 6.5, 0.072}, {8, 6.5, 0.085}, {8, 9.0, 0.080}, {8, 14.3, 0.090},
-				{12, 6.5, 0.125}, {12, 9.0, 0.128}, {12, 17.2, 0.150},
-				{16, 6.5, 0.205}, {16, 9.0, 0.198}, {16, 14.3, 0.222}, {16, 17.2, 0.227}
+				{8, 6.5, 1110000, 0.072}, {8, 6.5, 1810000, 0.085},
+				{8, 9.0, 2150000, 0.080}, {8, 14.3, 628000, 0.090},
+				{12, 6.5, 1170000, 0.125}, {12, 9.0, 1440000, 0.128},
+				{12, 17.2, 215000, 0.150},
+				{16, 6.5, 583000, 0.205}, {16, 9.0, 440000, 0.198},
+				{16, 14.3, 215000, 0.222}, {16, 17.2, 143000, 0.227}
 		};
 
 		double sumAbsError = 0;
 		int count = 0;
 		for (double[] row : data) {
-			CdBreakdown cd = computeCd(row[0], row[1]);
-			double error = 100.0 * (cd.totalCd - row[2]) / row[2];
+			CdBreakdown cd = computeCd(row[0], row[1], row[2]);
+			double error = 100.0 * (cd.totalCd - row[3]) / row[3];
 			sumAbsError += Math.abs(error);
 			count++;
 			System.out.printf("%4.0f  %4.1f  %.4f  %.4f  %.4f   %.4f   %.4f   %+6.1f%%%n",
-					row[0], row[1], row[2], cd.totalCd,
+					row[0], row[1], row[3], cd.totalCd,
 					cd.pressureCd, cd.frictionCd, cd.baseCd, error);
 		}
-		System.out.printf("\nMAPE = %.1f%% across %d points%n", sumAbsError / count, count);
+		double mape = sumAbsError / count;
+		System.out.printf("\nMAPE = %.1f%% across %d points%n", mape, count);
+		assertTrue(mape < 20.0,
+				String.format("DTIC cone total-CD MAPE %.1f%% should be below 20%%", mape));
 	}
 }

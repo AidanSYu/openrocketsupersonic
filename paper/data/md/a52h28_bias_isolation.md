@@ -5,7 +5,12 @@
 Separate the remaining A52H28 cone (n=1) and quarter-power (n=0.25) overprediction
 into friction-transition versus pressure-drag causes, per the Gap Closure Program §3.
 
-## Current Residuals (Overall MAE = 0.0147)
+**Current-code note.** The Java regression benchmark is now the manuscript source of
+truth: aggregate MAE is approximately **0.029** in $C_D$ with a gate of **0.035**.
+The residual percentages below are retained as legacy export diagnostics for the
+cone and quarter-power shape-pattern isolation, not as the current aggregate metric.
+
+## Legacy Residual Pattern (Current Java MAE approx. 0.029)
 
 | Shape | M=1.24 | M=1.44 | M=1.99 | M=3.06 | M=3.67 | Pattern |
 |---|---|---|---|---|---|---|
@@ -77,7 +82,8 @@ as an inherent limitation of the empirical table approach for the quarter-power 
 
 ## Impact on Overall Claims
 
-The overall MAE = 0.0147 remains valid. The isolated biases are:
+The current checked benchmark remains inside its MAE gate (approximately 0.029
+against a 0.035 limit). The isolated legacy residual patterns are:
 - Cone: architectural limitation in the transonic pressure model (known, bounded)
 - Quarter-power: empirical table calibration offset (known, bounded, ~10%)
 

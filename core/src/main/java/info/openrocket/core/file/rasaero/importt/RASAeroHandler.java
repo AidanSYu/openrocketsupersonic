@@ -85,11 +85,6 @@ public class RASAeroHandler extends AbstractElementHandler {
          */
         private final SimulationOptions launchSiteSettings = new SimulationOptions();
 
-        /**
-         * The RASAero file version.
-         */
-        private String version;
-
         public RocketDocumentHandler(DocumentLoadingContext context, String rocketName) {
             super();
             this.context = context;
@@ -131,15 +126,6 @@ public class RASAeroHandler extends AbstractElementHandler {
         @Override
         public void closeElement(String element, HashMap<String, String> attributes, String content,
                 WarningSet warnings) throws SAXException {
-            /*
-             * SAX handler for RASAero file version number. The value is not used currently,
-             * but could be used in the future
-             * for backward/forward compatibility reasons (different lower level handlers
-             * could be called via a strategy pattern).
-             */
-            if (RASAeroCommonConstants.FILE_VERSION.equals(element)) {
-                this.version = content;
-            }
         }
     }
 
@@ -253,7 +239,7 @@ public class RASAeroHandler extends AbstractElementHandler {
             else if (RASAeroCommonConstants.SUSTAINER_NOZZLE.equals(element)
                     || RASAeroCommonConstants.BOOSTER1_NOZZLE.equals(element)
                     || RASAeroCommonConstants.BOOSTER2_NOZZLE.equals(element)) {
-                warnIfNonZero(warnings, element, content);
+                noteDesignLevelNozzle(warnings, element, content);
             }
             // Comments
             else if (RASAeroCommonConstants.COMMENTS.equals(element)) {
@@ -267,10 +253,11 @@ public class RASAeroHandler extends AbstractElementHandler {
             }
         }
 
-        private void warnIfNonZero(WarningSet warnings, String element, String content) {
+        private void noteDesignLevelNozzle(WarningSet warnings, String element, String content) {
             try {
                 if (Math.abs(Double.parseDouble(content)) > 1.0e-12) {
-                    warnings.add("Ignoring unsupported RASAero setting " + element + "=" + content + ".");
+                    warnings.add("RASAero design-level " + element + "=" + content
+                            + " noted; per-simulation nozzle diameter fields are imported when present.");
                 }
             } catch (NumberFormatException ignored) {
                 // Numeric-format validation is handled elsewhere if the value is consumed.

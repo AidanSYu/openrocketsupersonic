@@ -23,6 +23,7 @@ import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.rocketcomponent.SymmetricComponent;
 import info.openrocket.core.rocketcomponent.Transition;
 import info.openrocket.core.rocketcomponent.position.AxialMethod;
+import info.openrocket.core.util.Coordinate;
 import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.util.MathUtil;
 import info.openrocket.core.util.PolyInterpolator;
@@ -123,10 +124,11 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	//   - Flat-plate 1/7-power turbulent BL: δ/x = 0.37/Re_x^0.2.
 	//
 	// Calibration: this correction is B-level. The functional form is physics-based
-	// (BL-thickness / radius ratio), but the scale constant THICK_BL_K = 0.8 is
-	// calibrated against Raven (SimVReal, min-dia 1.75" tube, body L/D = 37,
-	// M_max ≈ 1.12) — ORP overshoots +27.5% vs +5.9% RASAero without it. See
-	// `paper/data/raven_vs_rabia_diagnostic.md`.
+	// (BL-thickness / radius ratio), but the scale constant is corpus-frozen
+	// against SimVReal minimum-diameter outliers, with Raven (1.75" tube,
+	// body L/D = 37, M_max ≈ 1.12) as the primary regression anchor. This is
+	// intentionally reported as corpus closure, not an independent A-level
+	// component benchmark. See `paper/data/outlier_closure/raven_closure.md`.
 	//
 	// Gates (both required):
 	//   1. M > 0.9 (subsonic wake dynamics are dominated by different mechanisms;
@@ -135,11 +137,9 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	//      correlation is already valid).
 	// Both gates use smooth ramps to avoid C1 discontinuities at the thresholds.
 
-	/** Thick-BL scale constant: calibrated to Raven SimVReal residual (see diagnostic).
-	 *  k=0.8 initial value gave only 2.1 pp closure on Raven's 27.5% overshoot; retuned to 1.3
-	 *  after observing that base drag is ~24% of Raven's coast avg Cd, so the apogee leverage
-	 *  from a base-drag-only correction is smaller than the Cd increase would suggest.
-	 *  Rabia/Torrent verified band-safe at k=1.3 extrapolated from their k=0.8 movement. */
+	/** Thick-BL scale constant frozen by the 2026-05-01 SimVReal corpus gate.
+	 *  Raven-proxy geometries saturate at the 1.8 multiplier cap; the high-L/D and
+	 *  Mach gates protect moderate-L/D component benchmarks and ordinary HPR cases. */
 	private static final double THICK_BL_K = 2.2;
 	/** δ/R threshold below which the Devan-Ashwood correlation remains valid. */
 	private static final double THICK_BL_DELTA_R_THRESHOLD = 0.5;
@@ -440,12 +440,11 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		// laminar reduction. Keep the pragmatic HPR cap-and-factor only for ordinary
 		// rockets, where surface discontinuities trip transition almost immediately.
 		//
-		// Note: the RASAero Turbulence=True flag (conditions.isForceTurbulentBL)
-		// is parsed from CDX1 but NOT applied here. Enabling the flag produced a
-		// band-edge regression on AeroPac 104K (-7.0% -> -10.0%) and broke the
-		// MESOS test (-24.18%) without meaningfully closing Kinsel (only -0.8 pp)
-		// because the real Kinsel mechanism is elsewhere. Plumbing retained for
-		// future RAS-parity work; see paper/data/kinsel_fix_result.md.
+		// Note: RASAero Turbulence=True is applied inside
+		// calculateFrictionCoefficient() only for the perfect-finish laminar branch.
+		// Ordinary painted HPR imports already use the fully-turbulent rough-plate
+		// branch, so the flag remains a no-op there and protects the SimVReal
+		// corpus from a spurious blanket drag increase.
 		double transitionFactor = 1.0;
 		if (!configuration.getRocket().isPerfectFinish()) {
 			double velocity = conditions.getVelocity();
@@ -510,10 +509,7 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	 */
 	private double calculateFrictionCoefficient(FlightConfiguration configuration, double mach, double Re, double T_e,
 			boolean forceTurbulentBL) {
-		// The `forceTurbulentBL` parameter is parsed from CDX1 Turbulence=True but
-		// intentionally ignored in this path. See comment on transitionFactor in
-		// calculateFrictionCD() for the regression rationale.
-		boolean perfectFinish = configuration.getRocket().isPerfectFinish();
+		boolean perfectFinish = configuration.getRocket().isPerfectFinish() && !forceTurbulentBL;
 		double CfBase = perfectFinish
 				? smoothFinishTransitionCf(Re, transitionReynoldsNumber(mach))
 				: incompressibleCf(Re, false);
@@ -1132,9 +1128,11 @@ public class BarrowmanDragCalculator implements DragCalculator {
 			RocketComponent child = s.getChild(i);
 			if (child instanceof FinSet) {
 				FinSet fin = (FinSet) child;
-				totalFinCount += fin.getFinCount();
-				maxSpan = Math.max(maxSpan, fin.getSpan());
-				hasRoundedFin |= fin.getCrossSection() == FinSet.CrossSection.ROUNDED;
+				if (finTrailingEdgeNearAftFace(s, fin)) {
+					totalFinCount += fin.getFinCount();
+					maxSpan = Math.max(maxSpan, fin.getSpan());
+					hasRoundedFin |= fin.getCrossSection() == FinSet.CrossSection.ROUNDED;
+				}
 			}
 		}
 
@@ -1264,6 +1262,18 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		double spanFactor = MathUtil.clamp(maxSpan / bodyRadius, 0.3, 1.0);
 
 		return 1.0 + baseScale * finFactor * spanFactor * machFactor;
+	}
+
+	private static boolean finTrailingEdgeNearAftFace(SymmetricComponent s, FinSet fin) {
+		// Tail fins do not need to be mathematically flush with the base to disrupt
+		// the near wake.  Use a small absolute tolerance for model-scale fixtures and
+		// a body-scale aft region for HPR tail fins/fin cans, while still excluding
+		// forward wings like AGARD-B's mid-body delta wing.
+		double xTol = Math.max(0.05, 2.5 * s.getAftRadius());
+		double sAftX = s.toAbsolute(new Coordinate(s.getLength(), 0, 0))[0].getX();
+		double finLeadX = fin.toAbsolute(new Coordinate(0, 0, 0))[0].getX();
+		double finTeX = fin.toAbsolute(new Coordinate(fin.getLength(), 0, 0))[0].getX();
+		return Math.abs(finTeX - sAftX) < xTol || (finLeadX < sAftX && finTeX >= sAftX - xTol);
 	}
 
 	private static boolean hasExpandingFinCanSleeve(SymmetricComponent s) {

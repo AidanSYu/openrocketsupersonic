@@ -1,29 +1,32 @@
 # AGARD-B Drag Coefficient Benchmark
 
-This artifact is a **secondary external benchmark** (grade A with transition-sensitivity caveats).
+This artifact is a **secondary external diagnostic benchmark** (transition-sensitivity caveats).
 The exposed-vs-gross wing-reference issue is closed, and the remaining low-Mach component error is explained by boundary-layer transition sensitivity.
 With NACA TN 3393 independently closing supersonic base drag (turbulent BL), AGARD-B is no longer the sole transonic drag-split anchor and can be presented as a complementary external benchmark.
+The production regression test gates the six manuscript rows with per-row relative-error tolerances and a transonic-rise check; it does not use the aggregate MAE values below as pass/fail criteria.
 
 ## Main Finding
 
 The current `natural_transition` assumption under-predicts low-Mach forebody drag.
-When the same geometry is rerun with an `ordinary_finish_bracket`, the low-Mach total and forebody drag move materially closer to the tunnel data, while base drag changes only modestly.
-That pattern points to **transition / skin-friction state** as the main AGARD component-error driver, with base-drag excess remaining secondary.
+When the same geometry is rerun with an `ordinary_finish_bracket`, the lowest-Mach total-drag rows and most forebody rows move closer to the tunnel data, but the aggregate total-drag error worsens because the ordinary-finish bracket over-predicts total drag elsewhere.
+That pattern points to **transition / skin-friction state** as a major AGARD component-error driver, while base-drag excess remains secondary.
 
 ## Agreement Metrics
 
 | Quantity | Natural MAE | Ordinary MAE | Natural MAPE | Ordinary MAPE |
 | --- | --- | --- | --- | --- |
-| Total drag | 0.00480 | 0.00807 | 17.5% | 29.3% |
-| Forebody drag | 0.00437 | 0.00336 | 33.1% | 26.1% |
-| Base drag | 0.00530 | 0.00530 | 35.6% | 35.6% |
+| Total drag | 0.00642 | 0.00955 | 22.6% | 34.2% |
+| Forebody drag | 0.00395 | 0.00326 | 30.9% | 25.7% |
+| Base drag | 0.00658 | 0.00658 | 43.8% | 43.8% |
+
+The Java regression subset uses Mach 0.20, 0.50, 0.80, 0.90, 0.95, and 1.00 with per-row tolerances of 50%, 50%, 50%, 55%, 60%, and 50%, respectively. On the current natural-transition CSV those six rows have MAE 0.00905 and maximum relative error 50.9%, which is inside the declared row tolerances but should be reported as a loose qualitative/trend closure rather than a precision drag benchmark.
 
 ## Surface-Condition Bracket Coverage
 
 | Quantity | Points in bracket | Coverage |
 | --- | --- | --- |
 | Total drag | 5 / 12 | 42% |
-| Forebody drag | 10 / 12 | 83% |
+| Forebody drag | 9 / 12 | 75% |
 | Base drag | 0 / 12 | 0% |
 
 ## Geometry / Reference-Area Closure
