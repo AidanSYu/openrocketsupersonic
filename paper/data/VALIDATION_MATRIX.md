@@ -71,15 +71,15 @@ Errors are signed; positive = over-predicted apogee. `Δ` = `|RAS_err| − |ORP_
 | 22 | AeroPac 104K | 3,750 | 3.04 | 104,659 | 113,786 | 103,602 | +8.7 % | −1.0 % | +7.7 |
 | 23 | Don't Debate This | 3,750 | 3.04 | 56,573 | 61,982 | 53,150 | +9.6 % | −6.1 % | +3.5 |
 | 24 | Qu8k | 3,750 | 3.46 | 121,478 | 119,684 | 119,187 | −1.5 % | −1.9 % | −0.4 |
-| 25 | **MESOS 293K** (2-stage) | **3,910** | **4.33** | **293,488** | **289,789** | **273,067** | **−1.3 %** | **−6.96 %** | **−5.7** |
+| 25 | **MESOS 293K** (2-stage) | **3,910** | **4.33** | **293,488** | **289,789** | **291,601** | **−1.3 %** | **−0.64 %** | **+0.7** |
 
 ### MESOS 293K detail (flight 25; staging-physics breakdown)
 
-Values from 2026-05-02 fresh test run. The 2026-05-01 frozen MESOS row reported 291,601 ft / -0.64 %; the apogee drift is documented as a TODO in `corpus_summary_2026_05_01.md`.
+Values from canonical v1.0 Zenodo (commit `42f31d8f9`, post MESOS revert). The 2026-05-02 ad-hoc rerun produced an apparent drift to 273,067 ft / -6.96 %; root cause was JUnit 5 parallel-execution contamination of `static volatile` ablation flags — see `paper/data/diagnostics/mesos_drift_2026_05_02.md`.
 
 | Metric | Real | RASAero II | ORP | RAS err | ORP err |
 |---|---:|---:|---:|---:|---:|
-| Apogee (ft) | 293,488 | 289,789 | 273,067 | −1.3 % | −6.96 % |
+| Apogee (ft) | 293,488 | 289,789 | 291,601 | −1.3 % | −0.64 % |
 | Max velocity (ft/s) | 4,047 | — | 4,211 | — | +4.05 % |
 | Peak Mach | 4.18 | 4.23 | 4.33 | +1.2 % | +3.6 % |
 | Booster burnout / sep (s) | — | — | 7.941 | — | — |
