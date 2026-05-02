@@ -1,0 +1,71 @@
+# Arcas sounding rocket wind-tunnel static aerodynamic coefficients - combined digitization.
+#
+# Sources:
+#   D-4013: Ferris, J. C. "Static Stability Investigation of a Single-Stage Sounding Rocket
+#           at Mach Numbers from 0.60 to 1.20." NASA TN D-4013, June 1967.
+#           Langley 8-foot transonic pressure tunnel. Re/m = 9.8e6. Stag T = 322 K.
+#           Reference area S = max body cross section; reference length d = body diameter.
+#           Moment reference center: 70 percent body length.
+#           Short body L/d = 18.20 (Arcas Robin); Long body L/d = 23.80 (bioscience payload).
+#           xCP given as PERCENT BODY LENGTH (NOT calibers); to convert to calibers use L/d.
+#           Trapezoidal double-wedge fins, fin cant 0 or 2 deg, roll angle 0/22.5/45 deg.
+#
+#   D-4014: Babb, C. D., and Fuller, D. E. "Static Stability Investigation of a Sounding-
+#           Rocket Vehicle at Mach Numbers from 1.50 to 4.63." NASA TN D-4014, June 1967.
+#           Langley Unitary Plan wind tunnel. Re/m = 9.84e6. Stag T = 339-352 K.
+#           Reference area A = max body cross section; reference length d = body diameter.
+#           Moment reference center: 63.37 pct body length (config 1, short L/d=18.20)
+#                                  : 66.36 pct body length (config 2, long  L/d=23.77)
+#           Note: D-4014 CA values are NOT corrected for base axial force (CA includes base);
+#                 CA,c (chamber axial) is reported separately in Fig 4 and is small (~0.03-0.05).
+#                 D-4013 CA,corr in Fig 11/12 IS corrected to free-stream conditions at base.
+#                 Therefore CA values across the two papers differ by approx +CA_base term.
+#                 ca0_note column flags this.
+#
+# Configuration scope: short body (L/d = 18.20, Arcas Robin), fins-on, fin cant = 0 deg,
+# roll angle phi = 0 deg, alpha approx 0 deg for force coefficients; CN_alpha and Cm_alpha
+# are slopes in the linear range alpha 0 to about 4-6 deg.
+#
+# Digitization method: visual ("eyeball") reading of plotted figures using printed grid lines.
+# Confidence:
+#   high   = data point read from a grid intersection or symbol clearly aligned with grid
+#   medium = data read between gridlines but with a clear curve trace
+#   low    = curve is steep / partially obscured / off-grid; reader judgment dominates
+#
+# Tolerances per source paper accuracy spec:
+#   D-4013: CA pm 0.004; Cm pm 0.05; CN pm 0.03; alpha pm 0.1 deg; M pm 0.003.
+#   D-4014: CA pm 0.004; Cm pm 0.05; CN pm 0.03; alpha pm 0.1 deg; M pm 0.015 (M<=2.96), pm 0.050 (M>2.96).
+#   Eyeball-digitization adds an additional reader uncertainty estimated at:
+#     CN_alpha    : pm 0.005-0.010 /deg
+#     CA0         : pm 0.02
+#     xCP         : pm 1-2 percent body length
+#     Cm_alpha    : pm 0.05 /deg
+#
+# Units / sign conventions:
+#   cn_alpha_per_deg  : dCN/d(alpha), per degree, evaluated at small alpha (linear range)
+#   ca0               : axial-force coefficient at alpha approx 0 deg
+#   xcp_pct_L         : center-of-pressure location, percent body length from nose
+#   cm_alpha_per_deg  : dCm/d(alpha), per degree, at small alpha; SIGN CONVENTION: negative = stable
+#                       (CP aft of moment ref center)
+#   body_length       : "short" (L/d=18.20) or "long" (L/d=23.77/23.80)
+#   fin_cant_deg      : fin cant angle delta_F
+#   roll_angle_deg    : fin roll angle phi
+#
+# Note on CN_alpha and Cm_alpha derivation: extracted as slope between alpha=0 and the next
+# tabulated point (typically alpha=4 deg) on the printed CN-vs-alpha and Cm-vs-alpha curves
+# for the fins-on dF=0 phi=0 trace (square symbol in D-4013 Fig 7(b)/(c); curves keyed by Mach
+# in D-4014 Fig 5(b) and Fig 5(b) middle).
+#
+mach,cn_alpha_per_deg,ca0,xcp_pct_L,cm_alpha_per_deg,body_length,fin_cant_deg,roll_angle_deg,source_paper,source_figure,source_page,confidence,ca0_note
+0.60,0.045,0.30,76.5,-0.05,short,0,0,D-4013,"Fig7(b),Fig7(c),Fig11",p20-p23-p60,medium,CA_corr_base_corrected
+0.80,0.050,0.31,75.0,-0.10,short,0,0,D-4013,"Fig7(b),Fig7(c),Fig11",p20-p23-p60,medium,CA_corr_base_corrected
+0.90,0.055,0.34,73.5,-0.15,short,0,0,D-4013,"Fig7(b),Fig7(c),Fig11",p20-p24-p60,medium,CA_corr_base_corrected
+0.95,0.060,0.42,72.5,-0.30,short,0,0,D-4013,"Fig7(b),Fig7(c),Fig11",p20-p24-p60,medium,CA_corr_base_corrected
+1.00,0.062,0.55,75.0,-0.40,short,0,0,D-4013,"Fig7(b),Fig7(c),Fig11",p20-p25-p60,medium,CA_corr_base_corrected
+1.20,0.075,0.59,86.5,-0.50,short,0,0,D-4013,"Fig7(b),Fig7(c),Fig11",p20-p25-p60,low,CA_corr_base_corrected
+1.50,0.100,0.55,78.0,-0.30,short,0,0,D-4014,"Fig5(b),Fig5(b),Fig7",p26-p27-p41,medium,CA_includes_base_axial
+1.80,0.100,0.50,75.0,-0.25,short,0,0,D-4014,"Fig5(b),Fig5(b),Fig7",p26-p27-p41,medium,CA_includes_base_axial
+2.30,0.090,0.40,70.0,-0.18,short,0,0,D-4014,"Fig5(b),Fig5(b),Fig7",p26-p27-p41,medium,CA_includes_base_axial
+2.96,0.085,0.32,64.0,-0.10,short,0,0,D-4014,"Fig5(b),Fig5(b),Fig7",p26-p27-p41,medium,CA_includes_base_axial
+3.96,0.080,0.23,60.0,-0.05,short,0,0,D-4014,"Fig5(b),Fig5(b),Fig7",p26-p27-p41,low,CA_includes_base_axial
+4.63,0.070,0.20,56.0,-0.02,short,0,0,D-4014,"Fig5(b),Fig5(b),Fig7",p26-p27-p41,low,CA_includes_base_axial
