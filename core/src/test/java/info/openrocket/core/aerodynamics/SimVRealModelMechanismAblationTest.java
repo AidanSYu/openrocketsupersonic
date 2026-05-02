@@ -151,17 +151,22 @@ public class SimVRealModelMechanismAblationTest extends BaseTestCase {
 		assertTrue(baseline.abnormalCount == 0,
 				"Baseline must have zero abnormal endings; got " + baseline.abnormalCount);
 
-		// Validation gate 2: every mutation must produce a measurable delta on at
-		// least one case. We treat |delta| > 0.05 pp as "measurable".
+		// Validation gate 2: drag-affecting mutations must produce a measurable
+		// apogee delta (>= 0.05 pp) on at least one case; stability-only
+		// mutations (e.g., NO_PNK, NO_K1_FLOOR) legitimately produce zero
+		// apogee delta because they alter CN/CP without altering CD. The
+		// stability-only effect is reported in the CSV but not asserted here
+		// because the test fixture only captures apogee, not CN/CP traces.
 		for (Mutation m : Mutation.values()) {
 			if (m == Mutation.BASELINE) continue;
+			if (!m.expectsApogeeDelta) continue;
 			double maxDeltaPp = rows.stream()
 					.filter(r -> r.mutation == m)
 					.mapToDouble(r -> Math.abs(r.deltaPp()))
 					.max().orElse(0.0);
 			assertTrue(maxDeltaPp >= 0.05,
 					String.format(Locale.US,
-							"Mutation %s produced no measurable delta (max %.4f pp). "
+							"Mutation %s (drag-affecting) produced no measurable apogee delta (max %.4f pp). "
 									+ "Toggle infrastructure may be masked or ineffective.",
 							m.id, maxDeltaPp));
 		}
@@ -380,35 +385,42 @@ public class SimVRealModelMechanismAblationTest extends BaseTestCase {
 	}
 
 	private enum Mutation {
+		// expectsApogeeDelta: true for drag-affecting mutations, false for
+		// stability-only (CN/CP) mutations that legitimately produce zero
+		// apogee delta because they don't change CD. Used by the wiring-check
+		// assertion in testWriteModelMechanismAblation to distinguish a dead
+		// toggle from a stability-only mechanism.
 		BASELINE("baseline_current", "current production model",
-				() -> { /* no-op */ }),
+				() -> { /* no-op */ }, false),
 		NO_SHOCK_GEOMETRY("no_shockgeometry",
 				"ShockGeometry pre-pass disabled",
-				() -> AblationConfig.disableShockGeometry = true),
+				() -> AblationConfig.disableShockGeometry = true, true),
 		NO_PNK("no_pnk",
 				"Pitts-Nielsen-Kaattari interference disabled (F_WB=F_BW=1)",
-				() -> AblationConfig.disablePNK = true),
+				() -> AblationConfig.disablePNK = true, false),
 		NO_VAN_DRIEST_II("no_van_driest_ii",
 				"Van Driest II skin friction disabled (incompressible Cf)",
-				() -> AblationConfig.disableVanDriestII = true),
+				() -> AblationConfig.disableVanDriestII = true, true),
 		NO_K1_FLOOR("no_k1_floor",
 				"Mach-blended K1 floor disabled (no fin CNa floor)",
-				() -> AblationConfig.disableK1Floor = true),
+				() -> AblationConfig.disableK1Floor = true, false),
 		NO_FINNED_BASE("no_finned_base_aug",
 				"Finned-body base augmentation disabled",
-				() -> AblationConfig.disableFinnedBaseCore = true),
+				() -> AblationConfig.disableFinnedBaseCore = true, true),
 		NO_DATCOM_FIN_WAVE("no_datcom_fin_wave_drag",
 				"DATCOM 4.1.5.1 fin wave drag disabled",
-				() -> AblationConfig.disableDatcomFinWaveDrag = true);
+				() -> AblationConfig.disableDatcomFinWaveDrag = true, true);
 
 		final String id;
 		final String shortDesc;
 		final Runnable applyFn;
+		final boolean expectsApogeeDelta;
 
-		Mutation(String id, String shortDesc, Runnable applyFn) {
+		Mutation(String id, String shortDesc, Runnable applyFn, boolean expectsApogeeDelta) {
 			this.id = id;
 			this.shortDesc = shortDesc;
 			this.applyFn = applyFn;
+			this.expectsApogeeDelta = expectsApogeeDelta;
 		}
 
 		void apply() {
