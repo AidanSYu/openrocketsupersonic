@@ -1,0 +1,36 @@
+time_s,cg_in_from_motor_aft,iyy_slug_ft2,phase
+# Source: AFCRL-TR-73-0412 / DTIC AD-766737, Bollermann & Walker (Space Data Corp), 30 June 1973
+# "Design, Development and Flight Test of the Super Loki Stable Booster Rocket Systems"
+# Vehicle: Stable Super Loki Robin Dart (4.0 in dia booster + 1.625 in dia non-propulsive dart)
+#
+# Table 4.1 (Mass properties endpoints, exact numerical values):
+# Robin Dart:        weight 14.15 lb, CG 26.5 in from aft end of dart, Iyy 0.475 slug-ft^2
+# Booster loaded:    weight 61.05 lb, CG 42.05 in from aft end of motor, Iyy 8.292 slug-ft^2
+# Booster expended:  weight 16.12 lb, CG 41.38 in from aft end of motor, Iyy 3.466 slug-ft^2
+# Vehicle launch:    weight 75.15 lb, CG 54.95 in from aft end of motor, Iyy 20.558 slug-ft^2
+# Vehicle burnout:   weight 30.38 lb, CG 74.04 in from aft end of motor, Iyy 11.824 slug-ft^2
+# Vehicle max accel: 153 g
+#
+# Time-resolved values below digitized from Figures 4.2 (CG vs time) and 4.3 (Iyy vs time).
+# CG units: vehicle station (inches from motor aft end), per Fig 4.2 axis label.
+# Iyy units: slug-ft^2, per Fig 4.3 axis label.
+# Phase: PROP = propulsive flight (0-2.09 s nominal action time);
+#        SEP  = separation (~2.1 s); DART = post-separation dart-only.
+# Booster motor action time = 2.09 s (Table 3.3); separation occurs near burnout.
+# Estimated digitization tolerance: +/-0.5 in on CG, +/-0.5 slug-ft^2 on Iyy.
+0.00,55.0,20.5,PROP
+0.25,57.0,20.2,PROP
+0.50,59.5,19.5,PROP
+0.75,62.5,18.0,PROP
+1.00,65.5,16.5,PROP
+1.25,69.0,15.0,PROP
+1.50,71.5,13.5,PROP
+1.75,73.0,12.5,PROP
+2.00,74.0,12.0,PROP
+2.10,74.0,11.8,SEP
+# Post-separation: dart only (Iyy ~ 0.475 slug-ft^2; CG ~26.5 in from aft of dart, but dart
+# station referenced differently from booster - Fig 4.2 shows DART line stepped to ~24 in,
+# Fig 4.3 shows dart Iyy stepped to ~0.5 slug-ft^2 after separation)
+2.20,24.0,0.475,DART
+3.00,24.0,0.475,DART
+5.00,24.0,0.475,DART
