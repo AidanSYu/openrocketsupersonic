@@ -1,0 +1,26 @@
+flight_id,vehicle_name,motor,peak_mach,real_apogee_ft,rasaero_apogee_ft,orp_apogee_ft,err_rasaero_pct,err_thiswork_pct,source
+1,Thunder & Lightning,I284W (AT),0.54,3577,3989,3877,11.52,8.39,Rogers RASAero II set
+2,Gibb,I284W (AT),0.55,3913,4205,3989,7.46,1.94,Rogers RASAero II set
+3,Cancer Descending,M1297W (AT),0.56,6188,6328,6044,2.26,-2.33,Rogers RASAero II set
+4,EZI-65 J450ST,J450ST (AMW),0.60,3965,4214,4158,6.28,4.87,Rogers RASAero II set
+5,Caliber Isp 04 AVTC Team 2,I205 (CTI),0.64,3710,3876,3890,4.47,4.85,Rogers RASAero II set
+6,Caliber Isp 04 AVTC Team 3,I205 (CTI),0.64,3964,3876,3889,-2.22,-1.89,Rogers RASAero II set
+7,Caliber Isp 04 AVTC Team 1,I205 (CTI),0.66,3837,3948,3960,2.89,3.21,Rogers RASAero II set
+8,Byrum,J570W (AT),0.75,5732,5281,6161,-7.87,7.48,Rogers RASAero II set
+9,Ion Drive,K550W (AT),0.79,8027,8642,7730,7.66,-3.70,Rogers RASAero II set
+10,Caliber Isp 05 ARO-414 (Discovery),I285 (CTI),0.81,4930,4836,4772,-1.91,-3.20,Rogers RASAero II set
+11,Blister,K1075GG (AMW),0.83,9026,8301,8268,-8.03,-8.40,Rogers RASAero II set
+12,Caliber Isp 05 ARO-414 (Columbia),I285 (CTI),0.84,5085,4847,4777,-4.68,-6.06,Rogers RASAero II set
+13,Rabia - Short Fin Can,L730 (CTI),0.86,10584,10225,9916,-3.39,-6.31,Rogers RASAero II set
+14,Raven,J570W (AT),1.07,8815,9332,9489,5.87,7.65,Rogers RASAero II set
+15,Rabia,L1080BB (AMW),1.14,12745,12197,11913,-4.30,-6.53,Rogers RASAero II set
+16,Torrent,M1850GG (AMW),1.22,12807,13717,12455,7.11,-2.75,Rogers RASAero II set
+17,Kline-Rogers L500,L500 (Ace),1.98,24771,26509,24179,7.02,-2.39,Rogers RASAero II set
+18,A-601 Kinsel,P4935,2.19,42771,41098,46499,-3.91,8.72,Rogers RASAero II set
+19,Full Metal Jacket - BALLS 005,O10000 (Kosdon),2.31,37981,38772,37256,2.08,-1.91,Rogers RASAero II set
+20,Full Metal Jacket - Black Rock 6,O10000 (Kosdon),2.46,30038,32548,29239,8.36,-2.66,Rogers RASAero II set
+21,Proteus 6,P9381 (Loki-EX),2.87,85067,81499,91339,-4.19,7.37,Rogers RASAero II set
+22,AeroPac 104K Two-Stage,N1048 / M685W (AT),3.04,104659,113786,103602,8.72,-1.01,Rogers RASAero II set
+23,Don't Debate This,N5800 (CTI),3.04,56573,61982,53150,9.56,-6.05,Rogers RASAero II set
+24,Qu8k,Qu8k,3.46,121478,119684,119187,-1.48,-1.89,Rogers RASAero II set
+25,MESOS 293K,O4374 / M787 (KIP-EX),4.33,293488,289789,273094,-1.26,-6.95,"SimVReal MESOS (2-stage, custom KIP motors)"

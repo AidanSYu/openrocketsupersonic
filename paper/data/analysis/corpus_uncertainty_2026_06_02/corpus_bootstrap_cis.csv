@@ -1,0 +1,7 @@
+statistic,n,point,ci_lo,ci_hi
+ORP mean signed error (%),25,-0.382,-2.407,1.724
+ORP std dev (%),25,5.435,4.196,6.249
+ORP RMSE (%),25,5.339,4.375,6.189
+ORP MAE (%),25,4.74,3.777,5.704
+ORP within +/-5% (%),25,56.0,36.0,76.0
+ORP within +/-10% (%),25,100.0,100.0,100.0
