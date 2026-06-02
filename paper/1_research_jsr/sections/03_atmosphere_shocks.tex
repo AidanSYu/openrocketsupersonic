@@ -1,0 +1,325 @@
+% !TeX root = ../jsr_paper.tex
+% Section 3: Atmosphere, Compressibility, and Shock Relations
+% Fragment \input inside an existing \section in jsr_paper.tex.
+
+The models of the following sections inherit a common thermodynamic and
+compressible-flow infrastructure: the atmospheric profile, the temperature
+dependence of viscosity and the ratio of specific heats, the compressibility
+factor through the sonic line, and the closed-form shock and expansion
+relations. Every quantity in this section was verified against an analytical or
+authoritative tabulated reference before any downstream model was activated.
+
+\subsection{Speed of Sound and U.S. Standard Atmosphere}
+
+The thermodynamic speed of sound for dry air is
+%
+\begin{equation}
+a = \sqrt{\gamma R T}, \qquad R = \SI{287.053}{J/(kg.K)},
+\label{eq:speed_of_sound}
+\end{equation}
+%
+evaluated at the local static temperature. The original linear fit
+$a = 331.3 + 0.606\,(T - 273.15)$ errs by approximately \SI{0.6}{\percent} at
+tropopause temperatures. The revised implementation evaluates
+Eq.~\eqref{eq:speed_of_sound} directly with $\gamma = 1.4$ in the freestream and
+an effective $\gamma$ (Sec.~\ref{subsec:gamma_eff}) above the vibrational
+threshold. Verification against the U.S.\ Standard Atmosphere
+1976~\cite{nasa1976ussa} over twenty altitudes from sea level to \SI{80}{km}
+gave a maximum error of \SI{0.016}{\percent} (Fig.~\ref{fig:ussa_a}).
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{us_standard_atmosphere_speed_of_sound}
+  \caption{Speed of sound from the analytical relation
+    $a=\sqrt{\gamma R T}$ versus the tabulated U.S.\ Standard Atmosphere 1976
+    profile over twenty altitudes from sea level to \SI{80}{km}; maximum error
+    \SI{0.016}{\percent}.}
+  \label{fig:ussa_a}
+\end{figure}
+
+\subsection{Sutherland Viscosity}
+
+Dynamic viscosity follows Sutherland's law
+%
+\begin{equation}
+\mu(T) = \mu_{\mathrm{ref}}
+  \left(\frac{T}{T_{\mathrm{ref}}}\right)^{3/2}
+  \frac{T_{\mathrm{ref}} + S}{T + S},
+\label{eq:sutherland}
+\end{equation}
+%
+with $\mu_{\mathrm{ref}} = \SI{1.716e-5}{Pa.s}$,
+$T_{\mathrm{ref}} = \SI{273.15}{K}$, and $S = \SI{110.4}{K}$. The legacy linear
+fit produced viscosity errors exceeding \SI{50}{\percent} at post-shock wall
+temperatures, contaminating the skin-friction model. Equation~\eqref{eq:sutherland}
+was verified against the standard reference air-property tables~\cite{incropera2007}
+over \SIrange{150}{500}{K} with a mean absolute percent error (MAPE) of
+\SI{0.54}{\percent} and no systematic bias (Fig.~\ref{fig:sutherland}). The
+viscosity ratio implied by Eq.~\eqref{eq:sutherland} also supplies the
+$F_\theta$ factor of the Van~Driest~II compressibility transformation
+(Sec.~\ref{subsec:vandriest}).
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{sutherland_viscosity_air}
+  \caption{Sutherland viscosity, Eq.~\eqref{eq:sutherland}, versus reference
+    air-property tables over \SIrange{150}{500}{K}; MAPE \SI{0.54}{\percent}
+    with no systematic bias.}
+  \label{fig:sutherland}
+\end{figure}
+
+\subsection{Effective Ratio of Specific Heats}
+\label{subsec:gamma_eff}
+
+Above stagnation temperatures of approximately \SI{800}{K}, vibrational
+excitation of $\mathrm{N_2}$ and $\mathrm{O_2}$ depresses the effective ratio of specific
+heats. A piecewise model interpolates between thermally perfect, vibrationally
+relaxed, and partially dissociated regimes:
+%
+\begin{equation}
+\gamma_{\mathrm{eff}}(T_0) =
+\begin{cases}
+1.400, & T_0 \leq 800~\mathrm{K},\\[2pt]
+1.400 - 7.5\times10^{-5}\,(T_0 - 800), & 800 < T_0 \leq 2000~\mathrm{K},\\[2pt]
+1.310 - 2.5\times10^{-5}\,(T_0 - 2000), & 2000 < T_0 \leq 4000~\mathrm{K},\\[2pt]
+1.250, & T_0 > 4000~\mathrm{K}.
+\end{cases}
+\label{eq:gamma_eff}
+\end{equation}
+%
+The break points correspond to vibrational-equilibrium onset (\SI{800}{K}),
+substantial vibrational excitation (\SI{2000}{K}), and incipient dissociation
+(\SI{4000}{K})~\cite{anderson2006}. The model is $C^0$-continuous; the slope
+jumps fall well below the sensitivity floor of the downstream calculators.
+Real-gas dissociation chemistry is out of scope for vehicles whose flight time
+above $T_0 = \SI{4000}{K}$ is negligible.
+
+\subsection{Smooth Compressibility Factor Through Mach One}
+\label{subsec:beta}
+
+The Prandtl--Glauert/Ackeret compressibility factor
+%
+\begin{equation}
+\beta(M) = \sqrt{\left|1 - M^2\right|}
+\label{eq:beta}
+\end{equation}
+%
+appears in nearly every supersonic coefficient closed form. The legacy hard
+clamp $\beta_{\min} = 0.25$ produced a flat plateau from $M \approx 0.97$ to
+$1.03$ and was physically incorrect on both sides of the sonic line. The revised
+implementation embeds a cubic Hermite spline through the band
+$M \in [0.95, 1.05]$:
+%
+\begin{equation}
+\beta(M) =
+\begin{cases}
+\sqrt{1 - M^2}, & M < 0.95,\\[2pt]
+H_3\!\left(M;\,M_L, M_H, \beta_L, \beta_H, \beta'_L, \beta'_H\right),
+  & 0.95 \leq M \leq 1.05,\\[2pt]
+\sqrt{M^2 - 1}, & M > 1.05,
+\end{cases}
+\label{eq:beta_blend}
+\end{equation}
+%
+where $H_3$ is the cubic Hermite polynomial with endpoint values and slopes
+taken from the analytical expressions at $M_L = 0.95$ and $M_H = 1.05$. The
+spline is $C^1$ continuous, strictly positive (minimum $0.28$ near $M = 1$), and
+asymptotes correctly to $\sqrt{M^2 - 1}$ above $M = 1.05$. The blending region
+is one of thirteen documented in Table~\ref{tab:mach_blending}; every regime
+transition in the present work obeys the same $C^1$ discipline because
+fourth-order Runge--Kutta integration is intolerant of jumps in $C_D$,
+$C_{N_\alpha}$, or $C_{m_q}$.
+
+\subsection{Normal, Oblique, and Prandtl--Meyer Relations}
+
+Normal-shock jump conditions in a calorically perfect gas are
+%
+\begin{equation}
+\frac{p_2}{p_1} = 1 + \frac{2\gamma}{\gamma + 1}\left(M_1^2 - 1\right),
+\qquad
+M_2^2 = \frac{M_1^2 + 2/(\gamma - 1)}
+            {2\gamma M_1^2/(\gamma - 1) - 1}.
+\label{eq:normal_shock}
+\end{equation}
+%
+The stagnation-pressure ratio implied by Eq.~\eqref{eq:normal_shock} yields the
+Rayleigh pitot formula used downstream for Modified Newtonian theory:
+%
+\begin{equation}
+\frac{p_{02}}{p_{01}} =
+  \left[\frac{(\gamma+1)M_1^2}{(\gamma-1)M_1^2 + 2}\right]^{\gamma/(\gamma-1)}
+  \left[\frac{2\gamma M_1^2 - (\gamma - 1)}{\gamma + 1}\right]^{-1/(\gamma-1)}.
+\label{eq:rayleigh_pitot}
+\end{equation}
+%
+The oblique-shock solver solves the $\theta$--$\beta$--$M$ relation
+%
+\begin{equation}
+\tan\theta = 2\cot\beta\;
+  \frac{M_1^2 \sin^2\beta - 1}{M_1^2(\gamma + \cos 2\beta) + 2}
+\label{eq:theta_beta_m}
+\end{equation}
+%
+by bisection on the shock angle $\beta$ between the Mach angle
+$\sin^{-1}(1/M_1)$ and \SI{90}{\degree}. For conical noses the Taylor--Maccoll
+equations~\cite{taylormaccoll1933}
+%
+\begin{equation}
+\frac{dV_r}{d\phi} = V_\phi, \qquad
+\frac{dV_\phi}{d\phi} =
+  \frac{V_\phi^2 V_r - \tfrac{\gamma - 1}{2}
+        \left(1 - V_r^2 - V_\phi^2\right)\left(2V_r + V_\phi\cot\phi\right)}
+       {\tfrac{\gamma - 1}{2}\left(1 - V_r^2 - V_\phi^2\right) - V_\phi^2}
+\label{eq:taylor_maccoll}
+\end{equation}
+%
+are integrated by fourth-order Runge--Kutta with $500$ steps, iterating on the
+shock angle until the radial velocity at the cone surface vanishes. The
+Prandtl--Meyer function
+%
+\begin{equation}
+\nu(M) = \sqrt{\frac{\gamma + 1}{\gamma - 1}}\,
+  \arctan\!\sqrt{\frac{\gamma - 1}{\gamma + 1}\left(M^2 - 1\right)}
+  - \arctan\!\sqrt{M^2 - 1}
+\label{eq:prandtl_meyer}
+\end{equation}
+%
+is solved for the downstream Mach after a turning angle $\Delta\theta$ by
+Newton--Raphson with an analytic derivative. All iterative loops converge to a
+$10^{-12}$ relative tolerance.
+
+\subsection{Van~Driest~II Compressibility Transformation}
+\label{subsec:vandriest}
+
+The compressible turbulent skin-friction model used by the drag calculator of
+the following section maps an incompressible flat-plate friction coefficient to
+the compressible value through the Van~Driest~II transformation of Hopkins and
+Inouye~\cite{hopkins1971}. Defining
+%
+\begin{equation}
+m = \frac{\gamma - 1}{2}\,M_e^2, \qquad
+F = \frac{T_w}{T_e}, \qquad
+r = 0.88,
+\label{eq:vd2_defs}
+\end{equation}
+%
+where $M_e$ is the boundary-layer edge Mach number, $T_w/T_e$ is the
+wall-to-edge static-temperature ratio, and $r$ is the turbulent recovery
+factor, the transformation introduces the auxiliary quantities
+%
+\begin{equation}
+A = \sqrt{\frac{r\,m}{F}}, \qquad
+B = \frac{1 + r\,m - F}{F},
+\label{eq:vd2_AB}
+\end{equation}
+%
+and the compressibility factor
+%
+\begin{equation}
+F_c = \frac{r\,m}{\left(\arcsin\alpha + \arcsin\beta\right)^2}, \qquad
+\alpha = \frac{2A^2 - B}{\sqrt{4A^2 + B^2}}, \qquad
+\beta  = \frac{B}{\sqrt{4A^2 + B^2}}.
+\label{eq:vd2_fc}
+\end{equation}
+%
+The numerator $r\,m = T_{\mathrm{aw}}/T_e - 1$ is the recovery-temperature ratio
+deficit; for an adiabatic wall, $T_w/T_e = 1 + r\,m$, so that $B = 0$. The
+temperature-ratio factor $F_\theta$ is formed from the Sutherland viscosity
+ratio of Eq.~\eqref{eq:sutherland}, the Reynolds-number factor is
+$F_x = F_\theta/F_c$, and the compressible friction coefficient is
+$C_f = C_{f,\mathrm{inc}}/F_c$.
+
+\subsection{Verification Against NACA Report 1135}
+
+Each shock building block was verified against the tabulated values in NACA
+Report 1135~\cite{naca1135}. The normal-shock pressure ratio
+(Fig.~\ref{fig:normal_shock}), oblique-shock angle
+(Fig.~\ref{fig:oblique_shock}), Prandtl--Meyer function
+(Fig.~\ref{fig:prandtl_meyer}), and Rayleigh pitot $C_{p,\max}$
+(Fig.~\ref{fig:rayleigh_pitot}) reproduced the reference tables to better than
+\SI{0.1}{\percent} across $M = 1.5$--$10$ and \SIrange{5}{40}{\degree} cone
+half-angles. Component checks gave a maximum error of \SI{0.016}{\percent} for
+the speed of sound, \SI{0.021}{\percent} for the oblique-shock angle, and
+\SI{0.004}{\degree} for the Prandtl--Meyer function. The Taylor--Maccoll
+cone-shock-angle solver achieved a maximum error of \SI{0.825}{\percent} (gate
+\SI{1}{\percent}) on the reference cases~\cite{anderson2006}; the surface
+pressure coefficient itself matched the exact analytical result to less than
+\SI{0.01}{\percent}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{naca1135_normal_shock}
+  \caption{Normal-shock pressure ratio $p_2/p_1$, Eq.~\eqref{eq:normal_shock},
+    versus NACA Report 1135 over $M = 1.5$--$10$.}
+  \label{fig:normal_shock}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{naca1135_oblique_shock_beta}
+  \caption{Oblique-shock angle $\beta(\theta)$ from the
+    $\theta$--$\beta$--$M$ relation, Eq.~\eqref{eq:theta_beta_m}, versus NACA
+    Report 1135 at $M = 2.0$, $3.0$, and $5.0$.}
+  \label{fig:oblique_shock}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{naca1135_prandtl_meyer_nu}
+  \caption{Prandtl--Meyer function $\nu(M)$, Eq.~\eqref{eq:prandtl_meyer},
+    versus NACA Report 1135 Table III.}
+  \label{fig:prandtl_meyer}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{rayleigh_pitot_cpmax}
+  \caption{Rayleigh pitot $C_{p,\max}$, Eq.~\eqref{eq:rayleigh_pitot}, versus
+    NACA Report 1135 at fifteen Mach points, $M = 1$--$10$.}
+  \label{fig:rayleigh_pitot}
+\end{figure}
+
+\begin{table*}[t]
+  \centering
+  \caption{Mach blending regions used in the present work; all transitions are
+    $C^1$ continuous to maintain Runge--Kutta trajectory stability.}
+  \label{tab:mach_blending}
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    Physical quantity & Mach band & Method & Reference \\
+    \midrule
+    Compressibility factor $\beta$
+      & $0.95$--$1.05$ & Cubic Hermite, value $+$ slope matched
+      & Sec.~\ref{subsec:beta} \\
+    Skin friction $C_f$ (incompressible $\to$ Van~Driest~II)
+      & $0.9$--$1.1$ & Polynomial interpolation
+      & Sec.~\ref{subsec:vandriest} \\
+    Base drag (transonic peak)
+      & $0.85$--$1.3$ & Degree-4 polynomial anchored to peak & Drag models \\
+    Chapman--Korst turbulent base drag
+      & $1.2$--$1.4$ & Smoothstep blend from supersonic correlation
+      & Drag models \\
+    Chapman laminar base drag
+      & $1.3$--$2.5$ & Smoothstep blend from supersonic correlation
+      & Drag models \\
+    Fin wave drag onset (zero $\to$ DATCOM~4.1.5.1)
+      & $0.9$--$1.2$ & Cubic Hermite & Drag models \\
+    Fin $C_{N_\alpha}$ ($K_1/K_2/K_3$)
+      & $0.9$--$1.5$ & Polynomial blend & Stability models \\
+    Transonic similarity (ESDU)
+      & $0.9$--$1.5$ & Universal $h(K_{\mathrm{trans}})$ blend
+      & Stability models \\
+    PNK fin--body interference
+      & $0.85$--$1.15$ & Smoothstep from $F=1$ & Stability models \\
+    Nose wave drag (tables $\to$ analytical)
+      & $1.3$--$1.5$ & Smoothstep & Drag models \\
+    Body $C_{N_\alpha}$/CP supersonic shift
+      & $0.8$--$1.3$ & Smoothstep from Barrowman & Stability models \\
+    Modified Newtonian hypersonic blend
+      & $4.0$--$6.0$ & Smoothstep & Drag models \\
+    ShockGeometry activation
+      & $1.0$--$1.1$ & Smoothstep toward freestream
+      & Sec.~\ref{subsec:beta} \\
+    \bottomrule
+  \end{tabular}
+\end{table*}

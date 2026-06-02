@@ -1,0 +1,251 @@
+% Section 5: Stability and Dynamic Stability Models
+% Parent declares \section{Stability and Dynamic Stability Models}; this is the body fragment.
+
+The static and dynamic stability calculators consume the same
+post-shock local-flow conditions produced by the shock-geometry
+pre-pass as the drag model of the preceding section. Each submodel is
+summarized below with its regime of applicability, its departure from
+the legacy Barrowman formulation, and the published benchmark against
+which it is validated. The static-stability chain (Secs.~\ref{subsec:bodycp}--\ref{subsec:esdu})
+is externally validated against wind-tunnel data; the dynamic-stability
+derivatives (Secs.~\ref{subsec:cmq}--\ref{subsec:magnus}) are reported
+honestly as conservative engineering estimates with explicit disclosure
+of the closure adjustments they carry.
+
+\subsection{Body Normal Force and Center of Pressure}
+\label{subsec:bodycp}
+
+Subsonic body normal-force slope follows the Barrowman slender-body
+result $C_{N_\alpha,\,\mathrm{body}} = 2$. At supersonic speeds an
+Allen--Perkins crossflow term~\cite{allenperkins1951} augments the
+slender-body baseline,
+%
+\begin{equation}
+C_{N_\alpha,\,\mathrm{body}}(M,\alpha) = 2
+  + K_{\mathrm{cf}}(M)\,C_{d,c}(M_c)\,
+    \frac{A_{\mathrm{plan}}}{A_{\mathrm{ref}}}\,
+    \frac{2\sin\alpha}{\pi},
+\label{eq:body_cna}
+\end{equation}
+%
+where $K_{\mathrm{cf}}$ is a crossflow multiplier that blends from the
+subsonic Galejs value to $1.1$--$1.3$ supersonically, $C_{d,c}(M_c)$ is
+the Jorgensen crossflow drag coefficient~\cite{jorgensen1977} evaluated
+at the crossflow Mach $M_c = M\,\lvert\sin\alpha\rvert$, and
+$A_{\mathrm{plan}}/A_{\mathrm{ref}}$ is the ratio of planform to
+reference area. The asymptotic crossflow value $C_{d,c} = 1.20$
+tabulated in NASA TR R-474~\cite{jorgensen1977} is reproduced exactly.
+The body center of pressure migrates aft through the transonic band as
+the lift distribution transitions from the subsonic potential-flow
+pattern to the supersonic slender-body distribution; this shift is
+parametrized as a Mach-dependent fraction of body length over
+$M = 0.8$--$1.3$.
+
+\subsection{Fin Normal Force with Local Flow}
+\label{subsec:fincna}
+
+The fin normal-force model retains the Barrowman three-coefficient
+decomposition $C_{N_\alpha} = K_1 + K_2\alpha + K_3\alpha^2$ but
+evaluates each coefficient at the \emph{local} post-shock Mach $M_s$
+returned by the pre-pass rather than at freestream $M_\infty$. Because
+the Prandtl--Glauert factor $\beta = \sqrt{M^2-1}$ is strongly
+nonlinear near unity, a $14\%$ reduction in Mach at the fin station ---
+representative of a $15^\circ$ cone at $M_\infty = 2.5$ --- translates
+into roughly an $18\%$ change in $K_1 = 2/\beta$, so the use of local
+flow is the dominant correction in this regime. A Mach-dependent floor
+prevents $K_1$ from collapsing to numerical noise at high Mach:
+%
+\begin{equation}
+K_{1,\,\mathrm{floor}}(M) = 0.85
+  - 0.45\!\left[1 - \exp\!\bigl(-K_{\mathrm{decay}}(M-1)\bigr)\right],
+  \qquad K_{\mathrm{decay}} = 1.480.
+\label{eq:k1_floor}
+\end{equation}
+%
+The decay constant was calibrated against the NASA TM X-653 wind-tunnel
+database~\cite{nielsen1962} of finned-body normal-force slope and
+center-of-pressure measurements. Across $M = 0.6$--$5.82$ the calibrated
+model reproduced the measured $C_{N_\alpha}$ with a mean absolute
+percentage error (MAPE) of $6.84\%$ and the center-of-pressure location
+$x_{CP}/d$ with a MAPE of $7.11\%$ over ten test points each
+(Fig.~\ref{fig:x653}). The larger residual on $x_{CP}$ is concentrated
+in the transonic band $M = 0.9$--$1.2$, where small absolute pressure
+shifts produce large percentage errors in the lever arm.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{nasa_tm_x653_stability}
+  \caption{Static stability against the NASA TM X-653 wind-tunnel
+    database~\cite{nielsen1962}, $M = 0.6$--$5.82$: finned-body
+    normal-force slope $C_{N_\alpha}$ and center-of-pressure location
+    $x_{CP}/d$. The local-flow model achieves $C_{N_\alpha}$ MAPE
+    $6.84\%$ and $x_{CP}/d$ MAPE $7.11\%$ over ten test points each, with
+    the largest residual confined to the transonic band.}
+  \label{fig:x653}
+\end{figure}
+
+\subsection{Pitts--Nielsen--Kaattari Interference}
+\label{subsec:pnk}
+
+Fin--body and body--fin lift interference are handled by the
+Pitts--Nielsen--Kaattari (PNK) factors~\cite{pitts1957} $K_{WB}$ and
+$K_{BW}$, generalized here to Mach-dependent form,
+%
+\begin{equation}
+C_{N_\alpha,\,\mathrm{vehicle}} =
+  K_{WB}(M_s)\,C_{N_\alpha,\,\mathrm{fin}}^{\mathrm{alone}}
+  + K_{BW}(M_s)\,C_{N_\alpha,\,\mathrm{body}},
+\label{eq:pnk}
+\end{equation}
+%
+with both factors evaluated at the local post-shock Mach $M_s$. A
+smoothstep blend over $M = 0.85$--$1.15$ activates the Mach-dependent
+correction from the subsonic limit $K = 1.0$. At $M = 2$--$3$ the
+corrections are typically $5$--$20\%$ of the freestream-evaluated
+baseline. The interference treatment includes a floor on $K_{WB}$ to
+preserve a physically admissible fin contribution at high Mach; the
+mechanism ablation reported in the following section shows that this
+floor has no measurable effect on integrated apogee on the validation corpus,
+consistent with its role as a local-loads correction rather than a
+trajectory driver.
+
+\subsection{ESDU Transonic Similarity}
+\label{subsec:esdu}
+
+The near-sonic peak in fin $C_{N_\alpha}$, where conventional thin-wing
+theory breaks down, is captured by a transonic similarity rule. The fin
+normal-force coefficient in the transonic band is mapped onto a universal
+function $h(K_{\mathrm{trans}})$ of the transonic similarity parameter
+%
+\begin{equation}
+K_{\mathrm{trans}} = \frac{M^2 - 1}{[\tau\,\mathrm{AR}]^{2/3}},
+  \qquad \tau = t/c,
+\label{eq:ktrans}
+\end{equation}
+%
+where $\mathrm{AR}$ is the fin aspect ratio and $\tau$ the
+thickness-to-chord ratio. The universal curve is active for
+$K_{\mathrm{trans}} \in [-2,+3]$ and is blended with the conventional
+$K_1/K_2/K_3$ formulation outside that band, restoring continuity with
+the supersonic local-flow model of Sec.~\ref{subsec:fincna}.
+
+\subsection{Pitch Damping ($C_{m_q}$)}
+\label{subsec:cmq}
+
+The pitch-damping derivative is computed by classical strip theory,
+summing the contributions of each aerodynamic component~\cite{tobak1956},
+%
+\begin{equation}
+C_{m_q} = -2 \sum_{i=1}^{n_{\mathrm{comp}}}
+  C_{N_{\alpha,i}}\,
+  \frac{(x_{CP,i} - x_{CG})^2}{L_{\mathrm{ref}}^2},
+\label{eq:cmq}
+\end{equation}
+%
+with the secondary $C_{m_{\dot\alpha}}$ derivative set to
+$0.4\,C_{m_q}$ following the Tobak--Wehrend slender-body theoretical
+ratio. A transonic Gaussian augmentation represents the unsteady
+shock-oscillation amplification of the damping near $M = 1$:
+%
+\begin{equation}
+k_{\mathrm{transonic}}(M) = 1
+  + 2.5\,\exp\!\left[-\left(\frac{M-1}{0.15}\right)^{2}\right],
+  \qquad k(1.0) = 3.5,
+\label{eq:cmq_transonic}
+\end{equation}
+%
+which decays to unity within $\pm 0.3$ Mach of the transonic center
+(Fig.~\ref{fig:cmq_transonic}).
+
+Two limitations of this derivative must be stated plainly. First, strip
+theory systematically overpredicts the $C_{m_q}$ magnitude of an
+isolated axisymmetric body --- by roughly a factor of five to ten
+relative to the exact slender-body theory of Tobak and Wehrend
+(NACA TN 3788)~\cite{tobak1956} (Fig.~\ref{fig:cmq_tobak}). The sign is
+correct and the resulting damping is conservative (over-damped, and
+therefore trajectory-safe), but the magnitude is not a quantitative
+result. Second, to close the trajectory on the validation corpus the
+production code applies a $3\times$ multiplier on $C_{m_q}$. This
+multiplier is disclosed here as a \emph{B-level} adjustment: it has no
+independent wind-tunnel anchor, and recent computational
+determinations of dynamic-stability derivatives indicate that an
+augmentation of this size overshoots the physical transonic damping
+peak by roughly $110$--$160\%$~\cite{sznajder2025}. The transonic
+Gaussian factor of Eq.~\eqref{eq:cmq_transonic} is correspondingly only
+a qualitative match to free-oscillation behavior and is not claimed as a
+validated quantity. Both the multiplier and the Gaussian augmentation
+are expected to be replaced once modal $C_{m_q}$ identification data for
+slender finned configurations become available.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{tobak_cmq_comparison}
+  \caption{Strip-theory pitch-damping derivative $C_{m_q}$ compared with
+    the exact slender-body theory of Tobak and Wehrend, NACA TN
+    3788~\cite{tobak1956}. The sign is correct and the damping is
+    conservative, but strip theory overpredicts the magnitude for an
+    isolated axisymmetric body by a factor of five to ten; the
+    derivative is therefore reported as a conservative engineering
+    estimate rather than a quantitative result.}
+  \label{fig:cmq_tobak}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{transonic_cmq_augmentation}
+  \caption{Transonic Gaussian augmentation $k_{\mathrm{transonic}}(M)$
+    of the pitch-damping derivative, Eq.~\eqref{eq:cmq_transonic},
+    peaking at $3.5\times$ at $M = 1$ and decaying to unity within
+    $\pm 0.3$ Mach. The augmentation is a B-level adjustment with no
+    independent wind-tunnel anchor; the size of the closure correction
+    overshoots the physical transonic damping peak by an estimated
+    $110$--$160\%$~\cite{sznajder2025}.}
+  \label{fig:cmq_transonic}
+\end{figure}
+
+\subsection{Magnus, Vortex Sideforce, and Roll Damping}
+\label{subsec:magnus}
+
+For a spinning rocket at angle of attack the Magnus side-force
+derivative is modeled as a fixed fraction of the body normal-force
+slope~\cite{platou1965},
+%
+\begin{equation}
+C_{y,\,p\alpha} = -\tfrac{2}{3}\,C_{N_\alpha,\,\mathrm{body}},
+\label{eq:magnus}
+\end{equation}
+%
+with the corresponding Magnus yawing-moment derivative
+$C_{n,\,p\alpha} = C_{y,\,p\alpha}\,(x_{CP} - x_{CG})/L_{\mathrm{ref}}$.
+At angles of attack above approximately $20^\circ$ the asymmetric body
+vortex system generates a side force that is independent of roll angle.
+The present work models this contribution with a vortex-strength
+coefficient $K_v = 0.20$ and a ramp activation from $\alpha = 20^\circ$
+to $30^\circ$. We emphasize that $K_v = 0.20$ is an
+\emph{internally calibrated} coefficient adopted for range-checking the
+high-incidence side force; it is not anchored to an external benchmark,
+and no literature value is claimed for it. Roll damping is computed
+analytically from the integrated fin chordwise pressure distribution
+under uniform roll rate, with corrections for fin--body interference
+applied through the PNK factors of Sec.~\ref{subsec:pnk}.
+
+\subsection{Shock--Boundary-Layer Interaction at Fin Roots}
+\label{subsec:sbli}
+
+At $M > 1.2$ the fin leading-edge shock can separate the body boundary
+layer ahead of the fin, reducing the effective aerodynamic chord. The
+free-interaction theory of Chapman, Kuehn, and
+Larson~\cite{chapman1958} gives the separation-length scaling
+%
+\begin{equation}
+\frac{L_{\mathrm{sep}}}{\delta} \propto (M^2 - 1)^{-1/4},
+\label{eq:sbli}
+\end{equation}
+%
+clamped from below by $M^2 - 1 \geq 0.1$ to prevent divergence near the
+sonic line, where $\delta$ is the local boundary-layer thickness. The
+separation length is subtracted from the fin streamwise root chord when
+computing $K_1/K_2/K_3$. The associated pressure-drag contribution from
+the separated region was found to overestimate measured drag in the
+present finned-body fixtures and is disabled in production pending a
+re-derivation against higher-fidelity separated-flow data.

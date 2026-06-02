@@ -1,0 +1,133 @@
+% =====================================================================
+% Section 9 body fragment: Exploratory High-Mach Sounding-Rocket Results
+% Parent jsr_paper.tex declares the \section; this file is \input inside it.
+% Numbers: rocket-flight-database/sounding_rockets_exploratory.csv (full set),
+% framing per _DRAFTING_BRIEF.md sec. 0 (report all, no cherry-pick).
+% =====================================================================
+
+The 25-flight headline corpus of Sec.~8 is bounded above by Mach~4.33, so it
+contains no hypersonic flights. To probe whether the pre-pass and its downstream
+supersonic models continue to function beyond that ceiling, we assembled a
+separate set of roughly twenty historical sounding-rocket flights with
+documented apogees, several of which peak between Mach~5 and Mach~7. This set is
+\emph{not} part of the validation corpus and is reported here only as an
+exploratory probe of method reach. We state at the outset that these flights are
+\emph{excluded from every headline statistic}: presenting only the three that
+happen to fall within $\pm10\%$ would constitute outcome-based selection bias,
+the single most serious threat to the credibility of the result. We therefore
+report the full set---successes and failures alike---in Table~\ref{tab:exploratory}.
+
+\subsection{Full Exploratory Set}
+
+Of the historical flights simulated, three fall within $\pm10\%$ of the measured
+apogee. The Black Brant~V~VB (AAF-VB-32, Churchill Research Range, 3~March~1971;
+\cite{dtic_ad0733141}) reaches a peak Mach number of $7.22$ and is predicted to
+within $-6.97\%$ of its $273.6\,\mathrm{km}$ measured apogee. The two
+Nike--Deacon (DAN) meteorological flights of \cite{heitkotter1956}, peaking at
+Mach~$4.96$ and Mach~$5.08$, are predicted to $-1.06\%$ and $-0.89\%$
+respectively. These three results establish that the integrated method
+\emph{reaches} Mach~7 and returns apogee predictions within about $7\%$
+\emph{when the vehicle is well characterized}---that is, when an experimentally
+documented thrust history and a complete external geometry are available, as they
+are for these flights.
+
+The remaining flights fall well outside $\pm10\%$, and they fail in two opposite
+directions. The 1965 Nike--Apache set, whose vehicle definition follows the
+NASA performance handbook \cite{nasa_x721_66_568} and whose measured apogees are
+taken from the NASA Wallops range report X-721-67-103, is over-predicted by
+roughly $+24\%$ to $+36\%$, and the Nike--Cajun sounding flight (NACA RM~L57D26)
+is over-predicted by $+16.6\%$. The original blunt and secant-ogive Arcas flights
+(DTIC AD-235341) and the HEROS~3 amateur flight (Kobald, 2018) are instead
+severely under-predicted, by $-29\%$ to $-69\%$. Two cases are outright
+simulation failures rather than
+honest mispredictions: Nike--Apache 14.210~GI returns a degenerate zero apogee
+(a launch-state geometry/recovery configuration error), and the Nike--Cajun
+Hurricane flight terminates with an integration error before apogee; both are
+listed in Table~\ref{tab:exploratory} for completeness but carry no physical
+interpretation.
+
+\begin{table*}[t]
+\centering
+\caption{Full exploratory high-Mach sounding-rocket set (reported in its entirety;
+none of these flights enters any headline statistic of Sec.~8). Signed apogee
+error is (predicted~$-$~measured)/measured. Rows marked \textsuperscript{$\dagger$}
+are simulation failures, not physical predictions.}
+\label{tab:exploratory}
+\begin{tabular}{l c S[table-format=1.3] S[table-format=+3.2] c}
+\toprule
+Flight & Source & {Peak $M$} & {Error (\%)} & Within $\pm10\%$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Within $\pm10\%$ (well-characterized vehicles)}} \\
+Black Brant~V~VB (AAF-VB-32)        & \cite{dtic_ad0733141}  & 7.224 & -6.97 & yes \\
+Nike--Deacon no.~1 (Wallops 1955)   & \cite{heitkotter1956}  & 4.956 & -1.06 & yes \\
+Nike--Deacon no.~2 (Wallops 1955)   & \cite{heitkotter1956}  & 5.079 & -0.89 & yes \\
+\midrule
+\multicolumn{5}{l}{\textit{Over-predicted (Nike--Apache 1965 set; Nike--Cajun)}} \\
+Nike--Apache 14.108~GI              & \cite{nasa_x721_66_568} & 6.498 & +31.47 & no \\
+Nike--Apache 14.75~GR (Wallops 1965)& X-721-67-103            & 6.747 & +24.49 & no \\
+Nike--Apache 14.78~UA (WSMR 1965)   & X-721-67-103            & 5.955 & +23.87 & no \\
+Nike--Apache 14.133~NA (Wallops 1965)& X-721-67-103           & 6.335 & +33.82 & no \\
+Nike--Apache 14.213~UI (Wallops 1965)& X-721-67-103           & 6.426 & +35.85 & no \\
+Nike--Apache 14.214~UI (Wallops 1965)& X-721-67-103           & 6.416 & +35.32 & no \\
+Nike--Apache 14.242~UE (Wallops 1965)& X-721-67-103           & 7.047 & +32.68 & no \\
+Nike--Apache 14.244~UI (Wallops 1965)& X-721-67-103           & 6.939 & +26.88 & no \\
+Nike--Apache 14.247~UI (Wallops 1965)& X-721-67-103           & 7.047 & +29.63 & no \\
+Nike--Cajun UM (Wallops 1956--57)   & NACA RM L57D26          & 6.249 & +16.56 & no \\
+\midrule
+\multicolumn{5}{l}{\textit{Under-predicted (Arcas family; HEROS~3)}} \\
+Arcas flight 2 (blunt)              & DTIC AD-235341          & 2.294 & -29.18 & no \\
+Arcas flight 3 (blunt)              & DTIC AD-235341          & 2.294 & -38.76 & no \\
+Arcas flight 4 (secant ogive)       & DTIC AD-235341          & 2.535 & -69.12 & no \\
+Arcas flight 5 (secant ogive)       & DTIC AD-235341          & 2.535 & -67.93 & no \\
+HEROS~3 (Esrange 2016)              & Kobald 2018             & 1.886 & -63.38 & no \\
+\midrule
+\multicolumn{5}{l}{\textit{Simulation failures (no physical prediction)}} \\
+Nike--Apache 14.210~GI\textsuperscript{$\dagger$} & X-721-67-103 & {---} & {zero apogee} & no \\
+Nike--Cajun Hurricane\textsuperscript{$\dagger$}  & NACA RM L57D26 & {---} & {integration error} & no \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Root-Cause Assessment}
+
+The dominant source of error in this set is \emph{vehicle reconstruction}, not a
+single defect in the aerodynamic models. The headline corpus of Sec.~8 pairs each
+flight with a manufacturer or contest-documented thrust curve and a complete
+airframe definition; the historical sounding rockets here do not. Their thrust
+histories were synthesized from total-impulse and burn-time figures, and their
+external geometries were reconstructed from partial drawings and performance
+handbooks. The two opposite-signed failure modes are consistent with this
+diagnosis rather than with a common modelling bias. The Arcas and HEROS~3
+under-predictions, which occur at modest peak Mach numbers ($1.9$--$2.5$), are the
+signature of under-stated propulsive energy in the reconstructed motors---an
+178,000~ft documented Arcas apogee cannot be matched by any drag model when the
+synthesized impulse is too low, and the error there is propulsive bookkeeping, not
+high-Mach aerodynamics.
+
+The Nike--Apache over-predictions are more interesting because they are
+\emph{systematic and same-signed} across nine independent flights ($+24\%$ to
+$+36\%$), all peaking above Mach~$5.9$. A purely random reconstruction error would
+not bias an entire vehicle family in one direction. This pattern instead points to
+an aerodynamic or flight-dynamics mismatch specific to this configuration above
+Mach~$5$---most plausibly an under-predicted coast-phase drag coefficient (too
+little aerodynamic deceleration during the long high-altitude coast to apogee),
+together with the simplified thrust-misalignment and dispersion assumptions of a
+nominal vertical trajectory. Identifying which of these dominates would require the
+detailed range and trajectory data that motivate treating the Nike--Apache result
+as an open question rather than a validated outcome.
+
+\subsection{Status and Future Work}
+
+We draw no validation claim from this set. The honest reading is that the
+method's supersonic models continue to run, and can be accurate to within about
+$7\%$ at Mach~7, but only on the small number of flights for which the propulsion
+and geometry are independently documented to the standard of the headline corpus.
+On poorly documented historical vehicles, reconstruction uncertainty swamps any
+model signal. Establishing genuine hypersonic flight validation therefore
+requires either flights with experimentally measured thrust and mass-property
+histories at these Mach numbers, or a dedicated reconstruction-uncertainty
+quantification that propagates the documented tolerances on impulse, mass, and
+geometry into the predicted apogee. Both are left to future work; until then the
+paper's validated envelope remains the supersonic regime to Mach~$4.33$
+established in Sec.~8, and the high-Mach reach demonstrated here is reported as
+exploratory only.

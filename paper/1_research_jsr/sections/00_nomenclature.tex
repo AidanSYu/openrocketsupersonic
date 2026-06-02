@@ -1,0 +1,53 @@
+% Nomenclature fragment — \input inside the parent's \section*{Nomenclature}.
+% Two-column longtable (Symbol & Meaning), units carried inside the meaning.
+% Symbols restricted to those used by the equations in Secs. III–V.
+\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{@{}l@{\hskip 2em}l@{}}
+\toprule
+\multicolumn{1}{@{}l}{Symbol} & Meaning \\
+\midrule
+\endfirsthead
+\toprule
+\multicolumn{1}{@{}l}{Symbol} & Meaning \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+$a$ & speed of sound, \si{\meter\per\second} \\
+$A,\,B$ & Van~Driest~II compressibility auxiliaries, dimensionless \\
+$A_b,\,A_e$ & base area, nozzle exit area, \si{\meter\squared} \\
+$C_D$ & drag coefficient \\
+$C_{D_b}$ & base drag coefficient \\
+$C_{D_w}$ & wave drag coefficient \\
+$C_f$ & compressible skin-friction coefficient \\
+$C_{f,\mathrm{inc}}$ & incompressible (reference) skin-friction coefficient \\
+$C_{N_\alpha}$ & normal-force-curve slope, \si{\per\radian} \\
+$C_p,\,C_{p,\max}$ & pressure coefficient; stagnation maximum (Rayleigh pitot) \\
+$C_{m_q},\,C_{m_{\dot\alpha}}$ & pitch-damping derivatives, \si{\per\radian} \\
+$d_\mathrm{ref}$ & reference body diameter, \si{\meter} \\
+$F$ & wall-to-edge temperature ratio, $T_w/T_e$, dimensionless \\
+$F_c,\,F_\theta,\,F_x$ & Van~Driest~II skin-friction, momentum-thickness, and length transformation factors \\
+$K_1,\,K_2,\,K_3$ & DATCOM fin lift coefficients \\
+$K_{WB},\,K_{BW}$ & fin-on-body and body-on-fin interference factors \\
+$L/D$ & body fineness ratio \\
+$M,\,M_1,\,M_2$ & Mach number: freestream; pre-shock; post-shock \\
+$M_e$ & boundary-layer edge Mach number \\
+$m$ & compressibility parameter, $(\gamma-1)M_e^2/2$ \\
+$p,\,p_0$ & static pressure; stagnation pressure, \si{\pascal} \\
+$q_\infty$ & freestream dynamic pressure, \si{\pascal} \\
+$r$ & turbulent recovery factor ($r=0.88$) \\
+$\mathrm{Re}_L$ & length-based Reynolds number \\
+$T,\,T_0,\,T_w$ & static, stagnation, and wall temperature, \si{\kelvin} \\
+$T_e,\,T_{aw}$ & boundary-layer edge and adiabatic-wall temperature, \si{\kelvin} \\
+$t/c$ & fin thickness-to-chord ratio \\
+$x_{CP},\,x_{CG}$ & center of pressure; center of gravity, \si{\meter} \\
+$\alpha$ & angle of attack, \si{\radian} \\
+$\beta$ & Prandtl--Glauert / Ackeret compressibility factor, $\sqrt{|M^2-1|}$ \\
+$\gamma,\,\gamma_\mathrm{eff}$ & ratio of specific heats; effective (vibrationally relaxed) value \\
+$\delta$ & flow deflection (wedge or cone) angle, \si{\radian} \\
+$\theta,\,\theta_c$ & oblique-shock angle; cone half-angle, \si{\radian} \\
+$\Lambda_{LE}$ & fin leading-edge sweep angle, \si{\radian} \\
+$\mu$ & dynamic viscosity, \si{\pascal\second} \\
+$\nu(M)$ & Prandtl--Meyer function, \si{\radian} \\
+$\tau$ & fin half-thickness ratio ($\tau = 0.5\,t/c$) \\
+\end{longtable}

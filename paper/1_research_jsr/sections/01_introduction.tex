@@ -1,0 +1,185 @@
+% !TEX root = ../jsr_paper.tex
+% Section 1: Introduction (fragment; parent declares \section{Introduction})
+% Numbers authoritative from _DRAFTING_BRIEF.md. Honest framing: parity not superiority;
+% supersonic-validated to M4.33; hypersonic = demonstrated capability, exploratory.
+
+\subsection{Background and Motivation}
+
+Sounding rockets, supersonic missile testbeds, and student-built research
+vehicles routinely traverse Mach~1 to Mach~5 during boost and coast. Mission
+designers in this class need trajectory tools that predict apogee, peak dynamic
+pressure, peak Mach number, and static and dynamic stability across the full
+ascent profile with engineering accuracy, and increasingly they need those
+tools to be open so that the underlying coefficient models can be audited,
+extended, and reproduced. The two most widely used open-source rocket
+trajectory simulators, OpenRocket~\cite{niskanen2009} and
+RocketPy~\cite{rocketpy2021}, both descend from the Barrowman engineering
+aerodynamic method~\cite{barrowman1967} and are reliable below approximately
+Mach~1.1. Above the sonic line the underlying constant-coefficient lookup
+tables, the incompressible skin-friction transformation, and the absence of
+post-shock local-flow corrections cause the predicted drag and stability
+derivatives to diverge from measured behavior, frequently producing apogee
+errors well in excess of twenty percent on high-supersonic and hypersonic
+sounding-rocket missions.
+
+Commercial software fills part of this gap. RASAero~II~\cite{rogers2015}
+couples a six-degree-of-freedom integrator to a Missile DATCOM-style coefficient
+generator and is widely used in the high-power and university-class rocketry
+communities. Its source code is closed and its underlying coefficient model is
+not externally auditable by the user. The semi-empirical lineage typified by
+Missile DATCOM and the Aeroprediction code family supports missile design at
+industrial scale~\cite{moore2001,mooremcinvillehymer2002}, and cross-comparisons
+such as that of Sooy and Schmidt against measured data~\cite{sooy2005} document
+its maturity; but that lineage is likewise closed and proprietary. No
+open-source rocket trajectory simulator presently offers externally benchmarked
+supersonic aerodynamic prediction coupled to an end-to-end, reproducible
+flight-corpus validation.
+
+The objective of the present work is to close that gap within the OpenRocket
+fork OpenRocket-Plus: a single open-source, six-degree-of-freedom trajectory
+simulator whose aerodynamic subsystems are each traceable to a published
+wind-tunnel, ballistic-range, free-flight, or computational fluid-dynamics
+benchmark, and whose integrated apogee predictions are validated against an
+externally selected corpus of instrumented flights spanning the supersonic
+envelope. We validate end-to-end accuracy to Mach~4.33 against flight data and,
+separately and exploratorily, assess how far the same method reaches into the
+hypersonic regime on historical vehicles.
+
+\subsection{Prior Work}
+
+Barrowman's master's thesis~\cite{barrowman1967} established the lift and
+center-of-pressure framework that anchors essentially every open-source rocket
+simulator written since 1967. Niskanen~\cite{niskanen2009} implemented and
+extended that framework in OpenRocket, adding component-level drag bookkeeping
+and a Mach-dependent base-drag table valid through the transonic peak.
+RocketPy~\cite{rocketpy2021} provides a Python-language alternative also rooted
+in the Barrowman engineering pipeline, with comparable subsonic fidelity and a
+similar transonic ceiling. Both tools treat the freestream Mach number as the
+governing aerodynamic state uniformly along the body, an approximation that
+degrades as upstream shocks and expansions begin to process the local flow.
+
+Rogers' RASAero~II~\cite{rogers2015} couples a Missile DATCOM-style coefficient
+generator to a six-degree-of-freedom trajectory integrator and remains the most
+widely used non-OpenRocket prediction tool in high-power and university
+rocketry. The closed-source semi-empirical lineage against which the present
+work positions itself, Missile DATCOM and the Aeroprediction
+series~\cite{moore2001,mooremcinvillehymer2002,sooy2005}, handles post-shock
+local conditions internally as part of its coefficient generation but exposes
+neither its source nor those intermediate states to the user. Figure~\ref{fig:methods_hierarchy}
+places these methods in a common hierarchy: the present work occupies the
+open-source engineering tier between the subsonic Barrowman/OpenRocket pipeline
+and the closed-source industrial Missile DATCOM/Aeroprediction codes, extending
+auditable open-source prediction across the supersonic envelope.
+
+On the open-source-software side, recent precedent in this journal supports the
+publication of validated open aerospace software. The arcjetCV
+study~\cite{quintart2025} established that open-source aerospace software
+accompanied by a documented validation campaign and a permanent code archive is
+within the scope of the \textit{Journal of Spacecraft and Rockets}, and a 2025
+study of a low-cost amateur roll-control system~\cite{lowcostroll2025}
+established that supersonic amateur-rocket hardware work anchored on
+open-source trajectory simulation fits within that scope as well. The present
+work combines those two precedents: open-source supersonic aerodynamics with a
+reproducible flight-corpus validation.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{aerodynamic_methods_hierarchy}
+  \caption{Hierarchy of aerodynamic prediction methods for rocket trajectory
+  simulation. The present work (OpenRocket-Plus) occupies the open-source
+  engineering tier between the subsonic Barrowman/OpenRocket pipeline and the
+  closed-source Missile DATCOM/Aeroprediction lineage, extending externally
+  benchmarked open-source prediction across the supersonic envelope.}
+  \label{fig:methods_hierarchy}
+\end{figure}
+
+\subsection{Gap Statement}
+
+The combined prior literature leaves three concrete gaps. First, no open-source
+rocket trajectory simulator distributes post-shock local-flow conditions to its
+component-level aerodynamic calculators; freestream Mach is applied uniformly
+along the body, which is increasingly incorrect above approximately Mach~1.5.
+Second, the engineering submodels underlying OpenRocket and RocketPy, including
+incompressible skin friction, $\cos^2\Lambda_{LE}$ Ackeret fin wave drag,
+constant-coefficient base drag, and the absence of hypersonic blending, remain
+largely unchanged from their 1960s and 1970s antecedents and lack independent
+benchmarks above the transonic peak. Third, no open-source aerodynamic code has
+been subjected to end-to-end integrated flight-corpus validation against an
+externally selected set of instrumented supersonic flights, with the residual
+decomposed into bias and variance terms and compared on a paired basis against a
+commercial baseline.
+
+\subsection{Contributions}
+
+The present work addresses each gap with one corresponding contribution.
+
+\begin{enumerate}
+  \item \textbf{A shock-geometry pre-pass architecture.} A once-per-timestep
+  nose-to-tail surface march publishes post-shock local conditions, namely local
+  Mach number, static pressure, and static temperature, to every component-level
+  drag and stability calculator downstream of a single shared seam. The pre-pass
+  is inert at subsonic Mach and is verified bit-for-bit against the
+  Taylor--Maccoll cone solution and the Prandtl--Meyer function at body
+  shoulders. We are explicit about what this contribution does and does not buy:
+  its value is \textit{local-flow fidelity} (correct post-shock conditions for
+  fin loads and stability) and an architectural seam that enables the downstream
+  supersonic submodels, rather than a large change in integrated apogee, which is
+  dominated by lower-Mach drag and to which the pre-pass contributes only a
+  fraction of a percentage point.
+
+  \item \textbf{An externally benchmarked supersonic subsystem replacement.}
+  Each underlying Barrowman-era engineering submodel is replaced and
+  independently benchmarked against published wind-tunnel, ballistic-range,
+  free-flight, or computational fluid-dynamics data, with the governing
+  equation, regime of applicability, and mean absolute percent error reported
+  per subsystem. Where a model decision is corpus-calibrated rather than
+  literature-anchored, we disclose it as such.
+
+  \item \textbf{A reproducible flight-corpus validation.} An externally selected
+  corpus of 25 instrumented flights spanning Mach~0.54 to~4.33 enables
+  end-to-end integrated validation of the present method and a direct paired
+  comparison against RASAero~II. On this corpus OpenRocket-Plus achieves a mean
+  signed apogee error of $-0.38\%$ with all 25 flights within $\pm10\%$ of
+  measured altitude; the corresponding RASAero~II predictions, as recorded by
+  Rogers, give a mean signed error of $+2.46\%$ with 22 of 25 within $\pm10\%$.
+  The paired difference in absolute error is not statistically significant
+  (Wilcoxon signed-rank $p=0.615$; $95\%$ bootstrap confidence interval on the
+  mean paired difference $[-2.16, +0.96]$ percentage points, straddling zero), so
+  the honest claim is \emph{parity} with this version-locked commercial baseline,
+  not superiority. The corpus, analysis scripts, and source code are released
+  openly under a permanent digital object identifier~\cite{rfd_zenodo}.
+\end{enumerate}
+
+Two scope qualifications frame these contributions honestly. The headline
+validation corpus was selected externally by Rogers for an independent RASAero~II
+comparison rather than curated by the present authors, so its accuracy statistics
+are an outcome-independent validation result; the recorded RASAero~II values are
+Rogers' own predictions and are not fresh, independently rerun pre-flight
+estimates. Separately, although the underlying compressible-flow infrastructure
+demonstrates a method capability reaching Mach~7, we do \emph{not} claim
+hypersonic flight validation in the headline: high-Mach behavior is assessed
+exploratorily on a full, uncurated set of historical sounding rockets, where
+motor and geometry reconstruction uncertainty dominates the residual.
+
+\subsection{Paper Organization}
+
+Section~II presents the shock-geometry pre-pass architecture and establishes the
+analytical-reference verification that anchors the novelty claim. Section~III
+documents the underlying compressible-flow infrastructure: atmosphere,
+viscosity, the effective ratio of specific heats, the smoothed compressibility
+factor through Mach~1, and the closed-form shock and expansion relations.
+Sections~IV and~V catalog the drag and stability submodels respectively, each
+with its governing equation, regime of applicability, and published benchmark.
+Section~VI rolls up the externally benchmarked subsystems with explicit
+verification-and-validation methodology and discloses the corpus-calibrated model
+decisions. Section~VII validates against four independent published
+computational fluid-dynamics studies. Section~VIII reports the headline result:
+end-to-end integrated validation against the 25-flight corpus, with
+bias--variance decomposition, per-regime breakdown, paired RASAero~II
+comparison, distribution and normality characterization, and a sensitivity
+analysis, together with the decontaminated prospective holdout that addresses the
+partly in-sample nature of two calibrated constants. Section~IX reports the
+exploratory high-Mach sounding-rocket assessment over the full historical set,
+presented without cherry-picking. Section~X discloses known limitations with
+quantitative magnitude and root cause where identified, and Section~XI concludes
+with prioritized future work.

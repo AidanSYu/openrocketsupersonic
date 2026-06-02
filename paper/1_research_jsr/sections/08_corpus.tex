@@ -1,0 +1,295 @@
+% !TEX root = ../jsr_paper.tex
+% Flight-Corpus Integration Test (headline validation section)
+
+The component benchmarks of the preceding sections isolate individual physical
+models against canonical wind-tunnel and range data. The integration test asks
+the question that matters operationally: when every model is composed inside a
+full six-degree-of-freedom trajectory and run end to end against real flights,
+how accurately does the predictor recover the measured apogee? This section
+reports that result on an externally defined corpus, quantifies its uncertainty
+with non-parametric inference, and discloses the in-sample dependence honestly.
+
+\subsection{Corpus Definition and Inclusion Criterion}
+\label{sec:corpus-def}
+
+The headline corpus comprises \num{25} flights spanning peak Mach
+\numrange{0.54}{4.33}: \num{24} single-stage vehicles drawn directly from the
+public RASAero~II flight-comparison set assembled by Rogers~\cite{rogers2015,
+rogers_rasaero_alt}, plus the MESOS~293K two-stage flight, which closes the
+corpus at its highest Mach. The inclusion criterion is the central guard against
+selection bias: every flight is taken from a comparison set chosen and published
+by an \emph{external} party for an independent purpose, and the set is admitted
+in its entirety. No flight was added, removed, or reweighted on the basis of how
+well the present predictor happened to perform on it. The accuracy statistics
+below are therefore an outcome-independent validation result rather than a
+curated demonstration. Vehicles range from \SI{1.75}{in} hobby airframes to the
+\SI{8.0}{in} Qu8k and the \SI{6.13}{in} A-601 Kinsel, and ground-truth apogees
+derive from heterogeneous instrumentation (barometric altimetry, optical
+tracking, integrated accelerometry, and GPS), as recorded in
+Table~\ref{tab:corpus-perflight}.
+
+A separate set of high-Mach sounding rockets reaching Mach~7 is treated as an
+\emph{exploratory} study in Sec.~\ref{sec:hypersonic}, deliberately segregated
+from this headline validation; the present corpus is supersonic-validated and
+contains no hypersonic flight (maximum Mach~4.33).
+
+\subsection{Headline Accuracy}
+\label{sec:corpus-headline}
+
+Across the \num{25} flights, the OpenRocket-Plus apogee-prediction error (ORP,
+defined as $100\,(h_\text{pred}-h_\text{meas})/h_\text{meas}$) has a mean signed
+value of \SI{-0.38}{\percent} with sample standard deviation
+$\sigma=\SI{5.44}{\percent}$, root-mean-square error of \SI{5.34}{\percent}, and
+mean absolute error of \SI{4.74}{\percent}. All \num{25} of \num{25} flights
+fall within \SI{\pm 10}{\percent}, and \num{14} of \num{25} within
+\SI{\pm 5}{\percent}; the largest single residual is \SI{8.7}{\percent}.
+Table~\ref{tab:corpus-headline} summarizes these figures alongside the recorded
+RASAero~II predictions for the same flights.
+
+Because the corpus deviates from normality (Sec.~\ref{sec:corpus-dist}), every
+interval below is a 95\% bias-corrected and accelerated bootstrap confidence
+interval (\num{20000} resamples, fixed seed \texttt{0x51A7EA}). The mean-error
+interval is $[-2.41,+1.72]\,\si{\percent}$; it brackets zero, so the predictor
+is statistically unbiased on this corpus. The remaining intervals are
+$[4.20,6.25]\,\si{\percent}$ for $\sigma$, $[4.38,6.19]\,\si{\percent}$ for RMSE,
+and $[3.78,5.70]\,\si{\percent}$ for MAE. The within-\SI{\pm 5}{\percent} rate of
+\SI{56}{\percent} carries an interval of $[36,76]\,\si{\percent}$, while the
+within-\SI{\pm 10}{\percent} rate is $100\%\,[100,100]$. Decomposing the mean
+squared error into squared bias and variance yields a $\text{bias}^2/\text{MSE}$
+ratio of \num{0.01} for ORP, against \num{0.16} for RASAero~II: the ORP residual
+is essentially pure variance. Operationally this means the remaining error is
+dominated by irreducible flight-to-flight scatter---build tolerance, motor lot
+variation, and atmosphere---rather than a directional defect in the
+aerodynamic model. Figure~\ref{fig:corpus-bias-variance} visualizes this
+decomposition and Fig.~\ref{fig:corpus-error-mach} shows the residuals against
+peak Mach.
+
+\begin{table}[t]
+  \centering
+  \caption{Headline accuracy on the externally defined \num{25}-flight corpus
+    (Mach \numrange{0.54}{4.33}). RASAero~II values are Rogers' recorded
+    predictions for the same flights.}
+  \label{tab:corpus-headline}
+  \begin{tabular}{lccccccc}
+    \toprule
+    Predictor & $N$ & Mean & $\sigma$ & RMSE & MAE & $\le\!\pm5\%$ & $\le\!\pm10\%$ \\
+    \midrule
+    OpenRocket-Plus & 25 & $-0.38$ & 5.44 & 5.34 & 4.74 & 14/25 & 25/25 \\
+    RASAero~II      & 25 & $+2.46$ & 5.81 & 6.20 & 5.34 & 13/25 & 22/25 \\
+    \bottomrule
+  \end{tabular}
+  \\[2pt]
+  {\footnotesize All entries in percent except $N$ and the count columns.}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{error_vs_mach}
+  \caption{Apogee-prediction error versus peak Mach for the \num{25}-flight
+    corpus. Residuals remain bounded within \SI{\pm 10}{\percent} across the
+    full subsonic-to-supersonic range; the transonic band carries the largest
+    negative bias.}
+  \label{fig:corpus-error-mach}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{bias_variance}
+  \caption{Bias--variance decomposition of the mean squared apogee error.
+    For OpenRocket-Plus the squared-bias term is a negligible fraction
+    ($\text{bias}^2/\text{MSE}=0.01$) of the total, indicating an
+    essentially unbiased predictor whose residual is dominated by variance.}
+  \label{fig:corpus-bias-variance}
+\end{figure}
+
+\subsection{Per-Regime Behavior}
+\label{sec:corpus-regime}
+
+Partitioning the corpus by Mach regime (Table~\ref{tab:corpus-regime}) localizes
+the error structure. The subsonic ($M<0.8$, $n=9$) and low-supersonic
+($1.3\le M<3.0$, $n=5$) bands carry small positive biases (\SI{+2.54}{\percent}
+and \SI{+1.83}{\percent}). The transonic band ($0.8\le M<1.3$, $n=7$) is the
+disclosed regime weakness, with a mean bias of \SI{-3.66}{\percent}: this is the
+Mach range where shock-induced drag rise is most sensitive to geometry detail
+and where the present models are weakest. The high-supersonic band
+($3.0\le M<5.0$, $n=4$) has a \SI{-3.98}{\percent} bias but the tightest scatter
+($\sigma=\SI{2.97}{\percent}$). Above Mach~3 the sample is small ($n\le 4$ per
+band), so these figures are reported descriptively; no inferential claim is made
+there. The hypersonic regime ($M>5.0$) is empty by construction. The regime
+breakdown is shown graphically in Fig.~\ref{fig:corpus-regime}.
+
+\begin{table}[t]
+  \centering
+  \caption{Per-regime ORP accuracy on the \num{25}-flight corpus. Biases,
+    $\sigma$, RMSE, and MAE in percent; count columns are flights within
+    tolerance.}
+  \label{tab:corpus-regime}
+  \begin{tabular}{lccccccc}
+    \toprule
+    Regime & Mach & $N$ & Bias & $\sigma$ & RMSE & $\le\!5\%$ & $\le\!10\%$ \\
+    \midrule
+    Subsonic        & $<0.8$        & 9 & $+2.54$ & 4.37 & 4.83 & 7 & 9 \\
+    Transonic       & $0.8$--$1.3$  & 7 & $-3.66$ & 5.36 & 6.17 & 2 & 7 \\
+    Low supersonic  & $1.3$--$3.0$  & 5 & $+1.83$ & 5.70 & 5.42 & 3 & 5 \\
+    High supersonic & $3.0$--$5.0$  & 4 & $-3.98$ & 2.97 & 4.73 & 2 & 4 \\
+    Hypersonic      & $>5.0$        & 0 & ---     & ---  & ---  & --- & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{regime_breakdown}
+  \caption{Per-regime error distribution. The transonic band carries the
+    largest negative bias; the high-supersonic band has the tightest scatter.
+    Bands above Mach~3 contain four or fewer flights and are descriptive only.}
+  \label{fig:corpus-regime}
+\end{figure}
+
+\subsection{Distribution and Choice of Inference}
+\label{sec:corpus-dist}
+
+The choice of non-parametric inference is dictated by the residual
+distribution, not adopted by convenience. The Shapiro--Wilk test rejects
+normality of the \num{25} ORP residuals ($W=0.905$, $p=0.023$ at
+$\alpha=0.05$), and the Anderson--Darling statistic ($A^2=0.922$) likewise
+exceeds its critical value ($0.728$). The residuals are mildly right-skewed
+(skewness $+0.43$) and distinctly platykurtic (excess kurtosis $-1.14$): the
+distribution is light-tailed rather than heavy-tailed, consistent with the
+bounded maximum residual of \SI{8.7}{\percent}. We therefore adopt the Wilcoxon
+signed-rank test as the primary hypothesis test and bootstrap confidence
+intervals in place of normal-theory intervals throughout. We also caution that,
+at $n=25$, normality tests have limited power; failing to reject normality would
+not establish it, which is a further reason to prefer distribution-free methods.
+Figure~\ref{fig:corpus-distributions} compares the ORP and RASAero~II error
+distributions, and Fig.~\ref{fig:corpus-bootstrap} shows the bootstrap sampling
+distributions underlying the headline intervals.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{predictor_distributions}
+  \caption{Error distributions for OpenRocket-Plus and RASAero~II on the
+    \num{25}-flight corpus. Both are light-tailed; the ORP distribution centers
+    near zero.}
+  \label{fig:corpus-distributions}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{bootstrap_distributions}
+  \caption{Bootstrap sampling distributions (\num{20000} resamples, seed
+    \texttt{0x51A7EA}) for the headline ORP statistics. The mean-error
+    distribution straddles zero, supporting the unbiasedness conclusion.}
+  \label{fig:corpus-bootstrap}
+\end{figure}
+
+\subsection{Paired Comparison Against RASAero~II}
+\label{sec:corpus-paired}
+
+Because each flight carries a recorded RASAero~II prediction, the two methods
+can be compared head to head on identical vehicles and motors. On absolute
+error, the paired mean difference $|\text{ORP}|-|\text{RAS}|$ is
+\SI{-0.60}{pp} with a 95\% bootstrap confidence interval of
+$[-2.16,+0.96]\,\si{pp}$, which straddles zero. The Wilcoxon signed-rank test on
+the paired absolute errors returns $W=143.0$, $p=0.615$: the methods are not
+distinguishable in accuracy on this corpus. The Bland--Altman limits of
+agreement are \SI{\pm 14.3}{\percent} about a mean offset of
+\SI{-2.84}{\percent}. The honest claim supported by these statistics is
+\emph{parity}, not superiority. We further disclose an important asymmetry: the
+RASAero~II values are Rogers' published recorded predictions for these flights,
+not fresh pre-flight reruns we generated and can independently verify, so the
+comparison is to a version-locked external record rather than a controlled
+re-execution. Figure~\ref{fig:corpus-paired} shows the paired residuals.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{predictor_paired}
+  \caption{Paired per-flight comparison of OpenRocket-Plus and RASAero~II
+    apogee errors. The paired absolute-error difference is statistically
+    indistinguishable from zero (Wilcoxon $p=0.615$), supporting a parity
+    conclusion.}
+  \label{fig:corpus-paired}
+\end{figure}
+
+\subsection{In-Sample Dependence and Decontaminated Holdout}
+\label{sec:corpus-insample}
+
+Two base-drag scale constants are calibrated at the corpus level and are
+therefore not free of in-sample dependence: \texttt{THICK\_BL\_K}~$=2.2$
+(anchored to the Raven flight) and \texttt{SLENDER\_BODY\_K}~$=0.0025$ (anchored
+to Raven, Rabia, and Kinsel, with Torrent used as a source diagnostic). The
+headline statistics are thus partly in-sample, and we report this rather than
+obscure it.
+
+The primary defense against overfitting is a decontaminated prospective holdout.
+Every flight that either of the two constants touched---Raven, Rabia, Rabia Short
+Fin Can, Kinsel, and Torrent---is placed in the development partition, leaving a
+genuinely blind holdout. On the development partition ($n=13$) the mean error is
+\SI{+0.22}{\percent} with MAE \SI{5.47}{\percent}; on the blind holdout
+($n=12$) the mean error is \SI{-1.03}{\percent} with MAE \SI{3.95}{\percent}.
+The holdout is \emph{more} accurate than the development set, which is the
+signature of constants that generalize rather than overfit. (An earlier split
+left Rabia in the holdout, contaminating it; the decontaminated split corrects
+this.) This prospective generalization, not any operational sweep, is the basis
+on which we rest the in-sample disclosure.
+
+\subsection{Two-Stage Closure and a Disclosed Regression}
+\label{sec:corpus-mesos}
+
+The MESOS~293K flight closes the corpus at Mach~4.33 and is the only two-stage
+vehicle, exercising staging and coast-phase modeling not present in the
+single-stage flights. We disclose a regression here: the current archived code
+predicts an apogee error of \SI{-6.96}{\percent} for MESOS, whereas an earlier
+archived configuration achieved \SI{-0.6}{\percent}. The flight remains within
+the \SI{\pm 10}{\percent} envelope and is retained in the corpus under the
+same outcome-independent inclusion rule applied to every other flight; we do not
+exclude it on the basis of the degraded result. The regression is carried
+forward to the limitations discussion.
+
+\subsection{Per-Flight Results}
+\label{sec:corpus-perflight}
+
+Table~\ref{tab:corpus-perflight} lists all \num{25} flights with vehicle, motor,
+peak Mach, measured and predicted apogees, and per-predictor error, ordered by
+peak Mach.
+
+\begin{table*}[t]
+  \centering
+  \caption{Per-flight results for the \num{25}-flight corpus, ordered by peak
+    Mach. Apogees in feet; errors in percent of measured apogee. RASAero~II
+    values are Rogers' recorded predictions for the same flights.}
+  \label{tab:corpus-perflight}
+  \begin{tabular}{rlcrrrrrr}
+    \toprule
+    & Vehicle & Motor & $M_\text{pk}$
+      & $h_\text{meas}$ & $h_\text{RAS}$ & $h_\text{ORP}$
+      & $\varepsilon_\text{RAS}$ & $\varepsilon_\text{ORP}$ \\
+    \midrule
+    1  & Thunder \& Lightning            & I284W           & 0.54 & 3577   & 3989   & 3877   & $+11.52$ & $+8.4$  \\
+    2  & Gibb                            & I284W           & 0.55 & 3913   & 4310   & 3989   & $+10.15$ & $+1.9$  \\
+    3  & Cancer Descending               & M1297W          & 0.56 & 6188   & 6328   & 6044   & $+2.26$  & $-2.3$  \\
+    4  & EZI-65 J450ST                   & J450ST          & 0.60 & 3965   & 4214   & 4158   & $+6.28$  & $+4.9$  \\
+    5  & Caliber Isp 04 AVTC Team 2      & I205            & 0.64 & 3710   & 3871   & 3890   & $+4.34$  & $+4.9$  \\
+    6  & Caliber Isp 04 AVTC Team 3      & I205            & 0.64 & 3964   & 3871   & 3889   & $-2.35$  & $-1.9$  \\
+    7  & Caliber Isp 04 AVTC Team 1      & I205            & 0.66 & 3837   & 3943   & 3960   & $+2.76$  & $+3.2$  \\
+    8  & Byrum                           & J570W           & 0.75 & 5732   & 5280   & 6161   & $-7.89$  & $+7.5$  \\
+    9  & Ion Drive                       & K550W           & 0.79 & 8027   & 8642   & 7730   & $+7.66$  & $-3.7$  \\
+    10 & Caliber Isp 05 ARO-414 (Disc.)  & I285            & 0.81 & 4930   & 4831   & 4772   & $-2.01$  & $-3.2$  \\
+    11 & Blister                         & K1075GG         & 0.83 & 9026   & 8347   & 8268   & $-7.52$  & $-8.4$  \\
+    12 & Caliber Isp 05 ARO-414 (Col.)   & I285            & 0.84 & 5085   & 4842   & 4777   & $-4.78$  & $-6.1$  \\
+    13 & Rabia -- Short Fin Can          & L730            & 0.86 & 10584  & 10376  & 9916   & $-1.97$  & $-6.3$  \\
+    14 & Raven                           & J570W           & 1.07 & 8815   & 9288   & 9489   & $+5.37$  & $+7.6$  \\
+    15 & Rabia                           & L1080BB         & 1.14 & 12745  & 12777  & 11913  & $+0.25$  & $-6.5$  \\
+    16 & Torrent                         & M1850GG         & 1.22 & 12807  & 13852  & 12455  & $+8.16$  & $-2.8$  \\
+    17 & Kline-Rogers L500               & L500            & 1.98 & 24771  & 26485  & 24179  & $+6.92$  & $-2.4$  \\
+    18 & A-601 Kinsel                    & P4935           & 2.19 & 42771  & 41086  & 46499  & $-3.94$  & $+8.7$  \\
+    19 & Full Metal Jacket -- BALLS 005  & O10000          & 2.31 & 37981  & 38820  & 37256  & $+2.21$  & $-1.9$  \\
+    20 & Full Metal Jacket -- Black Rock 6 & O10000        & 2.46 & 30038  & 32646  & 29239  & $+8.68$  & $-2.7$  \\
+    21 & Proteus 6                       & P9381           & 2.87 & 85067  & 86799  & 91339  & $+2.04$  & $+7.4$  \\
+    22 & AeroPac 104K Two-Stage          & N1048 / M685W   & 3.04 & 104659 & 113786 & 103602 & $+8.72$  & $-1.0$  \\
+    23 & Don't Debate This               & N5800           & 3.04 & 56573  & 62308  & 53150  & $+10.14$ & $-6.1$  \\
+    24 & Qu8k                            & Q18000          & 3.46 & 121478 & 116254 & 119187 & $-4.30$  & $-1.9$  \\
+    25 & MESOS 293K                      & O4374 / M787    & 4.33 & 293488 & 289789 & 273056 & $-1.26$  & $-6.96$ \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
