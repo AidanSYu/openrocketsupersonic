@@ -1,3 +1,8 @@
-matplotlib
-numpy
-pandas
+# Python environment for regenerating all paper figures, tables, and statistics.
+# Pinned for bit-reproducibility of the reported p-values and CIs (audit fix:
+# Wilcoxon/Shapiro p-values are SciPy-version-sensitive). Verified stack:
+#   python >= 3.11
+numpy==2.4.6
+pandas==3.0.3
+scipy==1.17.1
+matplotlib==3.10.9
