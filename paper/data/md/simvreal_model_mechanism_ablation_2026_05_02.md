@@ -26,12 +26,12 @@ This is the AST manuscript's model-mechanism (causal-evidence) ablation. Each mu
 | no_shockgeometry | Cancer Descending | -2.33% | -2.33% | +0.00 | +0 | 0.56 | 0.56 | NORMAL |
 | no_shockgeometry | EZI-65 J450ST | +4.87% | +4.87% | +0.00 | +0 | 0.60 | 0.60 | NORMAL |
 | no_shockgeometry | Gibb | +1.94% | +1.94% | +0.00 | +0 | 0.55 | 0.55 | NORMAL |
-| no_shockgeometry | Ion Drive | -3.71% | -3.71% | +0.00 | +0 | 0.79 | 0.79 | NORMAL |
+| no_shockgeometry | Ion Drive | -3.71% | -3.71% | -0.00 | -0 | 0.79 | 0.79 | NORMAL |
 | no_shockgeometry | Raven | +7.64% | +7.64% | -0.00 | -0 | 1.07 | 1.07 | NORMAL |
 | no_shockgeometry | Thunder & Lightning | +8.37% | +8.37% | +0.00 | +0 | 0.54 | 0.54 | NORMAL |
-| no_shockgeometry | Blister | -8.40% | -8.40% | -0.00 | -0 | 0.83 | 0.83 | NORMAL |
+| no_shockgeometry | Blister | -8.40% | -8.40% | +0.00 | +0 | 0.83 | 0.83 | NORMAL |
 | no_shockgeometry | Rabia | -6.53% | -6.53% | +0.00 | +0 | 1.14 | 1.14 | NORMAL |
-| no_shockgeometry | Rabia Short Fin Can | -6.31% | -6.31% | -0.00 | -0 | 0.86 | 0.86 | NORMAL |
+| no_shockgeometry | Rabia Short Fin Can | -6.31% | -6.31% | +0.00 | +0 | 0.86 | 0.86 | NORMAL |
 | no_shockgeometry | Torrent | -2.75% | -2.75% | -0.00 | -0 | 1.22 | 1.22 | NORMAL |
 | no_shockgeometry | Caliber Isp 04 Team 3 | -1.90% | -1.90% | +0.00 | +0 | 0.64 | 0.64 | NORMAL |
 | no_shockgeometry | Caliber Isp 04 Team 1 | +3.21% | +3.21% | +0.00 | +0 | 0.66 | 0.66 | NORMAL |
@@ -54,9 +54,9 @@ This is the AST manuscript's model-mechanism (causal-evidence) ablation. Each mu
 | no_pnk | Raven | +7.64% | +7.64% | +0.00 | +0 | 1.07 | 1.07 | NORMAL |
 | no_pnk | Thunder & Lightning | +8.37% | +8.37% | +0.00 | +0 | 0.54 | 0.54 | NORMAL |
 | no_pnk | Blister | -8.40% | -8.40% | +0.00 | +0 | 0.83 | 0.83 | NORMAL |
-| no_pnk | Rabia | -6.53% | -6.53% | +0.00 | +0 | 1.14 | 1.14 | NORMAL |
+| no_pnk | Rabia | -6.53% | -6.53% | -0.00 | -0 | 1.14 | 1.14 | NORMAL |
 | no_pnk | Rabia Short Fin Can | -6.31% | -6.31% | -0.00 | -0 | 0.86 | 0.86 | NORMAL |
-| no_pnk | Torrent | -2.75% | -2.75% | -0.00 | -0 | 1.22 | 1.22 | NORMAL |
+| no_pnk | Torrent | -2.75% | -2.75% | +0.00 | +0 | 1.22 | 1.22 | NORMAL |
 | no_pnk | Caliber Isp 04 Team 3 | -1.90% | -1.90% | +0.00 | +0 | 0.64 | 0.64 | NORMAL |
 | no_pnk | Caliber Isp 04 Team 1 | +3.21% | +3.21% | +0.00 | +0 | 0.66 | 0.66 | NORMAL |
 | no_pnk | Caliber Isp 04 Team 2 | +4.85% | +4.85% | +0.00 | +0 | 0.64 | 0.64 | NORMAL |
@@ -64,11 +64,11 @@ This is the AST manuscript's model-mechanism (causal-evidence) ablation. Each mu
 | no_pnk | Caliber Isp 05 Discovery | -3.20% | -3.20% | +0.00 | +0 | 0.81 | 0.81 | NORMAL |
 | no_pnk | Kline-Rogers L500 | -2.39% | -2.39% | +0.00 | +0 | 1.98 | 1.98 | NORMAL |
 | no_pnk | Don't Debate This | -6.05% | -6.05% | +0.00 | +0 | 3.04 | 3.04 | NORMAL |
-| no_pnk | Qu8k | -1.89% | -1.89% | -0.00 | -0 | 3.46 | 3.46 | NORMAL |
-| no_pnk | Proteus 6 | +7.37% | +7.37% | +0.00 | +0 | 2.87 | 2.87 | NORMAL |
+| no_pnk | Qu8k | -1.89% | -1.89% | +0.00 | +0 | 3.46 | 3.46 | NORMAL |
+| no_pnk | Proteus 6 | +7.37% | +7.37% | -0.00 | -0 | 2.87 | 2.87 | NORMAL |
 | no_pnk | Full Metal Jacket BALLS 005 | -1.91% | -1.91% | +0.00 | +0 | 2.31 | 2.31 | NORMAL |
-| no_pnk | Full Metal Jacket Black Rock 6 | -2.66% | -2.66% | +0.00 | +0 | 2.46 | 2.46 | NORMAL |
-| no_pnk | A-601 Kinsel | +8.72% | +8.72% | +0.00 | +0 | 2.19 | 2.19 | NORMAL |
+| no_pnk | Full Metal Jacket Black Rock 6 | -2.66% | -2.66% | -0.00 | -0 | 2.46 | 2.46 | NORMAL |
+| no_pnk | A-601 Kinsel | +8.72% | +8.72% | -0.00 | -0 | 2.19 | 2.19 | NORMAL |
 | no_pnk | AeroPac 104K | -1.01% | -1.01% | -0.00 | -0 | 3.04 | 3.04 | NORMAL |
 | no_van_driest_ii | Byrum | +7.49% | +7.49% | +0.00 | +0 | 0.75 | 0.75 | NORMAL |
 | no_van_driest_ii | Cancer Descending | -2.33% | -2.33% | +0.00 | +0 | 0.56 | 0.56 | NORMAL |
@@ -79,7 +79,7 @@ This is the AST manuscript's model-mechanism (causal-evidence) ablation. Each mu
 | no_van_driest_ii | Thunder & Lightning | +8.37% | +8.37% | +0.00 | +0 | 0.54 | 0.54 | NORMAL |
 | no_van_driest_ii | Blister | -8.40% | -8.40% | +0.00 | +0 | 0.83 | 0.83 | NORMAL |
 | no_van_driest_ii | Rabia | -6.53% | -6.61% | -0.08 | -11 | 1.14 | 1.14 | NORMAL |
-| no_van_driest_ii | Rabia Short Fin Can | -6.31% | -6.31% | -0.00 | -0 | 0.86 | 0.86 | NORMAL |
+| no_van_driest_ii | Rabia Short Fin Can | -6.31% | -6.31% | +0.00 | +0 | 0.86 | 0.86 | NORMAL |
 | no_van_driest_ii | Torrent | -2.75% | -2.86% | -0.11 | -14 | 1.22 | 1.22 | NORMAL |
 | no_van_driest_ii | Caliber Isp 04 Team 3 | -1.90% | -1.90% | +0.00 | +0 | 0.64 | 0.64 | NORMAL |
 | no_van_driest_ii | Caliber Isp 04 Team 1 | +3.21% | +3.21% | +0.00 | +0 | 0.66 | 0.66 | NORMAL |
@@ -102,8 +102,8 @@ This is the AST manuscript's model-mechanism (causal-evidence) ablation. Each mu
 | no_k1_floor | Raven | +7.64% | +7.64% | +0.00 | +0 | 1.07 | 1.07 | NORMAL |
 | no_k1_floor | Thunder & Lightning | +8.37% | +8.37% | +0.00 | +0 | 0.54 | 0.54 | NORMAL |
 | no_k1_floor | Blister | -8.40% | -8.40% | +0.00 | +0 | 0.83 | 0.83 | NORMAL |
-| no_k1_floor | Rabia | -6.53% | -6.53% | -0.00 | -0 | 1.14 | 1.14 | NORMAL |
-| no_k1_floor | Rabia Short Fin Can | -6.31% | -6.31% | -0.00 | -0 | 0.86 | 0.86 | NORMAL |
+| no_k1_floor | Rabia | -6.53% | -6.53% | +0.00 | +0 | 1.14 | 1.14 | NORMAL |
+| no_k1_floor | Rabia Short Fin Can | -6.31% | -6.31% | +0.00 | +0 | 0.86 | 0.86 | NORMAL |
 | no_k1_floor | Torrent | -2.75% | -2.75% | +0.00 | +0 | 1.22 | 1.22 | NORMAL |
 | no_k1_floor | Caliber Isp 04 Team 3 | -1.90% | -1.90% | +0.00 | +0 | 0.64 | 0.64 | NORMAL |
 | no_k1_floor | Caliber Isp 04 Team 1 | +3.21% | +3.21% | +0.00 | +0 | 0.66 | 0.66 | NORMAL |
@@ -115,8 +115,8 @@ This is the AST manuscript's model-mechanism (causal-evidence) ablation. Each mu
 | no_k1_floor | Qu8k | -1.89% | -1.89% | -0.00 | -0 | 3.46 | 3.46 | NORMAL |
 | no_k1_floor | Proteus 6 | +7.37% | +7.37% | +0.00 | +0 | 2.87 | 2.87 | NORMAL |
 | no_k1_floor | Full Metal Jacket BALLS 005 | -1.91% | -1.91% | +0.00 | +0 | 2.31 | 2.31 | NORMAL |
-| no_k1_floor | Full Metal Jacket Black Rock 6 | -2.66% | -2.66% | -0.00 | -0 | 2.46 | 2.46 | NORMAL |
-| no_k1_floor | A-601 Kinsel | +8.72% | +8.72% | +0.00 | +0 | 2.19 | 2.19 | NORMAL |
+| no_k1_floor | Full Metal Jacket Black Rock 6 | -2.66% | -2.66% | +0.00 | +0 | 2.46 | 2.46 | NORMAL |
+| no_k1_floor | A-601 Kinsel | +8.72% | +8.72% | -0.00 | -0 | 2.19 | 2.19 | NORMAL |
 | no_k1_floor | AeroPac 104K | -1.01% | -1.01% | +0.00 | +0 | 3.04 | 3.04 | NORMAL |
 | no_finned_base_aug | Byrum | +7.49% | +8.90% | +1.41 | +81 | 0.75 | 0.75 | NORMAL |
 | no_finned_base_aug | Cancer Descending | -2.33% | +3.62% | +5.95 | +368 | 0.56 | 0.57 | NORMAL |
@@ -149,9 +149,9 @@ This is the AST manuscript's model-mechanism (causal-evidence) ablation. Each mu
 | no_datcom_fin_wave_drag | Ion Drive | -3.71% | -3.71% | +0.00 | +0 | 0.79 | 0.79 | NORMAL |
 | no_datcom_fin_wave_drag | Raven | +7.64% | +7.70% | +0.06 | +5 | 1.07 | 1.07 | NORMAL |
 | no_datcom_fin_wave_drag | Thunder & Lightning | +8.37% | +8.37% | +0.00 | +0 | 0.54 | 0.54 | NORMAL |
-| no_datcom_fin_wave_drag | Blister | -8.40% | -8.40% | -0.00 | -0 | 0.83 | 0.83 | NORMAL |
+| no_datcom_fin_wave_drag | Blister | -8.40% | -8.40% | +0.00 | +0 | 0.83 | 0.83 | NORMAL |
 | no_datcom_fin_wave_drag | Rabia | -6.53% | -6.45% | +0.07 | +9 | 1.14 | 1.14 | NORMAL |
-| no_datcom_fin_wave_drag | Rabia Short Fin Can | -6.31% | -6.31% | +0.00 | +0 | 0.86 | 0.86 | NORMAL |
+| no_datcom_fin_wave_drag | Rabia Short Fin Can | -6.31% | -6.31% | -0.00 | -0 | 0.86 | 0.86 | NORMAL |
 | no_datcom_fin_wave_drag | Torrent | -2.75% | -2.53% | +0.22 | +28 | 1.22 | 1.22 | NORMAL |
 | no_datcom_fin_wave_drag | Caliber Isp 04 Team 3 | -1.90% | -1.90% | +0.00 | +0 | 0.64 | 0.64 | NORMAL |
 | no_datcom_fin_wave_drag | Caliber Isp 04 Team 1 | +3.21% | +3.21% | +0.00 | +0 | 0.66 | 0.66 | NORMAL |
@@ -178,4 +178,4 @@ Each mutation reverts a single calculator mechanism to its pre-supersonic-uplift
 - **no_finned_base_aug** (Finned-body base augmentation disabled): avg |err| changes from 4.65% to 8.86% (signed delta +8.10 pp, max |delta| 39.50 pp, abnormal 0/24).
 - **no_datcom_fin_wave_drag** (DATCOM 4.1.5.1 fin wave drag disabled): avg |err| changes from 4.65% to 4.57% (signed delta +0.39 pp, max |delta| 1.92 pp, abnormal 0/24).
 
-Mutations with negligible aggregate delta are not regressions — they indicate the mechanism is dormant on this corpus (e.g., DATCOM fin wave drag is small compared to body wave drag, or the K1 floor only fires on the few low-AR swept fins). The per-case delta table identifies the rockets where each mechanism is load-bearing.
+Mutations with negligible aggregate delta are not regressions â€” they indicate the mechanism is dormant on this corpus (e.g., DATCOM fin wave drag is small compared to body wave drag, or the K1 floor only fires on the few low-AR swept fins). The per-case delta table identifies the rockets where each mechanism is load-bearing.

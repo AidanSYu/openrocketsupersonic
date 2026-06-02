@@ -1,13 +1,13 @@
 regime,predictor,n,bias,bias_sq,variance,mse,bias_frac
-Subsonic,OpenRocket Plus,9,2.5356,6.4290,16.9421,23.3712,0.2751
-Subsonic,RASAero II,9,3.6056,13.0000,29.9757,42.9758,0.3025
-Transonic,OpenRocket Plus,7,-3.6571,13.3747,24.6347,38.0094,0.3519
-Transonic,RASAero II,7,-1.3329,1.7765,27.5124,29.2889,0.0607
-Low supersonic,OpenRocket Plus,5,1.8260,3.3343,26.0239,29.3582,0.1136
-Low supersonic,RASAero II,5,1.8720,3.5044,27.7637,31.2681,0.1121
-High supersonic,OpenRocket Plus,4,-3.9750,15.8006,6.5737,22.3743,0.7062
-High supersonic,RASAero II,4,3.8850,15.0932,27.7093,42.8025,0.3526
+Subsonic,OpenRocket Plus,9,2.5355,6.4287,16.9404,23.3691,0.2751
+Subsonic,RASAero II,9,3.8598,14.8981,33.2138,48.1119,0.3097
+Transonic,OpenRocket Plus,7,-3.6574,13.3765,24.6164,37.9929,0.3521
+Transonic,RASAero II,7,-0.3569,0.1274,25.9808,26.1081,0.0049
+Low supersonic,OpenRocket Plus,5,1.8261,3.3346,26.0181,29.3528,0.1136
+Low supersonic,RASAero II,5,3.1814,10.1215,19.4397,29.5613,0.3424
+High supersonic,OpenRocket Plus,4,-3.9771,15.8170,6.5962,22.4132,0.7057
+High supersonic,RASAero II,4,3.3243,11.0512,38.6733,49.7245,0.2222
 Hypersonic,OpenRocket Plus,0,,,,,
 Hypersonic,RASAero II,0,,,,,
-All,OpenRocket Plus,25,-0.3820,0.1459,28.3619,28.5078,0.0051
-All,RASAero II,25,1.9208,3.6895,33.0847,36.7742,0.1003
+All,OpenRocket Plus,25,-0.3824,0.1462,28.3613,28.5075,0.0051
+All,RASAero II,25,2.4578,6.0407,32.4581,38.4987,0.1569

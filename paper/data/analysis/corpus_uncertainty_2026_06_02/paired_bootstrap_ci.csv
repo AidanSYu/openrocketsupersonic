@@ -1,2 +1,2 @@
 comparison,n_paired,point,ci_lo,ci_hi,wilcoxon_W,wilcoxon_p
-mean(|ORP err|) - mean(|RAS err|) (pp),25,-0.64,-1.942,0.644,141.0,0.5782
+mean(|ORP err|) - mean(|RAS err|) (pp),25,-0.598,-2.16,0.962,143.0,0.615

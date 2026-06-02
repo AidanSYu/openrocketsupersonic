@@ -1,0 +1,129 @@
+% =====================================================================
+% Paper 1 (flagship) — AIAA Journal of Spacecraft and Rockets
+% Class: new-aiaa (CTAN; MiKTeX auto-installs on first compile)
+% Build:  latexmk -pdf jsr_paper.tex   (or pdflatex x2 + bibtex)
+%
+% HONEST CANONICAL NUMBERS (regenerated from rocket-flight-database/flight_comparison.csv
+% via analyze.py + uncertainty_quantification.py — do NOT hand-edit; pull from artifacts):
+%   Corpus: 25 flights, Mach 0.54–4.33 (24 single-stage amateur/SACup + MESOS 293K 2-stage)
+%   Mean signed apogee error  = -0.38 %   (95% bootstrap CI [-2.41, +1.72])
+%   Sample sigma = 5.44 %, RMSE = 5.34 %, MAE = 4.74 %, within +/-10 % = 25/25, within +/-5 % = 14/25
+%   Dev-lock (10, tuned-on):    mean +1.84 %, |err| 5.56 %
+%   Prospective holdout (15):   mean -1.86 %, |err| 4.20 %   <-- BETTER than dev-lock => generalizes
+%   MESOS 293K: -6.95 % (true HEAD value; the stale -0.6 % is NOT reproducible)
+%   vs RASAero II (n=25 paired): |ORP|-|RAS| = -0.64 pp [CI -1.94,+0.64], Wilcoxon p=0.578 (no sig diff)
+%
+% AUDIT FIXES TO APPLY WHILE FILLING (do not lose these):
+%   [F1]  Title/scope: validated SUPERSONIC to M4.33; hypersonic = method capability + EXPLORATORY only
+%   [F2]  §1.2 add Missile DATCOM (Vukelich/Blake) + RASAero + Box/Niskanen OpenRocket as prior art
+%   [F3]  §1.4 contributions: integrated pre-pass architecture + reproducible OSS + 25-flight corpus;
+%         quantify pre-pass on/off integrated apogee benefit (ablation, new result)
+%   [F4]  §3.5 fix Van Driest Eq (17): B = (1 + r(g-1)M^2/2 - Tw/Te)/(Tw/Te); add Hopkins Fc/Ftheta anchor
+%   [F5]  §4.3 base drag: REMOVE fabricated "Devan-Ashwood" cite; attribute to ESDU 77021 / NACA TN 3393
+%   [F6]  §6.2 resolve [CITE:CHECK] tokens (AGARD-B, vortex Kv) or downgrade out of "A-level" count;
+%         use TRUE component MAPEs (Basic Finner ~11.8 %, hypersonic cone ~17.6 %) — verify from test output
+%   [F7]  §6.3 ADD in-sample disclosure: THICK_BL_K, SLENDER_BODY_K are B-level corpus-frozen
+%         (Raven/Rabia/Kinsel), so headline is partly in-sample; counter with holdout generalization
+%   [F8]  §8 rewrite to 25-flight honest numbers; dev/holdout split; bootstrap CIs;
+%         post-flight-tuned RAS disclosure (MESOS, AeroPac 104K); replace "statistically indistinguishable"
+%         with CI-straddles-zero / TOST framing + low-power caveat
+%   [F9]  §8.1 corpus construction: state explicit inclusion rule; sounding rockets -> EXPLORATORY (§ new)
+%   [F10] new exploratory section: all 20 sounding rockets (Nike-Apache +24..+36%, Arcas/HEROS -29..-69%),
+%         honest high-Mach limitation + future work
+%   [F11] Data/Code Availability: fix DOI 10.5281/zenodo.19976138 (concept), real GitHub URL
+%         (AidanSYu/openrocketsupersonic), real release tag (mint before submission); RFD DOI ...138
+%   [F12] §9 add in-sample + selection/exploratory limitations; fix heterogeneous-truth claim
+% =====================================================================
+\documentclass[journal]{new-aiaa}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage[version=4]{mhchem}
+\usepackage{longtable,tabularx}
+
+\title{A Shock-Geometry Pre-Pass for Supersonic Rocket Aerodynamic Prediction and Flight Validation}
+
+\author{Aidan Yu\footnote{Duke University; corresponding author.}}
+\affil{Duke University, Durham, North Carolina, USA}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+OpenRocket, the most widely used open-source rocketry flight simulator, is
+restricted to subsonic aerodynamics. We extend its semi-empirical Barrowman
+framework to compressible flight through a once-per-timestep \emph{shock-geometry
+pre-pass} that resolves local post-shock flow conditions along the airframe and
+exposes them to every downstream drag, normal-force, and stability calculator.
+The pre-pass unifies classical compressible methods---Taylor--Maccoll cone flow,
+Prandtl--Meyer expansion, oblique and normal shock relations, Van~Driest~II
+skin friction, the DATCOM fin wave-drag method, and Modified Newtonian impact
+pressure---within a single open implementation. Twenty-one component models are
+verified against wind-tunnel and computational references (NACA Report~1135,
+RM~A52H28, TN~3393, AGARD-B, and published URANS and Navier--Stokes solutions).
+The integrated simulator is validated against a 25-flight ground-truth corpus
+spanning Mach~0.54 to~4.33---24 single-stage amateur high-power flights and one
+two-stage closure (MESOS~293K). The mean signed apogee error is $-0.38\%$
+(95\% bootstrap confidence interval $[-2.41, +1.72]$) with root-mean-square
+error $5.34\%$, and all 25~flights fall within $\pm10\%$ of measured apogee. On
+a 15-flight prospective holdout the model is \emph{more} accurate (mean absolute
+error $4.20\%$) than on the 10 development flights ($5.56\%$), indicating that
+the two corpus-frozen base-drag constants generalize rather than overfit.
+Against RASAero~II on the 25 paired flights there is no statistically significant
+difference in absolute error (Wilcoxon $p = 0.58$). High-Mach sounding-rocket
+prediction is reported separately as exploratory: of 20 historical flights only
+three fall within $\pm10\%$, with systematic motor- and geometry-reconstruction
+errors elsewhere. All source code, the flight database, and the analysis scripts
+are released for end-to-end reproduction.
+\end{abstract}
+
+% ---------------------------------------------------------------------
+\section*{Nomenclature}
+% [FILL] port from JSR_PAPER.md Nomenclature; keep AIAA two-column nomenclature style
+\input{sections/00_nomenclature}
+
+% ---------------------------------------------------------------------
+\section{Introduction}                       % [FILL §1] + [F2] prior art (Missile DATCOM) + [F3] contributions
+\input{sections/01_introduction}
+
+\section{Shock-Geometry Pre-Pass Architecture}  % [FILL §2] + [F3] pre-pass on/off ablation result
+\input{sections/02_prepass}
+
+\section{Atmosphere, Compressibility, and Shock Relations}  % [FILL §3] + [F4] fix Eq (17)
+\input{sections/03_atmosphere_shocks}
+
+\section{Drag Models}                        % [FILL §4] + [F5] remove Devan-Ashwood cite
+\input{sections/04_drag}
+
+\section{Stability and Dynamic Stability Models}  % [FILL §5]
+\input{sections/05_stability}
+
+\section{Subsystem Benchmark Roll-Up}        % [FILL §6] + [F6] true MAPEs/CITE:CHECK + [F7] in-sample disclosure
+\input{sections/06_benchmarks}
+
+\section{Validation Against Published Computational Fluid Dynamics}  % [FILL §7]
+\input{sections/07_cfd}
+
+\section{Flight-Corpus Integration Test}     % [FILL §8] + [F8] honest 25-flight + holdout + CIs + RAS disclosure
+\input{sections/08_corpus}
+
+\section{Exploratory High-Mach Sounding-Rocket Results}  % [F10] new honest exploratory section
+\input{sections/09_exploratory}
+
+\section{Limitations and Honest Disclosures} % [FILL §9] + [F12] in-sample + selection limitations
+\input{sections/10_limitations}
+
+\section{Conclusions and Future Work}        % [FILL §10]
+\input{sections/11_conclusions}
+
+% ---------------------------------------------------------------------
+\section*{Acknowledgments}
+\input{sections/12_backmatter}              % acks + Data/Code Availability [F11] + AI disclosure
+
+\bibliographystyle{new-aiaa}
+\bibliography{jsr_paper}
+
+\end{document}
