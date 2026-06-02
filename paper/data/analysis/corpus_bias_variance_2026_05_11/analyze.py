@@ -1,5 +1,5 @@
 """
-Corpus bias-variance analysis for the OpenRocket Plus 28-flight validation corpus.
+Corpus bias-variance analysis for the OpenRocket Plus 25-flight validation corpus.
 
 Reproducibly produces all artifacts in this directory:
 - regime_breakdown.csv / regime_breakdown.png
@@ -9,7 +9,7 @@ Reproducibly produces all artifacts in this directory:
 - error_vs_mach.png
 - corpus_bias_variance_summary.md
 
-Source: rocket-flight-database/flight_comparison.csv (28 flights).
+Source: rocket-flight-database/flight_comparison.csv (25 flights).
 """
 
 from __future__ import annotations
@@ -597,7 +597,7 @@ def plot_error_vs_mach(df: pd.DataFrame, out_path: Path) -> None:
     ax.scatter(ras_x, ras_y, color=RAS_COLOR, edgecolor="black", linewidth=0.45,
                s=55, marker="^", zorder=4, label="RASAero II")
 
-    # Polynomial trend lines (deg=2 for ORP using all 28 flights; deg=2 for RAS using its 25)
+    # Polynomial trend lines (deg=2 for ORP using all flights; deg=2 for RAS using its 25)
     xg, yg = poly_trend(orp_x, orp_y, degree=2)
     if xg.size:
         ax.plot(xg, yg, color=ORP_COLOR, linewidth=1.3, alpha=0.85)
@@ -610,13 +610,12 @@ def plot_error_vs_mach(df: pd.DataFrame, out_path: Path) -> None:
     ax.text(1.05, ax.get_ylim()[1] - 1.5, "Tran.", ha="center", va="top", fontsize=9, color="#555555")
     ax.text(2.15, ax.get_ylim()[1] - 1.5, "Low supersonic", ha="center", va="top", fontsize=9, color="#555555")
     ax.text(4.0, ax.get_ylim()[1] - 1.5, "High supersonic", ha="center", va="top", fontsize=9, color="#555555")
-    ax.text(6.5, ax.get_ylim()[1] - 1.5, "Hypersonic", ha="center", va="top", fontsize=9, color="#555555")
 
     ax.set_xlabel("Peak Mach number")
     ax.set_ylabel("Signed apogee error (%)")
-    ax.set_title("Apogee error vs. peak Mach (28-flight validation corpus)")
+    ax.set_title("Apogee error vs. peak Mach (validation corpus)")
     ax.legend(loc="lower right")
-    ax.set_xlim(0.3, max(orp_x.max(), 7.5) + 0.3)
+    ax.set_xlim(0.3, orp_x.max() + 0.4)
     fig.tight_layout()
     fig.savefig(out_path)
     plt.close(fig)
@@ -638,7 +637,7 @@ def regime_markdown_table(regime_df: pd.DataFrame) -> str:
         "Low supersonic":  "1.3 < M ≤ 3.0",
         "High supersonic": "3.0 < M ≤ 5.0",
         "Hypersonic":      "M > 5.0",
-        "All":             "M 0.54–7.22",
+        "All":             "full corpus",
     }
     for r in regimes_in_order:
         for predictor in ("OpenRocket Plus", "RASAero II"):
@@ -743,26 +742,35 @@ def write_summary(
     losses = paired_stats["ras_wins"]
     ties = paired_stats["ties"]
 
+    # Derive corpus size and Mach span from the data so the prose can never drift
+    # from the CSV (the headline corpus is 25 flights, Mach 0.54-4.33; sounding
+    # rockets are reported separately as exploratory and are NOT in this file).
+    n_total = int(s_orp["n"])
+    n_paired = int(len(paired))
+    mach_lo = float(paired["peak_mach"].min())
+    mach_hi = float(paired["peak_mach"].max())
+    span_str = f"{mach_lo:.2f}–{mach_hi:.2f}"
+
     md = []
-    md.append("# Corpus Bias-Variance Analysis — 28-flight Validation Corpus")
+    md.append(f"# Corpus Bias-Variance Analysis — {n_total}-flight Validation Corpus")
     md.append("")
     md.append("**Source:** `rocket-flight-database/flight_comparison.csv`  ")
     md.append("**Generated:** 2026-05-11  ")
-    md.append("**Mach span:** 0.54 – 7.22 (peak)  ")
-    md.append(f"**N flights:** 28 total — OpenRocket Plus n={s_orp['n']}, RASAero II n={s_ras['n']}")
+    md.append(f"**Mach span:** {span_str} (peak)  ")
+    md.append(f"**N flights:** {n_total} total — OpenRocket Plus n={s_orp['n']}, RASAero II n={s_ras['n']}")
     md.append("")
     orp_norm_str = normality_verdict(norm_orp)
     md.append("## TL;DR")
     md.append("")
     md.append(
-        f"Across all 28 flights, OpenRocket Plus apogee error is essentially zero-mean "
+        f"Across all {n_total} flights, OpenRocket Plus apogee error is essentially zero-mean "
         f"({s_orp['mean']:+.2f}%) with σ={s_orp['std']:.2f}% "
         f"(RMSE={s_orp['rmse']:.2f}%, MAE={s_orp['mae']:.2f}%) and {orp_n_within10}/{s_orp['n']} "
         f"flights ({orp_pct_within10:.0f}%) within ±10%; "
         f"the error distribution is light-tailed and mildly right-skewed "
         f"(skew={norm_orp['skew']:+.2f}, excess kurtosis={norm_orp['excess_kurtosis']:+.2f}), "
         f"and Shapiro–Wilk rejects normality at α=0.05 (p={norm_orp['shapiro_p']:.3f}). "
-        "On the 25 paired flights, OpenRocket Plus and RASAero II agree to within "
+        f"On the {n_paired} paired flights, OpenRocket Plus and RASAero II agree to within "
         f"±{1.96 * (paired['err_thiswork_pct'] - paired['err_rasaero_pct']).std(ddof=1):.1f}% "
         f"(Bland-Altman 1.96σ) with {significance} difference in |error| "
         f"(Wilcoxon p={wilcoxon_p:.3f}). "
@@ -835,7 +843,7 @@ def write_summary(
     )
     md.append("")
 
-    md.append("## 4. Paired predictor comparison (n=25 flights with both)")
+    md.append(f"## 4. Paired predictor comparison (n={n_paired} flights with both)")
     md.append("")
     md.append(f"- Median Δ(|ORP|−|RAS|) = {paired_stats['median_diff_abs_pp']:+.2f} pp")
     md.append(f"- Mean Δ(|ORP|−|RAS|) = {paired_stats['mean_diff_abs_pp']:+.2f} pp")
@@ -867,7 +875,7 @@ def write_summary(
 
     md.append("## Pull quotes (for the JSR results section)")
     md.append("")
-    md.append(f"> The combined 28-flight corpus mean OpenRocket Plus apogee error is "
+    md.append(f"> The combined {n_total}-flight corpus mean OpenRocket Plus apogee error is "
               f"{s_orp['mean']:+.2f}% with σ={s_orp['std']:.2f}% "
               f"(RMSE={s_orp['rmse']:.2f}%); {orp_n_within10}/{s_orp['n']} flights agree with "
               f"flight measurement to within ±10%.")
@@ -878,38 +886,45 @@ def write_summary(
               f"per-flight variance ({sub_orp['variance']:.2f} %²), indicating that the "
               "subsonic Barrowman + Van Driest II baseline carries minimal systematic offset.")
     md.append("")
-    hyp_orp = bv_df[(bv_df["regime"] == "Hypersonic") & (bv_df["predictor"] == "OpenRocket Plus")].iloc[0]
     hs_orp = bv_df[(bv_df["regime"] == "High supersonic") & (bv_df["predictor"] == "OpenRocket Plus")].iloc[0]
     hs_orp_reg = regime_df[(regime_df["regime"] == "High supersonic") & (regime_df["predictor"] == "OpenRocket Plus")].iloc[0]
     md.append(f"> In the high-supersonic regime (3.0 < M ≤ 5.0, n={int(hs_orp['n'])}) "
-              f"OpenRocket Plus shows mean bias {hs_orp['bias']:+.2f}% with sample σ={hs_orp_reg['std']:.2f}%, "
-              f"while at M > 5 (n={int(hyp_orp['n'])}) the mean error is {hyp_orp['bias']:+.2f}% — "
-              "a useful but provisional result given that RASAero II provides no coverage above "
-              "M≈5 and only two flights in the present corpus strictly exceed M = 5 "
-              "(Nike-Deacon flight 2 at M = 5.08 and Black Brant V at M = 7.22).")
+              f"OpenRocket Plus shows mean bias {hs_orp['bias']:+.2f}% with sample σ={hs_orp_reg['std']:.2f}%. "
+              f"The headline corpus tops out at Mach {mach_hi:.2f} (MESOS 293K, the two-stage closure). "
+              "High-Mach sounding-rocket flights are reported separately as an exploratory set "
+              "(`sounding_rockets_exploratory.csv`) where motor/geometry reconstruction uncertainty "
+              "drives large systematic errors; they are excluded from this validated headline corpus.")
     md.append("")
 
     md.append("## Honest limitations")
     md.append("")
     md.append(
-        "- **Corpus composition.** 24 of 28 flights are amateur HPR launches benchmarked in "
-        "Rogers' RASAero II comparison set; the 4 sounding-rocket trajectories (Black Brant V, "
-        "Nike-Deacon ×2, MESOS) supply all high-Mach coverage. Most flights cluster at M < 1.3 "
-        "(the regime where OpenRocket has historically been calibrated), so corpus-mean "
-        "metrics are dominated by subsonic behavior."
+        f"- **Corpus composition.** 24 of {n_total} flights are amateur HPR launches benchmarked "
+        "in Rogers' RASAero II comparison set; MESOS 293K is the one two-stage closure (the "
+        f"highest-Mach flight at M {mach_hi:.2f}). Most flights cluster at M < 1.3 (the regime "
+        "where OpenRocket has historically been calibrated), so corpus-mean metrics are dominated "
+        "by subsonic behavior. High-Mach sounding rockets are deliberately excluded from the "
+        "headline (see *Scope*) and reported as exploratory only."
     )
     md.append(
-        "- **Asymmetric predictor coverage.** RASAero II has only n=25 because its validity "
-        "ends below M ≈ 5; the three flights not covered by RASAero (Black Brant V at M=7.22, "
-        "Nike-Deacon flights 1 & 2 at M=4.96 and 5.08) are evaluated against OpenRocket Plus "
-        "only. Cross-predictor comparisons must therefore be restricted to the paired n=25 subset."
+        f"- **In-sample base-drag constants.** Two B-level scale constants (THICK_BL_K, "
+        "SLENDER_BODY_K) are corpus-frozen on Raven/Rabia/Kinsel, which remain in the corpus, so "
+        "the headline is partly in-sample. Generalization is shown by the prospective holdout: "
+        "the 15 untuned holdout flights (mean |err| 4.20%) are MORE accurate than the 10 "
+        "development-lock flights (5.56%)."
     )
     md.append(
-        "- **Sparse high-Mach data.** Only 2 flights strictly exceed M=5 (Nike-Deacon flight 2 "
-        "at M=5.08 and Black Brant V at M=7.22) and only 5 flights fall in 3 < M ≤ 5. "
-        "Per-regime statistics above M=3 are descriptive, not inferential — no claim of "
-        "statistical significance is made for the supersonic / hypersonic bias estimates "
-        "and a single outlier could move the regime mean by several percentage points."
+        "- **Post-flight-tuned RASAero references.** Per Rogers' source notes, the RASAero II "
+        "apogees for MESOS 293K and AeroPac 104K are post-flight simulations (ignition delay / "
+        "launch angle adjusted to match flight), so the head-to-head on those two flights is not "
+        "a blind forward comparison and is flagged as such."
+    )
+    md.append(
+        f"- **Sparse high-Mach data.** No flight exceeds M=5 in the headline corpus (MESOS at "
+        f"M {mach_hi:.2f} is the maximum); only a handful fall in 3 < M ≤ 5. Per-regime statistics "
+        "above M=3 are descriptive, not inferential — no claim of statistical significance is made "
+        "for the supersonic bias estimates and a single outlier could move the regime mean by "
+        "several percentage points."
     )
     md.append(
         "- **Heterogeneous truth sources.** Apogee ground truth ranges from barometric "
