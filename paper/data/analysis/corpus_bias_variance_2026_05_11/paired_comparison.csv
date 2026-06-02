@@ -1,26 +1,26 @@
 flight_id,vehicle_name,motor,peak_mach,regime,err_rasaero_pct,err_thiswork_pct,abs_err_rasaero,abs_err_thiswork,abs_err_diff,winner
-1,Thunder & Lightning,I284W (AT),0.5400,Subsonic,11.5200,8.3900,11.5200,8.3900,-3.1300,OpenRocket Plus
-2,Gibb,I284W (AT),0.5500,Subsonic,7.4600,1.9400,7.4600,1.9400,-5.5200,OpenRocket Plus
-3,Cancer Descending,M1297W (AT),0.5600,Subsonic,2.2600,-2.3300,2.2600,2.3300,0.0700,RASAero II
-4,EZI-65 J450ST,J450ST (AMW),0.6000,Subsonic,6.2800,4.8700,6.2800,4.8700,-1.4100,OpenRocket Plus
-5,Caliber Isp 04 AVTC Team 2,I205 (CTI),0.6400,Subsonic,4.4700,4.8500,4.4700,4.8500,0.3800,RASAero II
-6,Caliber Isp 04 AVTC Team 3,I205 (CTI),0.6400,Subsonic,-2.2200,-1.8900,2.2200,1.8900,-0.3300,OpenRocket Plus
-7,Caliber Isp 04 AVTC Team 1,I205 (CTI),0.6600,Subsonic,2.8900,3.2100,2.8900,3.2100,0.3200,RASAero II
-8,Byrum,J570W (AT),0.7500,Subsonic,-7.8700,7.4800,7.8700,7.4800,-0.3900,OpenRocket Plus
-9,Ion Drive,K550W (AT),0.7900,Subsonic,7.6600,-3.7000,7.6600,3.7000,-3.9600,OpenRocket Plus
-10,Caliber Isp 05 ARO-414 (Discovery),I285 (CTI),0.8100,Transonic,-1.9100,-3.2000,1.9100,3.2000,1.2900,RASAero II
-11,Blister,K1075GG (AMW),0.8300,Transonic,-8.0300,-8.4000,8.0300,8.4000,0.3700,RASAero II
-12,Caliber Isp 05 ARO-414 (Columbia),I285 (CTI),0.8400,Transonic,-4.6800,-6.0600,4.6800,6.0600,1.3800,RASAero II
-13,Rabia - Short Fin Can,L730 (CTI),0.8600,Transonic,-3.3900,-6.3100,3.3900,6.3100,2.9200,RASAero II
-14,Raven,J570W (AT),1.0700,Transonic,5.8700,7.6500,5.8700,7.6500,1.7800,RASAero II
-15,Rabia,L1080BB (AMW),1.1400,Transonic,-4.3000,-6.5300,4.3000,6.5300,2.2300,RASAero II
-16,Torrent,M1850GG (AMW),1.2200,Transonic,7.1100,-2.7500,7.1100,2.7500,-4.3600,OpenRocket Plus
-17,Kline-Rogers L500,L500 (Ace),1.9800,Low supersonic,7.0200,-2.3900,7.0200,2.3900,-4.6300,OpenRocket Plus
-18,A-601 Kinsel,P4935,2.1900,Low supersonic,-3.9100,8.7200,3.9100,8.7200,4.8100,RASAero II
-19,Full Metal Jacket - BALLS 005,O10000 (Kosdon),2.3100,Low supersonic,2.0800,-1.9100,2.0800,1.9100,-0.1700,OpenRocket Plus
-20,Full Metal Jacket - Black Rock 6,O10000 (Kosdon),2.4600,Low supersonic,8.3600,-2.6600,8.3600,2.6600,-5.7000,OpenRocket Plus
-21,Proteus 6,P9381 (Loki-EX),2.8700,Low supersonic,-4.1900,7.3700,4.1900,7.3700,3.1800,RASAero II
-22,AeroPac 104K Two-Stage,N1048 / M685W (AT),3.0400,High supersonic,8.7200,-1.0100,8.7200,1.0100,-7.7100,OpenRocket Plus
-23,Don't Debate This,N5800 (CTI),3.0400,High supersonic,9.5600,-6.0500,9.5600,6.0500,-3.5100,OpenRocket Plus
-24,Qu8k,Qu8k,3.4600,High supersonic,-1.4800,-1.8900,1.4800,1.8900,0.4100,RASAero II
-25,MESOS 293K,O4374 / M787 (KIP-EX),4.3300,High supersonic,-1.2600,-6.9500,1.2600,6.9500,5.6900,RASAero II
+1,Thunder & Lightning,I284W (AT),0.5400,Subsonic,11.5180,8.3869,11.5180,8.3869,-3.1311,OpenRocket Plus
+2,Gibb,I284W (AT),0.5500,Subsonic,10.1457,1.9422,10.1457,1.9422,-8.2034,OpenRocket Plus
+3,Cancer Descending,M1297W (AT),0.5600,Subsonic,2.2624,-2.3271,2.2624,2.3271,0.0646,RASAero II
+4,EZI-65 J450ST,J450ST (AMW),0.6000,Subsonic,6.2799,4.8676,6.2799,4.8676,-1.4124,OpenRocket Plus
+5,Caliber Isp 04 AVTC Team 2,I205 (CTI),0.6400,Subsonic,4.3396,4.8518,4.3396,4.8518,0.5121,RASAero II
+6,Caliber Isp 04 AVTC Team 3,I205 (CTI),0.6400,Subsonic,-2.3461,-1.8920,2.3461,1.8920,-0.4541,OpenRocket Plus
+7,Caliber Isp 04 AVTC Team 1,I205 (CTI),0.6600,Subsonic,2.7626,3.2056,2.7626,3.2056,0.4431,RASAero II
+8,Byrum,J570W (AT),0.7500,Subsonic,-7.8856,7.4843,7.8856,7.4843,-0.4013,OpenRocket Plus
+9,Ion Drive,K550W (AT),0.7900,Subsonic,7.6616,-3.7000,7.6616,3.7000,-3.9616,OpenRocket Plus
+10,Caliber Isp 05 ARO-414 (Discovery),I285 (CTI),0.8100,Transonic,-2.0081,-3.2049,2.0081,3.2049,1.1968,RASAero II
+11,Blister,K1075GG (AMW),0.8300,Transonic,-7.5227,-8.3980,7.5227,8.3980,0.8752,RASAero II
+12,Caliber Isp 05 ARO-414 (Columbia),I285 (CTI),0.8400,Transonic,-4.7788,-6.0570,4.7788,6.0570,1.2783,RASAero II
+13,Rabia - Short Fin Can,L730 (CTI),0.8600,Transonic,-1.9652,-6.3114,1.9652,6.3114,4.3462,RASAero II
+14,Raven,J570W (AT),1.0700,Transonic,5.3659,7.6461,5.3659,7.6461,2.2802,RASAero II
+15,Rabia,L1080BB (AMW),1.1400,Transonic,0.2511,-6.5281,0.2511,6.5281,6.2770,RASAero II
+16,Torrent,M1850GG (AMW),1.2200,Transonic,8.1596,-2.7485,8.1596,2.7485,-5.4111,OpenRocket Plus
+17,Kline-Rogers L500,L500 (Ace),1.9800,Low supersonic,6.9194,-2.3899,6.9194,2.3899,-4.5295,OpenRocket Plus
+18,A-601 Kinsel,P4935,2.1900,Low supersonic,-3.9396,8.7162,3.9396,8.7162,4.7766,RASAero II
+19,Full Metal Jacket - BALLS 005,O10000 (Kosdon),2.3100,Low supersonic,2.2090,-1.9088,2.2090,1.9088,-0.3002,OpenRocket Plus
+20,Full Metal Jacket - Black Rock 6,O10000 (Kosdon),2.4600,Low supersonic,8.6823,-2.6600,8.6823,2.6600,-6.0224,OpenRocket Plus
+21,Proteus 6,P9381 (Loki-EX),2.8700,Low supersonic,2.0360,7.3730,2.0360,7.3730,5.3370,RASAero II
+22,AeroPac 104K Two-Stage,N1048 / M685W (AT),3.0400,High supersonic,8.7207,-1.0099,8.7207,1.0099,-7.7108,OpenRocket Plus
+23,Don't Debate This,N5800 (CTI),3.0400,High supersonic,10.1373,-6.0506,10.1373,6.0506,-4.0868,OpenRocket Plus
+24,Qu8k,Q18000 (Deville-EX),3.4600,High supersonic,-4.3004,-1.8859,4.3004,1.8859,-2.4144,OpenRocket Plus
+25,MESOS 293K,O4374 / M787 (KIP-EX),4.3300,High supersonic,-1.2604,-6.9618,1.2604,6.9618,5.7014,RASAero II

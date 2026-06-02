@@ -80,6 +80,18 @@ REGIME_LINE_COLOR = "#666666"
 
 def load_corpus() -> pd.DataFrame:
     df = pd.read_csv(SOURCE_CSV)
+    # Recompute signed errors from the full-precision apogee columns so that
+    # results do not inherit the 1-decimal rounding stored in the published
+    # err_*_pct columns. The apogee columns are the single source of truth:
+    #   real    = apogee_real_ft        (measured ground truth, RFD-authoritative)
+    #   rasaero = apogee_rasaero_ft      (Rogers' published RASAero II prediction)
+    #   thiswork= apogee_thiswork_ft     (OpenRocket-Plus, current archived code)
+    df["err_thiswork_pct"] = (
+        (df["apogee_thiswork_ft"] - df["apogee_real_ft"]) / df["apogee_real_ft"] * 100.0
+    )
+    df["err_rasaero_pct"] = (
+        (df["apogee_rasaero_ft"] - df["apogee_real_ft"]) / df["apogee_real_ft"] * 100.0
+    )
     df["regime"] = df["peak_mach"].apply(classify_regime)
     return df
 

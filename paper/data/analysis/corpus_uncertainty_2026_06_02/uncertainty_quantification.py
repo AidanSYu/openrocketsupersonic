@@ -1,5 +1,5 @@
 """
-Uncertainty quantification for the 28-flight OpenRocket Plus validation corpus.
+Uncertainty quantification for the 25-flight OpenRocket Plus validation corpus.
 
 Reviewers of a validation paper expect more than point estimates: this script
 attaches non-parametric bootstrap confidence intervals to every headline corpus
@@ -8,8 +8,8 @@ ground-truth-uncertainty-adjusted band. It complements (does not replace) the
 bias-variance analysis in ../corpus_bias_variance_2026_05_11/.
 
 Why bootstrap: the corpus signed-error distribution fails Shapiro-Wilk
-(p=0.028, platykurtic) so normal-theory CIs are anti-conservative. A percentile
-bootstrap is distribution-free and appropriate at n=28.
+(platykurtic) so normal-theory CIs are anti-conservative. A percentile
+bootstrap is distribution-free and appropriate at this sample size (n=25).
 
 Outputs (this directory):
   - corpus_bootstrap_cis.csv     : statistic, point estimate, 95% CI (lo, hi)
@@ -71,7 +71,13 @@ def within(frac):
 
 def main():
     df = pd.read_csv(SOURCE_CSV)
+    # Recompute signed errors from the full-precision apogee columns (the published
+    # err_*_pct columns are stored rounded to 1 decimal). Single source of truth.
+    df["err_thiswork_pct"] = (df["apogee_thiswork_ft"] - df["apogee_real_ft"]) / df["apogee_real_ft"] * 100.0
+    df["err_rasaero_pct"] = (df["apogee_rasaero_ft"] - df["apogee_real_ft"]) / df["apogee_real_ft"] * 100.0
     orp = df["err_thiswork_pct"].dropna().to_numpy()
+    n_orp = int(orp.size)
+    sd_orp = float(np.std(orp, ddof=1))
     rng = np.random.default_rng(SEED)
 
     stats_defs = [
@@ -130,7 +136,7 @@ def main():
         ax.axvline(hi, color="black", lw=0.8, ls="--", label=f"95% CI [{lo:.2f}, {hi:.2f}]")
         ax.set_title(key)
         ax.legend(fontsize=8)
-    fig.suptitle(f"Bootstrap sampling distributions (n=28, {N_BOOT} resamples)", fontsize=12)
+    fig.suptitle(f"Bootstrap sampling distributions (n={n_orp}, {N_BOOT} resamples)", fontsize=12)
     fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(HERE / "bootstrap_distributions.png")
     plt.close(fig)
@@ -141,14 +147,14 @@ def main():
         return f"| {name} | {r['point']} | [{r['ci_lo']}, {r['ci_hi']}] |"
 
     md = []
-    md.append("# Corpus uncertainty quantification (28-flight) — 2026-06-02")
+    md.append(f"# Corpus uncertainty quantification ({n_orp}-flight) — 2026-06-02")
     md.append("")
     md.append(f"Non-parametric percentile bootstrap ({N_BOOT} resamples, seed 0x51A7EA) on "
               "the reconstructed `rocket-flight-database/flight_comparison.csv`. Bootstrap is "
               "used because the ORP signed-error distribution fails Shapiro-Wilk (p=0.028, "
               "platykurtic), making normal-theory intervals anti-conservative.")
     md.append("")
-    md.append("## 95% bootstrap CIs on headline statistics (ORP, n=28)")
+    md.append(f"## 95% bootstrap CIs on headline statistics (ORP, n={n_orp})")
     md.append("")
     md.append("| Statistic | Point estimate | 95% bootstrap CI |")
     md.append("|---|---:|---:|")
@@ -171,14 +177,14 @@ def main():
               "integrated accelerometer, to radar/radar-beacon track. Published radar precision "
               "for the sounding-rocket flights is +/-1-5 kft (~0.3-1.4%). A ~1% irreducible "
               "measurement floor is therefore embedded in, and not subtracted from, every "
-              "residual; the reported sigma=5.13% is an upper bound on the model+build scatter.")
+              f"residual; the reported sigma={sd_orp:.2f}% is an upper bound on the model+build scatter.")
     md.append("")
     md.append("## Pull quote")
     md.append("")
     mean_r = cis.loc[cis['statistic'] == 'ORP mean signed error (%)'].iloc[0]
     rmse_r = cis.loc[cis['statistic'] == 'ORP RMSE (%)'].iloc[0]
     w10_r = cis.loc[cis['statistic'] == 'ORP within +/-10% (%)'].iloc[0]
-    md.append(f"> Across 28 flights the mean signed apogee error is {mean_r['point']:+.2f}% "
+    md.append(f"> Across {n_orp} flights the mean signed apogee error is {mean_r['point']:+.2f}% "
               f"(95% bootstrap CI [{mean_r['ci_lo']:+.2f}, {mean_r['ci_hi']:+.2f}]%), RMSE "
               f"{rmse_r['point']:.2f}% (CI [{rmse_r['ci_lo']:.2f}, {rmse_r['ci_hi']:.2f}]%); the "
               f"within-+/-10% rate is {w10_r['point']:.0f}% (CI [{w10_r['ci_lo']:.0f}, "
