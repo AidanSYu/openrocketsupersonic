@@ -1,0 +1,240 @@
+% =====================================================================
+% Section 2 body fragment — Shock-Geometry Pre-Pass Architecture
+% Parent jsr_paper.tex declares \section{Shock-Geometry Pre-Pass Architecture}
+% Numbers sourced from _DRAFTING_BRIEF.md (authoritative). [F3] honest framing applied.
+% =====================================================================
+
+This section presents the architectural contribution that distinguishes the
+present work from prior Barrowman-pipeline open-source simulators. The
+shock-geometry pre-pass is a once-per-timestep nose-to-tail surface march that
+publishes the post-shock local Mach number, static pressure, and static
+temperature at every component station before any downstream drag or stability
+calculator runs. Subsequent sections consume those local conditions through a
+stable query interface. The architectural value of the pre-pass lies in local
+post-shock fidelity and in providing a single seam through which all of the
+supersonic submodels of Sections~3--5 are driven; as quantified in
+Section~\ref{subsec:prepass-ablation}, its contribution to \emph{integrated}
+apogee is small, because apogee integrates a trajectory whose drag impulse is
+dominated by lower-Mach flight.
+
+\subsection{Motivation}
+
+The freestream Mach number governs aerodynamic-coefficient behavior only when
+the flow over each component is unprocessed by upstream shocks and expansions.
+On a slender finned rocket at moderate supersonic Mach this assumption breaks at
+the first body shoulder: the conical or ogival nose shock processes the flow
+before it reaches the cylindrical afterbody, the fins, and the base. A
+\SI{15}{\degree} cone at freestream Mach~2.5, for instance, leaves the
+post-shock surface Mach near 2.16---a fourteen-percent reduction. Because the
+Prandtl--Glauert compressibility factor $\beta = \sqrt{|M^2 - 1|}$ is nonlinear,
+that fourteen-percent Mach reduction translates to roughly an eighteen-percent
+change in the fin lift-curve-slope coefficient $K_1 = 2/\beta$. Similar effects
+propagate through fin wave drag, fin--body interference, and base-region inflow
+conditions. Evaluating every downstream coefficient at the freestream Mach
+therefore introduces a systematic bias in the \emph{local} aerodynamic loads,
+even where its effect on the integrated trajectory is modest.
+
+Closed-source missile aerodynamic codes such as Missile~DATCOM and the
+Aeroprediction lineage~\cite{sooy2005,moore2001,mooremcinvillehymer2002} handle
+post-shock local conditions internally as part of their coefficient generators
+but do not expose them as a shared architectural seam. Open-source rocket
+simulators do not address the local-flow question at all: OpenRocket and
+RocketPy evaluate every component at the freestream
+Mach~\cite{niskanen2009,rocketpy2021}. The present pre-pass makes the
+post-shock state an explicit, queryable object shared by every downstream
+calculator within an open six-degree-of-freedom trajectory simulator.
+
+\subsection{Data flow}
+\label{subsec:prepass-dataflow}
+
+The pre-pass executes once per call to the top-level aerodynamic-forces routine,
+immediately after the \texttt{FlightConditions} object is populated and before
+any per-component calculator runs. It produces a \texttt{ShockGeometry} object
+indexed by axial station; each downstream calculator queries that object for its
+local post-shock state. The data path is summarized below:
+
+\begin{quote}
+\ttfamily\small
+function getAerodynamicForces(rocket, fc):\\
+\hspace*{1.5em} shock\_geom = ShockGeometry.compute(rocket, fc)\\
+\hspace*{1.5em} forces = \{\}\\
+\hspace*{1.5em} for component in rocket.components():\\
+\hspace*{3.0em} local = shock\_geom.queryAt(component.axialStation())\\
+\hspace*{3.0em} forces[component] = calc(component, fc, local)\\
+\hspace*{1.5em} return aggregate(forces)
+\end{quote}
+
+The pre-pass is configuration-aware: it invalidates and recomputes on geometric
+changes (staging, fairing separation, side-booster jettison) but is otherwise
+pure with respect to \texttt{FlightConditions}. Below the sonic line the surface
+march short-circuits to a pass-through that returns freestream conditions at
+every station; the measured subsonic overhead is below ten microseconds per call
+on the reference hardware (single-threaded Intel Core~i7), which is below the
+measurement floor of the simulator's per-timestep budget. The full
+input/output contract is given in Table~\ref{tab:prepass-contract}.
+
+\begin{table*}[t]
+\caption{\texttt{ShockGeometry} calculator input/output contract. Subsonic
+column gives the pass-through value returned below $M_\infty = 1.0$.}
+\label{tab:prepass-contract}
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+Field & Direction & Description & Subsonic value \\
+\midrule
+\texttt{Rocket} configuration & in & Component tree, axial stations, half-angles, shoulder/boat-tail flags & passed through \\
+\texttt{FlightConditions.machNumber} & in & Freestream Mach number $M_\infty$ & passed through \\
+\texttt{FlightConditions.aoa} & in & Vehicle angle of attack (windward-side bias when present) & unused \\
+\texttt{localMach[station]} & out & Post-shock local Mach at each axial station & returns $M_\infty$ \\
+\texttt{localPressure[station]} & out & Post-shock static-pressure ratio $p/p_\infty$ & returns 1.0 \\
+\texttt{localTemperature[station]} & out & Post-shock static-temperature ratio $T/T_\infty$ & returns 1.0 \\
+\texttt{shockStandoff} & out & Detached-shock standoff distance for blunt noses & $\infty$ (no shock) \\
+\texttt{activationBlend} & out & $C^1$ blend weight $w \in [0,1]$ through $M = 1.0$--$1.1$ & returns 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Figure~\ref{fig:prepass-block} shows the data-flow block diagram.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{shockgeometry_block_diagram}
+\caption{Shock-geometry pre-pass data-flow block diagram. Once per timestep the
+pre-pass surface-marches the airframe and publishes the local post-shock Mach,
+pressure, and temperature; each component calculator queries the local state at
+its axial station before computing forces and moments.}
+\label{fig:prepass-block}
+\end{figure}
+
+\subsection{Surface marching}
+\label{subsec:prepass-march}
+
+The march initializes at the nose tip. For a sharp conical nose the inflow is
+processed through a Taylor--Maccoll cone solution~\cite{taylormaccoll1933}
+evaluated at the local tip half-angle, returning the cone-surface Mach and
+pressure as the seed state. For an ogival nose the tip slope is read as an
+instantaneous cone half-angle, and the Taylor--Maccoll seed is followed by a
+Prandtl--Meyer expansion at each subsequent strip increment. For a blunt nose a
+detached normal-shock solution seeds the post-shock state, and the surface march
+resumes around the shoulder.
+
+Body-station traversal walks downstream along the axisymmetric body, applying at
+each surface element either a Prandtl--Meyer expansion (for a contracting turning
+angle, where the surface inclination decreases relative to the freestream) or an
+oblique-shock turn (for an expanding turning angle, where the surface inclination
+increases). The branch is selected by the sign of the turning angle relative to
+the prior surface tangent; turning angles below a numerical threshold
+($10^{-9}~\mathrm{rad}$) are skipped to preserve the isentropic state.
+Boat-tails and aft-body contractions are handled by the expansion branch;
+shoulders, fin-leading-edge regions, and forward conical transitions invoke the
+oblique-shock branch.
+
+Pressure and temperature ratios accumulate multiplicatively along the march;
+Mach is updated through the Prandtl--Meyer function~\cite{naca1135} for
+expansions and through the post-shock $\theta$--$\beta$--$M$ relation for
+compressions. The iterative solvers---a Taylor--Maccoll Runge--Kutta-4
+integration with 500 angular steps, an oblique-shock bisection on the shock
+angle $\beta$, and a Prandtl--Meyer Newton--Raphson inversion---converge to a
+$10^{-12}$ relative tolerance.
+
+\subsection{Local-condition query interface}
+\label{subsec:prepass-query}
+
+Downstream calculators receive the pre-pass output through a stable query
+interface keyed on axial station. The body calculator reads \texttt{localMach}
+and \texttt{localPressure} at each body-element centroid for the
+shock-expansion strip integral and the crossflow body lift. The fin-set
+calculator reads \texttt{localMach} at the fin axial station and uses it in the
+DATCOM $K_1/K_2/K_3$ fin normal-force computation and in the DATCOM~4.1.5.1 fin
+wave-drag computation. The fin--body interference factors and the
+shock-wave/boundary-layer-interaction chord-reduction model draw from the same
+interface, and the base-drag calculator reads the post-shock local pressure for
+the base dynamic-pressure rescaling. A single seam thus supplies the local flow
+state to every supersonic submodel of Sections~3--5.
+
+\subsection{Numerical guards and $C^1$ activation}
+\label{subsec:prepass-activation}
+
+The pre-pass is gated by a continuous activation weight $w(M_\infty)$ that ramps
+from zero at $M_\infty = 1.0$ to one at $M_\infty = 1.1$ via a smoothstep,
+\begin{equation}
+w(M_\infty) = 3t^2 - 2t^3, \qquad t = \frac{M_\infty - 1.0}{0.1},
+\quad t \in [0,1].
+\label{eq:smoothstep}
+\end{equation}
+Below $M_\infty = 1.0$ the pre-pass returns freestream conditions everywhere;
+above $M_\infty = 1.1$ it returns the full post-shock state; through the
+activation band each component's local state is the smoothstep blend of the two.
+The activation band is $C^1$-continuous in $M_\infty$, which preserves the
+smoothness of the assembled drag and stability coefficients required by the
+fixed-step Runge--Kutta-4 trajectory integrator.
+
+Additional guards include a minimum surface-element length below which the
+expansion/oblique-shock branch is suppressed (avoiding accumulated round-off on
+geometries with very fine longitudinal discretization); a hard fallback to
+freestream conditions when the computed local Mach descends below~1.0 due to
+repeated expansion (preserving physical consistency); and bounds-checking on the
+post-shock $\theta$--$\beta$--$M$ solution to ensure $M_2 > 0$ for all admissible
+inputs.
+
+\subsection{Verification against analytical references}
+\label{subsec:prepass-verification}
+
+The pre-pass was verified against analytical references at six combinations of
+freestream Mach and cone half-angle spanning $M_\infty = 1.5$, 2.5, and 5.0 at
+$\theta_c = \SI{10}{\degree}$ and \SI{20}{\degree}. Cone-surface Mach reproduced
+the Taylor--Maccoll exact solution to $0.00\%$ in all six cases, the residual
+falling below the eight-digit print precision of the diagnostic; the underlying
+Taylor--Maccoll shock-angle solver matches the tabulated cone solution to within
+$0.825\%$ (against a $1\%$ acceptance gate). Shoulder-expansion turning
+reproduced the Prandtl--Meyer relation~\cite{naca1135} to better than
+$4 \times 10^{-11}\%$ at all tested turning angles between \SI{1}{\degree} and
+\SI{25}{\degree}, and the oblique-shock branch reproduced the closed-form turn
+relation to a maximum error of $0.021\%$. Figure~\ref{fig:prepass-mach} plots the
+surface-Mach march for the six reference cases against the analytical envelope.
+This verification level is consistent with the AIAA Editorial Policy on Numerical
+and Experimental Accuracy~\cite{aiaa_numerical_policy}, which directs engineering
+codes to anchor against analytical or tabulated solutions where available; the
+pre-pass is reported as an externally benchmarked subsystem in the Section~6
+roll-up.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{shockgeometry_surface_mach_verification}
+\caption{Shock-geometry surface-Mach verification against Taylor--Maccoll cone
+flow and Prandtl--Meyer expansion at six $(M_\infty, \theta_c)$ reference points
+spanning $M_\infty = 1.5$--$5.0$ and $\theta_c = \SI{10}{\degree}$--%
+\SI{20}{\degree}. Cone-surface Mach is reproduced to $0.00\%$ and
+shoulder-expansion Mach to better than $4 \times 10^{-11}\%$.}
+\label{fig:prepass-mach}
+\end{figure}
+
+\subsection{Contribution to integrated apogee: ablation}
+\label{subsec:prepass-ablation}
+
+The architectural prominence of the pre-pass should not be confused with a large
+effect on integrated apogee. To quantify its contribution honestly, each
+supersonic mechanism was disabled in isolation and the resulting change in
+predicted apogee was measured across the 24 single-stage corpus flights.
+Disabling the shock-geometry pre-pass changes the integrated apogee error by a
+mean magnitude of only $0.15$ percentage points, with a maximum of $3.6$
+percentage points on a single Mach-2.46 flight (FMJ~BR6). By comparison, the
+externally calibrated finned-base drag augmentation is the dominant apogee
+driver, with a mean magnitude of $8.10$ percentage points and a maximum of
+$39.5$ percentage points; Van~Driest~II skin friction contributes $0.87$
+percentage points (mean) and matters chiefly at high Mach, and the DATCOM fin
+wave-drag term contributes $0.39$ percentage points.
+
+The small integrated-apogee effect has a straightforward cause: apogee is a
+drag-impulse integral over a trajectory whose drag is dominated by lower-Mach
+flight, and the pre-pass is inert below $M_\infty = 1.0$ by construction
+(Section~\ref{subsec:prepass-activation}). The pre-pass is therefore \emph{not}
+presented as a gross-apogee improvement. Its value is twofold: it supplies
+correct \emph{local} post-shock conditions for fin loads and static stability---%
+verified to the analytical references of
+Section~\ref{subsec:prepass-verification}, where freestream evaluation would bias
+the local coefficients as shown in the motivation above---and it is the
+architectural seam through which the supersonic drag and stability models of
+Sections~3--5 are driven. The integrated-apogee accuracy reported in Section~8
+rests primarily on those downstream models and on the externally calibrated
+finned-base term, not on the pre-pass in isolation.

@@ -1,0 +1,295 @@
+% =====================================================================
+% Section 4: Drag Models
+% Parent jsr_paper.tex already declares \section{Drag Models} and \input's this file.
+% Start at \subsection. Equation numbering is automatic; do not hard-code \tag.
+% =====================================================================
+
+The total axial-force coefficient is assembled from independently validated
+contributions, each evaluated at the locally corrected post-shock state supplied
+by the shock-geometry pre-pass of Sec.~II:
+%
+\begin{equation}
+C_D = C_{D,\,\mathrm{friction}} + C_{D,\,\mathrm{pressure}}
+    + C_{D,\,\mathrm{base}} + C_{D,\,\mathrm{override}}
+    + C_N \sin\alpha .
+\label{eq:cd-total}
+\end{equation}
+%
+Each submodel below states its regime of applicability, governing equation, and
+the published benchmark against which it was assessed. Table~\ref{tab:drag-inventory}
+summarizes the inventory.
+
+\subsection{Nose and Body Wave Drag}
+
+For conical noses the wave-drag coefficient equals the Taylor--Maccoll surface
+pressure coefficient---the exact inviscid result for steady conical flow at zero
+incidence (Sec.~III)---and serves as the reference for all shape-correction
+methods.
+
+For tangent and secant ogives, parabolic, and shock-attached power-law noses, a
+shock-expansion strip integrator marches $N_{\mathrm{strip}} = 100$ conical
+frustum strips from tip to base. Each strip applies a Prandtl--Meyer expansion or
+an oblique shock according to the local turning angle; pressure and temperature
+ratios accumulate multiplicatively. The pressure-drag integral is
+%
+\begin{equation}
+C_{d,\,\mathrm{wave}} = \frac{2}{R_{\mathrm{aft}}^2 - R_{\mathrm{fore}}^2}
+   \sum_{i=1}^{N_{\mathrm{strip}}} C_{p,i}\,r_{\mathrm{mid},i}\,\Delta r_i ,
+\label{eq:strip-wave}
+\end{equation}
+%
+summing only windward strips, with tip initial conditions seeded from
+Taylor--Maccoll at the local tip half-angle.
+
+For Haack-series, parabolic, and selected power-law noses, the Dahlem--Buck
+correction~\cite{dahlembuck1966} scales the equivalent-cone result by an empirical
+shape factor and a fineness correction,
+%
+\begin{equation}
+C_{d,\,\mathrm{wave}} = C_{d,\,\mathrm{cone}}(M, \theta_{\mathrm{equiv}})\,
+   K_{\mathrm{shape}}\,\left(\frac{3}{f}\right)^{1.6} ,
+\label{eq:dahlem-buck}
+\end{equation}
+%
+with $K_{\mathrm{shape}} = 1.00$ for cones, $0.85$ for Lighthill--von~K\'arm\'an
+(L-V) ogives, $0.88$ for parabolics, $0.90$--$0.95$ for power-law families, and
+$0.60$ for the Haack series. A smoothstep over $M = 1.3$--$1.5$ fades the legacy
+NASA~TR~R-100~\cite{nasa_trr100} tabulated drag into the analytical result above
+$M = 1.5$. Below the drag-divergence Mach
+$M_{\mathrm{dd}} = 0.95 - 0.15\sin^{0.4}\theta_{\mathrm{tip}}$ wave drag is zero;
+above $M_{\mathrm{dd}}$ a $C^1$ cubic Hermite connects zero drag to the first
+analytical point. Above $M = 5$ the nose pressure crosses over to Modified
+Newtonian theory (Sec.~IV.F). The combined model was validated against
+NACA~RM~A52H28~\cite{a52h28} wind-tunnel pressure measurements for five
+fineness-3 nose shapes (cone, quarter-power, three-quarter-power, Haack, and L-V
+ogive) at $M = 1.5$--$3.0$, giving an aggregate mean absolute error of $0.029$ in
+$C_d$ against an acceptance gate of $0.035$ (Fig.~\ref{fig:a52h28}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{naca_rm_a52h28_validation}
+\caption{Nose wave drag versus NACA~RM~A52H28~\cite{a52h28} for cone,
+quarter-power, three-quarter-power, Haack, and L-V ogive noses at fineness~3,
+$M = 1.5$--$3.0$. Aggregate mean absolute error $= 0.029$ in $C_d$.}
+\label{fig:a52h28}
+\end{figure}
+
+\subsection{Fin Wave Drag (DATCOM 4.1.5.1)}
+
+The fin wave-drag model replaces the legacy $\cos^2\Lambda_{LE}$ Ackeret
+approximation with the full DATCOM~4.1.5.1 method~\cite{datcom1978}, branching on
+whether the fin leading edge is subsonic or supersonic relative to the local
+post-shock Mach number:
+%
+\begin{equation}
+C_{d,\,\mathrm{wave}} = \begin{cases}
+\dfrac{K}{\beta}\left(\dfrac{t}{c}\right)^2,
+   & \cot\Lambda_{LE} < \beta \quad (\text{supersonic LE}),\\[2.0ex]
+K\cot\Lambda_{LE}\left(\dfrac{t}{c}\right)^2,
+   & \cot\Lambda_{LE} > \beta \quad (\text{subsonic LE}),
+\end{cases}
+\label{eq:datcom-fin}
+\end{equation}
+%
+where $\beta = \sqrt{M^2 - 1}$, the section shape factor $K = 4.0$ for
+double-wedge (hexagonal) sections and $16/3$ for biconvex or rounded sections per
+DATCOM Table~4.1.5.1-A, and $t/c$ is the streamwise thickness-to-chord ratio. A
+cubic Hermite blend over $M = 0.9$--$1.2$ fades zero wave drag into the full
+DATCOM result. The implementation reproduces the closed-form Ackeret formula on
+15~analytical cases to $0.00\%$ error (code verification) and was validated
+against free-flight measurements of a 60-deg delta wing from
+NACA~TN~3650~\cite{ulmann1956}, yielding a mean absolute percentage error of
+$21.0\%$ across 12~points over $M = 1.1$--$2.5$ (Fig.~\ref{fig:fin-wave}). The
+residual reflects the difficulty of predicting wave drag near the
+subsonic-to-supersonic leading-edge transition.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{naca_tn_3650_fin_wave_drag}
+\caption{Fin wave drag for a 60-deg delta wing: present DATCOM~4.1.5.1
+implementation versus NACA~TN~3650~\cite{ulmann1956} free-flight data.
+Mean absolute percentage error $= 21.0\%$ over 12~points, $M = 1.1$--$2.5$.}
+\label{fig:fin-wave}
+\end{figure}
+
+\subsection{Base Drag}
+
+Four submodels cover the base-drag regimes of a slender finned rocket. For
+$M > 1.3$ with a turbulent boundary layer the supersonic base-drag correlation
+%
+\begin{equation}
+C_{d,\,\mathrm{base}} = 0.064 + \frac{0.186}{M^2}
+\label{eq:base-turb}
+\end{equation}
+%
+is applied. This empirical form is the supersonic asymptote for slender
+axisymmetric afterbodies documented in ESDU~77021~\cite{esdu77021}, and it was
+validated here against NACA~TN~3393~\cite{chapman1955} at four turbulent points
+over $M = 2.73$--$4.48$, giving a mean absolute percentage error of $15.9\%$
+(Fig.~\ref{fig:base-pressure}). For perfect-finish vehicles with delayed
+transition the laminar base-pressure correlation of Chapman~\cite{chapman1950}
+%
+\begin{equation}
+C_{p,\,b,\,\mathrm{lam}} = \frac{C_{\mathrm{lam}}}{M^2\sqrt{\mathrm{Re}_L}} ,
+\qquad C_{\mathrm{lam}} = 1870 ,
+\label{eq:base-lam}
+\end{equation}
+%
+is used, validated against the four laminar TN~3393 points with a mean absolute
+percentage error of $4.4\%$. Applying the turbulent form, Eq.~\eqref{eq:base-turb},
+to the laminar data instead yields a mean absolute percentage error of $44\%$:
+the boundary-layer state at the base materially governs the closure. A
+Chapman--Korst free-shear-layer model with the ESDU~77021~\cite{esdu77021}
+boundary-layer-thickness correction blends with Eq.~\eqref{eq:base-turb} over
+$M = 1.2$--$1.4$. A Viswanath boattail correction~\cite{viswanath1996} reduces
+base drag by $15$--$40\%$ for typical boattail half-angles of $6$--$16$~deg, and a
+power-on multiplier derived from the solid-rocket motor exit-flow guidance of
+NASA~SP-8039~\cite{nasa_sp8039} reduces base drag during burn using the nozzle
+exit-area and pressure ratios. Below $M = 0.85$ a Hoerner subsonic
+correlation~\cite{hoerner1965} is recovered, and the transonic peak near
+$M \approx 1.05$ is represented by a degree-4 polynomial anchored at the regime
+boundaries.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{naca_tn_3393_base_pressure}
+\caption{Turbulent and laminar base drag versus
+NACA~TN~3393~\cite{chapman1955}. The supersonic turbulent correlation,
+Eq.~\eqref{eq:base-turb}, attains a mean absolute percentage error of $15.9\%$;
+the Chapman laminar correlation~\cite{chapman1950}, Eq.~\eqref{eq:base-lam},
+attains $4.4\%$.}
+\label{fig:base-pressure}
+\end{figure}
+
+\subsection{Skin Friction: Van Driest II}
+
+The skin-friction model implements the Van~Driest~II compressible transformation
+in the Hopkins--Inouye formulation~\cite{hopkins1971}, replacing the legacy
+Eckert reference-temperature method. The transformation maps the compressible
+length Reynolds number to an equivalent incompressible value through the
+multiplicative factors $F_c$, $F_\theta$, and $F_x = F_\theta/F_c$. With edge
+Mach number $M_e$, ratio of specific heats $\gamma$, wall-to-edge temperature
+ratio $F = T_w/T_e$, recovery factor $r = 0.88$ (turbulent Prandtl number
+$0.71$), and the kinematic group $m = \tfrac{1}{2}(\gamma - 1)M_e^2$, the
+compressibility factor is
+%
+\begin{equation}
+F_c = \frac{r\,m}{\left(\sin^{-1}\alpha + \sin^{-1}\beta\right)^2} ,
+\qquad
+\alpha = \frac{2A^2 - B}{\sqrt{4A^2 + B^2}} ,
+\qquad
+\beta = \frac{B}{\sqrt{4A^2 + B^2}} ,
+\label{eq:vd2-fc}
+\end{equation}
+%
+where
+%
+\begin{equation}
+A = \sqrt{\frac{r\,m}{F}} ,
+\qquad
+B = \frac{1 + r\,m - F}{F} .
+\label{eq:vd2-ab}
+\end{equation}
+%
+The numerator of $F_c$ is the adiabatic-wall enthalpy excess
+$r\,m = T_{\mathrm{aw}}/T_e - 1$; for an adiabatic wall, where
+$T_w/T_e = 1 + r\,m$, the parameter $B$ vanishes. The temperature-ratio factor
+$F_\theta$ follows from the Sutherland wall-to-edge viscosity ratio (Sec.~III).
+The transformed Reynolds number $F_x\,\mathrm{Re}_x$ is substituted into the
+Karman--Schoenherr implicit relation
+%
+\begin{equation}
+\frac{0.242}{\sqrt{C_{f,\,\mathrm{inc}}}}
+   = \log_{10}\!\left(\mathrm{Re}_x\,C_{f,\,\mathrm{inc}}\right) ,
+\label{eq:karman-schoenherr}
+\end{equation}
+%
+solved by fixed-point iteration seeded with Schlichting's
+$\log^{-2.58}$ approximation, and the compressible coefficient follows as
+$C_f = C_{f,\,\mathrm{inc}}/F_c$. Hopkins and Inouye~\cite{hopkins1971}
+demonstrated that Van~Driest~II gave the best agreement with experiment among
+candidate transformations over $M = 1.5$--$9$. At $M = 5$ the compressible $C_f$
+is approximately half of its incompressible value at matched length Reynolds
+number (Fig.~\ref{fig:vd2}), a reduction that the reference-temperature method
+underestimates by roughly a factor of two.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{van_driest_ii_cf_vs_mach}
+\caption{Van~Driest~II compressible skin-friction coefficient versus Mach number
+for a representative slender body at length Reynolds number
+$\mathrm{Re}_L = 10^7$, after the Hopkins--Inouye
+formulation~\cite{hopkins1971}.}
+\label{fig:vd2}
+\end{figure}
+
+\subsection{Boundary-Layer Transition}
+
+The transition Reynolds number is Mach-dependent, with a laminar-fraction cap
+that prevents unphysically long laminar runs at high Mach. The low-subsonic
+crossover $\mathrm{Re}_{x,\mathrm{tr}} = 5\times10^5$ rises to approximately
+$5\times10^6$ at $M = 4$, consistent with the compressible-stabilization trend
+of the boundary layer. The laminar fraction is capped at $0.7$ of the body
+length to preserve consistency with the post-shock entropy layer.
+
+\subsection{Hypersonic Blending}
+
+Above $M = 5$ the inviscid nose and body pressure distributions transition to
+Modified Newtonian theory, $C_p = C_{p,\max}\sin^2\theta$, with $C_{p,\max}$
+taken from the normal-shock stagnation pressure of Sec.~III. A smoothstep weight
+$w = 3t^2 - 2t^3$ with $t = (M - 4)/2$ blends the shock-expansion result into the
+Newtonian asymptote over $M = 4$--$6$. The combined hypersonic model was
+assessed against DTIC~AD0487365~\cite{grabow1965} ballistic-range cone foredrag
+at $M = 6.5$--$17.2$ for 8-, 12-, and 16-deg half-angle cones, giving an
+aggregate mean absolute percentage error of $19.7\%$ across 11~points
+(Fig.~\ref{fig:cone-drag}). The largest residual, $+57\%$, occurs for the
+thinnest 8-deg cones at the lowest-Reynolds-number row, where friction and base
+drag dominate the foredrag and the reference boundary-layer state is incompletely
+specified; the blunter 16-deg cone agrees most closely. These results are
+reported as exploratory: the headline flight validation (Sec.~VIII) extends only
+to $M = 4.33$, and the hypersonic closure is a demonstrated method capability
+rather than a flight-validated claim.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{hypersonic_cone_drag}
+\caption{Hypersonic cone foredrag versus DTIC~AD0487365~\cite{grabow1965}
+ballistic-range data, $M = 6.5$--$17.2$, half-angles $8$, $12$, and $16$~deg.
+Aggregate mean absolute percentage error $= 19.7\%$ over 11~points; the largest
+residual is $+57\%$ for the thinnest cones at the lowest Reynolds number.}
+\label{fig:cone-drag}
+\end{figure}
+
+\begin{table*}[t]
+\centering
+\caption{Drag submodel inventory (present work).}
+\label{tab:drag-inventory}
+\begin{tabularx}{\textwidth}{l l X l l}
+\toprule
+Submodel & Regime & Source / formulation & Validation source & Metric \\
+\midrule
+Taylor--Maccoll cone pressure & $M = 1$--$17$ & Exact conical-flow ODE (Sec.~III)
+   & NACA~RM~A52H28 cone case & Exact (analytic) \\
+Shock-expansion ogive & $M = 1.3$--$10$ & Eq.~\eqref{eq:strip-wave}, 100-strip integrator
+   & NACA~RM~A52H28~\cite{a52h28} & MAE $0.029$ (5 shapes) \\
+Dahlem--Buck shape factor & $M = 1.3$--$6$ & Eq.~\eqref{eq:dahlem-buck}
+   & NACA~RM~A52H28~\cite{a52h28} & $K_{\mathrm{shape}}$ within $5\%$ \\
+Fin wave drag, DATCOM 4.1.5.1 & $M = 0.9$--$5{+}$ & Eq.~\eqref{eq:datcom-fin}
+   & NACA~TN~3650~\cite{ulmann1956} / Ackeret & MAPE $21\%$; analytic $0.00\%$ \\
+Supersonic turbulent base & $M > 1.3$ & Eq.~\eqref{eq:base-turb}
+   & NACA~TN~3393~\cite{chapman1955} (turb.) & MAPE $15.9\%$ \\
+Chapman laminar base & $M = 1.3$--$4.5$ & Eq.~\eqref{eq:base-lam}
+   & NACA~TN~3393~\cite{chapman1955} (lam.) & MAPE $4.4\%$ \\
+Chapman--Korst shear layer & $M = 1.2$--$1.4$ & ESDU~77021~\cite{esdu77021} BL correction
+   & Blend region & Continuity \\
+Viswanath boattail & Any $M$, boattail & $\Delta C_{d,b}(\theta_{bt}, M)$
+   & Viswanath~\cite{viswanath1996} & $15$--$40\%$ reduction \\
+Power-on base & During burn & $k_{po}(A_e/A_{\mathrm{ref}}, p_e/p_\infty)$
+   & NASA~SP-8039~\cite{nasa_sp8039} & Qualitative \\
+Van~Driest~II $C_f$ & $M = 1.1$--$9$ & Eqs.~\eqref{eq:vd2-fc}--\eqref{eq:karman-schoenherr}
+   & Hopkins \& Inouye~\cite{hopkins1971} & ${\sim}50\%$ $C_f$ at $M = 5$ \\
+Modified Newtonian & $M > 5$ & $C_p = C_{p,\max}\sin^2\theta$
+   & DTIC~AD0487365~\cite{grabow1965} & MAPE $19.7\%$ \\
+\bottomrule
+\end{tabularx}
+\end{table*}

@@ -37,6 +37,7 @@
 \documentclass[journal]{new-aiaa}
 
 \usepackage{graphicx}
+\graphicspath{{figures/}{../data/png/}{../data/analysis/corpus_bias_variance_2026_05_11/}{../data/analysis/corpus_uncertainty_2026_06_02/}}
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{siunitx}
@@ -86,44 +87,44 @@ are released for end-to-end reproduction.
 \input{sections/00_nomenclature}
 
 % ---------------------------------------------------------------------
-\section{Introduction}                       % [FILL §1] + [F2] prior art (Missile DATCOM) + [F3] contributions
+\section{Introduction}\label{sec:intro}
 \input{sections/01_introduction}
 
-\section{Shock-Geometry Pre-Pass Architecture}  % [FILL §2] + [F3] pre-pass on/off ablation result
+\section{Shock-Geometry Pre-Pass Architecture}\label{sec:prepass}
 \input{sections/02_prepass}
 
-\section{Atmosphere, Compressibility, and Shock Relations}  % [FILL §3] + [F4] fix Eq (17)
+\section{Atmosphere, Compressibility, and Shock Relations}\label{sec:atmosphere}
 \input{sections/03_atmosphere_shocks}
 
-\section{Drag Models}                        % [FILL §4] + [F5] remove Devan-Ashwood cite
+\section{Drag Models}\label{sec:drag}
 \input{sections/04_drag}
 
-\section{Stability and Dynamic Stability Models}  % [FILL §5]
+\section{Stability and Dynamic Stability Models}\label{sec:stability}
 \input{sections/05_stability}
 
-\section{Subsystem Benchmark Roll-Up}        % [FILL §6] + [F6] true MAPEs/CITE:CHECK + [F7] in-sample disclosure
+\section{Subsystem Benchmark Roll-Up}\label{sec:benchmarks}
 \input{sections/06_benchmarks}
 
-\section{Validation Against Published Computational Fluid Dynamics}  % [FILL §7]
+\section{Validation Against Published Computational Fluid Dynamics}\label{sec:cfd}
 \input{sections/07_cfd}
 
-\section{Flight-Corpus Integration Test}     % [FILL §8] + [F8] honest 25-flight + holdout + CIs + RAS disclosure
+\section{Flight-Corpus Integration Test}\label{sec:corpus}
 \input{sections/08_corpus}
 
-\section{Exploratory High-Mach Sounding-Rocket Results}  % [F10] new honest exploratory section
+\section{Exploratory High-Mach Sounding-Rocket Assessment}\label{sec:exploratory}\label{sec:hypersonic}
 \input{sections/09_exploratory}
 
-\section{Limitations and Honest Disclosures} % [FILL §9] + [F12] in-sample + selection limitations
+\section{Limitations and Honest Disclosures}\label{sec:limitations}
 \input{sections/10_limitations}
 
-\section{Conclusions and Future Work}        % [FILL §10]
+\section{Conclusions and Future Work}\label{sec:conclusions}
 \input{sections/11_conclusions}
 
 % ---------------------------------------------------------------------
 \section*{Acknowledgments}
 \input{sections/12_backmatter}              % acks + Data/Code Availability [F11] + AI disclosure
 
-\bibliographystyle{new-aiaa}
+% new-aiaa.cls already issues \bibliographystyle{new-aiaa}; do not repeat it.
 \bibliography{jsr_paper}
 
 \end{document}

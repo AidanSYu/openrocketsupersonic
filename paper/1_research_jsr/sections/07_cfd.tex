@@ -1,0 +1,161 @@
+% =====================================================================
+% Section 7 body: Validation Against Published Computational Fluid Dynamics
+% Fragment \input INSIDE \section{...}; do NOT redeclare the section.
+% Numbers authoritative per _DRAFTING_BRIEF.md (brief wins over JSR_PAPER.md).
+% =====================================================================
+
+No in-house computational fluid dynamics (CFD) campaign was undertaken; this is a
+deliberate scoping decision, revisited in the limitations discussion. In its place
+the present method is compared against four independent published CFD studies that
+together span two reference geometries, two distinct aerodynamic quantities, and
+three Mach bands. The four comparators are: the unsteady Reynolds-averaged
+Navier--Stokes (URANS) study of the Army--Navy Basic Finner by
+Bunescu et~al.~\cite{bunescu2025}; the thin-layer Navier--Stokes computation of a
+secant-ogive-cylinder-boattail projectile by Sahu, Nietubicz, and
+Steger~\cite{sahu1983}; the Menter shear-stress-transport (SST) $k$--$\omega$
+solution of the AGARD Model~B calibration standard by
+Vidanovi\'c et~al.~\cite{vidanovic2014}; and the ANSYS Fluent pitch-damping
+computations of the Basic Finner by Sznajder~\cite{sznajder2025}. A second
+independent CFD source on Basic Finner pitch damping, by Bhagwandin and
+Sahu~\cite{bhagwandin2013}, is used to corroborate the Sznajder finding. The
+inventory is summarized in Table~\ref{tab:cfd_inventory}, and the CFD-side
+panels are collected in Fig.~\ref{fig:cfd_panels}.
+
+\begin{table*}[htbp]
+  \centering
+  \caption{Published-CFD comparator inventory.}
+  \label{tab:cfd_inventory}
+  \begin{tabularx}{\textwidth}{@{}l l l l X@{}}
+    \toprule
+    Source & Geometry & Quantity & Mach range & Comparison status \\
+    \midrule
+    Bunescu et~al.~\cite{bunescu2025} (URANS)
+      & Basic Finner
+      & $C_X$
+      & 0.4--3.5
+      & Comparator wired; trend correct, loose absolute agreement \\
+    Sahu et~al.~\cite{sahu1983} (thin-layer NS)
+      & Ogive-cylinder-boattail
+      & $C_{D,b}$, $C_{D}$
+      & 0.9--1.2
+      & Memo only; digitization deferred to future work \\
+    Vidanovi\'c et~al.~\cite{vidanovic2014} (SST $k$--$\omega$)
+      & AGARD Model~B
+      & $C_D$, $C_L$, $C_m$
+      & 0.596, 1.602
+      & Reference dataset; no AGARD-B build shipped \\
+    Sznajder~\cite{sznajder2025} (Fluent)
+      & Basic Finner
+      & $C_{m_q}+C_{m_{\dot\alpha}}$
+      & 0.9--5.0
+      & Comparator wired; supersonic MAPE 31.6\% ($n=8$, $M\ge1.29$) \\
+    Bhagwandin \& Sahu~\cite{bhagwandin2013} (Fluent)
+      & Basic Finner
+      & $C_{m_q}+C_{m_{\dot\alpha}}$
+      & 0.6--4.5
+      & Second-source corroboration; MAPE 50.8\% ($n=13$) \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+\subsection{Basic Finner Static Axial Force versus Bunescu URANS}
+
+Bunescu et~al.~\cite{bunescu2025} reported URANS predictions of normal- and
+axial-force coefficients on the standard four-rectangular-fin Army--Navy Basic
+Finner at $M = 0.4$, 0.95, 1.6, 2.5, and 3.5, using a realizable $k$--$\varepsilon$
+closure with corroborating SST $k$--$\omega$ comparisons. The present method was
+exercised on the identical geometry at the same five Mach numbers and at zero angle
+of attack. Absolute agreement in the axial-force coefficient $C_X$ is loose: the
+largest residuals occur near the transonic point $M = 0.95$, where the
+shock-induced separation resolved by the URANS field is not represented by the
+engineering pressure-drag model, and at the supersonic points, where the
+semi-empirical viscous treatment differs from the Reynolds-number-resolved
+boundary layer. The Mach trend, however, is reproduced correctly: a transonic rise
+to a peak near $M \approx 1$ followed by monotone decay through $M = 3.5$. This
+comparison is reported as a qualitative trend check rather than as a quantitative
+benchmark.
+
+\subsection{Ogive-Cylinder-Boattail Base Drag versus Sahu Thin-Layer Navier--Stokes}
+
+Sahu, Nietubicz, and Steger~\cite{sahu1983} computed base, pressure, friction, and
+total drag for a secant-ogive-cylinder-boattail projectile across the transonic
+band $M = 0.9$--1.2 at $\mathrm{Re}_L = 4.5\times10^{6}$, overlaying their
+thin-layer Navier--Stokes solution against sting-mounted wind-tunnel data and a
+semi-empirical correlation. This triple comparison would provide an ideal anchor
+for a transonic base-drag panel against the present method's base-drag and
+pressure-drag pipelines. The digitization of this dataset was deferred during
+preparation of the present manuscript; the comparison is therefore retained as
+near-term future work rather than presented as a result, and the corresponding
+panel in Fig.~\ref{fig:cfd_panels} is flagged accordingly.
+
+\subsection{AGARD Model~B Reference versus Vidanovi\'c SST $k$--$\omega$}
+
+Vidanovi\'c et~al.~\cite{vidanovic2014} reported ANSYS Fluent SST $k$--$\omega$
+predictions of total drag, lift, and pitching-moment coefficients on the AGARD
+Model~B calibration standard at $M = 0.596$ and $M = 1.602$ over an
+angle-of-attack sweep, validated against wind-tunnel data from the VTI~T-38
+trisonic facility. The published CFD-versus-experiment agreement is within a few
+percent in $C_D$ and below one percent in $C_L$ over the test envelope. The present
+method does not ship an AGARD-B build---the equilateral-triangle delta wing with a
+biconvex section lies at the edge of the validity of the underlying fin-set
+model---so no quantitative comparison is reported here. Consistent with the
+benchmark roll-up, the AGARD-B configuration is treated as a qualitative trend
+reference only (the corresponding total-drag agreement is loose, with mean absolute
+percentage error of order $22\%$), and the Vidanovi\'c CFD is displayed in
+Fig.~\ref{fig:cfd_panels} as a reference dataset against which a future comparator
+build can be benchmarked. The omission is acknowledged as a deferred future-work
+item.
+
+\subsection{Basic Finner Pitch Damping versus Sznajder Fluent, Corroborated by Bhagwandin and Sahu}
+\label{sec:cfd_cmq}
+
+The most informative CFD comparison concerns the pitch-damping derivative on the
+Basic Finner. Sznajder~\cite{sznajder2025} computed $C_{m_q}$ and
+$C_{m_{\dot\alpha}}$ using three independent CFD techniques---a steady
+moving-reference-frame method, a dynamic-mesh forced-oscillation method, and a
+step-perturbation indicial-response method---over $M = 0.9$--5.0. The three methods
+agreed to within approximately $3\%$ of one another and were independently
+validated against free-flight experimental data. The present method exposes the
+experimentally observable damping sum $C_{m_q}+C_{m_{\dot\alpha}}$, which was
+compared against the Sznajder solution on a common grid with the following two
+findings.
+
+\begin{itemize}
+  \item \emph{Supersonic band}, $M = 1.29$--4.5 ($n = 8$ points): the present
+        method underpredicts the magnitude of the damping sum by $27$ to $36\%$,
+        with the sign and Mach trend correct. The mean absolute percentage error
+        over this band is $31.6\%$.
+  \item \emph{Transonic peak}, $M \approx 1.08$--1.11 ($n = 2$ points): the present
+        method overshoots the magnitude of the damping sum by $110$ to $160\%$;
+        the CFD does not exhibit a comparable peak in the sum.
+\end{itemize}
+
+The transonic overshoot is traced to the Gaussian augmentation applied to the
+strip-theory damping near $M = 1$ in the stability model; the supersonic
+underprediction reflects a constant-factor bias in the strip-theory damping
+coefficient. Bhagwandin and Sahu~\cite{bhagwandin2013} provide an independent ANSYS
+Fluent reference for the same geometry over $M = 0.6$--4.5, validated against the
+same free-flight dataset; their comparator yields a mean absolute percentage error
+of $50.8\%$ over thirteen points, with the same sign and the same direction of the
+residual.
+
+Two independent CFD sources therefore converge on the same two findings: a
+$27$--$36\%$ supersonic underprediction of pitch damping (with correct sign and
+trend) and a transonic-peak over-augmentation. Consistent with this evidence, the
+transonic pitch-damping augmentation is held to be a B-level model element rather
+than a validated one. Both findings are taken up explicitly in the limitations
+discussion.
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{cfd_validation_panels}
+  \caption{Published-CFD comparator composite. Panel~A: Basic Finner axial-force
+  coefficient versus the Bunescu URANS solution~\cite{bunescu2025} (correct trend,
+  loose absolute agreement). Panel~B: ogive-cylinder-boattail base drag versus the
+  Sahu thin-layer Navier--Stokes solution~\cite{sahu1983} (digitization deferred).
+  Panel~C: AGARD Model~B reference dataset versus the Vidanovi\'c SST $k$--$\omega$
+  solution and VTI~T-38 experiment~\cite{vidanovic2014}. Panel~D: Basic Finner
+  pitch-damping sum versus the Sznajder Fluent solution~\cite{sznajder2025},
+  corroborated by Bhagwandin and Sahu~\cite{bhagwandin2013}.}
+  \label{fig:cfd_panels}
+\end{figure*}

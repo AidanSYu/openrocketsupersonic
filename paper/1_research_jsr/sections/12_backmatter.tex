@@ -1,0 +1,46 @@
+% ---------------------------------------------------------------------
+% Back matter: Acknowledgments body + Data/Code Availability [F11] + AI Disclosure.
+% This fragment is \input AFTER the parent declares \section*{Acknowledgments};
+% it must NOT re-declare that heading.
+% ---------------------------------------------------------------------
+
+This work was conducted independently and was self-funded; the author gratefully
+acknowledges the support of Duke University. The author thanks the OpenRocket and
+RASAero~II developer and user communities for sustaining the open tools on which
+this work builds, and Charles E. Rogers for publicly releasing the RASAero~II
+flight-comparison set that constitutes the externally selected validation corpus
+used here. The choice of comparison flights and the recorded RASAero~II
+predictions are Rogers' own; their use as ground truth is therefore independent
+of the present model's outcome.
+
+% ---------------------------------------------------------------------
+\section*{Data and Code Availability}
+
+The Rocket Flight Database that defines the ground-truth corpus---measured
+apogees, vehicle and motor metadata, and the per-flight RASAero~II reference
+predictions---is released under the Creative Commons Attribution~4.0 International
+(CC-BY-4.0) license and archived at Zenodo, DOI
+\href{https://doi.org/10.5281/zenodo.19976138}{10.5281/zenodo.19976138}
+\cite{rfd_zenodo}, with an actively maintained mirror at
+\url{https://github.com/AidanSYu/rocket-flight-database}. The OpenRocket-Plus
+source code that implements the shock-geometry pre-pass and the downstream
+supersonic models is available at
+\url{https://github.com/AidanSYu/openrocketsupersonic}; a tagged release
+corresponding to the results reported here, together with an archival code
+Zenodo deposit (DOI \texttt{10.5281/zenodo.XXXXXXX}), will be minted at
+submission. The analysis scripts \texttt{analyze.py} and
+\texttt{uncertainty\_quantification.py}, distributed with the database
+repository, regenerate every figure, summary statistic, and bootstrap confidence
+interval reported in this paper directly from the published comparison CSV,
+enabling end-to-end reproduction of the validation results.
+
+% ---------------------------------------------------------------------
+\section*{AI Disclosure}
+
+In accordance with the AIAA editorial policy on the use of artificial
+intelligence (October~2024), the author discloses that a generative AI assistant
+(Anthropic Claude) was used for language editing, manuscript formatting, and
+code review of the analysis scripts. All text, scientific claims, equations, and
+numerical results were authored, derived, and verified by the human author, who
+takes full responsibility for the content. No AI system is listed as an author or
+qualifies for authorship.
