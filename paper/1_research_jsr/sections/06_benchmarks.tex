@@ -110,7 +110,7 @@ percent error (MAPE) or mean absolute error (MAE).}
 \bottomrule
 \endlastfoot
 1  & Speed of sound                & U.S.\ Std.\ Atm.\ 1976~\cite{nasa1976ussa}        & sea level--80\,km          & max error $0.016\%$ \\
-2  & Sutherland viscosity          & Incropera / NIST~\cite{incropera2007}             & 150--500\,K                & formula MAPE $0.012\%$ \\
+2  & Sutherland viscosity          & Incropera / NIST~\cite{incropera2007}             & 150--500\,K                & MAPE $0.54\%$ vs.\ tables \\
 3  & Normal-shock relations        & NACA Report~1135~\cite{naca1135}                  & $M = 1.5$--10              & max error $<0.01\%$ \\
 4  & Oblique-shock solver          & NACA Report~1135~\cite{naca1135}                  & $M = 1.5$--10, $\theta = 5$--40$^\circ$ & max angle error $0.021\%$ \\
 5  & Prandtl--Meyer expansion      & NACA Report~1135~\cite{naca1135}                  & $M = 1.2$--10              & max abs angle error $0.004^{\circ}$ \\
@@ -124,7 +124,7 @@ percent error (MAPE) or mean absolute error (MAE).}
 13 & Compressible skin friction (Van Driest~II) & Hopkins \& Inouye~\cite{hopkins1971} & $M = 1.5$--9        & best-of-class transformation \\
 14 & Static stability $C_{N_\alpha}$ & NASA TM~X-653~\cite{nielsen1962}                & $M = 0.6$--5.82, 10 pts    & MAPE $6.84\%$ \\
 15 & Static stability $x_{CP}/d$   & NASA TM~X-653~\cite{nielsen1962}                  & $M = 0.6$--5.82, 10 pts    & MAPE $7.11\%$ \\
-16 & Pitch damping $C_{m_q}$, body & Tobak NACA TN~3788~\cite{tobak1956}               & $M = 1.5$--3               & sign + qualitative agreement \\
+16 & Pitch damping $C_{m_q}$, body & Tobak NACA TN~3788~\cite{tobak1956}               & $M = 1.5$--3               & $39\%$ at $M=1.5$; sign-correct, conservative \\
 17 & Crossflow body $C_{d,c}$      & Jorgensen TR~R-474~\cite{jorgensen1977}           & supersonic crossflow       & exact match (1.20) \\
 18 & Crossflow fin $C_{d,c}$       & Hoerner / Jorgensen~\cite{hoerner1965}            & crossflow                  & 1.42 (within range) \\
 19 & Magnus body fraction          & Platou 1965~\cite{platou1965}                     & supersonic                 & 0.30 within $0.30$--$0.80$ \\
