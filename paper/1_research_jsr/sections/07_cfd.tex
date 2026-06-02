@@ -16,10 +16,14 @@ Steger~\cite{sahu1983}; the Menter shear-stress-transport (SST) $k$--$\omega$
 solution of the AGARD Model~B calibration standard by
 Vidanovi\'c et~al.~\cite{vidanovic2014}; and the ANSYS Fluent pitch-damping
 computations of the Basic Finner by Sznajder~\cite{sznajder2025}. A second
-independent CFD source on Basic Finner pitch damping, by Bhagwandin and
-Sahu~\cite{bhagwandin2013}, is used to corroborate the Sznajder finding. The
-inventory is summarized in Table~\ref{tab:cfd_inventory}, and the CFD-side
-panels are collected in Fig.~\ref{fig:cfd_panels}.
+independent CFD source on finned-projectile pitch damping, the CFD++ study of
+Bhagwandin and Sahu~\cite{bhagwandin2013}, is used to corroborate the Sznajder
+finding; that study reports the Army--Navy Finner (ANF, identical to the Basic
+Finner) and the geometrically distinct Air Force Modified Finner (AFF;
+tangent-ogive nose with clipped-delta fins), so it doubles as a second-planform
+cross-check rather than a same-geometry repeat. The inventory is summarized in
+Table~\ref{tab:cfd_inventory}, and the CFD-side panels are collected in
+Fig.~\ref{fig:cfd_panels}.
 
 \begin{table*}[htbp]
   \centering
@@ -49,11 +53,11 @@ panels are collected in Fig.~\ref{fig:cfd_panels}.
       & $C_{m_q}+C_{m_{\dot\alpha}}$
       & 0.9--5.0
       & Comparator wired; supersonic MAPE 31.6\% ($n=8$, $M\ge1.29$) \\
-    Bhagwandin \& Sahu~\cite{bhagwandin2013} (Fluent)
-      & Basic Finner
+    Bhagwandin \& Sahu~\cite{bhagwandin2013} (CFD++)
+      & AFF / ANF finners
       & $C_{m_q}+C_{m_{\dot\alpha}}$
-      & 0.6--4.5
-      & Second-source corroboration; MAPE 50.8\% ($n=13$) \\
+      & 1.3--4.5
+      & Second source; supersonic MAPE 19.0\% (AFF, $n=5$), 28.0\% (ANF, $n=8$) \\
     \bottomrule
   \end{tabularx}
 \end{table*}
@@ -133,15 +137,25 @@ findings.
 The transonic overshoot is traced to the Gaussian augmentation applied to the
 strip-theory damping near $M = 1$ in the stability model; the supersonic
 underprediction reflects a constant-factor bias in the strip-theory damping
-coefficient. Bhagwandin and Sahu~\cite{bhagwandin2013} provide an independent ANSYS
-Fluent reference for the same geometry over $M = 0.6$--4.5, validated against the
-same free-flight dataset; their comparator yields a mean absolute percentage error
-of $50.8\%$ over thirteen points, with the same sign and the same direction of the
-residual.
+coefficient. Bhagwandin and Sahu~\cite{bhagwandin2013} provide an independent
+CFD++ pitch-damping reference on two finner planforms---the ANF (identical to the
+Basic Finner) and the geometrically distinct AFF---validated against the same
+free-flight family. Restricting attention to the supersonic band where their CFD
+itself converges with the free-flight scatter, their comparator against the
+present method yields a mean absolute percentage error of $19.0\%$ on the AFF
+($n=5$, $M = 1.30$--2.50) and $28.0\%$ on the ANF ($n=8$, $M = 1.29$--4.50), with
+the same sign and the same direction of the residual on every supersonic point.
+The full-envelope figure is larger because it is dominated by the same transonic
+Gaussian over-augmentation seen against Sznajder, not by an independent defect.
 
-Two independent CFD sources therefore converge on the same two findings: a
-$27$--$36\%$ supersonic underprediction of pitch damping (with correct sign and
-trend) and a transonic-peak over-augmentation. Consistent with this evidence, the
+The two CFD sources therefore converge on the same two findings: a supersonic
+underprediction of pitch damping with correct sign and trend---$27$--$36\%$ against
+Sznajder, $19$--$28\%$ against Bhagwandin and Sahu across the two planforms---and a
+transonic-peak over-augmentation. Because the second source is on the AFF and ANF
+finner fixtures (the AFF planform is reconstructed from the source figure and is
+itself a B-level fixture) rather than an exact replicate of the Sznajder build,
+this is a cross-planform corroboration of the residual's sign and trend rather than
+a point-for-point confirmation of magnitude. Consistent with this evidence, the
 transonic pitch-damping augmentation is held to be a B-level model element rather
 than a validated one. Both findings are taken up explicitly in the limitations
 discussion.
@@ -156,6 +170,7 @@ discussion.
   Panel~C: AGARD Model~B reference dataset versus the Vidanovi\'c SST $k$--$\omega$
   solution and VTI~T-38 experiment~\cite{vidanovic2014}. Panel~D: Basic Finner
   pitch-damping sum versus the Sznajder Fluent solution~\cite{sznajder2025},
-  corroborated by Bhagwandin and Sahu~\cite{bhagwandin2013}.}
+  cross-corroborated on the AFF and ANF finner planforms by the CFD++ study of
+  Bhagwandin and Sahu~\cite{bhagwandin2013}.}
   \label{fig:cfd_panels}
 \end{figure*}

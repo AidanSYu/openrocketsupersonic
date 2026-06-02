@@ -1,6 +1,8 @@
 % Nomenclature fragment — \input inside the parent's \section*{Nomenclature}.
 % Two-column longtable (Symbol & Meaning), units carried inside the meaning.
-% Symbols restricted to those used by the equations in Secs. III–V.
+% Symbols restricted to those used by the equations in Secs. III–V (exhaustive).
+% Note: beta carries a dual meaning (compressibility factor and oblique-shock
+% wave angle) and is flagged as such in its entry.
 \renewcommand{\arraystretch}{1.15}
 \begin{longtable}{@{}l@{\hskip 2em}l@{}}
 \toprule
@@ -15,37 +17,50 @@
 \endfoot
 $a$ & speed of sound, \si{\meter\per\second} \\
 $A,\,B$ & Van~Driest~II compressibility auxiliaries, dimensionless \\
-$A_b,\,A_e$ & base area, nozzle exit area, \si{\meter\squared} \\
-$C_D$ & drag coefficient \\
-$C_{D_b}$ & base drag coefficient \\
-$C_{D_w}$ & wave drag coefficient \\
+$A_e$ & nozzle exit area, \si{\meter\squared} \\
+$A_\mathrm{plan},\,A_\mathrm{ref}$ & body planform area; reference (cross-sectional) area, \si{\meter\squared} \\
+$\mathrm{AR}$ & fin aspect ratio \\
+$C_D$ & total axial-force (drag) coefficient \\
+$C_{d,c}$ & crossflow (Jorgensen) drag coefficient \\
 $C_f$ & compressible skin-friction coefficient \\
 $C_{f,\mathrm{inc}}$ & incompressible (reference) skin-friction coefficient \\
+$C_N$ & normal-force coefficient \\
 $C_{N_\alpha}$ & normal-force-curve slope, \si{\per\radian} \\
+$C_{n,p\alpha},\,C_{y,p\alpha}$ & Magnus yawing-moment and side-force derivatives, \si{\per\radian\squared} \\
 $C_p,\,C_{p,\max}$ & pressure coefficient; stagnation maximum (Rayleigh pitot) \\
 $C_{m_q},\,C_{m_{\dot\alpha}}$ & pitch-damping derivatives, \si{\per\radian} \\
-$d_\mathrm{ref}$ & reference body diameter, \si{\meter} \\
+$f$ & nose fineness ratio (length-to-diameter) \\
 $F$ & wall-to-edge temperature ratio, $T_w/T_e$, dimensionless \\
 $F_c,\,F_\theta,\,F_x$ & Van~Driest~II skin-friction, momentum-thickness, and length transformation factors \\
-$K_1,\,K_2,\,K_3$ & DATCOM fin lift coefficients \\
+$K$ & DATCOM fin-section wave-drag shape factor \\
+$K_1,\,K_2,\,K_3$ & Barrowman/DATCOM fin normal-force coefficients \\
+$K_\mathrm{cf}$ & body crossflow lift multiplier \\
+$K_\mathrm{shape}$ & Dahlem--Buck nose-shape wave-drag factor \\
+$K_v$ & high-incidence body-vortex strength coefficient ($K_v = 0.20$) \\
 $K_{WB},\,K_{BW}$ & fin-on-body and body-on-fin interference factors \\
-$L/D$ & body fineness ratio \\
-$M,\,M_1,\,M_2$ & Mach number: freestream; pre-shock; post-shock \\
+$L_\mathrm{ref}$ & reference length (moment normalization), \si{\meter} \\
+$M,\,M_1,\,M_2$ & Mach number: freestream; pre-shock; post-shock (normal shock) \\
+$M_c$ & crossflow Mach number, $M\lvert\sin\alpha\rvert$ \\
 $M_e$ & boundary-layer edge Mach number \\
+$M_s$ & local post-shock (fin-station) Mach number \\
 $m$ & compressibility parameter, $(\gamma-1)M_e^2/2$ \\
-$p,\,p_0$ & static pressure; stagnation pressure, \si{\pascal} \\
-$q_\infty$ & freestream dynamic pressure, \si{\pascal} \\
+$p$ & static pressure, \si{\pascal} \\
+$p_{01},\,p_{02}$ & pre-shock and post-shock stagnation pressure, \si{\pascal} \\
 $r$ & turbulent recovery factor ($r=0.88$) \\
-$\mathrm{Re}_L$ & length-based Reynolds number \\
+$R$ & specific gas constant for air ($\SI{287.053}{J/(kg.K)}$) \\
+$\mathrm{Re}_L,\,\mathrm{Re}_x$ & length-based and local Reynolds number \\
+$S$ & Sutherland constant ($S = \SI{110.4}{K}$) \\
 $T,\,T_0,\,T_w$ & static, stagnation, and wall temperature, \si{\kelvin} \\
 $T_e,\,T_{aw}$ & boundary-layer edge and adiabatic-wall temperature, \si{\kelvin} \\
-$t/c$ & fin thickness-to-chord ratio \\
+$t/c$ & fin streamwise thickness-to-chord ratio \\
+$V_r,\,V_\phi$ & radial and angular velocity components (Taylor--Maccoll), nondimensional \\
 $x_{CP},\,x_{CG}$ & center of pressure; center of gravity, \si{\meter} \\
 $\alpha$ & angle of attack, \si{\radian} \\
-$\beta$ & Prandtl--Glauert / Ackeret compressibility factor, $\sqrt{|M^2-1|}$ \\
+$\beta$ & Prandtl--Glauert/Ackeret compressibility factor $\sqrt{|M^2-1|}$ \emph{and} oblique-shock wave angle (dual use), \si{\radian} \\
 $\gamma,\,\gamma_\mathrm{eff}$ & ratio of specific heats; effective (vibrationally relaxed) value \\
-$\delta$ & flow deflection (wedge or cone) angle, \si{\radian} \\
-$\theta,\,\theta_c$ & oblique-shock angle; cone half-angle, \si{\radian} \\
+$\delta$ & local boundary-layer thickness, \si{\meter} \\
+$\theta,\,\theta_c$ & flow-deflection (wedge/ramp) angle; cone half-angle, \si{\radian} \\
+$\phi$ & Taylor--Maccoll polar (ray) angle, \si{\radian} \\
 $\Lambda_{LE}$ & fin leading-edge sweep angle, \si{\radian} \\
 $\mu$ & dynamic viscosity, \si{\pascal\second} \\
 $\nu(M)$ & Prandtl--Meyer function, \si{\radian} \\

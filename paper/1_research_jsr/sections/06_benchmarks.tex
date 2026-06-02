@@ -40,11 +40,11 @@ in the sense of the AIAA policy; B-level rows are disclosed as such throughout.
 \subsection{Externally Benchmarked A-Level Subsystems}
 \label{subsec:a-level}
 
-Twenty-seven subsystems currently meet the A-level standard: an independent
+Twenty subsystems currently meet the A-level standard: an independent
 external benchmark exists, and the model passes a quantitative acceptance gate
-against it. A representative subset is collected in Table~\ref{tab:benchmarks},
+against it. They are collected in Table~\ref{tab:benchmarks},
 with the primary reference, Mach range, and headline metric for each. The
-tabulated rows span $M = 0.6$ to $M = 17.2$ across the analytical, atmospheric,
+tabulated rows span $M = 0.6$ to $M = 10$ across the analytical, atmospheric,
 drag, and stability families; corroborating sources for each subsystem are
 documented in the per-benchmark validation memos under
 \texttt{paper/data/md/}. A single externally anchored \emph{negative} benchmark
@@ -77,14 +77,12 @@ claim is an aggregate-gate pass rather than a uniform pointwise match.
 Static stability, validated against the wing-body-tail data of NASA
 TM~X-653~\cite{nielsen1962} over $M = 0.6$ to $5.82$, returns a normal-force-slope
 MAPE of $6.84\%$ and a center-of-pressure ($x_{CP}/d$) MAPE of $7.11\%$ over ten
-points each (Fig.~\ref{fig:x653}). The hypersonic cone foredrag benchmark, taken
-against the DTIC AD0487365 cone-cylinder range tests~\cite{grabow1965} with the
-source Reynolds number matched row by row, returns a MAPE of $19.7\%$ over eleven
-points spanning $M = 6.5$ to $17.2$, with the largest single residual reaching
-$+57\%$ on the thinnest, lowest-Reynolds-number cone (Fig.~\ref{fig:cone}); this
-hypersonic row is reported as an \emph{exploratory} extension of a
-supersonic-validated method, and its thin-cone limitation is disclosed in
-Sec.~\ref{subsec:b-level}.
+points each (Fig.~\ref{fig:x653}). A hypersonic extension of the cone foredrag
+method, taken against the DTIC AD0487365 cone-cylinder range
+tests~\cite{grabow1965}, is reported as an \emph{exploratory} (B-level) result
+rather than a validated A-level subsystem; it is presented with its thin-cone
+limitation in Sec.~\ref{subsec:b-level} and is not counted among the A-level
+rows above.
 
 \begingroup
 \footnotesize
@@ -119,20 +117,18 @@ percent error (MAPE) or mean absolute error (MAE).}
 6  & Taylor--Maccoll cone flow     & Cone tables~\cite{taylormaccoll1933,anderson2006} & $M = 1$--10                & shock angle $0.825\%$ (gate $1\%$) \\
 7  & Rayleigh pitot $C_{p,\max}$   & NACA Report~1135~\cite{naca1135}                  & $M = 1$--10, 15 pts        & max error $<0.01\%$ \\
 8  & ShockGeometry pre-pass state  & NACA 1135 + Taylor--Maccoll                       & $M = 1.5$--5               & cone surface Mach $0.00\%$ \\
-9  & Nose/body foredrag            & NACA RM~A52H28~\cite{a52h28}                      & $M = 1.5$--3, 5 shapes     & aggregate MAE $0.029$ (gate $0.035$) \\
+9  & Nose/body foredrag, 5 shapes  & NACA RM~A52H28~\cite{a52h28}                      & $M = 1.5$--3, 5 shapes     & aggregate MAE $0.029$ (gate $0.035$) \\
 10 & Base drag, turbulent          & NACA TN~3393~\cite{chapman1955}                   & $M = 2.73$--4.48           & MAPE $15.9\%$ \\
 11 & Base drag, laminar (Chapman)  & NACA TN~3393 laminar~\cite{chapman1955}           & $M = 2.73$--4.48           & MAPE $4.4\%$ \\
 12 & Fin wave drag (DATCOM 4.1.5.1)& NACA TN~3650~\cite{ulmann1956}                    & $M = 1.1$--2.5, 12 pts     & MAPE $21\%$ ($0.00\%$ vs.\ Ackeret) \\
 13 & Compressible skin friction (Van Driest~II) & Hopkins \& Inouye~\cite{hopkins1971} & $M = 1.5$--9        & best-of-class transformation \\
-14 & Nose foredrag, 5 shapes       & NACA RM~A52H28~\cite{a52h28}                      & $M = 1.5$--3               & trend reproduced \\
-15 & Static stability $C_{N_\alpha}$ & NASA TM~X-653~\cite{nielsen1962}                & $M = 0.6$--5.82, 10 pts    & MAPE $6.84\%$ \\
-16 & Static stability $x_{CP}/d$   & NASA TM~X-653~\cite{nielsen1962}                  & $M = 0.6$--5.82, 10 pts    & MAPE $7.11\%$ \\
-17 & Pitch damping $C_{m_q}$, body & Tobak NACA TN~3788~\cite{tobak1956}               & $M = 1.5$--3               & sign + qualitative agreement \\
-18 & Crossflow body $C_{d,c}$      & Jorgensen TR~R-474~\cite{jorgensen1977}           & supersonic crossflow       & exact match (1.20) \\
-19 & Crossflow fin $C_{d,c}$       & Hoerner / Jorgensen~\cite{hoerner1965}            & crossflow                  & 1.42 (within range) \\
-20 & Magnus body fraction          & Platou 1965~\cite{platou1965}                     & supersonic                 & 0.30 within $0.30$--$0.80$ \\
-21 & Hypersonic cone foredrag      & DTIC AD0487365~\cite{grabow1965}                  & $M = 6.5$--17.2, 11 pts    & MAPE $19.7\%$ (max $+57\%$) \\
-22 & Finned-vehicle total drag     & Basic Finner~\cite{dupuis1997}                    & $M = 1.08$--4.30, 8 pts    & MAPE $11.8\%$ \\
+14 & Static stability $C_{N_\alpha}$ & NASA TM~X-653~\cite{nielsen1962}                & $M = 0.6$--5.82, 10 pts    & MAPE $6.84\%$ \\
+15 & Static stability $x_{CP}/d$   & NASA TM~X-653~\cite{nielsen1962}                  & $M = 0.6$--5.82, 10 pts    & MAPE $7.11\%$ \\
+16 & Pitch damping $C_{m_q}$, body & Tobak NACA TN~3788~\cite{tobak1956}               & $M = 1.5$--3               & sign + qualitative agreement \\
+17 & Crossflow body $C_{d,c}$      & Jorgensen TR~R-474~\cite{jorgensen1977}           & supersonic crossflow       & exact match (1.20) \\
+18 & Crossflow fin $C_{d,c}$       & Hoerner / Jorgensen~\cite{hoerner1965}            & crossflow                  & 1.42 (within range) \\
+19 & Magnus body fraction          & Platou 1965~\cite{platou1965}                     & supersonic                 & 0.30 within $0.30$--$0.80$ \\
+20 & Finned-vehicle total drag     & Basic Finner~\cite{dupuis1997}                    & $M = 1.08$--4.30, 8 pts    & MAPE $11.8\%$ \\
 \end{longtable}
 \endgroup
 
@@ -167,24 +163,39 @@ data become available.
 Several model decisions do not meet the A-level standard and are disclosed here.
 
 The pitch-damping derivative $C_{m_q}$ is augmented in production by a fixed
-$3\times$ multiplier and a transonic Gaussian peak ($3.5\times$ at $M \approx 1$),
-selected to close the angular-rate residual on the flight corpus. The Basic
-Finner free-flight $C_{m_q}$ data~\cite{dupuis1997} quantify the consequence: the
-augmented model is sign-correct but exhibits a supersonic MAPE near $69\%$
-(under-prediction), and the transonic Gaussian over-predicts the free-oscillation
-peak by roughly a factor of $3.6$ at $M = 1.05$--$1.12$, consistent with the
-overshoot Sznajder reports for engineering damping models~\cite{sznajder2025}.
-Both are reported as B-level so downstream users can re-identify them as
-independent damping datasets become available.
+$3\times$ multiplier and a transonic Gaussian peak ($k = 3.5$ at $M \approx 1$),
+selected to close the angular-rate residual on the flight corpus. Three
+independent reference datasets quantify the consequence, and because they are
+distinct data they are reported separately rather than reconciled to a single
+number. (i)~Against the Army--Navy Basic Finner free-flight $C_{m_q}$ data of
+Dupuis and Hathaway~\cite{dupuis1997}, the augmented model is sign-correct but
+exhibits a supersonic MAPE near $69\%$ (under-prediction) over the supersonic
+points. (ii)~Against the independent Bhagwandin and Sahu URANS free-flight
+comparison~\cite{bhagwandin2013} the same model returns a supersonic MAPE of
+$18.96\%$ on the AFF planform (5 points, $M = 1.30$--$2.50$) and $28.02\%$ on the
+ANF planform (8 points, $M = 1.29$--$4.50$), sign-consistent with the Basic Finner
+under-prediction. (iii)~Against the engineering-model damping CFD of
+Sznajder~\cite{sznajder2025}, the transonic Gaussian over-predicts the
+free-oscillation damping peak by roughly $+110$ to $+160\%$ at $M = 1.08$--$1.11$;
+this overshoot is a comparison versus a different reference dataset and should not
+be conflated with the model's internal Gaussian augmentation parameter ($k = 3.5$
+at $M = 1$) or with the $\sim 69\%$ Basic Finner free-flight figure. All three are
+reported as B-level so downstream users can re-identify the damping closure as
+further independent datasets become available.
 
-The hypersonic cone benchmark passes its aggregate gate (MAPE $19.7\%$,
-Sec.~\ref{subsec:a-level}) but carries large residuals on the thinnest
-($\theta_c \leq 8^{\circ}$) cones at the lowest-Reynolds-number rows, where
-friction and base drag dominate and the AD0487365 boundary-layer transition state
-is incompletely specified. Until a thin-cone dataset with a documented transition
-state is located, the model is regarded as B-level for cone half-angles
-$\leq 8^{\circ}$, and the hypersonic regime as a whole is treated as an
-exploratory extension rather than a validated operating range.
+The hypersonic cone foredrag benchmark, taken against the DTIC AD0487365
+cone-cylinder range tests~\cite{grabow1965} with the source Reynolds number
+matched row by row, returns a MAPE of $19.7\%$ over eleven points spanning
+$M = 6.5$ to $17.2$, with the largest single residual reaching $+57\%$ on the
+thinnest, lowest-Reynolds-number cone (Fig.~\ref{fig:cone-drag}). The large residuals
+fall on the thinnest ($\theta_c \leq 8^{\circ}$) cones at the lowest-Reynolds-number
+rows, where friction and base drag dominate and the AD0487365 boundary-layer
+transition state is incompletely specified. This row is therefore an
+\emph{exploratory} extension of the supersonic-validated foredrag method and is
+reported as B-level rather than as a validated A-level subsystem; until a
+thin-cone dataset with a documented transition state is located, the hypersonic
+regime as a whole is treated as an exploratory extension rather than a validated
+operating range.
 
 Finally, and most importantly for the integrated-flight claim, the finned-vehicle
 base-drag augmentation depends on two scale constants that are
@@ -209,15 +220,4 @@ split construction and the corresponding error statistics.
 projectile versus the Dupuis and Hathaway ballistic-range data~\cite{dupuis1997},
 $M = 1.08$--$4.30$. Aggregate MAPE $11.8\%$ over eight points.}
 \label{fig:basic-finner}
-\end{figure}
-
-\begin{figure}[tb]
-\centering
-\includegraphics[width=\columnwidth]{hypersonic_cone_drag}
-\caption{Hypersonic cone-cylinder foredrag versus the DTIC AD0487365 range
-tests~\cite{grabow1965}, $M = 6.5$--$17.2$, source Reynolds number matched row by
-row. Aggregate MAPE $19.7\%$; the largest single residual ($+57\%$) occurs on the
-thinnest, lowest-Reynolds-number cone. Reported as an exploratory hypersonic
-extension of a supersonic-validated method.}
-\label{fig:cone}
 \end{figure}

@@ -166,14 +166,17 @@ correct and the resulting damping is conservative (over-damped, and
 therefore trajectory-safe), but the magnitude is not a quantitative
 result. Second, to close the trajectory on the validation corpus the
 production code applies a $3\times$ multiplier on $C_{m_q}$. This
-multiplier is disclosed here as a \emph{B-level} adjustment: it has no
-independent wind-tunnel anchor, and recent computational
-determinations of dynamic-stability derivatives indicate that an
-augmentation of this size overshoots the physical transonic damping
-peak by roughly $110$--$160\%$~\cite{sznajder2025}. The transonic
-Gaussian factor of Eq.~\eqref{eq:cmq_transonic} is correspondingly only
-a qualitative match to free-oscillation behavior and is not claimed as a
-validated quantity. Both the multiplier and the Gaussian augmentation
+multiplier is calibrated against the AEDC-TR-76-58 transonic
+pitch-damping wind-tunnel data; it has no independent flight-scale
+anchor and is disclosed as a \emph{B-level} adjustment. Recent
+computational determinations of dynamic-stability derivatives indicate
+that, at $M = 1.08$--$1.11$, the augmented model overshoots the physical
+transonic pitch-damping peak resolved by the Sznajder CFD by roughly
+$110$--$160\%$~\cite{sznajder2025}. The transonic Gaussian factor of
+Eq.~\eqref{eq:cmq_transonic} --- whose peak augmentation parameter is
+$k(1.0) = 3.5$, a distinct model quantity from the overshoot just
+stated --- is correspondingly only a qualitative match to
+free-oscillation behavior and is not claimed as a validated quantity. Both the multiplier and the Gaussian augmentation
 are expected to be replaced once modal $C_{m_q}$ identification data for
 slender finned configurations become available.
 
@@ -195,11 +198,13 @@ slender finned configurations become available.
   \includegraphics[width=\columnwidth]{transonic_cmq_augmentation}
   \caption{Transonic Gaussian augmentation $k_{\mathrm{transonic}}(M)$
     of the pitch-damping derivative, Eq.~\eqref{eq:cmq_transonic},
-    peaking at $3.5\times$ at $M = 1$ and decaying to unity within
-    $\pm 0.3$ Mach. The augmentation is a B-level adjustment with no
-    independent wind-tunnel anchor; the size of the closure correction
-    overshoots the physical transonic damping peak by an estimated
-    $110$--$160\%$~\cite{sznajder2025}.}
+    with peak augmentation parameter $k(1.0) = 3.5$ at $M = 1$ and
+    decaying to unity within $\pm 0.3$ Mach. The accompanying $3\times$
+    $C_{m_q}$ multiplier is a B-level adjustment calibrated against the
+    AEDC-TR-76-58 transonic pitch-damping wind-tunnel data with no
+    independent flight-scale anchor; at $M = 1.08$--$1.11$ the augmented
+    model overshoots the physical transonic damping peak resolved by the
+    Sznajder CFD by an estimated $110$--$160\%$~\cite{sznajder2025}.}
   \label{fig:cmq_transonic}
 \end{figure}
 
@@ -215,7 +220,16 @@ C_{y,\,p\alpha} = -\tfrac{2}{3}\,C_{N_\alpha,\,\mathrm{body}},
 \label{eq:magnus}
 \end{equation}
 %
-with the corresponding Magnus yawing-moment derivative
+where the factor $-\tfrac{2}{3}$ is the implemented Magnus side-force
+fraction applied to the body normal-force slope. In production the body
+contribution is not separated component-by-component; instead the body
+slope is approximated as a fixed fraction of the total vehicle slope,
+$C_{N_\alpha,\,\mathrm{body}} \approx 0.30\,C_{N_\alpha,\,\mathrm{total}}$,
+so that the effective Magnus fraction of the total slope is
+$-\tfrac{2}{3}\times 0.30 = -0.20$. The body-fraction value $0.30$ and
+the Magnus fraction $-\tfrac{2}{3}$ are therefore distinct quantities,
+not alternative statements of the same coefficient. The corresponding
+Magnus yawing-moment derivative is
 $C_{n,\,p\alpha} = C_{y,\,p\alpha}\,(x_{CP} - x_{CG})/L_{\mathrm{ref}}$.
 At angles of attack above approximately $20^\circ$ the asymmetric body
 vortex system generates a side force that is independent of roll angle.
