@@ -1,0 +1,5 @@
+vehicle,source_doc,apogee_real_ft,apogee_orp_ft,err_pct,max_mach,max_velocity_mps,max_accel_mps2,flight_time_s,note
+"Terrier-Improved Orion MK12 (RockOn/RockSat-C 2016)","NASA Wallops 24 Jun 2016 flight page (74 mi); NASA/TP-20230006855 p.144-146 screening geometry",390720,,,,,,,"SIM ERROR: Simulation values exceeded limits.  Try selecting a shorter time step."
+"Terrier-Improved Malemute MK12 (RockSat-X 2016)","NASA Wallops 17 Aug 2016 flight page (95 mi); NASA/TP-20230006855 p.147-149 screening geometry",501600,,,,,,,"SIM ERROR: Simulation values exceeded limits.  Try selecting a shorter time step."
+"Black Brant IX MOD2 ASPIRE SR02","NTRS 20190028247 Table 1 (SR02 apogee 54.82 km); NASA/TP-20230006855 p.139-143 screening vehicle",179856,211586,17.64,3.832,1132.9,83.8,160.0,"DESCENT-NAN (apogee captured): Simulation values exceeded limits.  Try selecting a shorter time step."
+"Aerobee 150A NASA 4.65GI","NASA TR R-226 p.117 Fig.102 (4.65GI apogee 139.5 st mi, payload 177.5 lb); p.12-13 propulsion",736560,,,,,,,"SIM ERROR: Simulation values exceeded limits.  Try selecting a shorter time step."

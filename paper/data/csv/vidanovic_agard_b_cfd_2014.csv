@@ -1,0 +1,86 @@
+# Digitized from Vidanovic, N. D.; Rasuo, B. P.; Damljanovic, D. B.; Vukovic, Dj. S.; Curcic, D. S.
+# "Validation of the CFD Code Used for Determination of Aerodynamic Characteristics of
+# Non-Standard AGARD-B Calibration Model." Thermal Science, Vol. 18, No. 4, pp. 1223-1233, 2014.
+# DOI: 10.2298/TSCI130409104V. PDF: paper/data/pdf/Validation_of_the_CFD_code_used_for_determination_.pdf
+#
+# Method: ANSYS Fluent, density-based steady RANS, SST k-omega turbulence model,
+# unstructured hybrid mesh ~9.84e6 cells, y+ ~= 1.0, second-order upwind, Roe-FDS.
+# Geometry: AGARD-B (D = 0.1158 m, L = 0.9843 m, wing span 0.4632 m, delta wing 4% bi-convex).
+# Reference length L_ref = 0.2674 m (mean aerodynamic chord). Wing-axes system.
+# Moment reference point: 2.557 D upstream of the model base.
+#
+# Two Mach numbers were simulated:
+#   Ma = 0.596, Re (based on L_ref) ~= 6.42 million
+#   Ma = 1.602, Re (based on L_ref) ~= 9.97 million
+#
+# Nose configurations:
+#   "parabola" : standard AGARD-B parabolic-arc ogive (theoretical model)
+#   "circle"   : non-standard circular-arc ogive (r = 9.274 D), the geometry the paper analyses
+# Plus VTI experimental data (yellow squares with line):
+#   "vti_exp"  : T-38 trisonic wind-tunnel measurement of the parabolic-arc model only
+#
+# Columns:
+#   mach          - free-stream Mach number
+#   aoa_deg       - angle of attack [deg]
+#   source        - "circle_cfd" | "parabola_cfd" | "vti_exp"
+#   cm            - pitching-moment coefficient (Fig. 6)
+#   cl            - lift coefficient (Fig. 7)
+#   cd            - drag coefficient (Fig. 8)
+#   source_figure - originating figure in the paper
+#   notes         - any caveat or read-uncertainty hint
+#
+# Digitization read uncertainty (hand-read, no WebPlotDigitizer):
+#   Cm  +/- 0.005   (Fig. 6 vertical resolution 0.02; three curves overlay)
+#   CL  +/- 0.01    (Fig. 7 vertical resolution 0.10; curves nearly coincident at M=0.596)
+#   CD  +/- 0.003   (Fig. 8 vertical resolution 0.02; curves coincident within line width)
+# At M = 1.602, the parabolic-vs-circular separation in Cm at AoA > 4 is real (paper text);
+# elsewhere the three sources overlap within the read uncertainty.
+#
+# Cd_pressure / Cd_friction / Cd_base columns are left BLANK: the paper reports only total
+# Cd vs AoA; component breakdown is not given.
+mach,aoa_deg,source,cm,cl,cd,cd_pressure,cd_friction,cd_base,source_figure,notes
+# --- Ma = 0.596, VTI experiment (Figs 6 left, 7 left, 8 left, yellow squares) ---
+0.596,-4.0,vti_exp,-0.040,-0.180,0.030,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,VTI yellow squares
+0.596,-2.0,vti_exp,-0.020,-0.090,0.022,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,VTI yellow squares
+0.596,0.0,vti_exp,0.000,0.000,0.020,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,Cd minimum near AoA=0
+0.596,2.0,vti_exp,0.020,0.095,0.024,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+0.596,4.0,vti_exp,0.040,0.195,0.034,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+0.596,6.0,vti_exp,0.058,0.305,0.052,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+0.596,8.0,vti_exp,0.075,0.425,0.075,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+0.596,10.0,vti_exp,0.095,0.560,0.108,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,upper end of test range
+# --- Ma = 0.596, parabolic-arc CFD (Figs 6 left, 7 left, 8 left, red curve) ---
+0.596,-4.0,parabola_cfd,-0.040,-0.180,0.030,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,paper text: percent error < 1% vs VTI for CL; 0.3-3% for CD
+0.596,0.0,parabola_cfd,0.000,0.000,0.020,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+0.596,4.0,parabola_cfd,0.038,0.195,0.034,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+0.596,8.0,parabola_cfd,0.072,0.425,0.075,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,paper: CFD slightly below VTI in Cm at AoA>4
+0.596,10.0,parabola_cfd,0.090,0.560,0.108,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+# --- Ma = 0.596, circular-arc CFD (blue curve, overlays parabolic at M=0.596) ---
+0.596,-4.0,circle_cfd,-0.040,-0.180,0.030,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,blue curve indistinguishable from parabola at this Mach
+0.596,0.0,circle_cfd,0.000,0.000,0.020,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+0.596,4.0,circle_cfd,0.038,0.195,0.034,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+0.596,8.0,circle_cfd,0.072,0.425,0.075,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+0.596,10.0,circle_cfd,0.090,0.560,0.108,,,,Vidanovic2014_Fig6L_Fig7L_Fig8L,
+# --- Ma = 1.602, VTI experiment (Figs 6 right, 7 right, 8 right, yellow squares) ---
+1.602,-4.0,vti_exp,-0.022,-0.215,0.080,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,VTI yellow squares
+1.602,-2.0,vti_exp,-0.010,-0.105,0.064,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,0.0,vti_exp,0.000,0.000,0.058,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,Cd minimum near AoA=0
+1.602,2.0,vti_exp,0.010,0.090,0.062,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,4.0,vti_exp,0.025,0.200,0.074,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,6.0,vti_exp,0.040,0.300,0.088,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,8.0,vti_exp,0.055,0.400,0.108,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,10.0,vti_exp,0.065,0.500,0.130,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,12.0,vti_exp,,,0.155,,,,Vidanovic2014_Fig8R,upper end of CD curve only
+# --- Ma = 1.602, parabolic-arc CFD (red curve) ---
+1.602,-4.0,parabola_cfd,-0.022,-0.230,0.080,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,paper: CFD vs VTI 0.3-3% for CD at positive AoA
+1.602,0.0,parabola_cfd,0.000,0.000,0.058,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,4.0,parabola_cfd,0.022,0.200,0.074,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,8.0,parabola_cfd,0.055,0.400,0.108,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,10.0,parabola_cfd,0.065,0.500,0.130,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,parabola CFD nearly coincident with VTI
+1.602,12.0,parabola_cfd,,,0.155,,,,Vidanovic2014_Fig8R,
+# --- Ma = 1.602, circular-arc CFD (blue curve, departs from parabola in Cm at AoA>4) ---
+1.602,-4.0,circle_cfd,-0.022,-0.230,0.080,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,0.0,circle_cfd,0.000,0.000,0.058,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,4.0,circle_cfd,0.020,0.200,0.074,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,
+1.602,8.0,circle_cfd,0.045,0.400,0.108,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,Cm offset from parabola begins ~4 deg
+1.602,10.0,circle_cfd,0.055,0.500,0.130,,,,Vidanovic2014_Fig6R_Fig7R_Fig8R,Cm noticeably below parabola
+1.602,12.0,circle_cfd,,,0.155,,,,Vidanovic2014_Fig8R,

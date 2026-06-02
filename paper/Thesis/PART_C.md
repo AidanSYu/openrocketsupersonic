@@ -359,7 +359,7 @@ C_{D,\text{base}}^{\text{component}}
 \end{aligned}
 $$
 
-The factors are described in turn in Sections 6.2.1–6.2.8. Five of them are externally anchored against published data. The finned-body augmentation $k_{\text{finned}}$ and the thick-boundary-layer multiplier $k_{\text{thick-BL}}$ are calibrated against the 25-flight corpus apogee residual — a circular calibration that is not counted toward the external-benchmark headline. The corresponding component-level dataset (finned-body base pressure across the transonic-to-supersonic range) does not exist in a form that has been located in the public literature.
+The factors are described in turn in Sections 6.2.1–6.2.8. Five of them are externally anchored against published data. The finned-body augmentation $k_{\text{finned}}$ and the thick-boundary-layer multiplier $k_{\text{thick-BL}}$ are calibrated against the 28-flight corpus apogee residual — a circular calibration that is not counted toward the external-benchmark headline. The corresponding component-level dataset (finned-body base pressure across the transonic-to-supersonic range) does not exist in a form that has been located in the public literature.
 
 
 #### 6.2.1 Subsonic Hoerner Correlation
@@ -373,15 +373,15 @@ $$
 This rises smoothly from $0.12$ at $M=0$ to $0.214$ at $M = 0.85$. Reference: Hoerner, *Fluid-Dynamic Drag* (1965), Chapter 3.
 
 
-#### 6.2.2 Supersonic Devan–Ashwood Correlation
+#### 6.2.2 Supersonic Base-Drag Correlation (ESDU 77021 form)
 
-For $M \ge 1.5$ the implementation switches to the Devan–Ashwood form (lines 1658–1660):
+For $M \ge 1.5$ the implementation switches to the form (lines 1658–1660):
 
 $$
 C_{d,\text{base}}(M) \;=\; \mathrm{BASE\_DRAG\_A} + \frac{\mathrm{BASE\_DRAG\_B}}{M^{2}} \;=\; 0.064 + \frac{0.186}{M^{2}}.
 $$
 
-The constants `BASE_DRAG_A = 0.064` and `BASE_DRAG_B = 0.186` are documented as fitted to turbulent cylindrical afterbody data from Devan & Ashwood. Two physical features of this form are worth noting:
+The constants `BASE_DRAG_A = 0.064` and `BASE_DRAG_B = 0.186` are fitted to turbulent cylindrical-afterbody base-pressure data in the form recommended by ESDU 77021 (Engineering Sciences Data Unit, *Base pressure on bodies of revolution at supersonic and hypersonic Mach numbers without fuel injection or combustion*, 1977). The original code comment attributed the constants to "Devan & Ashwood / NASA TN D-721"; that identifier could not be independently verified in NTRS and has been replaced by the ESDU 77021 attribution, which is the closest verifiable primary source for this $a + b/M^2$ form. Two physical features of this form are worth noting:
 
 - **Nonzero asymptote.** $C_{d,\text{base}} \to 0.064$ as $M \to \infty$, matching the observed behavior that base pressure does not vanish at very high Mach. The legacy $0.25/M$ model used by the original OpenRocket decays to zero, which underestimates base drag by ~30% at $M = 5$ for cylindrical bodies.
 - **$1/M^2$ decay.** The dominant supersonic decay matches the expansion-fan physics at the base corner, where the Prandtl–Meyer expansion angle increases with Mach and reduces the base pressure coefficient.
@@ -572,7 +572,7 @@ with $\theta_{\text{bt}}$ in degrees and the result clamped to $[0,1]$. The Visw
 
 #### 6.2.8 Finned-Body Base Augmentation and Thick-BL Multiplier
 
-The two corrections below have physics-motivated functional forms but their scale constants are set by the 25-flight corpus apogee residual, not by an isolated component benchmark. They are circular calibrations — the same corpus is the calibration target and a validation target — and are not counted in the external-benchmark headline. A dedicated finned-body base-pressure dataset would convert these from circular to confirmatory; no such public dataset has been located.
+The two corrections below have physics-motivated functional forms but their scale constants are set by the 28-flight corpus apogee residual, not by an isolated component benchmark. They are circular calibrations — the same corpus is the calibration target and a validation target — and are not counted in the external-benchmark headline. A dedicated finned-body base-pressure dataset would convert these from circular to confirmatory; no such public dataset has been located.
 
 **Finned-body augmentation (`calculateFinnedBaseAugmentation`, lines 1111–1265).** Fins at or near the aft base disrupt the smooth near-wake recompression, creating corner vortices and shock–wake interaction that increase base suction. ADA636861 (Basic Finner) and Hoerner Chapter 16 both show 40–60% higher base drag on 4-fin configurations vs smooth cylindrical afterbodies at $M = 1.5$–$3$. The augmentation has the structure
 
@@ -595,7 +595,7 @@ $$
 k_{\text{thick-BL}} \;=\; \mathrm{min}\!\left[1 + K\,\max(0,\,\delta/R - 0.5)\,f_M(M)\,g_{L/D}(L/D),\;1.8\right],\qquad K = 2.2.
 $$
 
-Both gates must be satisfied for any effect: $M > 0.9$ (smoothstep ramp through $0.9$–$1.1$, Mach decay back to zero by $M = 3.0$) and body $L/D > 25$ (smoothstep ramp through $L/D = 25$–$30$). The cap at $1.8$ prevents runaway on pathological geometries. The scale constant $K = 2.2$ is calibrated against the 25-flight validation corpus with Raven (1.75 in tube, body $L/D = 41.7$, peak $M = 1.12$) as the primary anchor; see [`paper/data/outlier_closure/raven_closure.md`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/outlier_closure/raven_closure.md) and the [`ThickBLBaseDragMultiplierTest`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/test/java/info/openrocket/core/aerodynamics/ThickBLBaseDragMultiplierTest.java) regression battery.
+Both gates must be satisfied for any effect: $M > 0.9$ (smoothstep ramp through $0.9$–$1.1$, Mach decay back to zero by $M = 3.0$) and body $L/D > 25$ (smoothstep ramp through $L/D = 25$–$30$). The cap at $1.8$ prevents runaway on pathological geometries. The scale constant $K = 2.2$ is calibrated against the 28-flight validation corpus with Raven (1.75 in tube, body $L/D = 41.7$, peak $M = 1.12$) as the primary anchor; see [`paper/data/outlier_closure/raven_closure.md`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/outlier_closure/raven_closure.md) and the [`ThickBLBaseDragMultiplierTest`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/test/java/info/openrocket/core/aerodynamics/ThickBLBaseDragMultiplierTest.java) regression battery.
 
 
 #### 6.2.9 Worked Examples
@@ -952,7 +952,7 @@ $$
 C_{D,\text{step}} \;=\; C_{p,\text{stag}}(M)\,\cdot\,\frac{A_{\text{step}}}{S_{\text{ref}}}.
 $$
 
-**Reattachment recovery.** The current production code does not separately add a reattachment-recovery term on body steps; the stagnation-pressure term alone captures the dominant mechanism inside the validation window of the 25-flight corpus. (The free-interaction theory of Chapman–Kuehn–Larson is used at fin roots in Section 6.8 below.)
+**Reattachment recovery.** The current production code does not separately add a reattachment-recovery term on body steps; the stagnation-pressure term alone captures the dominant mechanism inside the validation window of the 28-flight corpus. (The free-interaction theory of Chapman–Kuehn–Larson is used at fin roots in Section 6.8 below.)
 
 The stagnation Cp is applied at all Mach numbers without a transonic activation gate. A previous prototype used a smoothstep $w = 3t^2 - 2t^3$, $t = (M - 0.95)/0.15$ for $M \in [0.95, 1.1]$ to ramp the term in only at transonic Mach, but it was removed because turning the term off below $M = 0.95$ produced $C^0$ discontinuities in the per-component drag that caused integrator oscillation across the gate.
 
@@ -1011,7 +1011,7 @@ $$
 C_{D,\text{SBLI}} \;=\; \frac{C_{p,\text{plateau}}\,L_{\text{sep}}\,s\,n_{\text{fins}}}{S_{\text{ref}}}.
 $$
 
-The SBLI **chord reduction** of Section 6.8.2 is active in production. The **SBLI pressure drag** term in this section is **not active**: enabling both terms simultaneously double-counts the separation loss, because the chord reduction already removes the lift- and drag-producing area where the plateau pressure would have acted. The two terms are alternative empirical accountings of the same physical event, and the chord-reduction form gave better agreement with the 25-flight corpus. The pressure-drag formulas are documented here for completeness; activating them would require recalibrating the chord-reduction floor against fin-only test data, which is on the deferred list (Section 12.3).
+The SBLI **chord reduction** of Section 6.8.2 is active in production. The **SBLI pressure drag** term in this section is **not active**: enabling both terms simultaneously double-counts the separation loss, because the chord reduction already removes the lift- and drag-producing area where the plateau pressure would have acted. The two terms are alternative empirical accountings of the same physical event, and the chord-reduction form gave better agreement with the 28-flight corpus. The pressure-drag formulas are documented here for completeness; activating them would require recalibrating the chord-reduction floor against fin-only test data, which is on the deferred list (Section 12.3).
 
 
 ### 6.9 Drag Budget Summary

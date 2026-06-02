@@ -1,0 +1,150 @@
+<?xml version='1.0' encoding='utf-8'?>
+<openrocket version="1.8" creator="ORP corpus build script (paper/data/ork/sounding_rockets/_build_orks.py)">
+  <rocket>
+    <name>Super Loki Robin Dart</name>
+    <id>2e3d72ff-9bcb-4205-b30d-8ecf0a4633ff</id>
+    <axialoffset method="absolute">0.0</axialoffset>
+    <position type="absolute">0.0</position>
+    <comment>Super Loki Stable Booster + 1.625-in Robin Dart, 2-stage meteorological sounding rocket.
+Source: AFCRL-TR-73-0412 / DTIC AD-766737, Bollermann and Walker (Space Data Corp), 30 June 1973.
+Geometry: Tables 3.1 (booster motor), 4.1 (mass properties); Figures 3.4 (thrust), 4.1 (vehicle config).
+Apogee: ~106 km (Robin dart variant). Action time 2.09 s. Total impulse 9944 lbf-s.
+NOTE: dart fin geometry (root/tip/sweep) inferred from area only; nose cone length estimated from Fig 4.1.</comment>
+    <designer>ORP corpus build (auto-generated from source PDFs)</designer>
+    <revision>2026-05-02 v1</revision>
+    <motorconfiguration configid="474ced99-dd18-489d-bd59-12672ae5f597" default="true">
+      <name>Super Loki + Robin Dart</name>
+      <stage number="0" active="true"/>
+      <stage number="1" active="true"/>
+    </motorconfiguration>
+    <referencetype>maximum</referencetype>
+
+    <subcomponents>
+      <stage>
+        <name>Robin Dart (sustainer)</name>
+        <overridemass>6.418332</overridemass>
+        <overridesubcomponentsmass>true</overridesubcomponentsmass>
+
+        <subcomponents>
+          <nosecone>
+            <name>Dart nose cone (steel ogive)</name>
+            <id>46ff3b2b-fb0c-474c-b819-00a19622ab55</id>
+            <finish>polished</finish>
+            <material type="bulk" density="7850.0">Steel</material>
+            <length>0.254000</length>
+            <thickness>filled</thickness>
+            <shape>ogive</shape>
+            <shapeparameter>1.0</shapeparameter>
+            <aftradius>0.020637</aftradius>
+            <aftshoulderradius>0.0</aftshoulderradius>
+            <aftshoulderlength>0.0</aftshoulderlength>
+            <aftshoulderthickness>0.0</aftshoulderthickness>
+            <aftshouldercapped>false</aftshouldercapped>
+            <isflipped>false</isflipped>
+          </nosecone>
+
+          <bodytube>
+            <name>Dart body (steel tube + Thermolag coating)</name>
+            <id>fc72629e-a7f6-4086-b81c-83a74eb52473</id>
+            <finish>normal</finish>
+            <material type="bulk" density="7850.0">Steel</material>
+            <length>0.854837</length>
+            <thickness>0.001524</thickness>
+            <radius>0.020637</radius>
+
+            <subcomponents>
+              <trapezoidfinset>
+                <name>Dart fins (4x, 4.95 in^2 each, steel)</name>
+                <id>953f0945-bd6b-46ea-86f1-962940edf4c5</id>
+                <instancecount>4</instancecount>
+                <fincount>4</fincount>
+                <radiusoffset method="surface">0.0</radiusoffset>
+                <angleoffset method="relative">0.0</angleoffset>
+                <rotation>0.0</rotation>
+                <axialoffset method="bottom">0.0</axialoffset>
+                <position type="bottom">0.0</position>
+                <finish>normal</finish>
+                <material type="bulk" density="7850.0">Steel</material>
+                <thickness>0.001524</thickness>
+                <crosssection>square</crosssection>
+                <cant>0.0</cant>
+                <filletradius>0.0</filletradius>
+                <filletmaterial type="bulk" density="7850.0">Steel</filletmaterial>
+                <rootchord>0.076200</rootchord>
+                <tipchord>0.038100</tipchord>
+                <sweeplength>0.019050</sweeplength>
+                <height>0.055880</height>
+              </trapezoidfinset>
+            </subcomponents>
+          </bodytube>
+        </subcomponents>
+      </stage>
+
+      <stage>
+        <name>Stable Super Loki Booster</name>
+        <separationevent>burnout</separationevent>
+        <separationdelay>0.0</separationdelay>
+
+        <subcomponents>
+          <bodytube>
+            <name>Stable Super Loki motor case (SDC P/N 600-13)</name>
+            <id>ad937d16-f087-4c1a-ae8d-82627a269b4d</id>
+            <finish>normal</finish>
+            <material type="bulk" density="2810.0">Aluminum 2014-T6</material>
+            <length>2.242820</length>
+            <thickness>0.002108</thickness>
+            <radius>0.050800</radius>
+            <overridemass>9.502760</overridemass>
+            <overridesubcomponentsmass>true</overridesubcomponentsmass>
+              <motormount>
+                <ignitionevent>automatic</ignitionevent>
+                <ignitiondelay>0.0</ignitiondelay>
+                <overhang>0.0</overhang>
+                <motor configid="474ced99-dd18-489d-bd59-12672ae5f597">
+                  <type>single</type>
+                  <manufacturer>Space Data Corp</manufacturer>
+                  <digest>superloki600-13</digest>
+                  <designation>SuperLoki-600-13</designation>
+                  <diameter>0.101600</diameter>
+                  <length>2.242820</length>
+                  <delay>none</delay>
+                </motor>
+                <ignitionconfiguration configid="474ced99-dd18-489d-bd59-12672ae5f597">
+                  <ignitionevent>automatic</ignitionevent>
+                  <ignitiondelay>0.0</ignitiondelay>
+                </ignitionconfiguration>
+              </motormount>
+
+            <subcomponents>
+              <trapezoidfinset>
+                <name>Booster fins (4x, 31.4 in^2 each)</name>
+                <id>c43189bf-03d2-47e2-8f36-44550d877b38</id>
+                <instancecount>4</instancecount>
+                <fincount>4</fincount>
+                <radiusoffset method="surface">0.0</radiusoffset>
+                <angleoffset method="relative">0.0</angleoffset>
+                <rotation>0.0</rotation>
+                <axialoffset method="bottom">0.0</axialoffset>
+                <position type="bottom">0.0</position>
+                <finish>normal</finish>
+                <material type="bulk" density="2810.0">Aluminum 2014-T6 + Thermolag cuff</material>
+                <thickness>0.001524</thickness>
+                <crosssection>square</crosssection>
+                <cant>0.0</cant>
+                <filletradius>0.0</filletradius>
+                <filletmaterial type="bulk" density="2810.0">Aluminum</filletmaterial>
+                <rootchord>0.421640</rootchord>
+                <tipchord>0.375920</tipchord>
+                <sweeplength>0.045720</sweeplength>
+                <height>0.050800</height>
+              </trapezoidfinset>
+            </subcomponents>
+          </bodytube>
+        </subcomponents>
+      </stage>
+    </subcomponents>
+  </rocket>
+
+  <simulations>
+  </simulations>
+</openrocket>

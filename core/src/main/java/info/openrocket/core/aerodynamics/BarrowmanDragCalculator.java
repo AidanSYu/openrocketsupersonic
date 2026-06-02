@@ -297,7 +297,10 @@ public class BarrowmanDragCalculator implements DragCalculator {
 			if (CDi < 0) CDi = 0;  // induced drag is always non-negative
 		}
 
-		totalForces.setCD(frictionCD + pressureCD + baseCD + overrideCD + CDi);
+		// JSR 2026-05-11 sensitivity sweep: multiplicative total-Cd scale.
+		// AblationConfig.cdScale defaults to 1.0; production path unaffected.
+		double rawTotalCD = frictionCD + pressureCD + baseCD + overrideCD + CDi;
+		totalForces.setCD(rawTotalCD * AblationConfig.cdScale);
 		totalForces.setCDaxial(calculateAxialCD(conditions, totalForces.getCD()));
 
 		// Crossflow drag at high AoA: when the rocket is tumbling or at large
@@ -662,8 +665,18 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	// Van Driest II transformation: maps compressible BL to incompressible
 	// via Fc, Ftheta, Fx transformation functions. Recovery factor r = 0.88.
 
-	/** Van Driest II recovery factor (TN D-6945 recommends 0.88, not 1.0). */
+	/**
+	 * Van Driest II recovery factor (TN D-6945 recommends 0.88, not 1.0).
+	 * JSR 2026-05-11 sensitivity sweep: replaced with a method-local read of
+	 * {@code AblationConfig.vd2RecoveryOverride} so the parameter can be perturbed
+	 * by the corpus sweep harness. Default value (0.88) is preserved verbatim.
+	 */
 	private static final double VD2_RECOVERY = 0.88;
+
+	/** Reads the (possibly perturbed) VD2 recovery factor; defaults to 0.88. */
+	private static double vd2Recovery() {
+		return AblationConfig.vd2RecoveryOverride;
+	}
 
 	/**
 	 * Compressible local skin-friction coefficient via Van Driest II transformation.
@@ -688,7 +701,7 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		}
 
 		// Adiabatic wall temperature: Tw = Te * (1 + r*(gamma-1)/2 * M^2)
-		double tw = te * (1.0 + VD2_RECOVERY * 0.2 * mach * mach);
+		double tw = te * (1.0 + vd2Recovery() * 0.2 * mach * mach);
 
 		// Transformation function Fc (Eqs. 8, 12-17)
 		double Fc = computeVD2Fc(mach, tw / te);
@@ -720,8 +733,9 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	private static double computeVD2Fc(double mach, double twTe) {
 		double m = 0.2 * mach * mach;  // Eq. (17)
 		double F = twTe;                // Eq. (16)
-		double A = Math.sqrt(VD2_RECOVERY * m / F); // Eq. (14)
-		double B = (1.0 + VD2_RECOVERY * m - F) / F; // Eq. (15)
+		double r = vd2Recovery();
+		double A = Math.sqrt(r * m / F); // Eq. (14)
+		double B = (1.0 + r * m - F) / F; // Eq. (15)
 
 		double disc = Math.sqrt(4.0 * A * A + B * B);
 		double alpha = (2.0 * A * A - B) / disc; // Eq. (12)
@@ -736,7 +750,7 @@ public class BarrowmanDragCalculator implements DragCalculator {
 			// Degenerate case (M → 0): Fc → 1
 			return 1.0;
 		}
-		return VD2_RECOVERY * m / (denom * denom);
+		return vd2Recovery() * m / (denom * denom);
 	}
 
 	/**
@@ -1453,10 +1467,14 @@ public class BarrowmanDragCalculator implements DragCalculator {
 	static double calculateSlenderBodyPressureCD(FlightConfiguration configuration,
 			FlightConditions conditions) {
 		double mach = conditions.getMach();
+		// JSR 2026-05-11 sensitivity sweep: decay-end-Mach override (default 5.0).
+		double decayEnd = AblationConfig.slenderBodyDecayEndOverride;
+		// Decay start must remain <= decay end; clamp defensively.
+		double decayStart = Math.min(SLENDER_BODY_MACH_DECAY_START, decayEnd - 0.01);
 		if (mach <= SLENDER_BODY_MACH_LOW) {
 			return 0.0;
 		}
-		if (mach >= SLENDER_BODY_MACH_DECAY_END) {
+		if (mach >= decayEnd) {
 			return 0.0;
 		}
 
@@ -1475,9 +1493,9 @@ public class BarrowmanDragCalculator implements DragCalculator {
 		if (mach <= SLENDER_BODY_MACH_HIGH) {
 			machFactor = smoothstep((mach - SLENDER_BODY_MACH_LOW)
 					/ (SLENDER_BODY_MACH_HIGH - SLENDER_BODY_MACH_LOW));
-		} else if (mach >= SLENDER_BODY_MACH_DECAY_START) {
-			double t = (mach - SLENDER_BODY_MACH_DECAY_START)
-					/ (SLENDER_BODY_MACH_DECAY_END - SLENDER_BODY_MACH_DECAY_START);
+		} else if (mach >= decayStart) {
+			double t = (mach - decayStart)
+					/ (decayEnd - decayStart);
 			machFactor = 1.0 - smoothstep(t);
 		} else {
 			machFactor = 1.0;
@@ -1670,7 +1688,11 @@ public class BarrowmanDragCalculator implements DragCalculator {
 			return 0.12 + 0.13 * m * m;
 		}
 		if (m >= BASE_BLEND_HIGH) {
-			return BASE_DRAG_A + BASE_DRAG_B / (m * m);
+			// JSR 2026-05-11 sensitivity sweep: Devan-Ashwood A intercept override.
+			// Default = 0.064 (nominal); transonic polynomial below uses the static
+			// BASE_DRAG_A and is unaffected — by design, the sweep targets only the
+			// supersonic asymptote.
+			return AblationConfig.baseDragAOverride + BASE_DRAG_B / (m * m);
 		}
 		return PolyInterpolator.eval(m, baseDragTransonicPoly);
 	}

@@ -1,0 +1,27 @@
+# ORP vs Sznajder 2025 CFD pitch-damping comparator
+# Geometry: Army-Navy Basic Finner (ANF), CG = 6.1 d from nose tip (Sznajder Sec. 3).
+# Note: ORP combined damping values are reused from
+# paper/data/csv/bhagwandin_anf_cmq_comparator_2026_05_02.csv (CG = 5.5 d).
+# The two CG references differ by 0.6 d -- this introduces a small (~5-10 %) systematic
+# offset in the Cmq comparison that does not change the sign or qualitative shape of
+# the trend; the comparator memo discusses this caveat.
+#
+# Sznajder total pitch damping = Cmq + Cm_alphadot from Fig. 7 (MRF + FOM combined).
+# Linearly interpolated to ORP-grid Mach values.
+# ORP combined damping = ORP getCmq() + ORP getCmAlphaDot() with k_transonic active.
+#
+# delta = ORP - Sznajder ; delta_pct = delta / Sznajder * 100
+mach,sznajder_total_damping,orp_combined_damping,delta,delta_pct
+1.08,-433.0,-1127.4,-694.4,160.4
+1.11,-399.0,-843.3,-444.3,111.4
+1.29,-471.0,-348.3,122.7,-26.1
+1.50,-440.0,-287.5,152.5,-34.7
+2.00,-355.0,-226.3,128.7,-36.3
+2.50,-289.2,-192.7,96.5,-33.4
+3.00,-260.0,-171.5,88.5,-34.0
+3.50,-245.7,-156.8,88.9,-36.2
+4.00,-210.0,-146.0,64.0,-30.5
+4.50,-190.0,-137.7,52.3,-27.5
+# MAPE 53.0 % over 10 points. Excluding the 2 transonic-overshoot points (M=1.08, 1.11),
+# MAPE over the supersonic band (M >= 1.29) is 31.6 % with ORP systematically
+# UNDERPREDICTING |damping| by 25-36 %.

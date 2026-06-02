@@ -1,0 +1,487 @@
+# =====================================================================
+# Nike-Deacon (DAN) Sounding Rocket -- Vehicle Parameters for RFD v2.0
+# =====================================================================
+#
+# Two-stage solid-propellant unguided meteorological sounding rocket.
+# Stage 1: Nike booster (M5 motor, sandwich duralumin/wood-core fins on
+# cast-magnesium shroud) + Stage 2: ABL Deacon sustainer.
+# The Nike-Deacon combination ("DAN") was developed at the request of
+# the U.S. Air Force Cambridge Research Center to deliver the University
+# of Michigan free-fall accelerometer-sphere apparatus to ~250-375 kft
+# for upper-atmosphere density measurements.
+#
+# PRIMARY SOURCE:
+#   NACA Technical Note 3739, "Flight Investigation of the Performance
+#   of a Two-Stage Solid-Propellant Nike-Deacon (DAN) Meteorological
+#   Sounding Rocket", Robert H. Heitkotter (Langley Pilotless Aircraft
+#   Research Division), Langley Aeronautical Laboratory,
+#   Washington, July 1956. Date of completion 5 December 1955.
+#   NTRS 19930084525. PDF at paper/data/pdf/NACA_TN_3739_Nike_Deacon_Heitkotter_1956.pdf
+#   [hereafter "TN 3739"]
+#
+# CITATION HYGIENE (per CLAUDE.md): every numeric below cites a specific
+# page or figure in TN 3739 directly inspected. Values not directly
+# given (e.g., individual cone-section lengths derived from station
+# callouts in Fig 2) are flagged "derived" with the inference path.
+# =====================================================================
+
+vehicle_name: Nike-Deacon (DAN)
+vehicle_type: 2-stage solid sounding rocket
+designation: DAN meteorological sounding rocket (1955-era)
+manufacturer:
+  stage1_motor: Nike (M5, legacy Nike Ajax surface-to-air booster)
+  stage2_motor: Allegany Ballistics Laboratory (ABL Deacon)
+  airframe_integration: Langley Pilotless Aircraft Research Division (LPARD)
+  payload_apparatus: Engineering Research Institute, University of Michigan
+sources:
+  - NACA TN 3739 (Heitkotter 1956), "Flight Investigation of the Performance of a Two-Stage Solid-Propellant Nike-Deacon (DAN) Meteorological Sounding Rocket"
+
+# ---------------------------------------------------------------------
+# OVERALL VEHICLE GEOMETRY (TN 3739 Figure 2, p.9)
+# ---------------------------------------------------------------------
+# Figure 2 station callouts (all dims in inches, axial position from
+# nose tip = Sta. 0):
+#   Sta.   0       nose tip
+#   Sta.  38.6     end of pointed-cone instrument fairing (nominal)
+#   Sta.  40.5     transition step (6.25 in dia -> 6.5 in dia)
+#   Sta.  45.9     end of forward instrument-housing section
+#   Sta.  93.25    Deacon stage CG (loaded, no.1; ~95.0 for no.2)
+#   Sta. 134.5     forward end of Deacon-Nike interstage / fin shroud
+#   Sta. 136.5     adapter detail point
+#   Sta. 144.5     base of Deacon shroud (Deacon stage aft)
+#   Sta. 154.5     adapter coupling station
+#   Sta. 155.5     forward end of Nike booster body
+#   Sta. 227.5     Nike booster aft (motor case rear face / fin TE)
+# Diameter callouts on Fig 2:
+#   7.8 in   max OD of nose-cone radar-beacon shell (cast-magnesium)
+#   6.5 in   forward instrument body OD
+#   6.25 in  step OD just forward of Deacon motor
+#   7.1 in   Deacon motor head end / fin shroud OD
+#   16.5 in  Nike motor case OD
+#   17.5 in  Nike base OD (aft skirt diameter, fin shroud)
+# Other callouts:
+#   "1324 lb"   complete-booster weight at Nike aft body
+#   "216 lb"    Deacon stage no.1 (loaded, less booster) at CG marker
+#   "221 lb"    Deacon stage no.2 (loaded, less booster) at CG marker
+#   "150.5"     Nike body length (Sta. 227.5 - Sta. 77.0 ~ 150.5; the
+#                Nike booster occupies approximately the rear 150.5 in
+#                of the stack; Sta. 155.5 is the joint to Deacon
+#                shroud, so the Nike body proper is Sta. 155.5-227.5
+#                = 72 in from joint, but the labeled "150.5" likely
+#                refers to total Nike length including fin shroud
+#                (155.5-227.5 + 78-in upstream component = ~150 in
+#                interior). Treat the 150.5-in value as the total
+#                length of the Nike booster assembly including head
+#                fittings, per Fig 2 callout.) NOTE: the dimensioning
+#                is ambiguous in the 1956 facsimile; we adopt the
+#                explicit "Sta. 227.5 - Sta. 77.0 = 150.5 in" reading.
+#   "24.5"      booster fin axial root chord
+#   "9.5"       booster fin tip chord
+#   "62.5"      booster fin tip-to-tip span (across the cruciform)
+#   "19.9"      Deacon fin axial extent (aft of shroud)
+#   "27"        45 lb adapter (booster adapter mass) station detail
+overall:
+  total_length_in: 227.5            # TN 3739 Fig 2: Sta. 227.5 = aft of Nike booster
+  total_length_m: 5.7785            # 227.5 in * 0.0254 m/in
+  max_diameter_in_aft: 17.5         # TN 3739 Fig 2 (Nike base, fin shroud)
+  max_diameter_in_nike_body: 16.5   # TN 3739 Fig 2 (Nike motor case)
+  notes: |
+    The vehicle is described in TN 3739 p.3 as having (a) the Nike booster
+    (steel-and-magnesium head adapter + Nike rocket motor + cruciform
+    sandwich-construction fin assembly on cast-magnesium shroud) and
+    (b) the Deacon second stage (instrument housing with 11-deg apex
+    nose cone + tapered steel section + ABL Deacon sustainer motor +
+    cruciform tapered duralumin fin assembly on cylindrical shroud).
+    "The configuration and dimensions of both sounding rockets were
+    identical. The fins of the second stage were interdigitated
+    approximately 45 deg with the booster fins. The weights of both
+    sounding-rocket combinations were the same, differing only in the
+    additional 5 pounds of the second stage of sounding rocket no. 2."
+    -- TN 3739 p.3.
+
+# ---------------------------------------------------------------------
+# STAGE 1 -- NIKE BOOSTER
+# ---------------------------------------------------------------------
+stages:
+  - stage_index: 1
+    name: Nike booster (M5)
+    role: booster
+    motor:
+      designation: M5 (Nike Ajax legacy booster)
+      motor_family: Nike
+      manufacturer: Hercules Powder Co. (legacy Nike Ajax SAM motor)
+      propellant: double-base (legacy Nike, exact composition not stated in TN 3739)
+      # TN 3739 does NOT provide a Nike thrust curve, total impulse, or
+      # burn time directly. From Figure 10 (velocities vs time) the
+      # booster accelerates the stack to ~3300 fps in ~3.5 s; from
+      # Figure 14 the booster acceleration is ~37-38 g for the first
+      # ~3 s. These are CONSISTENT with the well-known M5 / M5-E1 Nike
+      # booster used in NASA TM X-55700 (Nike-Apache Performance
+      # Handbook), which models the Nike as a flat 42,500 lbf for 3.5 s.
+      # We adopt that profile here as best available reconstruction.
+      thrust_curve_source: |
+        TN 3739 does NOT publish a Nike thrust curve. We adopt the
+        NASA TM X-55700 (Nike Apache Performance Handbook) Appendix A
+        p.64 rectangular profile of 42,500 lbf for 3.5 s, which matches
+        TN 3739 Fig 10 (boost-phase peak velocity ~3300 fps in ~3.5 s)
+        and Fig 14 (~37-38 g sustained boost acceleration).
+      total_impulse_lbfs: 148750.0    # 42500 lbf x 3.5 s (handbook input)
+      total_impulse_Ns: 661690.0      # 148750 lbf-s x 4.4482 N/lbf
+      action_time_s: 3.5              # TN 3739 p.5 ("burning time of the Nike booster first stage was approximately 3.5 seconds")
+      avg_thrust_lbf: 42500.0
+      avg_thrust_N: 189051.0
+      thrust_curve:
+        time_s:    [0.0, 3.5, 3.5]
+        thrust_lbf: [42500.0, 42500.0, 0.0]
+        confidence: synthesized   # TN 3739 silent on shape; matches NASA Handbook
+    geometry:
+      booster_body_length_in: 150.5    # TN 3739 Fig 2 callout
+      booster_body_length_m: 3.8227    # 150.5 in
+      motor_case_diameter_in: 16.5     # TN 3739 Fig 2 ("16.5 Diam")
+      motor_case_diameter_m: 0.4191
+      base_diameter_in: 17.5           # TN 3739 Fig 2 ("17.5 Diam" at Sta 227.5 / aft skirt)
+      base_diameter_m: 0.4445
+      head_adapter_description: "steel adapter and magnesium coupling at the head end of the booster rocket" # TN 3739 p.3
+      fin_assembly_description: |
+        Cruciform 4-fin assembly, sandwich construction:
+        1/16-in-thick duralumin sheets glued to a laminated wood core,
+        attached to a cast-magnesium shroud.
+        -- TN 3739 p.3
+    fins:
+      count: 4
+      arrangement: cruciform
+      shape: clipped trapezoidal (axial root, swept LE)
+      root_chord_in: 24.5              # TN 3739 Fig 2 ("24.5" axial dim along motor)
+      tip_chord_in: 9.5                # TN 3739 Fig 2 ("9.5" axial dim at tip)
+      tip_to_tip_in: 62.5              # TN 3739 Fig 2 ("62.5" max span across cruciform, including 17.5 base)
+      span_per_fin_in: 22.5            # derived: (62.5 - 17.5) / 2 = 22.5 in exposed
+      sweep_length_in: 15.0            # derived: (root - tip) = (24.5 - 9.5) = 15.0 in (assumes square TE)
+      thickness_in: 0.0625             # derived: 1/16-in duralumin sheets (TN 3739 p.3)
+      cross_section: sandwich-laminate (1/16-in duralumin face + wood core); modelled as airfoil/rounded
+      mass_lb: 109.0                   # TN 3739 p.3 weight table ("Booster fins, lb ........ 109")
+      confidence: high                 # weight + sandwich construction + Fig 2 planform are explicit
+    mass:
+      loaded_booster_lb: 1170.0        # TN 3739 p.3 weight table
+      booster_adapter_lb: 45.0         # TN 3739 p.3 weight table
+      booster_fins_lb: 109.0           # TN 3739 p.3 weight table
+      complete_booster_lb: 1324.0      # TN 3739 p.3 weight table (sum: 1170+45+109)
+      complete_booster_kg: 600.55      # 1324 lb * 0.453592 kg/lb
+      cg_loaded_in_from_nose: |
+        Not explicitly tabulated. TN 3739 Fig 2 places the "1324 lb"
+        weight callout near the middle of the Nike booster section
+        (between Sta. 155.5 and Sta. 227.5 -> ~Sta. 191). Use this as
+        booster CG estimate; confidence: medium.
+      cg_loaded_in_from_nose_estimate: 191.0
+    notes: |
+      The booster's M5 motor is the standard Nike Ajax SAM solid
+      rocket motor. TN 3739 itself gives no propellant or empty
+      mass breakdown; only "loaded booster 1170 lb" appears.
+      For thrust integration purposes the propellant fraction is
+      taken from the Nike-Apache Handbook (p.6: 755 lb propellant
+      out of 1215 lb loaded motor), consistent with the M5 family.
+
+# ---------------------------------------------------------------------
+# STAGE 2 -- ABL DEACON SUSTAINER
+# ---------------------------------------------------------------------
+  - stage_index: 2
+    name: ABL Deacon sustainer
+    role: sustainer
+    motor:
+      designation: Deacon (ABL solid sustainer)
+      motor_family: Deacon
+      manufacturer: Allegany Ballistics Laboratory
+      propellant: double-base (legacy Deacon ABL formulation; not specified in TN 3739)
+      # TN 3739 also gives NO Deacon thrust curve. From Fig 14 the
+      # sustainer acceleration peaks at ~52 g (no.1) / ~48 g (no.2) at
+      # second-stage burnout; from Fig 10 the peak velocity reached is
+      # 5150 fps (no.1, at 47,060 ft) and 5289 fps (no.2, at 39,339
+      # ft). The Deacon is a well-known short-burn-time high-thrust
+      # ABL motor (~6500 lbf peak, ~3 s burn, ~120 lbf-s/lbm Isp).
+      # TN 3739 p.5 reports "the rocket fired" at 13.7 s coast (no.1)
+      # / 9.45 s coast (no.2) post-separation, accelerating to peak
+      # velocity within 2-3 s.
+      thrust_curve_source: |
+        TN 3739 does NOT publish a Deacon thrust curve. From TN 3739
+        Fig 14 (a_x vs t): peak boost acceleration ~52 g (no.1) and
+        ~48 g (no.2), occurring near t = 16 s (no.1) and 12-13 s
+        (no.2). The acceleration ramps from ~22 g at ignition to peak
+        in ~2 s, then drops sharply at burnout. Total impulse is back-
+        calculated from delta-V of ~3650 fps (5150 fps reached - 1500
+        fps coast bottom, no.1) over a ~155 lb burnout mass:
+        I = m * dV ~= 70 kg * 1113 m/s = 78,000 N-s ~= 17,500 lbf-s.
+      action_time_s: 3.0               # TN 3739 Fig 14 sustainer pulse width (boost rise to burnout, ~13-16 s window for no.1)
+      total_impulse_lbfs_estimate: 17500.0
+      total_impulse_Ns_estimate: 77800.0
+      avg_thrust_lbf_estimate: 5800.0
+      avg_thrust_N_estimate: 25800.0
+      thrust_curve_estimate:
+        # Synthesized from TN 3739 Fig 14 acceleration curve, integrated
+        # against Deacon stage mass (~155 lb at ignition reducing to
+        # ~90 lb at burnout). Shape: ramp 0 -> peak (~6500 lbf) over
+        # 1.5 s, hold 1 s, fall to 0 over 0.5 s.
+        time_s:    [0.0, 0.05, 0.30, 0.80, 1.50, 2.50, 2.80, 3.00]
+        thrust_lbf: [0.0, 4500, 5800, 6300, 6500, 6500, 1500, 0.0]
+        confidence: synthesized
+        notes: |
+          ABL Deacon thrust curve is not published in TN 3739. The
+          synthesized curve above reproduces (a) Fig 14 peak ~52 g at
+          ~155 lb burnout mass (52 * 32.2 * 70 = ~117 kN ~= peak 6500
+          lbf reasonable in atmospheric reduced state) and (b) Fig 10
+          delta-V of ~3650 fps over ~3 s. Independent verification via
+          ABL Deacon datasheet is REQUIRED before quantitative trajectory
+          claims are made.
+    geometry:
+      # All from TN 3739 Fig 2 station callouts, mapped from Sta. 0 = nose tip:
+      nose_cone_apex_angle_deg: 11.0   # TN 3739 p.3 ("11-degree angled nose cone")
+      nose_cone_half_angle_deg: 5.5
+      nose_cone_max_diameter_in: 7.8   # TN 3739 Fig 2 ("7.8 Diam")
+      nose_cone_length_in: 38.6        # TN 3739 Fig 2 (Sta 0 -> Sta 38.6 = nose body)
+      # NB: 7.8 in / (2 * tan 5.5 deg) = 40.5 in for a perfect 11-deg cone,
+      # vs 38.6 in measured. The ~2-in shortfall is the 38.6/40.5 callout
+      # showing the cast-magnesium shell stops at Sta 38.6 and the geometric
+      # cone apex is at Sta 40.5 -> the cone is slightly truncated at base.
+      # Treat as 38.6-in conical nose with 7.8-in base for ORK purposes.
+      forward_body_diameter_in: 6.5    # TN 3739 Fig 2 (between Sta 40.5 and 45.9)
+      step_down_station_in: 40.5
+      forward_section_aft_in: 45.9
+      forward_body_aft_diameter_in: 6.25  # TN 3739 Fig 2 ("6.25 Diam") -- step before steel taper
+      deacon_motor_section: |
+        From Sta 45.9 to Sta 134.5 (= 88.6 in) is the "tapered steel
+        section + Deacon sustainer motor + fin shroud" per TN 3739 p.3.
+        Body OD increases to 7.1 in at the Deacon-fin-shroud transition.
+      deacon_fin_can_diameter_in: 7.1  # TN 3739 Fig 2 ("7.1 Diam")
+      deacon_fin_can_aft_station_in: 144.5  # TN 3739 Fig 2 (Sta 144.5)
+      deacon_fin_can_axial_extent_in: 19.9  # TN 3739 Fig 2 ("19.9" callout near base)
+      deacon_total_length_in: 144.5    # Sta 0 -> Sta 144.5 = full Deacon stage incl. fin can
+    fins:
+      count: 4
+      arrangement: cruciform (interdigitated 45 deg from booster fins)  # TN 3739 p.3
+      shape: tapered duralumin
+      cross_section: tapered duralumin (TN 3739 p.3); model as airfoil
+      thickness_in: MISSING_FROM_SOURCE  # TN 3739 does not specify Deacon fin thickness
+      mass_lb_assembly: 25.5           # TN 3739 p.3 ("Deacon fins, shroud, and fairing ring, lb ... 25.5")
+      planform_dims_known: false
+      planform_notes: |
+        TN 3739 Fig 2 does NOT give explicit Deacon fin chord/span
+        dimensions; only the shroud OD (7.1 in) and overall axial extent
+        (19.9 in for the fin-can / shroud assembly) are labeled.
+        The fins are visible on the right side of Fig 2 as small swept
+        trapezoids attached to the cylindrical shroud, but with no
+        dimensions called out.
+        For ORK construction we adopt scaled-down Deacon planform per
+        a typical ABL Deacon (root ~ shroud length, tip ~ 1/3 root,
+        span ~ shroud OD). This is FLAGGED as an inference and the
+        confidence is marked low.
+      root_chord_in_inferred: 19.9     # = shroud axial extent (TN 3739 Fig 2)
+      tip_chord_in_inferred: 7.0       # inferred (~35% of root, typical Deacon)
+      span_per_fin_in_inferred: 9.0    # inferred (slightly larger than 7.1 OD)
+      tip_to_tip_in_inferred: 25.1     # = 2 * 9.0 + 7.1 OD
+      sweep_length_in_inferred: 12.9   # = root - tip
+      confidence: low                  # planform inferred, only shroud OD + axial extent in source
+    mass:
+      loaded_deacon_no1_lb: 151.5      # TN 3739 p.3 ("Loaded Deacon, lb ... 151.5")
+      loaded_deacon_no2_lb: 151.5      # same loaded weight; differences are in nose cone
+      deacon_fins_shroud_fairing_lb: 25.5     # TN 3739 p.3
+      nozzle_extension_lb: 5.0         # TN 3739 p.3
+      nose_cone_and_instrumentation_no1_lb: 34.0  # TN 3739 p.3
+      nose_cone_and_instrumentation_no2_lb: 39.0  # TN 3739 p.3
+      complete_deacon_no1_lb: 216.0    # TN 3739 p.3 ("Complete Deacon second stage ... 216.0 for no. 1")
+      complete_deacon_no2_lb: 221.0    # TN 3739 p.3 ("...  221 for no. 2")
+      complete_deacon_no1_kg: 97.98    # 216 lb * 0.453592 kg/lb
+      complete_deacon_no2_kg: 100.25   # 221 lb * 0.453592
+      cg_deacon_no1_in_from_nose: 93.25  # TN 3739 Fig 2 ("Sta. 93.25" callout)
+      cg_deacon_no2_in_from_nose: 95.0   # TN 3739 Fig 2 ("Sta. 95.0" callout)
+    notes: |
+      The Deacon sustainer is identified in TN 3739 as "second-stage
+      ABL Deacon sustainer ... which had previously been used by the
+      NACA as an aerodynamic research vehicle" (p.1).
+      The instrument housing is a cast-magnesium shell, 3/16-in thick,
+      designed for a 550-deg-F skin temperature 24 in aft of the nose tip
+      from a 12-second nose-cone heat-soak (TN 3739 p.3).
+      The nose cone separates the AN/DPN-19 radar beacon from the
+      Deacon motor body; the accelerometer sphere is housed inside.
+      Sphere is ejected at t = 52 s after launch, when q ~ 1% of weight.
+
+# ---------------------------------------------------------------------
+# INTER-STAGE / STAGING EVENT
+# ---------------------------------------------------------------------
+staging:
+  separation_event: differential drag at Nike burnout
+  separation_mechanism: |
+    "The booster then separated from the second stage since the
+    deceleration of the burned-out booster was greater than that of
+    the second-stage sustainer." -- TN 3739 p.5
+    Consistent with all Nike-stack sounding rockets: no mechanical
+    restraint axially; the booster falls away by drag differential
+    after motor burnout.
+  separation_time_s: 3.5             # TN 3739 p.5 (Nike burning time ~3.5 s)
+  separation_altitude_ft_no1: 4900   # TN 3739 p.5 ("The second stage was boosted to an altitude of 4,900 feet")
+  separation_altitude_ft_no2: 5200   # TN 3739 p.5 ("boosted to an altitude of 5,200 feet")
+  separation_altitude_m_no1: 1494
+  separation_altitude_m_no2: 1585
+  coast_duration_s_no1: 13.7         # TN 3739 p.5 ("The second stage coasted 13.7 seconds before the rocket fired")
+  coast_duration_s_no2: 9.45         # TN 3739 p.5 ("then coasted 9.45 seconds")
+  deacon_ignition_time_s_after_liftoff_no1: 17.2  # 3.5 + 13.7
+  deacon_ignition_time_s_after_liftoff_no2: 12.95 # 3.5 + 9.45
+  deacon_ignition_method: |
+    Powder squib delay, electrically ignited at launch.
+    "a nominally 15.5-second time-delay powder squib, electrically
+    ignited, was employed in the Deacon second stage in order to give
+    a nominal coasting period of 12 seconds and permit ignition of the
+    squib at the instant of launching." -- TN 3739 p.5
+    First flight: squib gave 17 s actual delay (vs nominal 15.5 s).
+    Second flight: 13.5-s delay squib used, gave 12.8 s actual.
+    Deacon ignition is therefore delay-from-launch (NOT burnout-keyed).
+  deacon_burnout_velocity_ftps_no1: 5150   # TN 3739 p.5
+  deacon_burnout_velocity_ftps_no2: 5289   # TN 3739 p.5
+  deacon_burnout_altitude_ft_no1: 47060    # TN 3739 p.5
+  deacon_burnout_altitude_ft_no2: 39339    # TN 3739 p.5
+  nose_cone_release_time_s: 52.0           # TN 3739 p.5 ("at 52 seconds after launching ... ratio of second-stage drag to weight was 1 percent or less")
+
+# ---------------------------------------------------------------------
+# COMBINED-STACK MASS PROPERTIES
+# ---------------------------------------------------------------------
+mass_summary:
+  liftoff_weight_no1_lb: 1540.0      # 1324 (booster) + 216 (Deacon no.1)
+  liftoff_weight_no2_lb: 1545.0      # 1324 (booster) + 221 (Deacon no.2)
+  liftoff_weight_no1_kg: 698.5
+  liftoff_weight_no2_kg: 700.8
+  notes: |
+    TN 3739 p.3 component breakdown sums to:
+      no. 1: 1324 + 216 = 1540 lb at liftoff
+      no. 2: 1324 + 221 = 1545 lb at liftoff
+    The 5-lb difference is in the nose-cone-and-instrumentation
+    payload (34 -> 39 lb).
+
+# ---------------------------------------------------------------------
+# LAUNCH CONDITIONS (TN 3739 p.4)
+# ---------------------------------------------------------------------
+launch:
+  site: Langley Pilotless Aircraft Research Station, Wallops Island, Virginia
+  site_altitude_ft: 0                # TN 3739 SUMMARY ("launched from sea level")
+  site_altitude_m: 0
+  site_latitude_deg_N: 37.840        # Wallops Island NACA station (independent: NASA Wallops)
+  site_longitude_deg_W: 75.483       # Wallops Island NACA station
+  azimuth_deg: MISSING_FROM_SOURCE    # TN 3739 does not record launch azimuth
+  elevation_angle_deg: 75.0          # TN 3739 SUMMARY + p.4 ("This was the maximum launching angle permitted by safety restrictions at the firing range at the Langley Pilotless Aircraft Research Station at Wallops Island, Va.")
+  launcher_type: zero-length         # TN 3739 p.4 (figs 1, 5-7); two-arm forward fitting (spring-loaded) + adjustable rear stud
+  launcher_length_ft: 0.0            # zero-length per TN 3739
+
+# ---------------------------------------------------------------------
+# CANONICAL FLIGHTS (used for RFD v2.0 corpus rows)
+# ---------------------------------------------------------------------
+flights:
+  - flight_id: NACA TN 3739 sounding rocket no. 1
+    site: Wallops Island, Virginia
+    date: 1955-pre-Dec  # TN 3739 completed 5 Dec 1955; flights conducted prior. Exact dates not in report.
+    payload_lb_nose_cone_and_instr: 34.0   # TN 3739 p.3
+    deacon_loaded_lb: 151.5
+    deacon_assembly_lb_no1: 216.0          # complete second stage
+    booster_lb: 1324.0
+    liftoff_weight_lb: 1540.0
+    launch_elevation_deg: 75.0             # TN 3739 p.5
+    coast_after_separation_s: 13.7         # TN 3739 p.5
+    deacon_ignition_t_s: 17.2              # 3.5 + 13.7
+    deacon_burnout_velocity_ftps: 5150     # TN 3739 p.5 (peak velocity)
+    deacon_burnout_altitude_ft: 47060      # TN 3739 p.5
+    apogee_ft: 356000                      # TN 3739 SUMMARY + p.5 (radar-beacon-determined peak altitude)
+    apogee_km: 108.5                       # 356000 ft * 0.0003048 km/ft = 108.51 km
+    apogee_method: AN/DPN-19 radar beacon (NACA SCR 584 modified tracking radar) at t = 161 s
+    apogee_time_s: 161.0                   # TN 3739 p.5
+    range_at_impact_ft: 340000             # TN 3739 p.5 ("estimated range upon impact was 340,000 feet")
+    confidence: high                       # apogee directly measured, beacon-tracked
+
+  - flight_id: NACA TN 3739 sounding rocket no. 2
+    site: Wallops Island, Virginia
+    date: 1955-pre-Dec
+    payload_lb_nose_cone_and_instr: 39.0   # TN 3739 p.3
+    deacon_loaded_lb: 151.5
+    deacon_assembly_lb_no2: 221.0          # complete second stage
+    booster_lb: 1324.0
+    liftoff_weight_lb: 1545.0
+    launch_elevation_deg: 75.0             # TN 3739 p.5
+    coast_after_separation_s: 9.45         # TN 3739 p.5
+    deacon_ignition_t_s: 12.95             # 3.5 + 9.45
+    deacon_burnout_velocity_ftps: 5289     # TN 3739 p.5 (peak velocity)
+    deacon_burnout_altitude_ft: 39339      # TN 3739 p.5
+    apogee_ft: 350000                      # TN 3739 SUMMARY + p.5
+    apogee_km: 106.7                       # 350000 ft * 0.0003048
+    apogee_method: |
+      AN/DPN-19 radar beacon (intermittent track during ascent;
+      0.5-s recording 29,048-29,762 ft; lost until just before apex;
+      then beacon-tracked downward to 144,000 ft).
+      Peak altitude reconstructed from data, peak time 156 s.
+    apogee_time_s: 156.0                   # TN 3739 p.6
+    range_at_impact_ft: 320000             # TN 3739 p.6 ("impact point was estimated to be 320,000 feet in range")
+    confidence: medium                     # beacon track was intermittent; apogee reconstructed
+
+# ---------------------------------------------------------------------
+# AERODYNAMIC NOTES
+# ---------------------------------------------------------------------
+aerodynamics:
+  drag_curve_cd_deacon_alone:
+    source: TN 3739 Figure 11 (drag coefficient vs Mach number, coast periods of second stage only)
+    measurement_method: CW Doppler radar V(t) -> a_x -> Cd via D = a*m, frontal area = pi/4 * (7.1 in)^2
+    mach_range_lower_segment: [1.6, 2.7]
+    cd_lower_segment_range: [0.46, 0.62]
+    mach_range_upper_segment: [4.7, 5.5]
+    cd_upper_segment_range: [0.23, 0.30]
+    notes: |
+      Figure 11 shows two clusters because Cd is reported only during
+      ballistic-coast portions of the second stage:
+      (a) the post-separation pre-Deacon-ignition coast at M ~1.6-2.7,
+      (b) the post-Deacon-burnout high-altitude coast at M ~4.7-5.5.
+      The peak Mach at Deacon burnout is approximately 5.3-5.4 from
+      Figs 10-11 (5150-5289 fps at ~40-47 kft, T ~ 390 R, sound speed
+      ~ 970 fps -> M ~ 5.3-5.4).
+  reynolds_per_foot_source: TN 3739 Figure 12
+  flight_path_angle: |
+    "the flight paths were determined by using radar beacon
+    instrumentation. The radar beacon instrumentation recorded a peak
+    altitude of 356,000 feet during the first flight test and 350,000
+    feet during the second flight test when both vehicles were
+    launched from sea level at an angle of elevation of 75 deg."
+    -- TN 3739 SUMMARY (p.1)
+
+unmodeled_physics:
+  - |
+    No spin stabilization is described in TN 3739. The interdigitated
+    booster + Deacon fin pair is purely static. No roll-rate or roll-
+    coupling data are reported, but the vehicle is presumably non-
+    spinning since fin canting is not mentioned.
+  - |
+    Nose-cone heat soak: TN 3739 reports a calculated peak skin
+    temperature of 550 deg F at 24 in aft of the nose tip during the
+    12-s booster-Deacon coast. This is a conduction calculation, not
+    an aero load; ORP / OpenRocket do not model thermal mass or
+    coupled heat transfer.
+  - |
+    Sphere-payload ejection at t = 52 s changes vehicle mass by
+    ~10-15 lb mid-coast (sphere assembly + nose cone separated
+    from Deacon). ORP can model staging events but mass-jump after
+    apogee approach is not in the canonical pipeline.
+  - |
+    Deacon thrust curve is synthesized; TN 3739 publishes a_x and
+    V(t) but not F(t) directly. Trajectory back-fit on apogee is
+    expected to require some cd / impulse calibration.
+
+# ---------------------------------------------------------------------
+# MISSING_FROM_SOURCE FIELDS
+# ---------------------------------------------------------------------
+missing_from_source:
+  - nike_thrust_curve_shape           # TN 3739 silent; we use NASA Handbook flat 42500 lbf x 3.5 s
+  - nike_propellant_mass_lb           # TN 3739 only gives "loaded booster 1170 lb"; propellant fraction adopted from M5-E1 family
+  - nike_motor_empty_mass_lb          # not stated
+  - deacon_thrust_curve               # TN 3739 reports a_x and V(t), not F(t); curve synthesized from those
+  - deacon_total_impulse              # back-calculated from delta-V x mass; not directly stated
+  - deacon_propellant_mass_lb         # TN 3739 silent
+  - deacon_motor_empty_mass_lb        # TN 3739 silent
+  - deacon_fin_planform_dimensions    # only shroud OD + 19.9-in axial extent in Fig 2
+  - deacon_fin_thickness              # not stated
+  - launch_azimuth_deg                # not recorded
+  - exact_flight_dates                # report completed 5 Dec 1955 but flights not dated
+  - cg_loaded_booster_in_from_nose    # not directly tabulated; only Deacon CG (Sta. 93.25 / 95.0) given
+
+# =====================================================================
+# END nike_deacon.yaml
+# =====================================================================

@@ -15,7 +15,7 @@ authors:
 affiliations:
   - name: Independent Researcher
     index: 1
-date: 14 April 2026
+date: 16 May 2026
 bibliography: paper.bib
 license: GPL-3.0
 repository-code: 'https://github.com/AidanSYu/openrocketsupersonic'
@@ -43,7 +43,7 @@ base drag suite covering turbulent, laminar, and boattail regimes [@chapman1950;
 @esdu77021]; Van Driest II compressible skin friction [@hopkins1971]; and Modified
 Newtonian theory for the hypersonic regime [@anderson2006]. All Mach regime
 transitions use C1-continuous polynomial blending to prevent trajectory integrator
-instabilities near Mach 1. The software is validated through 72 aerodynamic test
+instabilities near Mach 1. The software is validated through 95 aerodynamic test
 files tracked in a claim-by-claim validation matrix; remaining heuristic and open
 geometry-family gaps are explicitly classified rather than treated as closed.
 
@@ -184,6 +184,18 @@ other physical effects present in actual flight. The hypersonic cone drag
 benchmark (MAPE 16.7%, 11 points, M 6.5–17.2) confirms usable accuracy
 through the Modified Newtonian regime.
 
+Beyond component-level validation, the simulator has been validated against a
+28-flight ground-truth corpus spanning Mach 0.54 to 7.22 and apogee 1.1 to
+273.6 km, released as the Rocket Flight Database [@rfd_zenodo] under CC-BY-4.0.
+Mean signed apogee error is −0.44%, standard deviation 5.13%, with 28 of 28
+flights within ±10% of measured altitude. On the 25 flights with paired
+RASAero II predictions, no statistically significant difference in absolute
+error is found (Wilcoxon p = 0.375). Independent validation against four
+published computational-fluid-dynamics references (Basic Finner URANS
+[@bunescu2025]; Basic Finner pitch damping [@sznajder2025]; transonic projectile
+base flow [@sahu1983]; AGARD-B SST k-ω [@vidanovic2014]) provides additional
+anchor points for the static and dynamic stability subsystems.
+
 The software enables a class of research and educational activities that was
 previously inaccessible without commercial tools: trajectory optimization for
 HPR vehicles at Mach 2–5, aerodynamic stability analysis across the full
@@ -199,13 +211,21 @@ Haack noses via empirical Dahlem-Buck shape factors), systematic
 underprediction of total vehicle drag on the Basic Finner projectile
 suggesting a missing interference or transition drag source, and reduced
 center-of-pressure accuracy (xCP MAPE 7.1%) that degrades in the
-transonic band where the transonic similarity approximation is least accurate. The transonic regime (M 0.8–1.3) remains the most
+transonic band where the transonic similarity approximation is least accurate.
+Pressure drag for high-fineness slender bodies decays to zero above Mach 5 in
+the current implementation, producing a quantified positive apogee bias on
+high-L/D hypersonic flights (Phase 6h, documented as ongoing work). The
+transonic regime (M 0.8–1.3) remains the most
 challenging for all models. Real-gas dissociation chemistry above
 approximately Mach 7 is not included.
 
 # Acknowledgements
 
 The author thanks the OpenRocket development community for the original
-open-source codebase on which this work is built.
+open-source codebase on which this work is built. Large language model
+assistants (Anthropic Claude) were used to draft and edit portions of the
+source code and prose; all aerodynamic models, validation comparisons,
+numerical results, and citation verifications were independently checked by
+the author against primary references.
 
 # References

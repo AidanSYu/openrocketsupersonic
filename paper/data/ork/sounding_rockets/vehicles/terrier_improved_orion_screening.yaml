@@ -1,0 +1,63 @@
+# Terrier-Improved Orion screening model
+#
+# Purpose:
+#   Replacement v2 sounding-rocket candidate for spin-launched dart vehicles.
+#   This is a source-backed first-pass model, not a gold-standard motor
+#   reconstruction. Exact Terrier thrust curve, Improved Orion propellant
+#   mass, payload mass, and fin planforms remain open items.
+
+vehicle:
+  name: "Terrier-Improved Orion MK12"
+  stages: 2
+  class: "screening"
+  reason: "solid two-stage sounding rocket, no helical dart launcher dependency"
+
+sources:
+  - path: "paper/data/pdf/NASA_TP_20230006855_Sounding_Rockets_User_Handbook.pdf"
+    citekey: "NASA/TP-20230006855"
+    role: "vehicle geometry/performance envelope, Appendix A.5 p.144-146"
+  - url: "https://www.nasa.gov/news-release/nasa-successfully-launches-suborbital-rocket-from-wallops/"
+    citekey: "NASA Wallops 2016-06-24"
+    role: "specific Wallops RockOn/RockSat-C flight target, 74 mile apogee"
+
+booster:
+  motor: "Terrier MK12"
+  diameter_in: 18.0
+  length_in: 169.0
+  fins: "four 4.8 sq ft fins in cruciform"
+  cite: "NASA/TP-20230006855 p.144"
+  thrust_curve: "SYNTHESIZED_FROM_SCREENING_ASSUMPTION"
+  loaded_mass_lb: 1907.0
+  loaded_mass_basis: "3150 lb MK70 stack and 2850 lb MK12 stack minus 943 lb Improved Orion; handbook p.144"
+
+sustainer:
+  motor: "Improved Orion"
+  diameter_in: 14.0
+  length_in: 105.0
+  loaded_mass_lb: 943.0
+  thrust: "approximately 20,000 lbf for first 6 s; approximately 4,000 lbf until burnout at 24 s"
+  roll_rate: "burnout roll rate generally 4 cycles/s"
+  cite: "NASA/TP-20230006855 p.144"
+  propellant_mass_lb: "MISSING_FROM_SOURCE"
+
+payload_screening:
+  mass_lb: 500.0
+  diameter_in: 14.0
+  length_in: 90.0
+  basis: "within handbook supported range of 300-1100 lb, 70-290 in; exact RockOn/RockSat-C mass not in current source set"
+
+flight_target:
+  event: "RockOn/RockSat-C 2016 student payload flight"
+  launch_site: "Wallops Flight Facility"
+  launch_date: "2016-06-24"
+  reported_apogee_miles: 74.0
+  reported_apogee_ft: 390720.0
+  confidence: "medium: NASA flight page apogee, screening payload assumptions"
+
+missing_from_source:
+  - exact Terrier MK12 thrust curve
+  - exact Terrier MK12 propellant mass
+  - exact flight payload mass and geometry
+  - Improved Orion propellant mass
+  - upper-stage fin planform
+  - exact stage ignition/separation timing

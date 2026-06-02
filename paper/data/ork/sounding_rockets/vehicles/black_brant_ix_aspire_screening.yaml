@@ -1,0 +1,70 @@
+# Black Brant IX ASPIRE screening model
+#
+# Purpose:
+#   Modern high-fidelity trajectory target with published reconstructed flight
+#   events. Vehicle model is screening-grade because the public papers give
+#   stack geometry and event timing but not a full Terrier thrust curve or
+#   Black Brant fin/mass distribution details.
+
+vehicle:
+  name: "Black Brant IX MOD2 ASPIRE SR02"
+  stages: 2
+  class: "screening"
+  reason: "modern Wallops Terrier-Black Brant flight with reconstructed apogee/timing"
+
+sources:
+  - path: "paper/data/pdf/NASA_TP_20230006855_Sounding_Rockets_User_Handbook.pdf"
+    citekey: "NASA/TP-20230006855"
+    role: "Black Brant IX vehicle data, Appendix A.4 p.139-143"
+  - path: "paper/data/pdf/NASA_NTRS_20190028247_ASPIRE_Aero_Models.pdf"
+    citekey: "NTRS 20190028247"
+    role: "ASPIRE flight architecture and Table 1 trajectory events"
+  - path: "paper/data/pdf/NASA_NTRS_20200002361_ASPIRE_Reconstruction.pdf"
+    citekey: "NTRS 20200002361"
+    role: "SR02/SR03 trajectory reconstruction methods and atmospheric data"
+
+booster:
+  motor: "Terrier MK70"
+  diameter_in: 18.0
+  length_in: 169.0
+  fins: "four 2.5 sq ft fins in cruciform"
+  cite: "NASA/TP-20230006855 p.139"
+  thrust_curve: "SYNTHESIZED_FROM_SCREENING_ASSUMPTION"
+
+sustainer:
+  motor: "Black Brant motor with extended exit cone"
+  diameter_in: 17.26
+  length_in: 223.0
+  loaded_mass_lb: 2827.0
+  propellant_mass_lb: 2223.0
+  average_thrust_lbf: 23317.0
+  action_time_s: 27.5
+  burnout_roll_rate_cps: 4.0
+  cite: "NASA/TP-20230006855 p.139"
+  thrust_curve: "flat average-thrust table; exact curve missing"
+
+payload_screening:
+  mass_kg: 1100.0
+  length_m: 6.6606
+  diameter_m: 0.7239
+  cite: "NTRS 20190028247 p.6, Figure 4"
+
+flight_target:
+  flight: "ASPIRE SR02"
+  launch_site: "Wallops Flight Facility"
+  launch_date: "2018-03-31"
+  first_stage_burnout_time_s: 6.21
+  second_stage_burnout_time_s: 34.10
+  payload_separation_time_s: 103.99
+  apogee_time_s: 123.49
+  apogee_km: 54.82
+  apogee_ft: 179856.0
+  cite: "NTRS 20190028247 Table 1 p.5"
+  confidence: "high trajectory target; medium-low vehicle model"
+
+missing_from_source:
+  - exact Terrier MK70 thrust curve
+  - exact Terrier MK70 propellant mass
+  - Black Brant IX fin geometry
+  - exact ASPIRE stack/payload mass by flight
+  - stage separation and ignition implementation details

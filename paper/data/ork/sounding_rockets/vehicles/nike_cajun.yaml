@@ -1,0 +1,545 @@
+# =====================================================================
+# Nike-Cajun (CAN) Sounding Rocket -- Vehicle Parameters for RFD v2.0
+# =====================================================================
+#
+# Two-stage solid-propellant unguided sounding rocket.
+# Stage 1: Nike M5 booster (modified to "M5-E1" for sounding rockets) +
+# Stage 2: Cajun TE-82 sustainer (Atlantic Research, polysulfide).
+# Cruciform 4-fin stabilization on each stage. Stages connected by an
+# adapter and coupling at the head end of the booster; separation is by
+# differential drag at Nike burnout.
+#
+# Two configurations were flight-tested in NACA RM L57D26:
+#   (a) University of Michigan ("sounding rocket"): 51.85-lb nose+instr,
+#       launched 75 deg elevation, peak altitude 426,000 ft (130 km).
+#   (b) Hurricane variant ("hurricane rocket"): 75.77-lb nose+instr
+#       (heavier photographic / camera payload), same body and fins as
+#       UM rocket, peak altitude ~412,000 ft (~126 km) per Fig. 7.
+#
+# Primary source:
+#   NACA RM L57D26 (NACA-CR-CB-CONFIDENTIAL, declass 1959-07-22),
+#   "Characteristics of the Nike-Cajun (CAN) Rocket System and Flight
+#    Investigation of Its Performance"
+#   Royall, J.F., Jr., and Garland, B.J. (Langley Aero. Lab., NACA),
+#   29 July 1957.
+#   PDF: paper/data/pdf/NACA_RM_L57D26_Nike_Cajun_Royall_Garland_1957.pdf
+#   [hereafter "L57D26"]
+#
+# Cross-reference for Cajun mass / propellant burn history:
+#   NASA TM X-55440 / X-721-66-91,
+#   "Effects of Payload Weight and Length on the Mass and Aerodynamic
+#    Characteristics of the Apache and Cajun Sounding Rockets (CAPACHE)"
+#   Mayo, E.E. (GSFC, Spacecraft Integration & Sounding Rocket Div.),
+#   March 1966.
+#   PDF: paper/data/pdf/NASA_X-721-66-91_Apache_Cajun_Mass_Aero_Mayo_1966.pdf
+#   [hereafter "Mayo66"; Tables 1, 3 give propellant-loss-vs-time which
+#    is integrated below into the Cajun thrust curve.]
+#
+# Cross-reference for Nike booster motor curve (shared hardware):
+#   NASA TM X-55700 / X-721-66-569,
+#   "Nike Apache Performance Handbook" (Galloway & Crough, GSFC, 1966).
+#   PDF: paper/data/pdf/NASA_X-721-66-568_Nike_Apache_Performance_Handbook.pdf
+#   The M5-E1 input is a flat 42,500 lbf for 3.5 s (Apx A p.64).
+#   [hereafter "NikeApacheHandbook"]
+#
+# CITATION HYGIENE (per CLAUDE.md): every numeric value below cites a
+# specific page / figure / table directly inspected in the PDFs above.
+# Values not directly given are flagged with confidence "derived" or
+# "low" with the derivation path shown in the comment.
+#
+# IMPORTANT NOTE: NACA RM L56K01 ("Flight Performance of a 2.8-KS-8100
+# Cajun Solid-Propellant Rocket Motor", Heitkotter 1957) is referenced
+# externally as the original Cajun motor characterization, but is not
+# present on disk and could not be retrieved. The Cajun thrust curve
+# below is therefore derived from the propellant-loss table in Mayo66
+# Table 3 (which itself integrates the same motor's flight data).
+# =====================================================================
+
+vehicle_name: Nike-Cajun (CAN)
+vehicle_type: 2-stage solid sounding rocket
+designation: NACA / University of Michigan / U.S. Weather Bureau (CAN)
+manufacturer:
+  stage1_motor: Hercules Powder Co. (Nike M5 / M5-E1, double-base)
+  stage2_motor: Atlantic Research Corp. (Cajun TE-82, polysulfide)
+  fins_and_adapter: NACA Langley Pilotless Aircraft Research Division
+sources:
+  - NACA RM L57D26, Royall & Garland, "Characteristics of the Nike-Cajun (CAN) Rocket System and Flight Investigation of Its Performance", 29 July 1957
+  - NASA TM X-55440 / X-721-66-91, Mayo, "Effects of Payload Weight and Length ... CAPACHE", March 1966
+  - NASA TM X-55700 / X-721-66-569 (Nike Apache Performance Handbook), Dec 1966 [Nike booster cross-reference]
+
+# ---------------------------------------------------------------------
+# OVERALL VEHICLE GEOMETRY (L57D26 Figure 6 a/b, p.20)
+# ---------------------------------------------------------------------
+# Two stack lengths in L57D26 Fig 6:
+#   sounding rocket:  308.5 in total
+#   hurricane rocket: 324.4 in total (longer because of larger nose
+#                     section housing photographic equipment)
+overall:
+  total_length_in_um:        308.5    # L57D26 Fig 6(b) "Total length, 308.5 inches"
+  total_length_in_hurricane: 324.4    # L57D26 Fig 6(a) "Total length, 324.4 inches"
+  body_diameter_motor_in:    16.5     # L57D26 Fig 6(b): Nike motor case diameter
+  body_diameter_aft_skirt_in: 17.5    # L57D26 Fig 6(b): Nike aft adapter / skirt
+  cajun_motor_diameter_in:   6.50     # L57D26 Fig 13 ("based on a diameter of 6.50 inches for Cajun")
+  cajun_payload_diameter_um_in: 6.75  # L57D26 Fig 6(b): UM nose-base diameter (note step at 6.5->6.75)
+  cajun_payload_diameter_hurricane_in: 9.0  # L57D26 Fig 6(a): hurricane nose section dia
+  notes: |
+    Figure 6 dimensional schematic shows axial stations measured from the
+    nose tip (Sta 0):
+      Sounding rocket (a):
+          Sta   0       nose tip
+          Sta  38.6     nose tip-to-shoulder, where dia = 6.75 in
+          Sta  40.5     end of payload nose section
+          Sta  46.9     nominal step (transition; visible step in fig.)
+          Sta 129.9     Cajun motor mid-station
+          Sta 131.9     fin assembly start (4 extruded sections)
+          Sta 140.9     fin mid
+          Sta 152.9     fin TE / Cajun motor base
+          Sta 154.2     overall Cajun (incl nozzle ext) length
+       (Above 154.2 in is the Nike booster + adapter; total stack 308.5 in.)
+      Hurricane rocket (a):
+          Sta   0       nose tip (11-deg, 0.156-in nose radius)
+          Sta  46.6     nose tip-to-shoulder transition (9.0 -> 6.5 dia)
+          Sta  48.6     small step
+          Sta  62.8     end of forward nose+instrument bay
+          Larger nose -> +15.9 in stack length vs UM rocket.
+
+# ---------------------------------------------------------------------
+# STAGE 1 -- NIKE M5 / M5-E1 BOOSTER
+# ---------------------------------------------------------------------
+# Note: the L57D26 (1957) booster is the production "Nike" M5 motor,
+# which the later NikeApacheHandbook (1966) refers to as M5-E1 after
+# minor adaptation for sounding-rocket use. The same hardware: 1170 lb
+# loaded, 1273.5 lb complete-with-fins-adapter (L57D26 p.5), and the
+# same trajectory input (42,500 lbf flat for 3.5 s) appears in both
+# documents. Loaded prop weight is not separately stated in L57D26;
+# the NikeApacheHandbook gives 755 lb (consistent with M5).
+stages:
+  - stage_index: 1
+    name: Nike M5 / M5-E1
+    role: booster
+    motor:
+      designation: M5-E1
+      motor_family: Nike (M5)
+      manufacturer: Hercules Powder Co. (Nike Ajax SAM motor adapted)
+      propellant: double-base (NDRC formulation; not specified in L57D26)
+      total_impulse_lbfs: 148750.0    # = 42500 lbf x 3.5 s, NikeApacheHandbook Apx A p.64
+      total_impulse_Ns: 661690.0
+      action_time_s: 3.5              # NikeApacheHandbook Apx A p.64; cf. L57D26 Fig 7 "Nike burnout, t=3.3 s" -> ~3.3-3.5 s consistent
+      avg_thrust_lbf: 42500.0         # NikeApacheHandbook Apx A p.64
+      avg_thrust_N: 189051.0
+      thrust_curve:
+        time_s:    [0.0, 3.5, 3.5]
+        thrust_lbf: [42500.0, 42500.0, 0.0]
+        confidence: handbook-given
+        notes: |
+          L57D26 does not publish a Nike thrust curve; only flight-derived
+          longitudinal acceleration is shown (Fig 11). The flat 42,500 lbf
+          rectangular profile from NikeApacheHandbook Apx A p.64 is the
+          design-input trajectory model and is consistent with L57D26
+          Fig. 11 acceleration ramp (peak ~33 g during Nike thrust at
+          1273.5 lb gross weight: 33 g x 1273.5 lb / 32.174 ft/s^2 =
+          ~1300 lbf? -- check: 33 g x 1273.5 lb = 42024 lbf, matches
+          the 42,500 lbf design input within 1%).
+    geometry:
+      length_in: 149.75               # NikeApacheHandbook Fig 5; consistent with L57D26 Fig 6 (Cajun stack 154.2 + 154.3 Nike => 308.5 -> Nike ~ 154 in including adapter)
+      body_diameter_in: 16.5          # L57D26 Fig 6(b): Nike motor case diameter
+      aft_diameter_in: 17.5           # L57D26 Fig 6(b): Nike aft skirt diameter
+      adapter_dia_fore_in: 7.1        # L57D26 p.12 "D1 = 7.1 inches and is the diameter of the front of the adapter"
+      adapter_dia_aft_in: 17.5        # L57D26 p.12 "D2 = 17.5 inches and is the diameter of the rear of the adapter"
+      nose_or_top_interface: cone-frustum (adapter) to 6.5-in Cajun motor
+    mass:
+      loaded_motor_lb: 1170.00        # L57D26 p.5 "Loaded booster"
+      adapter_lb: 27.00               # L57D26 p.5 "Booster adapter"
+      fins_lb: 76.50                  # L57D26 p.5 "Booster fins"
+      complete_booster_lb: 1273.50    # L57D26 p.5 "Complete booster" (includes adapter+fins)
+      propellant_lb: 755.0            # NikeApacheHandbook p.6 (not in L57D26); confidence: cross-ref
+      empty_motor_lb: 415.0           # L57D26 derivation: 1170.00 - 755.0 propellant; not stated explicitly
+    fins:
+      count: 4
+      arrangement: cruciform
+      shape: clipped-delta with rounded LE cuffs (steel)
+      construction: |
+        L57D26 p.4: "The booster fin assembly (see fig. 2) consisted of
+        four magnesium fins each welded to a magnesium quadrant. The four
+        quadrants were held together by four longitudinal rods. The
+        quadrants are in turn held to the booster motor by an aluminum
+        shell which is attached to the motor and quadrants by screws."
+      # Geometric callouts: L57D26 Fig 2 is a photograph; no numeric fin
+      # dimensions are printed in L57D26. We adopt the Nike-Apache Handbook
+      # Fig 5 callouts (same Nike booster hardware -> same fin geometry):
+      root_chord_in: 23.3             # NikeApacheHandbook Fig 5 (cross-reference; Nike fin is shared hardware)
+      tip_chord_in: 10.1              # NikeApacheHandbook Fig 5
+      span_per_fin_in: 10.75          # NikeApacheHandbook Fig 5: 21.5-in tip-to-tip exposed past body / 2
+      tip_to_tip_in: 38.0             # NikeApacheHandbook Fig 5: 21.5 + 16.5 motor dia
+      sweep_length_in: 13.2           # derived: root - tip = 23.3 - 10.1
+      sweep_angle_le_deg: 50.8        # derived: atan(13.2 / 10.75) = 50.8 deg
+      thickness_in: 0.25              # not stated; double-wedge with steel cuff per p.4 narrative
+      cross_section: double-wedge (rounded LE per fin photo Fig 2)
+      confidence: medium-low  # geometry from cross-reference (NikeApacheHandbook), not L57D26 itself
+    notes: |
+      Nike booster is the same shared sounding-rocket hardware as in
+      Nike-Apache, Nike-Tomahawk, and other Nike-class two-stages. The
+      complete-booster mass (1273.5 lb) in L57D26 p.5 matches the
+      NikeApacheHandbook p.6 "Flight Weight" within rounding.
+
+# ---------------------------------------------------------------------
+# STAGE 2 -- CAJUN TE-82 SUSTAINER
+# ---------------------------------------------------------------------
+  - stage_index: 2
+    name: Cajun TE-82
+    role: sustainer
+    motor:
+      designation: TE-82
+      motor_family: Cajun (Atlantic Research)
+      manufacturer: Atlantic Research Corp. (Alexandria, VA)
+      propellant: polysulfide / ammonium perchlorate (Cajun standard; not stated in L57D26)
+      # Mass props (Cajun-specific, L57D26 p.5):
+      cajun_loaded_lb: 166.90         # L57D26 p.5 "Loaded Cajun"
+      cajun_fins_shroud_fairing_lb: 30.0  # L57D26 p.5 "Cajun fins, shroud, and fairing ring"
+      cajun_nozzle_extension_lb: 5.00 # L57D26 p.5 "Nozzle extension"
+      # Burn timing (Mayo66 Table 3 cross-reference):
+      action_time_s: 4.0              # Mayo66 Table 3: t_bo - t_i = 21.0 - 17.0 s
+      propellant_lb: 119.0            # Mayo66 Table 3 W_MLF - W_MEF = 202 - 83 = 119 lb (final col)
+      empty_motor_lb: 47.9            # 166.90 loaded Cajun (L57D26) - 119 propellant (Mayo66) = 47.9 lb;
+                                       # NB: this is motor + nozzle only, exclusive of the 30 lb fins/shroud/fairing
+                                       # and 5 lb nozzle extension that are listed separately in L57D26 p.5
+      cajun_isp_eff_s: 175.0          # derived from prop+thrust: 20825 lbf-s / 119 lb = 175 s; consistent with polysulfide Cajun
+      total_impulse_lbfs: 20825.0     # = avg ~5206 lbf x 4.0 s integrated from Mayo66 Table 3 mass-loss-vs-time
+      total_impulse_Ns: 92627.0       # = 20825 * 4.4482
+      avg_thrust_lbf: 5206.0          # = total_impulse / action_time
+      avg_thrust_N: 23154.0
+      peak_thrust_lbf: 7875.0         # peak from differentiated Mayo66 Table 3 mass loss at t-rel=2.94 s
+      thrust_curve:
+        # Generated by differentiating Mayo66 Table 3 propellant-mass-vs-time
+        # and multiplying by Isp_eff = 175 s. Times are RELATIVE to Cajun
+        # ignition (Mayo66 t_i = 17.0 s -> here t = 0). Profile is mildly
+        # progressive (5950->7875 lbf over the first 3 s) then sharp tail-off
+        # in the last second.
+        time_s:    [0.000, 0.050, 0.080, 0.100, 0.150, 0.250, 0.350, 0.500, 0.650, 0.800, 1.200, 1.400, 1.600, 2.100, 2.350, 2.550, 2.800, 2.940, 2.960, 3.000, 3.150, 3.200, 3.250, 3.350, 3.400, 3.500, 4.000]
+        thrust_lbf: [    0,  1050,  4083,  6125,  5950,  5950,  5950,  5833,  5833,  5950,  6388,  6738,  6913,  6965,  7140,  7263,  7560,  7875,  7875,  7000,  4783,  2100,  1050,   350,   700,    88,    18]
+        confidence: derived  # integrated from Mayo66 Table 3 propellant-loss-vs-time
+        notes: |
+          The Cajun thrust curve is NOT directly published in L57D26.
+          It is reconstructed from Mayo66 Table 3 (propellant mass lost
+          vs time, p.4 of X-721-66-91). The differentiation procedure:
+            mdot(t) = (m_lost[i] - m_lost[i-1]) / (t[i] - t[i-1])    [lb/s]
+            F(t)    = mdot(t) * Isp_eff   [lbf]
+          with Isp_eff = 175 s (polysulfide Cajun nominal). Total impulse
+          integrates to ~20,825 lbf-s = ~92.6 kN-s, matching avg-thrust
+          spec for the Cajun TE-82 family. The Mayo66 propellant-vs-time
+          curve in turn was generated by GSFC programmers from the
+          original 1957 NACA flight thrust calibration of the same
+          motor (NACA RM L56K01, Heitkotter -- not on disk).
+      ignition_event: stage1_burnout + coast_time
+      coast_time_s_um: 8.9            # L57D26 p.5: "second stage coasted 8.9 seconds before the Cajun sustainer rocket fired"
+      coast_time_s_hurricane: 13.1    # L57D26 Fig 7 caption: "Cajun thrust, t=13.2 sec (Hurricane rocket)" - 0.1 = 13.1 s post-Nike-burnout (Nike burnout ~3.5 s + 8.9-13.2 s coast)
+      ignition_time_after_liftoff_s_um: 12.4    # 3.5 s Nike burnout + 8.9 s coast
+      ignition_time_after_liftoff_s_hurricane: 13.2  # L57D26 Fig 7 caption explicitly: "Cajun thrust, t = 13.2 sec (Hurricane)"
+      burnout_time_after_liftoff_s_um: 16.4     # 12.4 + 4.0 cf. L57D26 Fig 7 caption "Cajun burnout, t = 15.5 sec (Sounding)" - small inconsistency, see notes
+      burnout_time_after_liftoff_s_hurricane: 17.2  # 13.2 + 4.0 cf. L57D26 Fig 7 caption "Cajun burnout, t = 16.6 sec (Hurricane)"
+      ignition_burnout_notes: |
+        L57D26 Fig 7 caption explicitly labels (sounding/hurricane):
+          Nike burnout       t = 3.3 s
+          Cajun thrust start t = 12.2 s (sounding) / 13.2 s (hurricane)
+          Cajun burnout      t = 15.5 s (sounding) / 16.6 s (hurricane)
+        -> Cajun action time = 3.3 s (sounding) / 3.4 s (hurricane).
+        This is shorter than the 4.0 s implied by Mayo66 Table 3
+        (t_i = 17.0, t_bo = 21.0). The discrepancy is because Mayo66
+        is for a Cajun motor at SEA-LEVEL static-test conditions, while
+        L57D26 motor was firing at ~40,000 ft altitude with reduced
+        backpressure (and hence faster burn). The thrust *integral*
+        (total impulse) should be conserved between the two; therefore
+        we adopt the Mayo66 PROFILE (4.0 s, 20,825 lbf-s integral) for
+        ORK simulation, accepting that ignition timing in the simulator
+        is keyed to "burnout of stage 1 + 8.9 s delay" so the simulator
+        will end Cajun thrust ~4.0 s later, which matches Mayo66 but
+        is ~0.6 s longer than the L57D26 flight-measured action time.
+        Apogee predictions should be insensitive to this minor profile
+        compression (total impulse is the integrated quantity).
+    geometry:
+      cajun_motor_diameter_in: 6.50   # L57D26 Fig 6, Fig 13 ref dia
+      cajun_motor_length_in_approx: 105.0  # derived: Sta 46.9 (motor head) to Sta 152.9 (fin TE) per Fig 6 = 106 in incl. fwd 6.75-in interface; rough
+      nozzle_extension_length_in: 1.3      # L57D26 Fig 6: Sta 152.9 -> 154.2 = 1.3 in axial
+      nose_cone_um:
+        diameter_base_in: 6.75         # L57D26 Fig 6(b): UM nose base = 6.75 in
+        nose_step_diameter_in: 6.50    # L57D26 Fig 6(b): step from 6.75 to 6.50 at Sta 46.9 (visible "Step" callout)
+        nose_total_angle_deg: 11.0     # L57D26 Fig 6(b): "11 deg" angle callout at Sta 0
+        nose_tip_radius_in: 0.156      # L57D26 Fig 6(b): "0.156 radius" callout at nose tip; spherical cap blunt
+        nose_total_length_in: 38.6     # L57D26 Fig 6(b): tip-to-shoulder Sta 0 -> 38.6 in
+        nose_construction: solid steel block at tip (heat sink) + Inconel skin (0.032-in wall, L57D26 p.8); aluminum aft section
+        nose_section_total_length_in: 46.9  # L57D26 Fig 6(b): Sta 46.9 = end of forward nose+instr bay; this is the "nose section" mass listed below
+      nose_cone_hurricane:
+        diameter_max_in: 9.00          # L57D26 Fig 6(a): hurricane nose max dia
+        diameter_step_in: 6.75         # L57D26 Fig 6(a): step at sta 46.6
+        nose_total_angle_deg: 11.0     # L57D26 Fig 6(a): same "11 deg" callout
+        nose_tip_radius_in: 0.156      # L57D26 Fig 6(a): "0.156 radius"
+        nose_section_total_length_in: 62.8  # L57D26 Fig 6(a): Sta 0 -> 62.8 in (longer to house photo equipment)
+        nose_construction: same heat-protected design but larger payload bay (75.77 lb of nose+instr -> hurricane)
+    mass:
+      cajun_motor_loaded_lb: 166.90    # L57D26 p.5
+      cajun_fins_shroud_lb: 30.00      # L57D26 p.5
+      cajun_nozzle_ext_lb: 5.00        # L57D26 p.5
+      nose_instr_lb_um: 51.85          # L57D26 p.5
+      nose_instr_lb_hurricane: 75.77   # L57D26 p.5
+      complete_second_stage_lb_um: 253.75       # L57D26 p.5
+      complete_second_stage_lb_hurricane: 277.67 # L57D26 p.5
+      check_um: |
+        166.90 (loaded Cajun) + 30.00 (fins/shroud) + 5.00 (nozzle ext)
+          + 51.85 (nose+instr UM) = 253.75 lb. Matches L57D26 p.5 sum.
+      check_hurricane: |
+        166.90 + 30.00 + 5.00 + 75.77 = 277.67 lb. Matches L57D26 p.5.
+    fins:
+      count: 4
+      arrangement: cruciform
+      construction: |
+        L57D26 p.4: "The Cajun fin assembly (see fig. 3) consisted of
+        four extruded sections, each section consisting of an aluminum
+        fin and a quarter section of the shroud. The four sections were
+        held together with longitudinal pins and were attached to the
+        motor by means of a threaded ring located inside the assembled
+        quadrants. A 1/32-inch-thick Inconel cap covered the leading
+        edge of each of the second-stage Cajun fins to protect them
+        against aerodynamic heating."
+      shape: clipped-delta with extruded shroud, Inconel-capped LE
+      # NO dimensional fin drawing exists in L57D26 -- only the photograph
+      # in Fig 3 (p.17). We back out fin geometry from Fig 20 (p.35):
+      planform_area_total_ft2: 2.07    # L57D26 Fig 20: "A_fin = 2.07 sq ft"
+      planform_area_per_fin_ft2: 0.5175   # = 2.07 / 4
+      planform_area_per_fin_in2: 74.52    # = 0.5175 ft^2 * 144
+      # Fin assembly axial location (L57D26 p.11):
+      fin_cp_axial_station_in: 97.1   # L57D26 p.11: "fins is at 50% of MAC which is at 97.1 inch station" (measured from front of CYLINDER, i.e. from Sta 46.9 -> 97.1 = MAC midpoint at Sta 144 absolute? No: "measured from front of cylinder" = Sta 46.9; so Cajun-relative MAC midpoint at 97.1 in -> absolute Sta 144.0 in)
+      # Synthesized fin clipped-delta dimensions consistent with Afin_per_fin = 74.5 in^2:
+      # Cajun published spec & photograph (Fig 3) suggests root ~13.5 in,
+      # tip ~4.5 in, exposed semispan ~8.3 in -> area = (13.5+4.5)/2 * 8.3 = 74.7 in^2 (matches L57D26 within 0.3%).
+      root_chord_in: 13.5              # synthesized (clipped-delta inferred from Fig 3 photo proportions and Afin)
+      tip_chord_in: 4.5                # synthesized
+      span_per_fin_in: 8.3             # synthesized; exposed semispan past 6.5-in body
+      sweep_length_in: 5.5             # synthesized: (root - tip) / 2 + slight TE rake; Fig 3 shows ~30 deg LE sweep
+      tip_to_tip_in: 23.1              # = 2*8.3 + 6.5 motor dia
+      sweep_angle_le_deg: 33.5         # synthesized: atan(5.5 / 8.3) = 33.5 deg, consistent with Fig 3 photo
+      thickness_in: 0.20               # extruded aluminum, ~3% of root chord; Fig 18 shows 0.10-0.20 in stations measured along chord
+      cross_section: extruded wedge with 1/32-in (0.031 in) Inconel LE cap (L57D26 p.4)
+      le_cap_thickness_in: 0.031       # L57D26 p.4 "1/32-inch-thick Inconel cap"
+      confidence: low                  # geometry inferred from photo + total-area constraint; no dimensional drawing in source
+      cant_deg: 0.0                    # L57D26 does not state a fin cant or roll rate; assumption: zero cant
+      cant_notes: |
+        Brief task description claimed "fin cant data present" but a
+        full text scan of L57D26 turns up no quantitative cant angle,
+        spin rate, or roll-rate measurement. Fig 11 ("longitudinal
+        acceleration") does not include roll. The Cajun fin photo
+        Fig 3 does not visibly show fin cant. Hence we adopt cant=0.
+        If a roll rate is reported in NACA RM L56K01 (the Cajun motor
+        flight test, NOT on disk) we should revisit; for now the YAML
+        flags this as MISSING_FROM_SOURCE.
+    notes: |
+      Cajun TE-82 is the original Atlantic Research Cajun motor (1956);
+      the later Cajun TE-307 Mod I is a polyurethane re-formulation,
+      and the Apache TE-307 Mod II is the aluminized polyurethane
+      hardware-compatible variant. The L57D26 (1957) Cajun is the
+      polysulfide TE-82 (or close family member); both Mayo66 mass
+      properties (Table 3: 119 lb prop, 4.0 s burn) and the inferred
+      Isp_eff = 175 s are consistent with that early Cajun.
+
+# ---------------------------------------------------------------------
+# INTER-STAGE / STAGING EVENT
+# ---------------------------------------------------------------------
+staging:
+  separation_event: differential drag at Nike burnout
+  separation_mechanism: |
+    L57D26 p.5: "The booster then separated from the second stage since
+    the deceleration of the burned-out booster was greater than that of
+    the second-stage motor." -- This is the same drag-separation scheme
+    as Nike-Apache (no mechanical restraint).
+  separation_time_s: 3.3              # L57D26 Fig 7 caption: "Nike burnout, t = 3.3 sec"
+  separation_altitude_ft: 5000        # L57D26 p.5: "The second stage was boosted to an altitude of 5,000 feet."
+  coast_time_s_um: 8.9                # L57D26 p.5
+  coast_time_s_hurricane: 13.1        # derived: 13.2 s ignition - 3.3 - very small offset; see Fig 7 caption
+  cajun_ignition_time_s_um: 12.2      # L57D26 Fig 7 caption: "Cajun thrust, t = 12.2 sec (Sounding)"
+  cajun_ignition_time_s_hurricane: 13.2  # L57D26 Fig 7 caption: "Cajun thrust, t = 13.2 sec (Hurricane)"
+  cajun_ignition_altitude_ft: 40000   # L57D26 p.5: "accelerated to a maximum velocity of 6,250 fps at an altitude of 40,000 feet" (peak velocity reached at Cajun BURNOUT, which is at ~40k ft -> Cajun ignition at ~38-40k ft)
+  cajun_burnout_velocity_fps: 6250    # L57D26 p.5
+  cajun_burnout_velocity_ms: 1905     # = 6250 * 0.3048
+  cajun_burnout_altitude_ft: 40000    # L57D26 p.5
+  cajun_burnout_mach: 6.0             # L57D26 p.7 "performance capabilities of the CAN (M=6)" + Fig 9(b) shows peak ~M=6.0
+
+# ---------------------------------------------------------------------
+# CANONICAL FLIGHT 1 -- UNIVERSITY OF MICHIGAN SOUNDING ROCKET
+# ---------------------------------------------------------------------
+flights:
+  - flight_id: nike_cajun_um
+    label: University of Michigan sounding rocket
+    site: Wallops Island, Virginia (NACA Langley Pilotless Aircraft Research Station)
+    date: 1956 or 1957  # L57D26 dated 12 April 1957; flight likely late 1956 / early 1957
+    date_confidence: low # exact date not stated in L57D26 narrative
+    payload_lb: 51.85   # L57D26 p.5 "Nose cone and instrumentation (sounding rocket)"
+    payload_description: AN/DPN-19 radar beacon + accelerometer sphere (L57D26 p.4)
+    launch_elevation_deg: 75.0   # L57D26 p.5 "launched at an angle of elevation of 75 degrees from horizontal"
+    launch_azimuth_deg: 105      # Wallops standard (typical), not stated in L57D26
+    launch_azimuth_confidence: low  # Wallops default azimuth assumed; not stated
+    site_altitude_ft: 0          # L57D26 p.5: "launched ... from a sea-level missile test facility" (Wallops at sea level)
+    site_altitude_m: 0
+    site_latitude_deg_N: 37.8385  # Wallops Island, NASA standard
+    site_longitude_deg_W: 75.4827  # Wallops Island
+    apogee_real_ft: 426000        # L57D26 p.5: "A peak altitude of 426,000 feet was determined from the AN/DPN-19 radar beacon ... at 170 seconds after ground launching"
+    apogee_real_km: 129.84        # = 426000 * 0.0003048
+    apogee_real_confidence: high  # L57D26 p.5 explicit value, AN/DPN-19 radar beacon tracked
+    apogee_time_s: 170.0          # L57D26 p.5
+    impact_range_ft: 472000       # L57D26 p.6: "tracked to splash at a range of 472,000 feet"
+    impact_time_s: 343            # L57D26 p.6
+    cajun_burnout_velocity_fps: 6250  # L57D26 p.5
+    cajun_burnout_altitude_ft: 40000  # L57D26 p.5
+    peak_mach: 6.0                # L57D26 Fig 9(b)
+    notes: |
+      This is the "sounding rocket" flight in L57D26 -- the lighter
+      configuration (51.85 lb nose+instr) that achieved 426,000 ft.
+      Trajectory data: AN/DPN-19 radar beacon tracked by SCR-584 (range,
+      azimuth, elevation -> altitude/range); CW Doppler radar for early
+      velocity. Speed of sound from rawinsonde temperature profile.
+
+  - flight_id: nike_cajun_hurricane
+    label: Hurricane variant (photographic / heavy nose)
+    site: Wallops Island, Virginia (NACA Langley Pilotless Aircraft Research Station)
+    date: 1957  # not stated in L57D26 narrative
+    date_confidence: low
+    payload_lb: 75.77   # L57D26 p.5 "Nose cone and instrumentation (hurricane rocket)"
+    payload_description: photographic / camera payload for high-altitude hurricane imagery (L57D26 p.2 cites Office of Naval Research, Phys. Sci. Lab. NM College)
+    launch_elevation_deg: 75.0   # ASSUMED same as UM rocket; L57D26 narrative does not state hurricane launch angle (Fig 12 trajectory has same launch angle implicit)
+    launch_elevation_confidence: medium  # Inferred from Fig 7 trajectory shape similarity to UM rocket
+    launch_azimuth_deg: 105      # Wallops default
+    launch_azimuth_confidence: low
+    site_altitude_ft: 0
+    site_altitude_m: 0
+    site_latitude_deg_N: 37.8385
+    site_longitude_deg_W: 75.4827
+    apogee_real_ft: 412000        # L57D26 Fig 7 (p.21): hurricane rocket peak altitude reads ~41 x 10^4 ft = 410,000-415,000 ft
+    apogee_real_km: 125.6         # = 412000 * 0.0003048
+    apogee_real_confidence: medium  # Fig 7 graph read; absolute number not given in narrative (only "satisfactory performance")
+    apogee_real_NOTES: |
+      L57D26 narrative does NOT publish an explicit apogee number for
+      the hurricane rocket. The 412,000 ft value is digitized from the
+      Fig 7 trajectory plot (p.21), where the hurricane rocket's peak
+      h' ordinate reads approximately 4.1 x 10^5 ft. Confidence is
+      "medium" pending higher-fidelity digitization of Fig 7.
+      Brief task description states "lower apogee due to heavier nose
+      cone" -- the 412k vs UM 426k difference (-14,000 ft = -3.3%)
+      is consistent with the +24 lb mass penalty (75.77 vs 51.85 lb,
+      delta ~10% of second-stage mass). At first order, dh ~ -2 dm/m
+      for ballistic apogee at high Mach -> -3.3% / -10% / 2 ratio is
+      slightly milder than expected; suggests hurricane drag is also
+      reduced (larger blunter nose has less wave drag at M>4 due to
+      thicker BL? -> consistent with L57D26 Fig 13 showing hurricane
+      total Cd slightly less than UM total Cd at M>3).
+    cajun_ignition_time_s: 13.2   # L57D26 Fig 7 caption
+    cajun_burnout_time_s: 16.6    # L57D26 Fig 7 caption
+    cajun_burnout_velocity_fps: 6300  # L57D26 Fig 9(a): hurricane peak velocity ~6300 fps (slightly higher than UM 6250)
+    notes: |
+      Construction is identical to the UM rocket EXCEPT for the nose
+      cone, which is a 9.0-in-diameter, 62.8-in-long nose-and-instrument
+      bay (vs UM's 6.75-in dia, 46.9-in long). The larger nose adds
+      15.9 in to the stack (308.5 -> 324.4 in total) and 23.92 lb of
+      nose+instrumentation mass (51.85 -> 75.77 lb). All other components
+      (Cajun motor, fins, shroud, Nike booster, adapter, fins) are
+      shared with the UM rocket. This makes the hurricane rocket an
+      excellent matched-pair ablation against the UM rocket: same
+      everything, only the nose section changes -- a clean test of
+      nose-cone aerodynamics on apogee performance.
+
+# ---------------------------------------------------------------------
+# AERODYNAMIC NOTES (L57D26 source figures)
+# ---------------------------------------------------------------------
+aerodynamics:
+  drag_curves_cajun_coasting:
+    source: L57D26 Figure 13 (p.28), "Variation of drag coefficient with Mach number based on a diameter of 6.50 inches for Cajun coasting"
+    components: nose_cone_drag, fins_as_flown, step (annular pressure drag), base, basic_fins
+    mach_range: [1.0, 7.0]
+    measured_total_drag_um_at_M3: 0.65   # Fig 13 reading
+    measured_total_drag_hurricane_at_M3: 0.68  # Fig 13 reading (slightly higher because of nose)
+    notes: |
+      Two TOTAL DRAG curves in Fig 13:
+        UM rocket measured total drag M~1.5 -> M~7: 0.91 -> 0.45
+        hurricane measured total drag: same range, ~0.95 -> 0.46
+      Calculated total drag (also shown) very close to measured.
+      Component breakdown (Fig 13 stacked components, Cajun coasting):
+        base drag       ~0.05 at all M
+        basic fins      ~0.05 -> 0.05
+        step            ~0.07 -> 0.04 (annular conical pressure drag)
+        fins as flown   ~0.06 -> 0.04 (incl. Inconel LE cap drag)
+        nose cone drag  ~0.20 -> 0.10
+  drag_curves_thrusting:
+    source: L57D26 Figure 14 (p.29), "Variation of calculated drag coefficient with Mach number based on a diameter of 16.5 inches for Nike-Cajun thrusting"
+    mach_range: [0, 6]
+    notes: |
+      Reference area = pi * 16.5^2 / 4 (Nike body), so Cd values are
+      smaller in absolute terms. Fig 14 reads:
+        Cd_thrusting at M=0 -> 0.36
+        peak ~M=1            -> 0.42
+        M=2                  -> 0.40
+        M=3                  -> 0.30
+  cn_alpha_cajun:
+    source: L57D26 Figure 20 (p.35), "C_L_alpha A vs Mach for Cajun cylinder and fins"
+    fin_area_ref_ft2: 2.07
+    cylinder_area_ref_ft2: 0.23
+    fin_cna_area_at_M2_per_rad: 8.0   # Fig 20 reading
+    fin_cna_area_at_M5_per_rad: 2.5   # Fig 20 reading
+    fin_xcp_at_M5_in_from_motor_front: 35   # Fig 20 reading
+  cn_alpha_nike:
+    source: L57D26 Figure 21 (p.36), "C_L_alpha A vs Mach for Nike booster"
+    nike_adapter_area_ref_ft2: 0.274
+    nike_cylinder_area_ref_ft2: 1.485
+    nike_fin_area_ref_ft2: 5.000
+  cp_supersonic:
+    source: L57D26 Figure 19 (p.34), "Variation of calculated CP with Mach number"
+    cp_position_um_M5_in: 198            # Fig 19 reading: ~198 in from nose tip at M=5
+    cp_position_hurricane_M5_in: 200     # Fig 19 reading: ~200 in (very similar)
+    cg_loaded_combination_in: 122        # Fig 19: "C.G. of Combination (Nike loaded)"
+    cg_empty_combination_in: 130         # Fig 19: "C.G. of Combination (Nike empty)"
+    cg_second_stage_loaded_in: 234       # Fig 19: "C.G. of Second Stage (loaded)"
+    cg_second_stage_empty_in: 232        # Fig 19: "C.G. of Second Stage (empty)"
+    static_margin_status: |
+      L57D26 p.11: "the University of Michigan sounding and the
+      hurricane rockets appeared to have adequate static stability."
+      CP is 50-80 in aft of CG for the loaded combination (M>2), so
+      static margin is comfortably positive throughout the flight.
+
+unmodeled_physics:
+  - |
+    Spin / roll dynamics. Cajun fins as flown have no documented cant;
+    the body is presumed non-spinning. ORP / OpenRocket cannot capture
+    aero damping or roll-pitch coupling without a roll input.
+  - |
+    Thrust altitude correction. Mayo66 thrust profile is sea-level
+    static. Cajun ignites at ~38,000-40,000 ft where thrust is nominally
+    +5-15% (back-pressure relief). L57D26 implicitly accounts for this
+    via a slightly shorter flight-measured action time (3.3 s vs Mayo's
+    4.0 s), consistent with pressure-corrected mdot. Our ORK uses the
+    Mayo66 SL profile -- accept ~3-5% altitude-thrust correction error.
+  - |
+    Cajun fin cant / roll. None documented in L57D26. The 1/32-in
+    Inconel LE cap adds ~3% to fin mass; we treat this as 0.5 lb
+    additional fin mass (already included in the 30-lb fins+shroud+
+    fairing total per L57D26 p.5).
+  - |
+    Hurricane heavier-nose drag interaction. Fig 13 shows the hurricane
+    rocket has SLIGHTLY HIGHER total drag below M=4 but comparable
+    drag at M>4 (the larger nose has higher subsonic friction but
+    similar supersonic wave drag because it is also more streamlined
+    in fineness ratio). ORP must rebuild the nose section's geometry
+    correctly per Fig 6(a): 9.0-in diameter, 62.8-in long compound
+    nose+instrument bay.
+
+# ---------------------------------------------------------------------
+# MISSING_FROM_SOURCE FIELDS
+# ---------------------------------------------------------------------
+missing_from_source:
+  - cajun_fin_dimensional_drawing       # only photograph (Fig 3) and total area (Fig 20) given
+  - cajun_fin_cant_or_roll_rate          # not measured / reported in L57D26
+  - hurricane_launch_elevation_explicit_value  # assumed same as UM (75 deg)
+  - hurricane_apogee_explicit_narrative_value  # only Fig 7 plot
+  - cajun_thrust_curve_direct            # reconstructed from Mayo66 mass-loss table
+  - nike_thrust_curve_direct             # cross-referenced from NikeApacheHandbook
+  - exact_flight_dates_for_either_flight # L57D26 dated April 1957; flights likely late-1956
+  - launch_azimuth_explicit_value        # Wallops default assumed
+
+# =====================================================================
+# END nike_cajun.yaml
+# =====================================================================

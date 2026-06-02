@@ -1,0 +1,133 @@
+# Digitized from Sznajder, J. "Computational Determination of Dynamic Stability Derivatives."
+# Transactions on Aerospace Research, eISSN 2545-2835, Vol. 281, No. 4/2025, pp. 98-121.
+# DOI: 10.2478/tar-2025-0021. Author: Lukasiewicz Research Network - Institute of Aviation,
+# Warsaw, Poland. ORCID 0000-0003-3478-490X.
+# PDF: paper/data/pdf/Computational_determination_of_dyna.pdf
+#
+# Method: ANSYS Fluent, compressible viscous RANS. Three CFD-based approaches:
+#   MRF = Moving Reference Frame (steady-flow, non-inertial frame, "Cmq - MRF" red X)
+#   FOM = Forced Oscillation Method (Dynamic Mesh, k = 0.025, "Cmq - FOM" red +,
+#         "Cm_aldot, Forced Oscillations" red X w/ line in Fig. 6)
+#   IRM = Indicial Response Method (step in AoA / pitch rate, "Cm_aldot, Indicial Response"
+#         blue open diamonds in Fig. 6)
+# Geometry: Basic Finner (Army-Navy Finner / ANF). Reference diameter d = 30 mm,
+# total length 10 d, 10-deg half-angle cone (2.84 d), rectangular fins.
+# CG located 6.1 d from the model nose (Sznajder Section 3, page 107).
+# All derivatives in d-normalized body-axis system; positive nose-up.
+#
+# Experimental reference for Cmq (Fig. 3 blue circles, Fig. 7 blue circles + green diamonds):
+#   Sznajder cites [14]: Dupuis & Hathaway 1997, "Aeroballistic Range Tests of the
+#   Basic Finner Reference Projectile at Supersonic Velocities," DREV-TM-9703 (= ADA636861).
+#   This is the SAME experimental source used by ORP's BasicFinnerCmqBenchmarkTest.
+#
+# Figures digitized:
+#   Fig. 3 (PDF page 11)  -- Cmq vs Mach, MRF / FOM / experiment
+#   Fig. 6 (PDF page 14)  -- Cm_alphadot vs Mach, FOM / IRM
+#   Fig. 7 (PDF page 14)  -- (Cmq + Cm_alphadot) vs Mach, MRF+FOM / experiment
+#
+# Read uncertainty (hand-read, no WebPlotDigitizer):
+#   Cmq           +/- 15  (Fig. 3 vertical grid 100; scatter point sizes ~3 % of full scale)
+#   Cm_alphadot   +/- 8   (Fig. 6 vertical grid 50; peak region M=1.0-1.2 has larger spread)
+#   Sum (total)   +/- 20  (Fig. 7 vertical grid 100; experimental scatter is the larger source)
+#
+# Mach values inferred from gridlines (whole units, half-grid divisions). Where Sznajder's
+# CFD points cluster at slightly different Mach from experimental points, the digitized Mach
+# is the visual centre of the symbol.
+mach,aoa_deg,cmq,cm_alphadot,total_pitch_damping,cfd_method,source_figure,notes
+# --- Fig. 3: Cmq, MRF (red X) ---
+0.90,0.0,-540,,,MRF,Sznajder2025_Fig3,MRF X
+1.05,0.0,-540,,,MRF,Sznajder2025_Fig3,MRF X (transonic peak region)
+1.10,0.0,-575,,,MRF,Sznajder2025_Fig3,MRF X
+1.20,0.0,-525,,,MRF,Sznajder2025_Fig3,MRF X
+1.50,0.0,-460,,,MRF,Sznajder2025_Fig3,MRF X
+1.70,0.0,-395,,,MRF,Sznajder2025_Fig3,MRF X
+1.85,0.0,-370,,,MRF,Sznajder2025_Fig3,MRF X
+2.00,0.0,-335,,,MRF,Sznajder2025_Fig3,MRF X
+2.40,0.0,-300,,,MRF,Sznajder2025_Fig3,MRF X
+3.00,0.0,-245,,,MRF,Sznajder2025_Fig3,MRF X
+4.00,0.0,-200,,,MRF,Sznajder2025_Fig3,MRF X
+4.50,0.0,-180,,,MRF,Sznajder2025_Fig3,MRF X
+5.00,0.0,-165,,,MRF,Sznajder2025_Fig3,MRF X
+# --- Fig. 3: Cmq, FOM (red +) ---
+1.00,0.0,-560,,,FOM,Sznajder2025_Fig3,FOM +
+1.20,0.0,-550,,,FOM,Sznajder2025_Fig3,FOM +
+# --- Fig. 3: Cmq, experiment (blue circles, Dupuis & Hathaway 1997 / ADA636861) ---
+1.05,0.0,-320,,,experiment,Sznajder2025_Fig3,exp blue circle
+1.10,0.0,-345,,,experiment,Sznajder2025_Fig3,exp blue circle
+1.15,0.0,-330,,,experiment,Sznajder2025_Fig3,exp blue circle
+1.20,0.0,-350,,,experiment,Sznajder2025_Fig3,exp blue circle
+1.30,0.0,-385,,,experiment,Sznajder2025_Fig3,exp blue circle
+1.30,0.0,-500,,,experiment,Sznajder2025_Fig3,exp blue circle (paired)
+1.35,0.0,-505,,,experiment,Sznajder2025_Fig3,exp blue circle
+1.70,0.0,-390,,,experiment,Sznajder2025_Fig3,exp blue circle
+1.85,0.0,-370,,,experiment,Sznajder2025_Fig3,exp blue circle
+1.90,0.0,-420,,,experiment,Sznajder2025_Fig3,exp blue circle
+2.30,0.0,-300,,,experiment,Sznajder2025_Fig3,exp blue circle
+2.40,0.0,-330,,,experiment,Sznajder2025_Fig3,exp blue circle
+2.60,0.0,-400,,,experiment,Sznajder2025_Fig3,exp blue circle
+2.70,0.0,-300,,,experiment,Sznajder2025_Fig3,exp blue circle
+2.70,0.0,-260,,,experiment,Sznajder2025_Fig3,exp blue circle (paired)
+2.80,0.0,-280,,,experiment,Sznajder2025_Fig3,exp blue circle
+3.30,0.0,-235,,,experiment,Sznajder2025_Fig3,exp blue circle
+3.35,0.0,-250,,,experiment,Sznajder2025_Fig3,exp blue circle
+3.70,0.0,-210,,,experiment,Sznajder2025_Fig3,exp blue circle
+3.75,0.0,-205,,,experiment,Sznajder2025_Fig3,exp blue circle
+3.75,0.0,-280,,,experiment,Sznajder2025_Fig3,exp blue circle (paired)
+4.15,0.0,-155,,,experiment,Sznajder2025_Fig3,exp blue circle
+4.50,0.0,-250,,,experiment,Sznajder2025_Fig3,exp blue circle
+4.50,0.0,-160,,,experiment,Sznajder2025_Fig3,exp blue circle (paired)
+# --- Fig. 6: Cm_alphadot, FOM (red X with line) ---
+0.90,0.0,,20,,FOM,Sznajder2025_Fig6,FOM X
+1.05,0.0,,62,,FOM,Sznajder2025_Fig6,FOM X
+1.10,0.0,,118,,FOM,Sznajder2025_Fig6,FOM X (near transonic peak)
+1.30,0.0,,60,,FOM,Sznajder2025_Fig6,FOM X
+1.50,0.0,,10,,FOM,Sznajder2025_Fig6,FOM X
+1.70,0.0,,-15,,FOM,Sznajder2025_Fig6,FOM X
+2.00,0.0,,-20,,FOM,Sznajder2025_Fig6,FOM X
+2.50,0.0,,-25,,FOM,Sznajder2025_Fig6,FOM X
+3.00,0.0,,-20,,FOM,Sznajder2025_Fig6,FOM X
+4.00,0.0,,-12,,FOM,Sznajder2025_Fig6,FOM X
+4.50,0.0,,-10,,FOM,Sznajder2025_Fig6,FOM X
+5.00,0.0,,-15,,FOM,Sznajder2025_Fig6,FOM X (end of sweep)
+# --- Fig. 6: Cm_alphadot, IRM (blue open diamonds) ---
+0.90,0.0,,40,,IRM,Sznajder2025_Fig6,IRM diamond
+1.05,0.0,,49,,IRM,Sznajder2025_Fig6,IRM diamond
+1.10,0.0,,175,,IRM,Sznajder2025_Fig6,IRM diamond (discontinuity, both methods)
+1.50,0.0,,15,,IRM,Sznajder2025_Fig6,IRM diamond
+1.70,0.0,,-15,,IRM,Sznajder2025_Fig6,IRM diamond
+2.00,0.0,,-22,,IRM,Sznajder2025_Fig6,IRM diamond
+3.00,0.0,,-20,,IRM,Sznajder2025_Fig6,IRM diamond
+4.00,0.0,,-10,,IRM,Sznajder2025_Fig6,IRM diamond
+4.50,0.0,,-10,,IRM,Sznajder2025_Fig6,IRM diamond
+# --- Fig. 7: (Cmq + Cm_alphadot), MRF+FOM combined (red X with line) ---
+1.00,0.0,,,-510,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+1.05,0.0,,,-490,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+1.10,0.0,,,-395,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X (cm_aldot spike up)
+1.30,0.0,,,-475,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+1.50,0.0,,,-440,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+1.70,0.0,,,-405,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+1.85,0.0,,,-380,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+2.00,0.0,,,-355,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+2.40,0.0,,,-295,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+3.00,0.0,,,-260,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+3.70,0.0,,,-240,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+4.00,0.0,,,-210,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+4.50,0.0,,,-190,MRF_plus_FOM,Sznajder2025_Fig7,combined sum red X
+# --- Fig. 7: experiment "average of multiple fits" (green diamonds) ---
+1.10,0.0,,,-320,experiment_avg,Sznajder2025_Fig7,green diamond (avg multi-fit)
+1.30,0.0,,,-505,experiment_avg,Sznajder2025_Fig7,green diamond (avg multi-fit)
+1.85,0.0,,,-385,experiment_avg,Sznajder2025_Fig7,green diamond (avg multi-fit)
+2.40,0.0,,,-330,experiment_avg,Sznajder2025_Fig7,green diamond (avg multi-fit)
+2.75,0.0,,,-255,experiment_avg,Sznajder2025_Fig7,green diamond (avg multi-fit)
+3.10,0.0,,,-270,experiment_avg,Sznajder2025_Fig7,green diamond (avg multi-fit)
+3.70,0.0,,,-215,experiment_avg,Sznajder2025_Fig7,green diamond (avg multi-fit)
+4.30,0.0,,,-158,experiment_avg,Sznajder2025_Fig7,green diamond (avg multi-fit)
+# --- Fig. 7: experiment single-test (blue open circles) ---
+1.10,0.0,,,-330,experiment_single,Sznajder2025_Fig7,blue circle (single test)
+1.10,0.0,,,-605,experiment_single,Sznajder2025_Fig7,blue circle (single test, low outlier)
+1.85,0.0,,,-385,experiment_single,Sznajder2025_Fig7,blue circle (single test)
+2.30,0.0,,,-310,experiment_single,Sznajder2025_Fig7,blue circle (single test)
+2.60,0.0,,,-335,experiment_single,Sznajder2025_Fig7,blue circle (single test)
+3.10,0.0,,,-260,experiment_single,Sznajder2025_Fig7,blue circle (single test)
+3.70,0.0,,,-240,experiment_single,Sznajder2025_Fig7,blue circle (single test)
+4.50,0.0,,,-250,experiment_single,Sznajder2025_Fig7,blue circle (single test)

@@ -1,0 +1,3 @@
+predictor,n,shapiro_W,shapiro_p,anderson_A2,anderson_crit_5pct,skew,excess_kurtosis
+OpenRocket Plus,28,0.916093,0.027799,0.905213,0.730000,0.484116,-0.864006
+RASAero II,25,0.952271,0.281905,0.381374,0.728000,-0.174625,-1.138086

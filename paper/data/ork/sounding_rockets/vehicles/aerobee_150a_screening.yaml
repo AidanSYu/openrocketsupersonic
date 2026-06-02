@@ -1,0 +1,65 @@
+# Aerobee 150A screening model
+#
+# Purpose:
+#   Deep historical 100k+ altitude candidate with rich flight and propulsion
+#   data. OpenRocket does not directly model pressure-fed liquid sustainer
+#   plumbing, so the liquid stage is represented as a tabular thrust/mass RSE.
+
+vehicle:
+  name: "Aerobee 150A NASA 4.65GI"
+  stages: 2
+  class: "screening-liquid-as-rse"
+  reason: "rich historical flight data, high altitude, no spin-dart/helical launcher dependency"
+
+sources:
+  - path: "paper/data/pdf/NASA_TR_R_226_Aerobee_Compendium_1959_1963.pdf"
+    citekey: "NASA TR R-226"
+    role: "vehicle description, propulsion, performance charts, flight summaries"
+
+geometry:
+  total_length_ft: 30.0
+  diameter_in: 15.0
+  sustainer_length_in: 303.98
+  total_stack_length_in: 382.02
+  nose: "3.1 caliber aluminum ogive"
+  cite: "NASA TR R-226 p.3 and Figure 2 p.4"
+
+booster:
+  motor: "Aerojet 2.5KS-18,000"
+  sea_level_thrust_lbf: 18600.0
+  burn_time_s: 2.5
+  loaded_mass_lb: 520.0
+  expended_mass_lb: 260.0
+  total_impulse_lbfs_range: "44,375 to 50,000"
+  cite: "NASA TR R-226 p.8, p.11-13"
+
+sustainer:
+  type: "liquid pressure-fed ANFA/IRFNA"
+  sea_level_thrust_lbf: 4100.0
+  powered_duration_s: 51.5
+  total_impulse_lbfs: 208690.0
+  oxidizer_mass_lb: 758.2
+  fuel_mass_lb: 303.3
+  helium_mass_lb: 5.15
+  rocket_empty_mass_lb: 279.1
+  fins_mass_lb: 28.0
+  cite: "NASA TR R-226 p.12-13"
+
+flight_target:
+  flight: "NASA 4.65GI"
+  launch_site: "Wallops Island"
+  launch_date: "1963-09-25"
+  payload_mass_lb: 177.5
+  apogee_statute_miles: 139.5
+  apogee_ft: 736560.0
+  time_to_apogee_s: 256.0
+  sustainer_burnout_time_s: 54.6
+  static_margin_cal: 3.46
+  cite: "NASA TR R-226 Figure 102 p.117"
+  confidence: "high flight/propulsion target; model limited by liquid-as-RSE approximation"
+
+missing_from_source:
+  - exact liquid thrust transient for flight 4.65GI
+  - exact time-varying tank CG/Iyy during liquid depletion
+  - exact tower rail/guide lug constraint model
+  - full fin planform dimensions from Figure 5 image extraction

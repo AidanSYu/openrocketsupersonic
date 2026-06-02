@@ -921,7 +921,24 @@ Local-flow correction threshold & $|M_\text{local}{-}M_\infty| \ge 0.10$ & Rejec
 Constants for dynamic stability ($C_{mq}$ accumulation, Magnus, vortex side force) are documented in Chapter 9 and collected separately. Brief callouts:
 
 - **Pitch damping $C_{mq}$** validated to $39\,\%$ at $M = 1.5$ vs Tobak & Wehrend NACA TN 3788 via the eq. (54) axis transfer and the length-to-diameter normalization; externally benchmarked.
-- **Transonic $C_{mq}$ augmentation** (Gaussian peak $3.5\times$) compared against AEDC-TR-76-58 Fig. 12 roll-damping data; over-predicts by $\approx 3.6\times$ at $M \in [1.05, 1.12]$, calibrated against integrated flight data rather than against the AEDC component dataset alone.
-- **Magnus body fraction 0.3** within the BRL 1193 (Platou 1963) measured 0.3–0.8 range; externally benchmarked.
+- **Transonic $C_{mq}$ augmentation** (Gaussian peak $3.5\times$) compared against AEDC-TR-76-58 Fig. 12 roll-damping data; over-predicts by $\approx 3.6\times$ at $M \in [1.05, 1.12]$, calibrated against integrated flight data rather than against the AEDC component dataset alone. The Sznajder 2025 ANSYS Fluent CFD comparator on the same Basic Finner geometry (Section 8.9 below; PART_E §9.11) independently shows the same transonic over-augmentation direction, with overshoot $+110$ to $+160$ percent at $M = 1.08$--$1.11$ vs the CFD-side reference.
+- **Magnus body fraction 0.3** within the Platou (AIAA Journal **3**(1), 83–90, 1965, DOI 10.2514/3.2791) measured 0.3–0.8 range; externally benchmarked. (The original master citation "BRL Report 1193, 1963" could not be independently verified; the AIAA Journal publication is the verifiable primary source for the same Platou work.)
 - **Vortex $K_v = 0.20$, onset $20°$, saturation $40°$** within Paul & Wedemeyer ogive-cylinder $C_Y(\alpha)$ envelope; externally benchmarked.
+
+### 8.9 Published CFD Comparators
+
+In addition to the wind-tunnel and free-flight stability benchmarks tabulated above, the present method is anchored against four independent published CFD studies that together span two reference geometries, two distinct aerodynamic quantities (static force/moment coefficients; pitch-damping derivatives), and three Mach bands (transonic; supersonic; supersonic-leading-to-hypersonic). The four sources are: Bunescu et al. (2025) URANS k-$\epsilon$ on the Army-Navy Basic Finner [*Aerospace* **12**(5), 371, DOI 10.3390/aerospace12050371]; Sahu, Nietubicz & Steger (1983) thin-layer Navier-Stokes on a secant-ogive-cylinder-boattail projectile [ARBRL-TR-02495, DTIC AD-A130293]; Vidanović et al. (2014) Menter SST $k$-$\omega$ on the AGARD Model B calibration standard [*Thermal Science* **18**(4), 1223, DOI 10.2298/TSCI130409104V]; and Sznajder (2025) ANSYS Fluent MRF / forced-oscillation / indicial-response computations of Basic Finner pitch damping over $M = 0.9$--$5.0$ [*Trans. Aerospace Res.* No. 4, 98, DOI 10.2478/tar-2025-0021]. A fifth source — Bhagwandin and Sahu (2013) ARL-TR-6725 on Basic Finner and Air Force Modified Finner pitch damping — is used in Section 9.9.6 (PART_E) as a second-source corroboration of the Sznajder supersonic-band finding.
+
+**Table 8.9.1 — Published-CFD comparator inventory.** Detailed per-source discussion is given in PART_E Sections 9.9.6, 9.10, 9.11, and 9.12.
+
+| Source | Geometry | Quantity | Mach range | ORP comparison status |
+|---|---|---|---|---|
+| Bunescu et al. (2025), URANS | Basic Finner (ANF) | $C_N$, $C_X$ | 0.4--3.5 | Java comparator (`BunescuANFCfdComparatorTest`); $C_X$ MAPE 39.1% on 5 points at AoA = $0°$ |
+| Sahu et al. (1983), TLNS | Secant-ogive-cyl.-boattail | $C_{Db}$, $C_{D,\text{tot}}$ | 0.9--1.2 | PDF in repo; comparator deferred — geometry requires a separate ORP rocket model |
+| Vidanović et al. (2014), SST k-$\omega$ | AGARD-B | $C_D$, $C_L$, $C_m$ | 0.596, 1.602 | Reference dataset only; AGARD-B `.ork` not shipped (deferred future work) |
+| Sznajder (2025), Fluent MRF/FOM/IRM | Basic Finner (ANF) | $C_{mq} + C_{m\dot\alpha}$ | 0.9--4.5 | Comparator wired; supersonic MAPE 31.6% on 8 points ($M \ge 1.29$); transonic overshoot $+110$ to $+160\%$ |
+| Bhagwandin & Sahu (2013), Fluent | ANF + AFF | $C_{mq} + C_{m\dot\alpha}$ | 0.6--4.5 | Second-source confirmation of Sznajder supersonic bias direction; AFF supersonic MAPE 18.96% on 5 points |
+
+The four CFD-side panels are collected into the composite figure `paper/data/png/cfd_validation_panels.png`. The two converging findings from Sznajder and Bhagwandin/Sahu — supersonic underprediction of $|C_{mq}|$ by 27--36 percent and a transonic peak over-augmentation — are taken up explicitly as documented limitations in PART_E §12.4 item 2.
+
 
