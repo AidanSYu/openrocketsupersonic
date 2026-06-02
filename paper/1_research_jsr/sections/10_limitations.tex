@@ -72,14 +72,19 @@ which would constitute outcome-based selection.
 \subsection{Two-stage closure (MESOS 293K) regression}
 \label{sec:lim-mesos}
 
-The single two-stage closure in the headline corpus, MESOS~293K, currently
-predicts a signed apogee error of $-6.96\%$. An archived value of $-0.6\%$ is
-\emph{not} reproducible from the present code and is disclosed here as a
-regression rather than carried forward. The current $-6.96\%$ result remains
-within the $\pm 10\%$ admission criterion and so does not change the
-$25/25$ headline, but the discrepancy is acknowledged and the cause---most
-plausibly staging-event mass and drag bookkeeping across the interstage---is
-flagged for diagnosis. We report the reproducible $-6.96\%$ value throughout.
+The corpus contains two two-stage closures (the AeroPac~104K flight at
+$M = 3.04$ and MESOS~293K at $M = 4.33$); the remaining 23 flights are
+single-stage. MESOS~293K currently predicts a signed apogee error of $-6.96\%$
+(273{,}056~ft). This is a \emph{disclosed regression} relative to the archived
+RFD~v1.2 snapshot, which recorded 291{,}601~ft ($-0.6\%$) under an earlier code
+version. The $-6.96\%$ value is itself reproducible: it is reproduced from the
+current archived code release with the MESOS flight run in isolation. The root
+cause of the regression from the v1.2-era value is under investigation; we do
+\emph{not} attribute it to a specific mechanism here. The current $-6.96\%$
+result remains within the $\pm 10\%$ admission criterion and so does not change
+the $25/25$ headline. The next RFD release will re-synchronize the model column
+to the current code; we report the reproducible $-6.96\%$ value throughout this
+paper.
 
 \subsection{No author-produced computational fluid dynamics}
 \label{sec:lim-cfd}
@@ -103,12 +108,12 @@ only'' caveat.
 
 The transonic pitch-damping augmentation is held at B-level confidence. The
 strip-theory damping model applies a single transonic multiplier of
-approximately $3\times$, calibrated against AEDC pitch-damping
+approximately $3\times$, calibrated against AEDC-TR-76-58 wind-tunnel
 data~\cite{aedc7658} and re-checked against the Sznajder Fluent
 reference~\cite{sznajder2025}, against which it overshoots the transonic damping
 peak by $+110$ to $+160\%$ at $M = 1.08$--$1.11$ (Sec.~\ref{sec:lim-transonic}).
 The root cause is the absence of a flight-scale anchor: the multiplier rests on
-a single wind-tunnel-scale source with no independent full-scale validation.
+this single wind-tunnel-scale source with no independent flight-scale validation.
 This affects predicted dynamic stability and coning behavior but not the apogee
 statistics, which are insensitive to $C_{mq}$. Lifting this term to A-level
 requires an independent flight-scale pitch-damping dataset, which is identified
@@ -141,7 +146,7 @@ meaningful value.
 \subsection{Sensitivity sweep run on the exploratory high-Mach vehicles}
 \label{sec:lim-sensitivity}
 
-The four-flight operational sensitivity sweep of Sec.~\ref{sec:corpus} was run on
+The four-flight operational sensitivity sweep reported below was run on
 the high-Mach \emph{exploratory} vehicles (HEROS~3, the blunt Arcas, a Nike-Apache,
 and Black~Brant~VB) rather than on the gentler headline flights. These are the
 fastest, highest-Mach trajectories in the dataset and therefore bound the

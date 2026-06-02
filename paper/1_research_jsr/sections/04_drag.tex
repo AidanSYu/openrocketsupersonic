@@ -163,39 +163,11 @@ attains $4.4\%$.}
 
 \subsection{Skin Friction: Van Driest II}
 
-The skin-friction model implements the Van~Driest~II compressible transformation
-in the Hopkins--Inouye formulation~\cite{hopkins1971}, replacing the legacy
-Eckert reference-temperature method. The transformation maps the compressible
-length Reynolds number to an equivalent incompressible value through the
-multiplicative factors $F_c$, $F_\theta$, and $F_x = F_\theta/F_c$. With edge
-Mach number $M_e$, ratio of specific heats $\gamma$, wall-to-edge temperature
-ratio $F = T_w/T_e$, recovery factor $r = 0.88$ (turbulent Prandtl number
-$0.71$), and the kinematic group $m = \tfrac{1}{2}(\gamma - 1)M_e^2$, the
-compressibility factor is
-%
-\begin{equation}
-F_c = \frac{r\,m}{\left(\sin^{-1}\alpha + \sin^{-1}\beta\right)^2} ,
-\qquad
-\alpha = \frac{2A^2 - B}{\sqrt{4A^2 + B^2}} ,
-\qquad
-\beta = \frac{B}{\sqrt{4A^2 + B^2}} ,
-\label{eq:vd2-fc}
-\end{equation}
-%
-where
-%
-\begin{equation}
-A = \sqrt{\frac{r\,m}{F}} ,
-\qquad
-B = \frac{1 + r\,m - F}{F} .
-\label{eq:vd2-ab}
-\end{equation}
-%
-The numerator of $F_c$ is the adiabatic-wall enthalpy excess
-$r\,m = T_{\mathrm{aw}}/T_e - 1$; for an adiabatic wall, where
-$T_w/T_e = 1 + r\,m$, the parameter $B$ vanishes. The temperature-ratio factor
-$F_\theta$ follows from the Sutherland wall-to-edge viscosity ratio (Sec.~III).
-The transformed Reynolds number $F_x\,\mathrm{Re}_x$ is substituted into the
+The compressible skin-friction coefficient uses the Van~Driest~II transformation
+of Eqs.~\eqref{eq:vd2_defs}--\eqref{eq:vd2_fc} (Sec.~\ref{sec:atmosphere}), in the
+Hopkins--Inouye formulation~\cite{hopkins1971}, replacing the legacy Eckert
+reference-temperature method. The transformed Reynolds number
+$F_x\,\mathrm{Re}_x$, with $F_x = F_\theta/F_c$, is substituted into the
 Karman--Schoenherr implicit relation
 %
 \begin{equation}
@@ -286,7 +258,7 @@ Viswanath boattail & Any $M$, boattail & $\Delta C_{d,b}(\theta_{bt}, M)$
    & Viswanath~\cite{viswanath1996} & $15$--$40\%$ reduction \\
 Power-on base & During burn & $k_{po}(A_e/A_{\mathrm{ref}}, p_e/p_\infty)$
    & NASA~SP-8039~\cite{nasa_sp8039} & Qualitative \\
-Van~Driest~II $C_f$ & $M = 1.1$--$9$ & Eqs.~\eqref{eq:vd2-fc}--\eqref{eq:karman-schoenherr}
+Van~Driest~II $C_f$ & $M = 1.1$--$9$ & Eqs.~\eqref{eq:vd2_defs}--\eqref{eq:vd2_fc} (Sec.~\ref{sec:atmosphere}), \eqref{eq:karman-schoenherr}
    & Hopkins \& Inouye~\cite{hopkins1971} & ${\sim}50\%$ $C_f$ at $M = 5$ \\
 Modified Newtonian & $M > 5$ & $C_p = C_{p,\max}\sin^2\theta$
    & DTIC~AD0487365~\cite{grabow1965} & MAPE $19.7\%$ \\

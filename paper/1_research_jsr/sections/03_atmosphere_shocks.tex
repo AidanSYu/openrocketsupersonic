@@ -89,10 +89,11 @@ relaxed, and partially dissociated regimes:
 %
 The break points correspond to vibrational-equilibrium onset (\SI{800}{K}),
 substantial vibrational excitation (\SI{2000}{K}), and incipient dissociation
-(\SI{4000}{K})~\cite{anderson2006}. The model is $C^0$-continuous; the slope
-jumps fall well below the sensitivity floor of the downstream calculators.
-Real-gas dissociation chemistry is out of scope for vehicles whose flight time
-above $T_0 = \SI{4000}{K}$ is negligible.
+(\SI{4000}{K})~\cite{anderson2006}. The model is piecewise, with a value step
+below \SI{1}{\percent} at the \SI{4000}{K} break point, far below the downstream
+sensitivity floor; flight time above $T_0 = \SI{4000}{K}$ is negligible.
+Real-gas dissociation chemistry is out of scope for the vehicles considered
+here.
 
 \subsection{Smooth Compressibility Factor Through Mach One}
 \label{subsec:beta}
@@ -216,9 +217,9 @@ B = \frac{1 + r\,m - F}{F},
 and the compressibility factor
 %
 \begin{equation}
-F_c = \frac{r\,m}{\left(\arcsin\alpha + \arcsin\beta\right)^2}, \qquad
-\alpha = \frac{2A^2 - B}{\sqrt{4A^2 + B^2}}, \qquad
-\beta  = \frac{B}{\sqrt{4A^2 + B^2}}.
+F_c = \frac{r\,m}{\left(\arcsin A_1 + \arcsin A_2\right)^2}, \qquad
+A_1 = \frac{2A^2 - B}{\sqrt{4A^2 + B^2}}, \qquad
+A_2 = \frac{B}{\sqrt{4A^2 + B^2}}.
 \label{eq:vd2_fc}
 \end{equation}
 %
@@ -242,9 +243,9 @@ half-angles. Component checks gave a maximum error of \SI{0.016}{\percent} for
 the speed of sound, \SI{0.021}{\percent} for the oblique-shock angle, and
 \SI{0.004}{\degree} for the Prandtl--Meyer function. The Taylor--Maccoll
 cone-shock-angle solver achieved a maximum error of \SI{0.825}{\percent} (gate
-\SI{1}{\percent}) on the reference cases~\cite{anderson2006}; the surface
-pressure coefficient itself matched the exact analytical result to less than
-\SI{0.01}{\percent}.
+\SI{1}{\percent}) against the tabulated supersonic cone solutions of NASA
+SP-3004~\cite{sims1964,anderson2006}; the surface pressure coefficient itself
+matched the exact analytical result to less than \SI{0.01}{\percent}.
 
 \begin{figure}[t]
   \centering

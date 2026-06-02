@@ -50,9 +50,10 @@ dynamics; the comparators are published third-party datasets.
 
 Third, we validated the integrated simulator against a reproducible 25-flight
 ground-truth corpus spanning Mach~0.54 to~4.33. The corpus inclusion rule is
-external: twenty-four single-stage flights are taken from Rogers' public
-RASAero~II altitude-comparison set~\cite{rogers2015,rogers_rasaero_alt}, with
-one two-stage closure (MESOS~293K) added, so the accuracy statistics are not
+external: the flights are taken from Rogers' public RASAero~II
+altitude-comparison set~\cite{rogers2015,rogers_rasaero_alt} and comprise
+twenty-three single-stage flights and two two-stage flights (AeroPac~104K at
+Mach~3.04 and MESOS~293K at Mach~4.33), so the accuracy statistics are not
 outcome-curated by the present author. The mean signed apogee error is
 $-0.38\%$ (95\% bootstrap confidence interval $[-2.41,\,+1.72]$, 20\,000
 resamples), with standard deviation $5.44\%$, RMSE~$5.34\%$, MAE~$4.74\%$, and
@@ -64,7 +65,7 @@ tolerance, motor-lot variation, and atmospheric soundings---rather than
 directional model bias. On the 25 paired flights the difference in absolute
 error against RASAero~II is $-0.60$~percentage points (95\% bootstrap CI
 $[-2.16,\,+0.96]$, straddling zero), and a Wilcoxon signed-rank test finds no
-significant difference ($W=143.0$, $p=0.62$)~\cite{wilcoxon1945}. The honest
+significant difference ($W=143.0$, $p=0.615$)~\cite{wilcoxon1945}. The honest
 claim is therefore \emph{parity} with this version-locked RASAero~II set, not
 superiority; the recorded RASAero~II values are Rogers' archived predictions
 rather than independently rerun pre-flight cases. Because two base-drag scale
@@ -97,10 +98,14 @@ Sec.~\ref{sec:limitations}.
     that an above-Mach-5 integrated claim rests on measurement rather than on
     inferred inputs.
   \item \textbf{Recover the MESOS regression.} The two-stage MESOS~293K closure
-    currently predicts $-6.95\%$ against a previously archived $-0.6\%$ that is
-    not reproducible from the present code. Isolating and recovering this
-    regression is required before the two-stage staging-and-coast model can be
-    presented as fully validated.
+    predicts $-6.96\%$ (273{,}056~ft) from the current archived code release---a
+    disclosed regression relative to the earlier RFD~v1.2 snapshot ($291{,}601$~ft,
+    $-0.6\%$), which was produced by an earlier code version. The $-6.96\%$ value
+    is itself reproducible from the present release, and the flight remains within
+    the $\pm10\%$ band; the root cause is under investigation, and the next RFD
+    release will re-sync the model column. Isolating and recovering this regression
+    is required before the two-stage staging-and-coast model can be presented as
+    fully validated.
   \item \textbf{Anchor the pitch-damping multiplier to wind-tunnel data.} The
     transonic pitch-damping ($C_{m_q}$) augmentation relies on a single $3\times$
     multiplier that overshoots reference computations by 110--160\% per

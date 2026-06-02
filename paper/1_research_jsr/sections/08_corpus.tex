@@ -13,10 +13,12 @@ with non-parametric inference, and discloses the in-sample dependence honestly.
 \label{sec:corpus-def}
 
 The headline corpus comprises \num{25} flights spanning peak Mach
-\numrange{0.54}{4.33}: \num{24} single-stage vehicles drawn directly from the
-public RASAero~II flight-comparison set assembled by Rogers~\cite{rogers2015,
-rogers_rasaero_alt}, plus the MESOS~293K two-stage flight, which closes the
-corpus at its highest Mach. The inclusion criterion is the central guard against
+\numrange{0.54}{4.33}: \num{23} single-stage vehicles together with \num{2}
+two-stage flights (the AeroPac~104K flight at Mach~3.04 and the MESOS~293K
+flight at Mach~4.33), drawn directly from the public RASAero~II
+flight-comparison set assembled by Rogers~\cite{rogers2015,
+rogers_rasaero_alt}. The MESOS~293K flight closes the corpus at its highest
+Mach. The inclusion criterion is the central guard against
 selection bias: every flight is taken from a comparison set chosen and published
 by an \emph{external} party for an independent purpose, and the set is admitted
 in its entirety. No flight was added, removed, or reweighted on the basis of how
@@ -47,7 +49,7 @@ Table~\ref{tab:corpus-headline} summarizes these figures alongside the recorded
 RASAero~II predictions for the same flights.
 
 Because the corpus deviates from normality (Sec.~\ref{sec:corpus-dist}), every
-interval below is a 95\% bias-corrected and accelerated bootstrap confidence
+interval below is a 95\% non-parametric percentile bootstrap confidence
 interval (\num{20000} resamples, fixed seed \texttt{0x51A7EA}). The mean-error
 interval is $[-2.41,+1.72]\,\si{\percent}$; it brackets zero, so the predictor
 is statistically unbiased on this corpus. The remaining intervals are
@@ -189,17 +191,23 @@ distributions underlying the headline intervals.
 Because each flight carries a recorded RASAero~II prediction, the two methods
 can be compared head to head on identical vehicles and motors. On absolute
 error, the paired mean difference $|\text{ORP}|-|\text{RAS}|$ is
-\SI{-0.60}{pp} with a 95\% bootstrap confidence interval of
-$[-2.16,+0.96]\,\si{pp}$, which straddles zero. The Wilcoxon signed-rank test on
-the paired absolute errors returns $W=143.0$, $p=0.615$: the methods are not
-distinguishable in accuracy on this corpus. The Bland--Altman limits of
-agreement are \SI{\pm 14.3}{\percent} about a mean offset of
+\SI{-0.60}{pp} with a 95\% non-parametric percentile bootstrap confidence
+interval of $[-2.16,+0.96]\,\si{pp}$, which straddles zero. The Wilcoxon
+signed-rank test on the paired absolute errors returns $W=143.0$, $p=0.615$:
+the methods are not distinguishable in accuracy on this corpus, with ORP closer
+on \num{13} flights and RASAero~II closer on \num{12}. The Bland--Altman limits
+of agreement are \SI{\pm 14.3}{\percent} about a mean offset of
 \SI{-2.84}{\percent}. The honest claim supported by these statistics is
 \emph{parity}, not superiority. We further disclose an important asymmetry: the
 RASAero~II values are Rogers' published recorded predictions for these flights,
 not fresh pre-flight reruns we generated and can independently verify, so the
 comparison is to a version-locked external record rather than a controlled
-re-execution. Figure~\ref{fig:corpus-paired} shows the paired residuals.
+re-execution. In addition, for the two two-stage flights---AeroPac~104K and
+MESOS~293K---the recorded RASAero~II apogees are \emph{post-flight} simulations
+in which the ignition delay and launch angle were adjusted to match the measured
+flight; the head-to-head on these two flights is therefore not a blind forward
+prediction, and the corresponding RASAero~II errors should be read accordingly.
+Figure~\ref{fig:corpus-paired} shows the paired residuals.
 
 \begin{figure}[t]
   \centering
@@ -236,13 +244,18 @@ on which we rest the in-sample disclosure.
 \subsection{Two-Stage Closure and a Disclosed Regression}
 \label{sec:corpus-mesos}
 
-The MESOS~293K flight closes the corpus at Mach~4.33 and is the only two-stage
-vehicle, exercising staging and coast-phase modeling not present in the
-single-stage flights. We disclose a regression here: the current archived code
-predicts an apogee error of \SI{-6.96}{\percent} for MESOS, whereas an earlier
-archived configuration achieved \SI{-0.6}{\percent}. The flight remains within
-the \SI{\pm 10}{\percent} envelope and is retained in the corpus under the
-same outcome-independent inclusion rule applied to every other flight; we do not
+The MESOS~293K flight closes the corpus at Mach~4.33 and is one of the two
+two-stage flights in the corpus (alongside AeroPac~104K), exercising staging and
+coast-phase modeling not present in the single-stage flights. We disclose a
+regression here relative to the RFD~v1.2 archived snapshot: that earlier code
+version recorded an apogee of \SI{291601}{ft} (\SI{-0.6}{\percent}), whereas the
+current archived code release predicts \SI{273056}{ft}, an error of
+\SI{-6.96}{\percent}. The \SI{-6.96}{\percent} value is reproducible from the
+current archived code release---verified by running the MESOS flight in
+isolation---and the root cause of the regression is under investigation; the
+next RFD release will re-sync the model column. The flight remains within the
+\SI{\pm 10}{\percent} envelope and is retained in the corpus under the same
+outcome-independent inclusion rule applied to every other flight; we do not
 exclude it on the basis of the degraded result. The regression is carried
 forward to the limitations discussion.
 
@@ -286,10 +299,16 @@ peak Mach.
     19 & Full Metal Jacket -- BALLS 005  & O10000          & 2.31 & 37981  & 38820  & 37256  & $+2.21$  & $-1.9$  \\
     20 & Full Metal Jacket -- Black Rock 6 & O10000        & 2.46 & 30038  & 32646  & 29239  & $+8.68$  & $-2.7$  \\
     21 & Proteus 6                       & P9381           & 2.87 & 85067  & 86799  & 91339  & $+2.04$  & $+7.4$  \\
-    22 & AeroPac 104K Two-Stage          & N1048 / M685W   & 3.04 & 104659 & 113786 & 103602 & $+8.72$  & $-1.0$  \\
+    22 & AeroPac 104K Two-Stage          & N1048 / M685W   & 3.04 & 104659 & 113786 & 103602 & $+8.72$\textsuperscript{\dag} & $-1.0$  \\
     23 & Don't Debate This               & N5800           & 3.04 & 56573  & 62308  & 53150  & $+10.14$ & $-6.1$  \\
     24 & Qu8k                            & Q18000          & 3.46 & 121478 & 116254 & 119187 & $-4.30$  & $-1.9$  \\
-    25 & MESOS 293K                      & O4374 / M787    & 4.33 & 293488 & 289789 & 273056 & $-1.26$  & $-6.96$ \\
+    25 & MESOS 293K                      & O4374 / M787    & 4.33 & 293488 & 289789 & 273056 & $-1.26$\textsuperscript{\dag} & $-6.96$ \\
     \bottomrule
   \end{tabular}
+  \\[2pt]
+  {\footnotesize \textsuperscript{\dag}For the two-stage flights AeroPac~104K
+    and MESOS~293K, the recorded RASAero~II apogees are post-flight simulations
+    in which the ignition delay and launch angle were adjusted to match the
+    measured flight; these RASAero~II errors are therefore not blind forward
+    predictions.}
 \end{table*}
