@@ -3,6 +3,7 @@ package info.openrocket.core.aerodynamics;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -38,6 +39,7 @@ import info.openrocket.core.startup.Application;
  * </ul>
  */
 @Execution(ExecutionMode.SAME_THREAD)
+@Tag("slow")  // heavy Mach-sweep performance test (~42 s); excluded by default, run with -Pslow
 public class Phase5PerformanceTest {
 
     @BeforeAll

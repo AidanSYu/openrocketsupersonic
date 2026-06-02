@@ -14,6 +14,7 @@ import info.openrocket.core.startup.Application;
 import info.openrocket.core.util.CoordinateIF;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,6 +43,7 @@ import java.util.Map;
  * long-running flight simulations, which would cause the simulations to time out.
  */
 @ResourceLock("AERO_CPU_HEAVY")
+@Tag("slow")  // heavy supersonic baseline validation (~1.3 min); excluded by default, run with -Pslow
 public class SupersonicBaselineTest {
 
 	private static final double TOLERANCE_CD = 0.10;    // 10% relative tolerance for drag

@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -52,6 +53,7 @@ import info.openrocket.core.util.BaseTestCase;
  */
 @Isolated("AblationConfig static volatile flags must not be observed by concurrent tests")
 @ResourceLock("AERO_CPU_HEAVY")
+@Tag("sweep")  // paper-data regeneration (model-mechanism ablation, ~9.6 min); excluded by default, run with -Psweeps
 public class SimVRealModelMechanismAblationTest extends BaseTestCase {
 
 	private static final String SIMVREAL_DIR = "simvreal/RasAero Sims";

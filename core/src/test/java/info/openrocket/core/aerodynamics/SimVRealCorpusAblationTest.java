@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -48,6 +49,7 @@ import info.openrocket.core.util.BaseTestCase;
  * multiplying runtime by rerunning every low-leverage subsonic case.
  */
 @ResourceLock("AERO_CPU_HEAVY")
+@Tag("sweep")  // paper-data regeneration (corpus ablation subset, ~1.7 min); excluded by default, run with -Psweeps
 public class SimVRealCorpusAblationTest extends BaseTestCase {
 
 	private static final String SIMVREAL_DIR = "simvreal/RasAero Sims";

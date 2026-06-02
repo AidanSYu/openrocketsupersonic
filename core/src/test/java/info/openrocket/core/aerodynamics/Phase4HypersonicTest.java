@@ -3,6 +3,7 @@ package info.openrocket.core.aerodynamics;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -29,6 +30,7 @@ import info.openrocket.core.util.CoordinateIF;
  * Phase 4d: Edge case hardening (M=1.0, high AoA, NaN/Inf guards)
  * Phase 4e: Graceful degradation & user warnings
  */
+@Tag("slow")  // heavy hypersonic validation (~11 s); excluded by default, run with -Pslow
 public class Phase4HypersonicTest {
 
 	@BeforeAll

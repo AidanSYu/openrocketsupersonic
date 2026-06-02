@@ -25,7 +25,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
       - name: Execute Gradle build
-        run: ./gradlew check build dist
+        # -Pcoverage instruments tests + runs jacoco verification/report (uploaded below).
+        # -Psweeps includes the heavy paper-data regeneration sweeps so CI exercises the
+        # full suite (local dev runs exclude them by default for speed; see build.gradle).
+        run: ./gradlew check build dist -Pcoverage -Pslow -Psweeps
       # If wanting to serialize all the engines during build
       #        run: ./gradlew serializeEnginesDist build dist
       - name: Upload build reports

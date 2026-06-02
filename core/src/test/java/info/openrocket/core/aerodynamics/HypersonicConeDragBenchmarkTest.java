@@ -3,6 +3,7 @@ package info.openrocket.core.aerodynamics;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -42,6 +43,7 @@ import info.openrocket.core.startup.Application;
  * fixture marks the range models as perfect-finish and sets the atmospheric
  * pressure row-by-row so ORP sees the tabulated length Reynolds number.
  */
+@Tag("slow")  // heavy hypersonic cone-drag benchmark (~10 s); excluded by default, run with -Pslow
 public class HypersonicConeDragBenchmarkTest {
 
 	/** Tolerance for total CD comparison. DTIC experiments were at laminar BL

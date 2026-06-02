@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -50,6 +51,7 @@ import info.openrocket.core.simulation.FlightEvent;
 import info.openrocket.core.util.BaseTestCase;
 
 @ResourceLock("AERO_CPU_HEAVY")
+@Tag("sweep")  // paper-data regeneration (outlier diagnostics, ~1.9 min); excluded by default, run with -Psweeps
 public class SimVRealOutlierDiagnosticTest extends BaseTestCase {
 
 	private static final String SIMVREAL_DIR = "simvreal/RasAero Sims";

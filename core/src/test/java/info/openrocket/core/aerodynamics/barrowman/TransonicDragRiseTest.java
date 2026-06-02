@@ -20,6 +20,7 @@ import info.openrocket.core.rocketcomponent.Transition;
 import info.openrocket.core.startup.Application;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -41,6 +42,7 @@ import java.util.Map;
  *   <li>Preserves existing behavior for shapes with TR-R-100 transonic data</li>
  * </ul>
  */
+@Tag("slow")  // heavy transonic drag-rise validation (~11 s); excluded by default, run with -Pslow
 public class TransonicDragRiseTest {
 
 	private static Injector injector;
