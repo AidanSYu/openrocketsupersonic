@@ -19,6 +19,14 @@ Builds:
   arcas.ork
 plus a sidecar README.md and a RASP .eng thrust file for each motor.
 
+The .ork archives also embed a RockSim .rse copy of each thrust curve at
+`thrustcurves/<digest>.rse`. That is the path
+`info.openrocket.core.file.openrocket.importt.MotorHandler#loadMotorFromZip`
+falls back to when the user's MotorDatabase has no matching entry for the
+custom Super Loki / Arcas designations. Without it, the loader returns
+`motor == null`, the simulation produces zero thrust, and our v2 corpus
+test sees `hasMotors == false` even though the .ork XML parses cleanly.
+
 Unit conventions:
   All OpenRocket lengths/radii in meters; masses in kg; densities kg/m^3.
   1 inch = 0.0254 m;  1 lb = 0.45359237 kg;  1 lbf = 4.4482216 N.
@@ -306,7 +314,14 @@ NOTE: dart fin geometry (root/tip/sweep) inferred from area only; nose cone leng
             <length>{SL_BOOSTER_LEN:.6f}</length>
             <thickness>0.002108</thickness>
             <radius>{SL_BOOSTER_RADIUS:.6f}</radius>
-            <overridemass>{SL_BOOSTER_INERT_MASS + SL_HEADCAP_MASS:.6f}</overridemass>
+            <!-- The .rse motor block carries the *full* loaded motor mass
+                 (SL_BOOSTER_LOADED_MASS = 60.62 lb, of which 17.14 lb is
+                 motor-inert at burnout). Counting motor inert here too
+                 double-counts the casing — the v1 build did that and the
+                 simulation came in 22% overweight. The override is now
+                 just the headcap+interstage mass, which is *not* in the
+                 motor-loaded weight per Table 3.1. -->
+            <overridemass>{SL_HEADCAP_MASS:.6f}</overridemass>
             <overridesubcomponentsmass>true</overridesubcomponentsmass>
 {make_motor_block(cid, "SuperLoki-600-13", "Space Data Corp",
                   SL_BOOSTER_RADIUS * 2, SL_BOOSTER_LEN,
@@ -450,7 +465,12 @@ Total impulse 9089 lbf-s @ 70F; action time 29.0 s; avg thrust 336 lbf.</comment
             <length>{ARC_MOTOR_LEN:.6f}</length>
             <thickness>0.001016</thickness>
             <radius>{ARC_RADIUS:.6f}</radius>
-            <overridemass>{ARC_MOTOR_INERT_MASS:.6f}</overridemass>
+            <!-- The .rse carries the full "rocket motor + fins" 64.5-lb
+                 lump per Table I (= ARC_PROP_MASS + ARC_MOTOR_INERT_MASS).
+                 Casing + fins have no separate mass override here so we
+                 don't double-count the 23.5 lb of inert that the motor
+                 already brings to burnout. -->
+            <overridemass>0.0</overridemass>
             <overridesubcomponentsmass>true</overridesubcomponentsmass>
 {make_motor_block(cid, "29-KS-336", "Atlantic Research Corp",
                   ARC_RADIUS * 2 * 0.92, ARC_MOTOR_LEN * 0.95,
@@ -556,20 +576,110 @@ def write_eng(filepath, motor_name, diameter_mm, length_mm, delays,
         fh.write("\n".join(lines) + "\n")
 
 
+def build_rse_xml(designation, manufacturer, diameter_mm, length_mm,
+                  delays, propellant_kg, total_kg, thrust_lbf_pairs,
+                  comment_lines):
+    """Build a RockSim .rse motor file as an XML string.
+
+    Mass + CG are flagged auto-calc so the loader fills them in from the
+    thrust integral (we do not have time-resolved mass data for either
+    sounding-rocket motor). Required attributes are everything in
+    info.openrocket.core.file.motor.RockSimMotorLoader.RSEMotorHandler:
+    mfg, code, delays, dia (mm), len (mm), initWt (g), propWt (g), Type,
+    auto-calc-mass, auto-calc-cg.
+    """
+    init_g = total_kg * 1000.0
+    prop_g = propellant_kg * 1000.0
+    cg_mm = length_mm / 2.0  # placeholder; auto-calc-cg replaces it
+    comment_text = "\n".join(comment_lines).strip()
+    rows = []
+    for t, f_lbf in thrust_lbf_pairs:
+        rows.append(
+            f'<eng-data t="{t:.4f}" f="{f_lbf * LBF:.2f}" '
+            f'm="{prop_g:.2f}" cg="{cg_mm:.2f}"/>'
+        )
+    data_block = "\n      ".join(rows)
+    return (
+        '<engine-database>\n'
+        ' <engine-list>\n'
+        f'<engine mfg="{manufacturer}" code="{designation}" delays="{delays}"'
+        f' Type="single-use"'
+        f' dia="{diameter_mm:.3f}" len="{length_mm:.3f}"'
+        f' initWt="{init_g:.2f}" propWt="{prop_g:.2f}"'
+        f' auto-calc-mass="1" auto-calc-cg="1">\n'
+        f'<comments>{comment_text}</comments>\n'
+        '<data>\n'
+        f'      {data_block}\n'
+        '</data>\n'
+        '</engine>\n'
+        ' </engine-list>\n'
+        '</engine-database>\n'
+    )
+
+
 # =========================================================================
 #                           Pack zip + emit
 # =========================================================================
-def pack_ork(target, xml_text):
+def pack_ork(target, xml_text, attachments=None):
+    """Write the .ork zip, with optional extra zip entries.
+
+    `attachments` is a dict of {zip_entry_path: text_content}. Used to
+    embed `thrustcurves/<digest>.rse` so the loader's zip fallback can
+    resolve custom motors that are not in the user's MotorDatabase.
+    """
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("rocket.ork", xml_text)
+        if attachments:
+            for entry_name, content in attachments.items():
+                z.writestr(entry_name, content)
 
 
 def main():
     sl = build_super_loki()
     arc = build_arcas()
 
-    pack_ork(os.path.join(HERE, "super_loki_dart.ork"), sl)
-    pack_ork(os.path.join(HERE, "arcas.ork"), arc)
+    # Build .rse blobs for embedding. The digest in the .ork's <motor>
+    # block is reused as the filename: MotorHandler.loadMotorFromZip
+    # constructs the lookup key as "thrustcurves/<digest>.rse".
+    sl_rse = build_rse_xml(
+        designation="SuperLoki-600-13",
+        manufacturer="SpaceDataCorp",
+        diameter_mm=4.0 * 25.4,
+        length_mm=88.3 * 25.4,
+        delays="P",
+        propellant_kg=43.48 * LB,
+        total_kg=60.62 * LB,
+        thrust_lbf_pairs=SL_THRUST_TIME_LBF,
+        comment_lines=[
+            "Stable Super Loki rocket motor (SDC P/N 600-13)",
+            "Source: AFCRL-TR-73-0412 / DTIC AD-766737, Table 3.3, Figure 3.4",
+            "Sea-level firing at +59 deg F",
+        ],
+    )
+    arc_rse = build_rse_xml(
+        designation="29-KS-336",
+        manufacturer="AtlanticResearch",
+        diameter_mm=4.45 * 25.4,
+        length_mm=60.7 * 25.4,
+        delays="P",
+        propellant_kg=ARC_PROP_MASS,
+        total_kg=ARC_PROP_MASS + ARC_MOTOR_INERT_MASS,
+        thrust_lbf_pairs=ARC_THRUST_TIME_LBF,
+        comment_lines=[
+            "Arcas 4.5 EX2 MOD 0 / 29-KS-336 MARC 2B1 rocket motor",
+            "Source: DTIC AD-235341, Table I (p.6) and Figure 6",
+            "End-burning Arcite 373D propellant, 70 deg F",
+        ],
+    )
+
+    pack_ork(
+        os.path.join(HERE, "super_loki_dart.ork"), sl,
+        attachments={"thrustcurves/superloki600-13.rse": sl_rse},
+    )
+    pack_ork(
+        os.path.join(HERE, "arcas.ork"), arc,
+        attachments={"thrustcurves/arcas-29ks336.rse": arc_rse},
+    )
 
     # --- Verify total-impulse for the .eng files ---------------------------
     def integrate(pairs):

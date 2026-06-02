@@ -85,7 +85,7 @@ The transonic factor of $3.5$ at $M = 1$ nearly triples the effective pitch damp
 
 In `BarrowmanStabilityCalculator.calculateDampingMoments()` the code iterates over all active rocket components, retrieves each component's `getCP()` (a `CoordinateIF` whose weight is the component $C_{N\alpha}$ and whose $x$-coordinate is the per-component CP location), computes the squared moment arm relative to $x_{CG}$, and accumulates the sum. The transonic factor and $C_{m\dot{\alpha}}/C_{mq}$ ratio are applied after accumulation.
 
-**Empirical damping multiplier.** A constant `DAMPING_MULTIPLIER = 3.0` (package-visible for sensitivity testing) is applied to the legacy damping-multiplier output that drives the pitch and yaw damping moments. The factor exists because the linearized theoretical $C_{mq}$ under-predicts the damping required to reproduce realistic apogee-turn behavior in 6-DOF trajectory simulation. Against the ADA636861 free-flight $C_{mq}$ data on the Basic Finner, the combined $\times 3$ multiplier and Gaussian augmentation over-predict damping at $M = 1.05$--$1.12$ by roughly a factor of $3.6$. The multiplier is corpus-calibrated, not externally validated. It is reported as such (not counted in the 27-subsystem external-benchmark headline), and removing it degrades the corpus apogee-turn signature on five flights. The 25-flight closure is dominated by drag and base-pressure terms, so the damping over-prediction does not propagate into the 4.49% headline; it is nonetheless real and unfixed (Section 12.4 item 2).
+**Empirical damping multiplier.** A constant `DAMPING_MULTIPLIER = 3.0` (package-visible for sensitivity testing) is applied to the legacy damping-multiplier output that drives the pitch and yaw damping moments. The factor exists because the linearized theoretical $C_{mq}$ under-predicts the damping required to reproduce realistic apogee-turn behavior in 6-DOF trajectory simulation. Against the ADA636861 free-flight $C_{mq}$ data on the Basic Finner, the combined $\times 3$ multiplier and Gaussian augmentation over-predict damping at $M = 1.05$--$1.12$ by roughly a factor of $3.6$; the Sznajder 2025 ANSYS Fluent CFD comparator independently shows a +110 to +160% overshoot at $M = 1.08$--$1.11$. The multiplier is corpus-calibrated, not externally validated. It is reported as such (not counted in the 27-subsystem external-benchmark headline), and removing it degrades the corpus apogee-turn signature on five flights. The 28-flight closure is dominated by drag and base-pressure terms, so the damping over-prediction does not propagate into the MAE 4.33% headline; it is nonetheless real and unfixed (Section 12.4 item 2).
 
 **Damping-magnitude cap.** The damping moment magnitude is capped at the current static pitching moment coefficient,
 
@@ -146,7 +146,7 @@ The implementation uses the conservative slender-body approximation
 
 $$C_{N\alpha,\text{body}} \;\approx\; 0.3 \cdot C_{N\alpha,\text{total}}.$$
 
-This factor is a compact estimate that avoids per-component decomposition of normal force inside the damping calculation. It is consistent with the body-alone vs finned-body Magnus ratios reported by Platou (BRL Report 1193, 1963), which fall in the 0.3--0.8 range depending on fin loading and Mach number; 0.3 sits at the lower end (the conservative side, since body and fin Magnus forces are opposite in sign and the smaller the body fraction, the smaller the predicted Magnus yaw moment).
+This factor is a compact estimate that avoids per-component decomposition of normal force inside the damping calculation. It is consistent with the body-alone vs finned-body Magnus ratios reported by Platou ("Magnus Characteristics of Finned and Nonfinned Projectiles," *AIAA Journal* 3(1), 83–90, 1965), which fall in the 0.3--0.8 range depending on fin loading and Mach number; 0.3 sits at the lower end (the conservative side, since body and fin Magnus forces are opposite in sign and the smaller the body fraction, the smaller the predicted Magnus yaw moment).
 
 #### 9.2.4 Worked Example -- Spinning Rocket at $M = 2$, $\alpha = 5°$
 
@@ -476,9 +476,9 @@ The dynamic stability models in this chapter are validated against published exp
 
 The pitch-damping derivative $C_{mq}$ is validated against the linearized supersonic theory of Tobak and Wehrend (NACA TN 3788, 1956), who derived stability derivatives for cones at supersonic speeds. `TobakCmqBenchmarkTest` compares the strip-theory implementation against TN 3788 at $M = 1.5$, applying the axis-transfer correction (TN 3788 eq. 54) to convert from a nose-tip to a CG reference and the length-to-diameter normalization needed to compare body- vs diameter-referenced coefficients. The frozen result is **39%** agreement at $M = 1.5$ and conservative bounding at higher Mach. This is the level of agreement expected when comparing an engineering strip-theory approximation against linearized theory for an isolated cone without fins; the validation matrix records this row as A with the frozen 39% threshold.
 
-#### 9.9.2 Magnus Force -- Platou (BRL Report 1193)
+#### 9.9.2 Magnus Force -- Platou (AIAA Journal 1965)
 
-The Magnus model is validated against the wind-tunnel measurements of Platou (BRL Report 1193, 1963) on body-alone and finned-body configurations at supersonic speeds. `MagnusBenchmarkTest` uses the implementation default body fraction $0.3$ and compares the predicted $C_{y,p\alpha}$ against BRL 1193 for both configurations. The implementation lies within the measured range $0.3$--$0.8$ for the body fraction and matches the reference body $C_{N\alpha}$ derivation to machine precision.
+The Magnus model is validated against the wind-tunnel measurements of Platou, "Magnus Characteristics of Finned and Nonfinned Projectiles," *AIAA Journal* **3**(1), 83–90 (1965), DOI 10.2514/3.2791, on body-alone and finned-body configurations at supersonic speeds. The original master citation for this work as "BRL Report 1193, 1963" could not be independently verified through NTRS or DTIC search; the AIAA Journal publication is the verifiable primary source for the same work and has been adopted in place of the unverified report number. `MagnusBenchmarkTest` uses the implementation default body fraction $0.3$ and compares the predicted $C_{y,p\alpha}$ against Platou 1965 for both configurations. The implementation lies within the measured range $0.3$--$0.8$ for the body fraction and matches the reference body $C_{N\alpha}$ derivation to machine precision.
 
 #### 9.9.3 Vortex Sideforce -- Paul and Wedemeyer (EOARD-TR-82-7)
 
@@ -537,6 +537,35 @@ Combined MAPE = **43.1%**; $C_X$-only MAPE = 39.1%. ORP systematically underpred
 3. **The single $C_N$ point at AoA $= 10°$, $M = 1.60$ is the worst miss (-63%).** Bunescu reports $C_N = 3.4$; ORP gives 1.25. ORP's normal-force prediction in the ANF supersonic regime is anchored against the NASA TM X-653 NSCFB blunt-fin geometry (Section 11.4.1, MAPE 6.84%), not against the ANF rectangular-fin configuration. The ANF-specific $C_N$ gap may indicate that the Pitts-Nielsen-Kaattari interference factor or the cylinder-fin crossflow $C_d$ is biased low for this exact geometry; this is a flagged investigation, not a calibration adjustment.
 
 The honest disposition: the gap is documented and bounded, no constants are tuned to close it, and a second independent CFD anchor on matching geometry would be required to justify any retune. The companion CFD source ARBRL-TR-02495 (Sahu, Nietubicz \& Steger 1983, Thin-Layer Navier-Stokes on a secant-ogive-cylinder-boattail at $M = 0.9$--$1.2$) is in repo at `paper/data/pdf/Empirical heuristics and tuned constants validation/` for transonic base-flow validation but has not been exercised as a comparator in this revision -- the geometry is structurally different from the Basic Finner and would require building a separate ORP rocket model. Comparator artifacts: `paper/data/csv/bunescu_anf_cfd_2025.csv` (digitized source), `paper/data/csv/bunescu_anf_comparator_2026_05_02.csv` (test output), and `paper/data/md/bunescu_anf_cfd_comparator_2026_05_02.md` (assessment memo).
+
+### 9.11 CFD Comparator -- Sznajder 2025 ANF Pitch Damping
+
+A second independent CFD comparator on pitch damping is provided by Sznajder (2025), "Computational Determination of Dynamic Stability Derivatives," *Transactions on Aerospace Research* No. 4, pp. 98–121, DOI 10.2478/tar-2025-0021. Sznajder reports ANSYS Fluent computations of $C_{mq}$ and $C_{m\dot\alpha}$ *separately*, from three independent CFD techniques — steady moving reference frame (MRF), dynamic-mesh forced oscillation (FOM), and step-perturbation indicial response (IRM) — over $M = 0.9$--$5.0$ on the Army-Navy Basic Finner. The three methods agreed to within approximately 3 percent of one another and were independently validated against the DREV-TM-9703 free-flight experimental dataset that also anchors the present method's existing `BasicFinnerCmqBenchmarkTest`. The present method exposes the experimentally observable damping sum $C_{mq} + C_{m\dot\alpha}$. On the ten-point comparison grid:
+
+- **Supersonic band, $M = 1.29$--$4.5$ ($n = 8$ points):** the present method underpredicts the magnitude of the damping sum by 27 to 36 percent, with sign and Mach trend correct. MAPE on the supersonic band is **31.6 percent**.
+- **Transonic peak, $M = 1.08$--$1.11$ ($n = 2$ points):** the present method overshoots the magnitude of the damping sum by **+110 to +160 percent**. The Sznajder CFD does not exhibit a comparable transonic peak in the sum.
+
+The transonic overshoot is traced to the $k_{\mathrm{transonic}} = 1 + 2.5 \exp(-((M - 1)/0.15)^2)$ Gaussian augmentation applied in `BarrowmanStabilityCalculator`; the supersonic underprediction reflects a constant-factor bias of approximately 0.67 in the strip-theory damping coefficient. The Bhagwandin and Sahu 2013 second-source CFD on AFF and ANF (Section 9.9.6, ARL-TR-6725) independently confirms the same supersonic-band underprediction direction. Two independent CFD sources therefore converge on the same two findings: a 27--36 percent supersonic underprediction of pitch damping and a transonic-peak over-augmentation. Both findings are taken up explicitly in the limitations discussion in Section 12.4 item 2. Comparator artifacts: `paper/data/csv/sznajder_anf_cmq_cfd_2025.csv` (digitized source) and `paper/data/csv/sznajder_anf_cmq_comparator_2026_05_11.csv` (test output); the assessment memo is `paper/data/md/sznajder_anf_cmq_cfd_comparator_2026_05_11.md`.
+
+### 9.12 CFD Comparator -- Vidanović 2014 AGARD-B Reference
+
+A third CFD comparator is provided by Vidanović et al. (2014), "Validation of the CFD code used for determination of aerodynamic characteristics of nonstandard AGARD-B calibration model," *Thermal Science* **18**(4), 1223–1233, DOI 10.2298/TSCI130409104V. The authors report ANSYS Fluent Menter SST $k$-$\omega$ predictions of total drag, lift, and pitching-moment coefficients on the AGARD Model B calibration standard at $M = 0.596$ and $M = 1.602$ over an angle-of-attack sweep of $-4°$ to $+12°$. Their CFD is validated against wind-tunnel data from the VTI T-38 trisonic facility in Belgrade, with CFD-versus-experiment agreement of 0.3--3 percent in $C_D$ at positive AoA and below 1 percent in $C_L$ over the test envelope — a state-of-the-art benchmark on a wing-body calibration standard. The present method does not yet ship an AGARD-B `.ork`: the equilateral-triangle delta wing with 4 percent bi-convex section is at the edge of the OpenRocket fin-set model's validity, and a faithful AGARD-B fixture would require either rendering the delta wing as a fictitious fin set or extending the fin geometry primitives. The Vidanović CFD is therefore retained in the present revision as a *reference dataset* against which a future OpenRocket Plus AGARD-B comparator can be benchmarked; the comparator panel is shown in Figure 18 of `paper/data/png/cfd_validation_panels.png` and is flagged as deferred future work in Section 12.6. Comparator artifact (digitized source only): `paper/data/csv/vidanovic_agard_b_cfd_2014.csv`, memo at `paper/data/md/vidanovic_agard_b_cfd_comparator_2026_05_11.md`.
+
+### 9.13 CFD Comparator Inventory Summary
+
+The four published CFD comparators that anchor the present method's CFD-side validation are summarized below. Together they span two reference geometries (Army-Navy Basic Finner; AGARD Model B), two distinct aerodynamic quantities (static force/moment coefficients; pitch-damping derivatives), three Mach bands (transonic; supersonic; supersonic-leading-to-hypersonic), and three independent author groups across two continents and three CFD code families.
+
+**Table 9.13.1 — Published-CFD comparator inventory.**
+
+| Source | Geometry | Quantity | Mach range | ORP comparison status |
+|---|---|---|---|---|
+| Bunescu et al. (2025), *Aerospace* **12**(5), 371, URANS k-$\epsilon$ | Basic Finner (ANF) | $C_N$, $C_X$ | 0.4--3.5 | Java comparator wired (`BunescuANFCfdComparatorTest`); $C_X$ MAPE 39.1 percent on 5 points at AoA = $0°$ |
+| Sahu, Nietubicz, Steger (1983), ARBRL-TR-02495 (DTIC AD-A130293), thin-layer Navier-Stokes | Secant-ogive-cylinder-boattail | $C_{Db}$, $C_{D,\text{tot}}$ | 0.9--1.2 | PDF in repo; comparator not yet digitized (deferred future work) |
+| Vidanović et al. (2014), *Therm. Sci.* **18**(4), 1223, SST k-$\omega$ | AGARD-B calibration standard | $C_D$, $C_L$, $C_m$ | 0.596, 1.602 | Reference dataset only; AGARD-B `.ork` not yet shipped (deferred future work) |
+| Sznajder (2025), *Trans. Aerosp. Res.* No. 4, 98, Fluent MRF/FOM/IRM | Basic Finner (ANF) | $C_{mq} + C_{m\dot\alpha}$ | 0.9--4.5 | Memo + comparator CSV; supersonic MAPE 31.6 percent on 8 points ($M \ge 1.29$); transonic overshoot $+110$ to $+160$ percent |
+| Bhagwandin & Sahu (2013), ARL-TR-6725 (DTIC ADA592550), Fluent | Basic Finner (ANF) + Air Force Modified Finner (AFF) | $C_{mq} + C_{m\dot\alpha}$ | 0.6--4.5 | Second-source corroboration of Sznajder supersonic bias direction on the same and on an independent finned geometry |
+
+The four-panel composite figure (`paper/data/png/cfd_validation_panels.png`) overlays the comparator outputs into a single quick-look diagram: Panel A — Basic Finner $C_X$ vs Bunescu URANS; Panel B — Sahu reference (deferred); Panel C — AGARD-B reference dataset (Vidanović SST + VTI T-38 experiment); Panel D — Basic Finner $C_{mq} + C_{m\dot\alpha}$ vs Sznajder Fluent + Bhagwandin & Sahu second source.
 
 
 ## 10. Regime Blending
@@ -809,14 +838,14 @@ Headline:
 
 - **27 subsystems are externally benchmarked against published wind-tunnel, free-flight, or analytical data** with a quantitative acceptance criterion, plus **1 externally anchored negative benchmark** (NACA RM-10) used to bound and exclude a geometry family.
 - **9 results are calibrated against the integrated flight corpus** rather than against isolated component data. These are circular calibrations (same corpus is the calibration and validation target) and are *not* counted in the 27-subsystem headline. Each is flagged where it is used (Section 11.6.5).
-- **25-flight integrated validation corpus** (Rocket Flight Database v1.0, [DOI: 10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138)): 25/25 within $\pm 10\%$, 15/25 within $\pm 5\%$, average $\lvert\text{error}\rvert = 4.49\%$, 0 abnormal endings. Lower aggregate error than the recorded RASAero II predictions on the same flights ($5.26\%$, 22/25 within $\pm 10\%$).
-- **MESOS 293K** (Mach 4.18 / 293,488 ft): apogee $-0.6\%$, peak velocity $+4.0\%$, peak Mach $+3.6\%$.
-- **Envelope of the headline claim.** The accuracy figures above apply to finned slender vehicles within the boattail half-angle envelope of $6°$--$16°$ (the Viswanath 1996 calibration band, Section 6.2.7) and to fin sections that are HEXAGONAL (double-wedge) or AIRFOIL/ROUNDED (rounded-LE), the section types present in the 25-flight Rocket Flight Database v1.0 and in every Basic-Finner-class wind-tunnel and free-flight reference geometry used in this work. Out-of-envelope geometries -- specifically the high-fineness parabolic body with steeply contracted afterbody and 60° swept circular-arc biconvex fins of NACA RM-10 -- are reported as transparency references and are excluded from the headline accuracy claim (Section 11.3.6).
+- **28-flight integrated validation corpus** (Rocket Flight Database v1.2, concept DOI: [10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138)): 28/28 within $\pm 10\%$, 17/28 within $\pm 5\%$, mean signed apogee error $-0.44\%$, $\sigma = 5.13\%$, MAE $4.33\%$, 0 abnormal endings. On the 25 paired flights for which RASAero II coverage exists, RASAero II averages $5.34\%$ MAE with 22/25 within $\pm 10\%$ (Wilcoxon $p = 0.375$ on paired absolute errors — not statistically distinguishable).
+- **MESOS 293K** (Mach 4.18 / 293,488 ft): apogee $-0.6\%$, peak velocity $+4.0\%$, peak Mach $+3.6\%$. **Black Brant V VB AAF-VB-32** (Mach 7.22 / 273.6 km): apogee $-7.0\%$. **Nike-Deacon flights 1 & 2** ($M = 4.96$ and $5.08$): apogee $-1.1\%$ and $-0.9\%$.
+- **Envelope of the headline claim.** The accuracy figures above apply to finned slender vehicles within the boattail half-angle envelope of $6°$--$16°$ (the Viswanath 1996 calibration band, Section 6.2.7) and to fin sections that are HEXAGONAL (double-wedge) or AIRFOIL/ROUNDED (rounded-LE), the section types present in the 28-flight Rocket Flight Database v1.2 and in every Basic-Finner-class wind-tunnel and free-flight reference geometry used in this work. Out-of-envelope geometries -- specifically the high-fineness parabolic body with steeply contracted afterbody and 60° swept circular-arc biconvex fins of NACA RM-10 -- are reported as transparency references and are excluded from the headline accuracy claim (Section 11.3.6).
 
 
 ### 11.1 Test Suite Overview
 
-The aerodynamic validation suite currently comprises **85 tracked JUnit test classes** in the `info.openrocket.core.aerodynamics` package hierarchy (87 tracked Java files including support/export helpers), plus one workspace-local `SimVRealCorpusAblationTest` used for the May 1 import-parity ablation. The claim inventory consists of 27 externally benchmarked subsystem results, 9 integrated flight-data closures, and 1 negative external benchmark (NACA RM-10). Not every claim has equal evidence: externally benchmarked results are independently matched against published experimental or tabulated data with a quantitative acceptance criterion; integrated flight-data closures are validated against the 25-flight Rocket Flight Database corpus rather than against an isolated published component dataset; numerical-consistency tests verify that the implementation reduces to its analytical limit or matches its own boundary conditions; and a small number of empirically tuned coefficients are documented as such. Every claim in this chapter is reported with its evidence type, not as a uniformly closed validation.
+The aerodynamic validation suite currently comprises **85 tracked JUnit test classes** in the `info.openrocket.core.aerodynamics` package hierarchy (87 tracked Java files including support/export helpers), plus one workspace-local `SimVRealCorpusAblationTest` used for the May 1 import-parity ablation. The claim inventory consists of 27 externally benchmarked subsystem results, 9 integrated flight-data closures, and 1 negative external benchmark (NACA RM-10). Not every claim has equal evidence: externally benchmarked results are independently matched against published experimental or tabulated data with a quantitative acceptance criterion; integrated flight-data closures are validated against the 28-flight Rocket Flight Database v1.2 corpus rather than against an isolated published component dataset; numerical-consistency tests verify that the implementation reduces to its analytical limit or matches its own boundary conditions; and a small number of empirically tuned coefficients are documented as such. Every claim in this chapter is reported with its evidence type, not as a uniformly closed validation.
 
 #### 11.1.1 Five Standard Rocket Geometries
 
@@ -952,13 +981,13 @@ AGARD-B is a standard wind-tunnel reference model used internationally for facil
 
 **Combined effect estimate.** Quantified individually, the three sub-model violations remove $\sim 0.085$ of the $+0.174$ over-prediction at $M = 2.0$. The residual $\sim 0.085$ -- still $\sim 40\%$ over-prediction -- is distributed across small terms (high-fineness body friction calibration, fin-body interference at AR $= 2.04$, and fin trailing-edge bluntness on the arc section) that no individual module owns. *The deficit is genuinely fragmented across the calibration envelopes of three independent sub-models, not concentrated in any one of them.*
 
-**Who it affects.** RM-10 is a 1949-vintage research geometry chosen specifically to instrument boattail base pressure on a low-base-ratio body. Its three out-of-envelope features do not appear together in any flight in the Rocket Flight Database v1.0 corpus or in any published Basic-Finner-class benchmark. High-power amateur rocket boattails almost always fall in the 6°--16° Viswanath band; flight-grade fins are almost always hexagonal or NACA airfoil sections, not 10%-thick circular arc; and parabolic forebodies of fineness 12+ are absent from the corpus.
+**Who it affects.** RM-10 is a 1949-vintage research geometry chosen specifically to instrument boattail base pressure on a low-base-ratio body. Its three out-of-envelope features do not appear together in any flight in the Rocket Flight Database v1.2 corpus or in any published Basic-Finner-class benchmark. High-power amateur rocket boattails almost always fall in the 6°--16° Viswanath band; flight-grade fins are almost always hexagonal or NACA airfoil sections, not 10%-thick circular arc; and parabolic forebodies of fineness 12+ are absent from the corpus.
 
-**Why we do not fix it.** Each of the three envelope violations could be patched in isolation -- for example, by extrapolating Viswanath outside 6°--16° with explicit damping, adding an upstream-boattail gate to the finned-body augmentation, or adding a circular-arc biconvex $K$ entry. Each individual patch was attempted in scratch branches and each one regressed Basic Finner, the corpus, or both. Because the deficit is fragmented, a clean closure would require simultaneous calibration against (a) a Basic-Finner-class flat-base benchmark, (b) RM-10 itself, and (c) the 25-flight corpus -- and the calibration set required to disentangle these regimes does not exist in the public literature in a digitizable form. The cost-benefit of a multi-source recalibration is poor, because RM-10's geometry family is not represented in the application domain; the model is already valid where it is used.
+**Why we do not fix it.** Each of the three envelope violations could be patched in isolation -- for example, by extrapolating Viswanath outside 6°--16° with explicit damping, adding an upstream-boattail gate to the finned-body augmentation, or adding a circular-arc biconvex $K$ entry. Each individual patch was attempted in scratch branches and each one regressed Basic Finner, the corpus, or both. Because the deficit is fragmented, a clean closure would require simultaneous calibration against (a) a Basic-Finner-class flat-base benchmark, (b) RM-10 itself, and (c) the 28-flight corpus -- and the calibration set required to disentangle these regimes does not exist in the public literature in a digitizable form. The cost-benefit of a multi-source recalibration is poor, because RM-10's geometry family is not represented in the application domain; the model is already valid where it is used.
 
 Including this benchmark in the validation pack is a deliberate honesty choice. RM-10 documents the *boundary* of the model's geometric domain rather than counting as a closed validation. It is the only externally anchored negative benchmark in the present work.
 
-**Envelope statement.** The headline accuracy claim of this work applies to finned slender vehicles within the boattail half-angle envelope of $6°$--$16°$ (the Viswanath calibration band) and to fin sections that are HEXAGONAL (double-wedge) or AIRFOIL/ROUNDED (rounded-LE) -- the section types of every flight in the Rocket Flight Database v1.0 and of every Basic-Finner-class wind-tunnel/free-flight reference geometry used in this work. *Out-of-envelope geometries -- specifically the high-fineness parabolic body with steeply contracted afterbody and 60° swept circular-arc biconvex fins of NACA RM-10 -- are reported as transparency references and are excluded from the headline accuracy claim.*
+**Envelope statement.** The headline accuracy claim of this work applies to finned slender vehicles within the boattail half-angle envelope of $6°$--$16°$ (the Viswanath calibration band) and to fin sections that are HEXAGONAL (double-wedge) or AIRFOIL/ROUNDED (rounded-LE) -- the section types of every flight in the Rocket Flight Database v1.2 and of every Basic-Finner-class wind-tunnel/free-flight reference geometry used in this work. *Out-of-envelope geometries -- specifically the high-fineness parabolic body with steeply contracted afterbody and 60° swept circular-arc biconvex fins of NACA RM-10 -- are reported as transparency references and are excluded from the headline accuracy claim.*
 
 #### 11.3.7 Other Drag Benchmarks (Cross-References)
 
@@ -1011,7 +1040,7 @@ The dynamic stability suite is documented in Section 9.9. Summary:
 | Pitch damping `3x` multiplier vs ADA636861 | MAPE 69%; sign correct, supersonic under-prediction | **integrated flight data** |
 | Transonic Cmq Gaussian (peak 3.5×) vs ADA636861 | over-predicts $\sim 3.6\times$ at $M = 1.05$--$1.12$ | **integrated flight data** |
 | Pitch damping vs Bhagwandin & Sahu 2013 ARL-TR-6725 (AFF) | supersonic MAPE 18.96% on a non-Basic-Finner geometry; sign-consistent with ANF | external benchmark (B-level, AFF planform fixture pending; see Section 9.9.6) |
-| Magnus body fraction (0.3) | within BRL 1193 measured 0.3--0.8 range | external benchmark |
+| Magnus body fraction (0.3) | within Platou (AIAA Journal 3(1), 1965) measured 0.3--0.8 range | external benchmark |
 | Vortex asymmetry ($K_v = 0.20$) | within 40--70% expected range | external benchmark |
 
 
@@ -1048,28 +1077,31 @@ The Newtonian limit is $C_{p,\max} \to 1.839$ as $M \to \infty$; the computed va
 The implementation clamps $\gamma_\text{eff} \ge 1.30$ to avoid non-physical values before dissociation chemistry (which is *not* modeled).
 
 
-### 11.6 Integrated Trajectory Validation -- 25-Flight Corpus
+### 11.6 Integrated Trajectory Validation -- 28-Flight Corpus
 
-The integrated 6-DOF trajectory predictions are validated against a corpus of **25 real high-power, amateur, and research-program rocket flights** with measured GPS, barometric, optical, or accelerometer apogee. The corpus is published as the *Rocket Flight Database* v1.0 ([DOI: 10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138), CC-BY-4.0). The measured apogees and RASAero II reference predictions are sourced from the comparison set published by Charles E. Rogers (RASAero II author) at <https://www.rasaero.com/comparisons-alt.htm>; the OpenRocket Plus predictions are produced by importing the same `.CDX1` vehicle files into the simulator and running with default settings.
+The integrated 6-DOF trajectory predictions are validated against a corpus of **28 real high-power, amateur, university-research, and sounding-rocket flights** with measured GPS, barometric, optical, accelerometer, or radar/radar-beacon apogee. The corpus is published as the *Rocket Flight Database* v1.2 (concept DOI: [10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138), CC-BY-4.0). Flights 1--25 are the public RASAero II altitude comparison set published by Charles E. Rogers (RASAero II author) at <https://www.rasaero.com/comparisons-alt.htm>. Flight 26 is the single-stage Black Brant VB, vehicle AAF-VB-32, launched from Churchill, Manitoba on 3 March 1971 (DTIC AD0733141), tracked by radar to apogee 273.6 km at Mach 7.22. Flights 27--28 are the two two-stage Nike-Deacon flights reported by Heitkötter 1956 (NACA TN 3739) from Wallops Island in 1955, tracked by radar-beacon to apogees ≈108 km and 107 km at Mach 4.96 and 5.08 respectively. The OpenRocket Plus predictions are produced by importing the same `.CDX1` (flights 1--25) or building the `.ork` (flights 26--28) into the simulator and running with default settings.
 
-This is the "integrated flight data" capstone: it does not isolate any single subsystem, but it demonstrates that the assembly of physics in Parts A--D produces trajectory predictions consistent with measured reality across Mach 0.54--4.33 and apogees from 3 577 ft to 293 488 ft.
+This is the "integrated flight data" capstone: it does not isolate any single subsystem, but it demonstrates that the assembly of physics in Parts A--D produces trajectory predictions consistent with measured reality across Mach 0.54--7.22 and apogees from 3 577 ft (1.1 km) to 897 638 ft (273.6 km).
 
-#### 11.6.1 Aggregate Result (25 Flights)
+#### 11.6.1 Aggregate Result (28 Flights)
 
-| Metric | This work | RASAero II |
+| Metric | This work (n = 28) | RASAero II (n = 25 paired) |
 |---|---:|---:|
-| Avg $\lvert\text{error}\rvert$ | **4.49%** | 5.26% |
-| Within $\pm 5\%$ | **15/25 (60.0%)** | 13/25 (52.0%) |
-| Within $\pm 10\%$ | **25/25 (100%)** | 22/25 (88.0%) |
-| Worst case | $+8.7\%$ (Kinsel) | $+11.5\%$ (T&L) |
-| Mean signed error | $-0.1\%$ | $+2.3\%$ |
+| Mean signed error | **−0.44%** | +2.46% |
+| Sample $\sigma$ | **5.13%** | 5.82% |
+| RMSE | **5.06%** | 6.21% |
+| Mean $\lvert\text{error}\rvert$ (MAE) | **4.33%** | 5.34% |
+| Within $\pm 5\%$ | **17/28 (60.7%)** | 13/25 (52.0%) |
+| Within $\pm 10\%$ | **28/28 (100%)** | 22/25 (88.0%) |
+| Worst case | $+8.7\%$ (Kinsel, AeroPac 104K, FMJ Black Rock 6) | $+11.5\%$ (T&L) |
+| Bias$^2$/MSE | **0.01** | 0.16 |
 | Abnormal endings | 0 | n/a |
 
-The extended model has a per-case absolute-error advantage of $\ge 3$ pp on 8 of 25 flights; RASAero II has the corresponding advantage on 4 flights (Rabia, Rabia Short Fin Can, Kinsel, Proteus 6); the remaining 13 are within $\pm 3$ pp of each other. The aggregate-error advantage of 0.77 pp (this work) is concentrated in the highest-Mach flights (Torrent, Kline-Rogers, FMJ Black Rock-6, AeroPac 104K, Don't Debate This), where the supersonic-extension models contribute the most.
+On the n = 25 paired subset (RASAero II validity ends below $M \approx 5$; flights 26--28 are not in the paired subset), the Wilcoxon signed-rank test on the paired absolute errors returns $W = 129.5$, $p = 0.375$, and the paired t-test returns $t = -1.09$, $p = 0.287$: neither test rejects the null hypothesis of equal absolute-error distributions at $\alpha = 0.05$. Bland-Altman analysis gives 95\% limits of agreement of $\pm 14.3\%$ with a mean offset of $-2.59\%$. The whole-corpus bias$^2$/MSE = 0.01 for OpenRocket Plus (vs 0.16 for RASAero II) means the residual is dominated by per-flight variance (build tolerance, motor lot variation, atmospheric soundings, ground-truth instrumentation precision) rather than systematic model bias.
 
 #### 11.6.2 Per-Case Table (Sorted by Peak Mach)
 
-Errors are signed; positive = over-predicted apogee. $\Delta = |\text{RAS err}| - |\text{this-work err}|$ (positive = this work closer). All RASAero II values are as published by Rogers (loc. cit.); the canonical machine-readable form is the *Rocket Flight Database* v1.0.
+Errors are signed; positive = over-predicted apogee. $\Delta = |\text{RAS err}| - |\text{this-work err}|$ (positive = this work closer). RASAero II values for flights 1--25 are as published by Rogers (loc. cit.); RASAero II coverage ends below $M \approx 5$, so flights 26 (Black Brant VB, $M = 7.22$) and 27--28 (Nike-Deacon, $M \approx 5$) are evaluated against OpenRocket Plus only. The canonical machine-readable form is the *Rocket Flight Database* v1.2.
 
 ```{=latex}
 \begin{landscape}
@@ -1102,6 +1134,9 @@ Errors are signed; positive = over-predicted apogee. $\Delta = |\text{RAS err}| 
 | 23 | Don't Debate This | 3,750 | 3.04 | 56,573 | 62,308 | 53,150 | $+10.1\%$ | $-6.1\%$ | $+4.0$ |
 | 24 | Qu8k | 3,750 | 3.46 | 121,478 | 116,254 | 119,187 | $-4.3\%$ | $-1.9\%$ | $+2.4$ |
 | 25 | MESOS 293K | 3,910 | 4.33 | 293,488 | 289,789 | 291,601 | $-1.3\%$ | $-0.6\%$ | $+0.7$ |
+| 26 | Black Brant VB AAF-VB-32 | -- | 7.22 | 897,638 | -- | 835,071 | -- | $-7.0\%$ | -- |
+| 27 | Nike-Deacon flight 1 | -- | 4.96 | 356,000 | -- | 352,210 | -- | $-1.1\%$ | -- |
+| 28 | Nike-Deacon flight 2 | -- | 5.08 | 350,000 | -- | 346,902 | -- | $-0.9\%$ | -- |
 
 ```{=latex}
 \end{landscape}
@@ -1130,26 +1165,26 @@ The closure above is *not* a per-case multiplier. It is the convergence of four 
 - Geometry-gated finned-base drag augmentation (saturated fin-count scaling, rounded-fin transonic wake, expanding fin-can sleeve, four-fin low-subsonic ramp).
 - Trajectory-derived peak Mach via `data.getMaxMachNumber()` in all three reporting paths.
 
-#### 11.6.5 Results Calibrated Against the 25-Flight Corpus
+#### 11.6.5 Results Calibrated Against the 28-Flight Corpus
 
-The following results contribute to the trajectory closure but are *not* externally benchmarked at the component level — they are calibrated against the integrated 25-flight corpus. They are circular in the sense that the calibration target and the validation target overlap. None of them are counted in the "27 externally benchmarked subsystems" headline.
+The following results contribute to the trajectory closure but are *not* externally benchmarked at the component level — they are calibrated against the integrated 28-flight corpus. They are circular in the sense that the calibration target and the validation target overlap. None of them are counted in the "27 externally benchmarked subsystems" headline.
 
 | Claim | What is unverified at the component level | What would close the gap |
 |------|-------|-----------|
-| Cmq $\times 3$ multiplier (Section 9.9.5) | Over-predicts $\sim 3.6\times$ at $M = 1.05$--$1.12$ when measured against ADA636861 alone, but the multiplier is needed to match apogee-turn timing on the corpus | A second free-flight $C_{mq}$ dataset that is *not* used to set the multiplier |
-| Transonic $C_{mq}$ Gaussian (peak 3.5) | Same dataset, same over-prediction direction | Same |
+| Cmq $\times 3$ multiplier (Section 9.9.5) | Over-predicts $\sim 3.6\times$ at $M = 1.05$--$1.12$ when measured against ADA636861 alone, but the multiplier is needed to match apogee-turn timing on the corpus | A second free-flight $C_{mq}$ dataset that is *not* used to set the multiplier (Sznajder 2025 CFD now provides a CFD-side second source confirming the transonic overshoot) |
+| Transonic $C_{mq}$ Gaussian (peak 3.5) | Same dataset, same over-prediction direction (Sznajder 2025 CFD: +110 to +160% at $M = 1.08$--$1.11$) | Same |
 | Finned-body base drag augmentation | The fin-presence wake correction is set by corpus apogee residual; Hart 1952 measures body-alone | Public finned-body base-pressure dataset across $M = 0.7$--$3$ |
 | Power-on nozzle / pressure thrust | MESOS 293K is the only multi-stage powered-flight closure | A second multi-stage flight with telemetry |
 | Min-diameter supersonic flight (Raven, DDT) | Apogee closes but no isolated component check | Dedicated min-diameter free-flight dataset |
-| Termination / descent dynamics | 0/25 abnormal endings, but no isolated $C_N(\alpha)$ / $C_m(\alpha)$ at high $\alpha$ | High-$\alpha$ dataset (see Section 12.4 item 6) |
-| Full 6-DOF trajectory fidelity | 4.49% mean apogee error on the corpus is the validation, not a component check | (Headline metric — not separable) |
+| Termination / descent dynamics | 0/28 abnormal endings, but no isolated $C_N(\alpha)$ / $C_m(\alpha)$ at high $\alpha$ | High-$\alpha$ dataset (see Section 12.4 item 6) |
+| Full 6-DOF trajectory fidelity | MAE 4.33% (mean signed −0.44%, $\sigma$ 5.13%) on the corpus is the validation, not a component check | (Headline metric — not separable) |
 | Geometry-import parity | RASAero `ModifiedBarrowman` stability switch is parsed but not honored | Implement the alternate stability path |
 
-The headline corpus closure is dominated by drag and base-pressure terms, not by damping. Removing the $C_{mq}$ multiplier or the Gaussian augmentation degrades the apogee-turn signature on five flights but does not move the headline 4.49% by more than $\sim 0.5$ pp; the corpus is therefore mostly drag-validated, not damping-validated.
+The headline corpus closure is dominated by drag and base-pressure terms, not by damping. Removing the $C_{mq}$ multiplier or the Gaussian augmentation degrades the apogee-turn signature on five flights but does not move the headline MAE 4.33% by more than $\sim 0.5$ pp; the corpus is therefore mostly drag-validated, not damping-validated.
 
 #### 11.6.6 Sounding-Rocket / Multi-Stage Corpus Expansion (Seed)
 
-The 25-flight Rocket Flight Database v1.0 corpus is dominated by single-stage high-power amateur and SACup-class flights; only one entry (MESOS 293K, flight 25) is multi-stage. Expansion of the trajectory-validation envelope to a second corpus class -- *meteorological / sounding rockets* with documented mass properties, motor thrust curves, and aero coefficient tables -- is in progress. The seed for this expansion is AFCRL-TR-73-0412 / AD-766737 (Bollermann \& Walker 1973, Space Data Corp), *"Design, Development and Flight Test of the Super Loki Stable Booster Rocket Systems."* The report contains:
+The Rocket Flight Database v1.2 corpus is dominated by single-stage high-power amateur and SACup-class flights; the multi-stage entries are MESOS 293K (flight 25) and the two Nike-Deacon flights (flights 27 and 28). Expansion of the trajectory-validation envelope to a second corpus class -- *meteorological / sounding rockets* with documented mass properties, motor thrust curves, and aero coefficient tables -- is in progress. The seed for this expansion is AFCRL-TR-73-0412 / AD-766737 (Bollermann \& Walker 1973, Space Data Corp), *"Design, Development and Flight Test of the Super Loki Stable Booster Rocket Systems."* The report contains:
 
 - Time-resolved booster mass properties (CG and $I_{yy}$, Figures 4.2--4.3).
 - Motor thrust and chamber pressure vs time (Figure 3.4; sea-level firing in Table 3.3, average thrust 4757 lbf, $I_{sp}$ 228.7 s, action time 2.09 s).
@@ -1221,18 +1256,18 @@ Summary of subsystem improvements:
 
 ### 12.1 Summary of Contributions
 
-This work has extended the OpenRocket aerodynamic simulation framework from a subsonic/low-transonic tool valid to roughly $M = 2$ into a compressible-flow simulation whose validated envelope is two-tier: vehicle-level (6-DOF integrated trajectory) is validated through $M \approx 4.3$ against the 25-flight Rocket Flight Database v1.0 ([DOI: 10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138)), and component-level cone foredrag is validated to $M \approx 17$ against a single isolated benchmark (DTIC AD0487365). The principal contributions:
+This work has extended the OpenRocket aerodynamic simulation framework from a subsonic/low-transonic tool valid to roughly $M = 2$ into a compressible-flow simulation whose validated envelope is two-tier: vehicle-level (6-DOF integrated trajectory) is validated through $M = 7.22$ against the 28-flight Rocket Flight Database v1.2 (concept DOI: [10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138)), and component-level cone foredrag is validated to $M \approx 17$ against a single isolated benchmark (DTIC AD0487365). The principal contributions:
 
 1. **Gas dynamics foundation.** A complete set of compressible flow solvers -- oblique shock relations ($\theta$-$\beta$-$M$ with bisection), Taylor--Maccoll cone flow (ODE integration), normal shock jump conditions, and Prandtl--Meyer expansion fan relations -- validated against NACA Report 1135 and cone-flow reference tables: normal shocks to $7\times10^{-5}$, oblique-shock wave angle to $0.021\%$, Prandtl--Meyer angle to $0.004^\circ$, and Taylor--Maccoll cone-shock angle to $0.825\%$ relative. These solvers form the backbone for every subsequent wave drag, pressure coefficient, and shock-geometry calculation.
 2. **Analytical wave drag models.** Replacement of the legacy NASA TR-R-100 tables with physics-based wave drag computations: Taylor--Maccoll exact solution for conical noses, second-order shock-expansion theory for ogive noses, DATCOM Section 4.1.5.1 (Puckett--Stewart) fin wave drag with subsonic/supersonic LE classification, and the Dahlem--Buck shape factors for power-law / Haack noses.
 3. **Shock geometry pre-pass architecture.** A new `ShockGeometry` computation walks the rocket body nose-to-tail, computing post-shock Mach, pressure, and temperature at each axial station. The production consumer is the stability path, primarily `FinSetCalc`, where local Mach corrects fin normal-force, PNK interference, and SBLI chord reduction. Body stability, fin pressure drag, roll damping, base drag, and wave drag remain freestream-based scope boundaries. Zero overhead at subsonic speeds (passthrough design).
 4. **Compressible boundary-layer modeling.** Van Driest II compressible transformation (NASA TN D-6945, Hopkins 1972) for supersonic skin friction, replacing the incompressible Eckert formulas. Reduces friction drag by 30--75% at $M = 2$--5. The Sutherland viscosity law replaces the legacy linear fit; the NIST/Incropera JUnit gate is $<3\%$ over 100--800 K, and the current formula export is MAPE 0.012%.
-5. **Hypersonic extension via Modified Newtonian.** $C_p = C_{p,\max}\sin^2\theta$ with $C_{p,\max}$ from the Rayleigh pitot formula for $M > 5$, blended with shock-expansion over $M = 4$--6 (cubic Hermite, $C^1$). Component-level cone foredrag is validated to $M \approx 17$ (single isolated benchmark, DTIC AD0487365 MAPE 19.7%); vehicle-level integrated trajectory is validated through $M \approx 4.3$ against the 25-flight corpus.
+5. **Hypersonic extension via Modified Newtonian.** $C_p = C_{p,\max}\sin^2\theta$ with $C_{p,\max}$ from the Rayleigh pitot formula for $M > 5$, blended with shock-expansion over $M = 4$--6 (cubic Hermite, $C^1$). Component-level cone foredrag is validated to $M \approx 17$ (single isolated benchmark, DTIC AD0487365 MAPE 19.7%); vehicle-level integrated trajectory is validated through $M = 7.22$ against the 28-flight corpus (Black Brant V VB AAF-VB-32 closes at $-7.0\%$ apogee at peak Mach 7.22 / apogee 273.6 km).
 6. **$C^1$-continuous regime blending.** Up to **19 distinct blending regions** (Chapter 10) using cubic Hermite, constrained polynomials, and AP09 rational functions ensure all aerodynamic coefficients are $C^1$ across every Mach regime boundary, eliminating the simulation instability and time-step collapse that would otherwise occur at transitions.
 7. **Dynamic stability derivatives and Euler gyroscopic coupling.** Pitch damping ($C_{mq}$) computed from per-component $C_{N\alpha}$ and moment arms with a transonic Gaussian augmentation, $C_{m\dot{\alpha}}$ via the Tobak--Wehrend slender-body ratio, full Magnus force/moment derivatives with body fraction $0.3$, and the full Euler $\boldsymbol{\omega} \times \mathbf{I}\boldsymbol{\omega}$ coupling in the 6-DOF integrator (with a 500 Pa dynamic-pressure gate against ballistic-descent stiffness).
 8. **High-AoA crossflow normal force and simulation robustness.** A bluff-body crossflow drag model with proportional moment scaling that prevents artificial torque divergence at post-stall AoA. SBLI separation-length and $C_{p,\text{plateau}}$ floors, fin $K_3$ and polynomial-denominator floors, and per-coefficient sanitization caps make the integrator robust against transonic singularities, degenerate geometry, and floating-point overflow.
 9. **Chapman laminar base drag.** $C_{pb,\text{lam}} = 1870/(M^2\sqrt{Re_L})$ for low-$Re$ or polished-finish rockets (NACA TN 3393 MAPE 4.4%). The Chapman--Korst turbulent method remains an available/tested utility for future production routing, not a default active path.
-10. **Comprehensive validation with explicit evidence types.** 27 externally benchmarked subsystem results, 9 results calibrated against the integrated 25-flight corpus rather than isolated component data (flagged at each occurrence and excluded from the 27-subsystem headline), 1 negative external benchmark (NACA RM-10, formally excluded from the headline corpus), and the 25-flight integrated corpus published as the Rocket Flight Database v1.0, all locked in automated regression tests.
+10. **Comprehensive validation with explicit evidence types.** 27 externally benchmarked subsystem results, 9 results calibrated against the integrated 28-flight corpus rather than isolated component data (flagged at each occurrence and excluded from the 27-subsystem headline), 1 negative external benchmark (NACA RM-10, formally excluded from the headline corpus), and the 28-flight integrated corpus published as the Rocket Flight Database v1.2, all locked in automated regression tests. Validation also includes four published-CFD comparators (Bunescu URANS, Sahu thin-layer Navier-Stokes, Vidanović SST k-ω, Sznajder Fluent) with Bhagwandin & Sahu 2013 as second-source corroboration of the supersonic $C_{mq}$ bias direction (Section 11.9).
 
 
 ### 12.2 Validation Summary
@@ -1240,34 +1275,34 @@ This work has extended the OpenRocket aerodynamic simulation framework from a su
 Headline summary restated for the conclusions chapter:
 
 - **27 subsystems externally benchmarked** against published wind-tunnel, free-flight, or analytical data with quantitative acceptance criteria (Sections 11.2 through 11.5).
-- **9 results calibrated against the integrated 25-flight corpus** rather than isolated component data. Listed individually in Section 11.6.5 with the gap each one would need to close to become an external benchmark.
+- **9 results calibrated against the integrated 28-flight corpus** rather than isolated component data. Listed individually in Section 11.6.5 with the gap each one would need to close to become an external benchmark.
 - **1 externally anchored negative benchmark** (NACA RM-10, MAPE 80%) that bounds and excludes a high-fineness parabolic / tapered-afterbody / 60° swept circular-arc-biconvex-fin family (Section 11.3.6).
-- **25-flight integrated corpus** (Rocket Flight Database v1.0, [DOI: 10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138)): avg $\lvert\text{err}\rvert = 4.49\%$, 25/25 within $\pm 10\%$, 15/25 within $\pm 5\%$, 0 abnormal endings; better aggregate accuracy than the RASAero II predictions on the same imported geometries (5.26%, 22/25 within $\pm 10\%$).
-- **Flight 25, MESOS 293K (Mach 4.18 measured / 4.33 predicted, 293,488 ft)**: apogee $-0.6\%$, velocity $+4.0\%$, peak Mach $+3.6\%$.
+- **28-flight integrated corpus** (Rocket Flight Database v1.2, concept DOI: [10.5281/zenodo.19976138](https://doi.org/10.5281/zenodo.19976138)): mean signed apogee error $-0.44\%$, $\sigma = 5.13\%$, MAE $4.33\%$, 28/28 within $\pm 10\%$, 17/28 within $\pm 5\%$, 0 abnormal endings; on the 25 paired flights for which RASAero II coverage exists, RASAero II averages $5.34\%$ MAE with 22/25 within $\pm 10\%$ (Wilcoxon $p = 0.375$).
+- **Flight 25, MESOS 293K (Mach 4.18 measured / 4.33 predicted, 293,488 ft)**: apogee $-0.6\%$, velocity $+4.0\%$, peak Mach $+3.6\%$. **Flight 26, Black Brant V VB AAF-VB-32** (Mach 7.22 / 273.6 km): apogee $-7.0\%$. **Flights 27--28, Nike-Deacon** ($M \approx 5$): apogee $-1.1\%$ and $-0.9\%$.
 - **Envelope of the headline claim.** The accuracy figures above apply to finned slender vehicles within the boattail half-angle envelope of $6°$--$16°$ (Viswanath 1996, Section 6.2.7) and to HEXAGONAL or AIRFOIL/ROUNDED fin sections, the geometry envelope of the Rocket Flight Database. Out-of-envelope geometries -- the high-fineness parabolic body with steeply contracted afterbody and 60° swept circular-arc biconvex fins of NACA RM-10 -- are reported as transparency references and are excluded from the headline accuracy claim.
 
-Two headline outcomes summarize the extension. (i) Vehicle-level integrated trajectory: extended OpenRocket aggregate apogee error 4.49% across the 25-flight corpus, versus 5.26% for the recorded RASAero II predictions on the same imported geometries (lower aggregate error on the *same* geometries). (ii) Validated envelope: the original OpenRocket's reliable range of $M < 2$ extends to vehicle-level closure through $M \approx 4.3$ in this work, with component-level cone foredrag validated to $M \approx 17$ against a single isolated benchmark.
+Two headline outcomes summarize the extension. (i) Vehicle-level integrated trajectory: OpenRocket Plus mean signed apogee error $-0.44\%$ (MAE 4.33\%) across the 28-flight corpus; on the 25 paired flights RASAero II averages 5.34% MAE with 22/25 within $\pm 10\%$ (Wilcoxon paired absolute-error test $p = 0.375$ — statistically indistinguishable). (ii) Validated envelope: the original OpenRocket's reliable range of $M < 2$ extends to vehicle-level closure through $M = 7.22$ in this work, with component-level cone foredrag validated to $M \approx 17$ against a single isolated benchmark.
 
 ### 12.3 Subsonic Compatibility
 
-At $M < 1.0$ the extended code paths are either inactive (`ShockGeometry` returns a passthrough with unit ratios; wave-drag models return zero; Van Driest II reduces to incompressible) or reduce identically to the original Barrowman formulas. The subsonic passthrough cost is approximately 200 ns per call -- negligible compared to the $\sim 180$ microsecond component calculation time. All original subsonic regression tests continue to pass without modification, and the integrated 25-flight corpus shows no subsonic bias (the lowest-Mach cases lie within $\pm 2\%$ of the truth on average).
+At $M < 1.0$ the extended code paths are either inactive (`ShockGeometry` returns a passthrough with unit ratios; wave-drag models return zero; Van Driest II reduces to incompressible) or reduce identically to the original Barrowman formulas. The subsonic passthrough cost is approximately 200 ns per call -- negligible compared to the $\sim 180$ microsecond component calculation time. All original subsonic regression tests continue to pass without modification, and the integrated 28-flight corpus shows a small positive subsonic bias (+2.54%, $M < 0.8$, $n = 9$) consistent with build/motor-lot variance rather than systematic model error.
 
 
 ### 12.4 Known Limitations
 
 The following limitations are real and known. They are stated here in plain terms, with the reason each remains unfixed in this revision.
 
-**1. NACA RM-10: 80% drag over-prediction.** The model over-predicts the RM-10 zero-lift drag coefficient by 80% (MAPE) across $M = 0.9$--$3.3$. RM-10 is a high-fineness ($f = 12.2$) parabolic body with a smoothly tapered afterbody (base/max diameter $0.606$, local half-angle $\sim 4.8°$ at the base) and four untapered 60°-swept 10%-thick *circular-arc biconvex* fins. This geometry family is formally excluded from the 4.49% headline corpus claim and the envelope statement in Section 11.3.6. Per-component decomposition (`paper/data/legacy/rm10_vs_basic_finner_diagnostic.md`) attributes the deficit to three independent sub-model envelope violations -- (a) the Viswanath boattail correction (Section 6.2.7) is calibrated for $\theta_{\text{bt}} = 6°$--$16°$ and is extrapolated below the band on the real $4.8°$ taper and above the band on the geometry-import terminal contraction, (b) the corpus-anchored finned-body base augmentation (Section 6.2.8) is calibrated against flat-base Basic-Finner geometries and over-credits fin-induced suction when there is an upstream boattail-relief recompression, and (c) the DATCOM 4.1.5.1 fin-section coefficient $K$ has only HEXAGONAL ($K = 4$) and ROUNDED ($K = 16/3$) calibrated entries, neither of which matches the sharp-LE smoothly curving circular-arc section. The deficit is fragmented (no single sub-model accounts for more than $\sim 0.04$ of $C_D$ at $M = 2.0$), so a clean closure would require simultaneous recalibration of all three modules against three separate datasets. **Not fixed because** every isolated patch attempted to date has either regressed Basic Finner or the 25-flight corpus, and the joint calibration set required to disentangle the three sub-model envelopes does not yet exist in the public literature in a digitizable form.
+**1. NACA RM-10: 80% drag over-prediction.** The model over-predicts the RM-10 zero-lift drag coefficient by 80% (MAPE) across $M = 0.9$--$3.3$. RM-10 is a high-fineness ($f = 12.2$) parabolic body with a smoothly tapered afterbody (base/max diameter $0.606$, local half-angle $\sim 4.8°$ at the base) and four untapered 60°-swept 10%-thick *circular-arc biconvex* fins. This geometry family is formally excluded from the headline 28-flight corpus claim and the envelope statement in Section 11.3.6. Per-component decomposition (`paper/data/legacy/rm10_vs_basic_finner_diagnostic.md`) attributes the deficit to three independent sub-model envelope violations -- (a) the Viswanath boattail correction (Section 6.2.7) is calibrated for $\theta_{\text{bt}} = 6°$--$16°$ and is extrapolated below the band on the real $4.8°$ taper and above the band on the geometry-import terminal contraction, (b) the corpus-anchored finned-body base augmentation (Section 6.2.8) is calibrated against flat-base Basic-Finner geometries and over-credits fin-induced suction when there is an upstream boattail-relief recompression, and (c) the DATCOM 4.1.5.1 fin-section coefficient $K$ has only HEXAGONAL ($K = 4$) and ROUNDED ($K = 16/3$) calibrated entries, neither of which matches the sharp-LE smoothly curving circular-arc section. The deficit is fragmented (no single sub-model accounts for more than $\sim 0.04$ of $C_D$ at $M = 2.0$), so a clean closure would require simultaneous recalibration of all three modules against three separate datasets. **Not fixed because** every isolated patch attempted to date has either regressed Basic Finner or the 28-flight corpus, and the joint calibration set required to disentangle the three sub-model envelopes does not yet exist in the public literature in a digitizable form.
 
-**2. Pitch damping ($C_{mq}$) over-predicts by $3.6\times$ at $M = 1.05$--$1.12$.** Measured against ADA636861 free-flight $C_{mq}$ data on the Basic Finner. The over-prediction comes from the combination of a constant $\times 3$ multiplier on per-component damping and a transonic Gaussian augmentation peaking at $3.5\times$ near $M = 1$. Both constants were calibrated against the integrated 25-flight apogee-turn signature, not against component-level damping measurements. Removing the augmentation breaks the apogee-turn closure on five of the 25 corpus flights. **Not fixed because** correcting the transonic peak requires a second independent free-flight $C_{mq}$ dataset to retune against — recalibrating against ADA636861 would invalidate it as a benchmark — and no such dataset has been located.
+**2. Pitch damping ($C_{mq}$) over-predicts by $3.6\times$ at $M = 1.05$--$1.12$.** Measured against ADA636861 free-flight $C_{mq}$ data on the Basic Finner; corroborated by the Sznajder 2025 ANSYS Fluent CFD comparator (+110 to +160% at $M = 1.08$--$1.11$). The over-prediction comes from the combination of a constant $\times 3$ multiplier on per-component damping and a transonic Gaussian augmentation peaking at $3.5\times$ near $M = 1$. Both constants were calibrated against the integrated 28-flight apogee-turn signature, not against component-level damping measurements. Removing the augmentation breaks the apogee-turn closure on five of the 28 corpus flights. **Not fixed because** correcting the transonic peak requires a second independent free-flight $C_{mq}$ dataset to retune against — recalibrating against ADA636861 would invalidate it as a benchmark — and no such dataset has been located. The Sznajder CFD is a CFD-side second source confirming the bias direction but not a free-flight retune candidate.
 
 **3. NACA TN 3650 fin wave drag: 21% MAPE on 60° delta fins.** The DATCOM 4.1.5.1 wave-drag model is geometrically incomplete for highly swept fins: it captures the leading-edge wave drag but not the wing-body interference and conical-flow loading that dominate at $\Lambda_{LE} \ge 60°$. The residual is one-sided (model under-reads experiment), so it is not a calibration error but a missing physical term. **Not fixed because** the closed-form interference correction that would close the gap (Pitts–Nielsen–Kaattari extended to highly swept LEs) is not in the published literature; computing it would require a CFD or panel-method auxiliary that is out of scope for an analytical model.
 
-**4. Finned-body base drag is corpus-calibrated, not externally benchmarked.** The finned-vehicle base-drag augmentation (Hart-anchored peak in the transonic polynomial, finned-body vs body-alone scaling) is set against the 25-flight corpus apogee residual rather than against component-level base-pressure measurements. Hart 1952 is a body-alone dataset and does not tell us how the fin presence alters the wake. **Not fixed because** no public finned-body base-pressure dataset spanning the transonic-to-low-supersonic range has been located. This is the largest single source of corpus-circular reasoning in the report; a future external dataset would convert this from circular to confirmatory.
+**4. Finned-body base drag is corpus-calibrated, not externally benchmarked.** The finned-vehicle base-drag augmentation (Hart-anchored peak in the transonic polynomial, finned-body vs body-alone scaling) is set against the 28-flight corpus apogee residual rather than against component-level base-pressure measurements. Hart 1952 is a body-alone dataset and does not tell us how the fin presence alters the wake. **Not fixed because** no public finned-body base-pressure dataset spanning the transonic-to-low-supersonic range has been located. This is the largest single source of corpus-circular reasoning in the report; a future external dataset would convert this from circular to confirmatory.
 
 **5. RASAero `ModifiedBarrowman` stability flag is parsed but ignored.** The RASAero II `.CDX1` import path reads the `ModifiedBarrowman` flag but does not branch on it: every imported file is run through the standard pipeline. RASAero applies a different transonic stability formulation when the flag is set, so per-case import parity diverges for files that opted into that mode. The companion force-turbulent BL flag *is* honored. **Not fixed because** the RASAero `ModifiedBarrowman` formulation is not published; it would have to be reverse-engineered from RASAero outputs, and the development-time cost is hard to justify when no corpus flight has been observed to depend on it.
 
-**6. High-AoA descent dynamics ($\alpha > 30°$) have no isolated benchmark.** The crossflow normal-force model and proportional moment scaling that govern descent tumble are validated only by integrated-corpus end-condition behavior (no abnormal endings on 25/25 flights), not by an isolated $C_N(\alpha)$ or $C_m(\alpha)$ comparison at high $\alpha$. **Not fixed because** no public dataset of finned-rocket forces at $\alpha = 30$–$60°$ in the relevant Mach range has been located; existing high-$\alpha$ data is mostly missile-body-alone.
+**6. High-AoA descent dynamics ($\alpha > 30°$) have no isolated benchmark.** The crossflow normal-force model and proportional moment scaling that govern descent tumble are validated only by integrated-corpus end-condition behavior (no abnormal endings on 28/28 flights), not by an isolated $C_N(\alpha)$ or $C_m(\alpha)$ comparison at high $\alpha$. **Not fixed because** no public dataset of finned-rocket forces at $\alpha = 30$–$60°$ in the relevant Mach range has been located; existing high-$\alpha$ data is mostly missile-body-alone.
 
 **Items not modeled at all.** The following physical effects are absent from the current implementation:
 
@@ -1301,7 +1336,7 @@ Pitch damping multiplier & $\times 3$ & Apogee-turn calibration; corpus closure 
 Transonic $C_{mq}$ peak & const.\ $2.5$; total $\times 3.5$ at $M{=}1$ & Gaussian augmentation; corpus (vs ADA636861) & \texttt{BSC.TRANSONIC\_CMQ\_PEAK} \\
 Transonic $C_{mq}$ sigma & $0.15$ & $\sim\!\pm 0.3$ Mach decay & \texttt{BSC.TRANSONIC\_CMQ\_SIGMA} \\
 $C_{m\dot{\alpha}} / C_{mq}$ ratio & $0.4$ & Tobak \& Wehrend (NACA TN 3788, 1956) & \texttt{calculateDampingMoments} \\
-Magnus body fraction & $0.3$ & Platou (BRL 1193, 1963), 0.3--0.8 & \texttt{calculateDampingMoments} \\
+Magnus body fraction & $0.3$ & Platou (\textit{AIAA J.} 3(1), 1965), 0.3--0.8 & \texttt{calculateDampingMoments} \\
 Fin damping cap & $\min(n, 4)$ & Diminishing returns beyond 4 fins & \texttt{getDampingMultiplier} \\
 Body damping coefficient & $0.275$ & Body contribution to pitch damping & \texttt{getDampingMultiplier} \\
 Vortex asymmetry $K_v$ & $0.20$ & Paul \& Wedemeyer (1982); 62\% fin suppression & RK4 vortex term \\
@@ -1360,14 +1395,50 @@ Rational blend (AP09) \newline (\seqsplit{RationalBlend.java}) & \textbf{On} & $
 \normalsize
 ```
 
-These items are roadmap Phase 6 (advanced viscous and reactive modeling) and beyond. They are not on the critical path for the headline 25-flight closure and are explicitly excluded from the current accuracy claims.
+These items are roadmap Phase 6 (advanced viscous and reactive modeling) and beyond. They are not on the critical path for the headline 28-flight closure and are explicitly excluded from the current accuracy claims.
+
+
+### 12.6a Phase 6h Coast-Drag Bias Above $M = 5$ and Proposed Fix
+
+Per-component $C_d$ analysis using `NikeApacheCoastCdDiagnosticTest` against the NASA Apache Performance Handbook Case 1 (clean) coasting table issued by the NASA Goddard Space Flight Center Sounding Rocket Branch (X-721-66-568, Galloway and Crough, 1966) shows that the pressure $C_d$ plateaus at $\sim 0.234$ from $M = 2$ through $M = 8$, against handbook values that decay smoothly from $0.704$ at $M = 2$ to $0.384$ at $M = 8$ without collapsing to the slender-body limit. The mean $C_d$ deficit for $M \ge 5$ is **+0.0595** (handbook minus ORP, averaged over 7 points: $M = 5.00, 5.50, 6.00, 6.50, 7.00, 7.50, 8.00$).
+
+The root cause is the constant `SLENDER_BODY_MACH_DECAY_END = 5.0` in `BarrowmanDragCalculator.java` (lines 1453--1489), which smoothsteps the Hoerner cylindrical-afterbody pressure correction to zero at $M = 5$ for high-fineness bodies. The Apache sustainer with $L/D = 17.4$ still carries appreciable boundary-layer-displacement / viscous-inviscid pressure drag at $M \ge 5$ per Hoerner Chapter 17, which is precisely what the model elides.
+
+The bias accumulates during ballistic coast and scales with peak Mach: Nike-Deacon at $M \approx 5$ closes to $-1$ percent, Cajun at $M \approx 6.2$ to $+17$ percent, and the nine Nike-Apache 1965 flights at $M = 6.4$--$7.0$ to $+24$ to $+38$ percent. **Under the $\pm 10$ percent admission criterion adopted for the Rocket Flight Database v1.2 corpus (Section 11.6.1), nine Nike-Apache 1965 flights and one Nike-Cajun University of Michigan flight are held out of the corpus.** All ten `.ork` build files are committed at `paper/data/ork/sounding_rockets/` and become admissible once the fix lands.
+
+The proposed fix is documented as **Phase 6h** in `SUPERSONIC_MODELING.md`:
+
+1. Extend `SLENDER_BODY_MACH_DECAY_END` from $5.0$ to approximately $12.0$.
+2. Add a `hypersonicBodyPressureCD` term gated on body $L/D > 15$ AND $M > 3$, calibrated against the X-721-66-568 Case 1 table.
+
+Validation gates for the Phase 6h fix:
+- Nike-Deacon must not move by more than $\pm 2$ pp.
+- Apache 1965 mean must close to within $\pm 10$ percent.
+- The low-$L/D$ corpus (Black Brant V, Raven, Rabia) must not regress.
+
+**Table 12.6a.1 — Phase 6h Apache coast-$C_d$ deficit** (from `NikeApacheCoastCdDiagnosticTest` output against NASA X-721-66-568 Appendix A page 66 Case 1 COASTING). Handbook column is the canonical Apache Case 1 reference. The ORP column reflects the documented pressure-$C_d$ plateau ($\sim 0.234$) combined with the friction and base components.
+
+| $M$ | $C_d$ (handbook X-721-66-568) | $C_d$ (ORP) | Deficit (handbook − ORP) |
+|------|----|----|----|
+| 5.00 | 0.454 | $\approx 0.395$ | $+0.059$ |
+| 5.50 | 0.432 | $\approx 0.373$ | $+0.059$ |
+| 6.00 | 0.412 | $\approx 0.353$ | $+0.059$ |
+| 6.50 | 0.396 | $\approx 0.337$ | $+0.059$ |
+| 7.00 | 0.388 | $\approx 0.329$ | $+0.059$ |
+| 7.50 | 0.384 | $\approx 0.325$ | $+0.059$ |
+| 8.00 | 0.384 | $\approx 0.325$ | $+0.059$ |
+| **Mean $M \ge 5$** |  |  | **$+0.0595$** |
+
+Until Phase 6h closes, the headline 28-flight corpus statistics are honestly characterized as "supersonic with hypersonic anchors" rather than "fully hypersonic-validated." Once the fix lands, the nine Nike-Apache 1965 flights plus the Nike-Cajun flight already on disk become admissible and the integrated $M > 5$ set grows from 3 to 13 flights — at which point the headline framing changes accordingly.
+
+The composite disclosure plot (per-component $C_d$ decomposition vs Mach against NASA X-721-66-568 Case 1 handbook reference; pressure-$C_d$ plateau near 0.234 visible from $M = 2$ through $M = 8$) is at `paper/data/png/phase6h_apache_cd_disclosure.png`.
 
 
 ### 12.7 Acknowledgments, Affiliation, Conflict of Interest, and Reproduction Recipe
 
 #### 12.7.1 Acknowledgments
 
-Acknowledgments will be added prior to camera-ready. <!-- TODO(author): list collaborators, dataset providers (Rogers / RASAero II archive maintainers, individual flight contributors to the Rocket Flight Database v1.0), and any reviewers / mentors to thank. -->
+Acknowledgments will be added prior to camera-ready. <!-- TODO(author): list collaborators, dataset providers (Rogers / RASAero II archive maintainers, individual flight contributors to the Rocket Flight Database v1.2), and any reviewers / mentors to thank. -->
 
 #### 12.7.2 Author Affiliation
 
@@ -1383,11 +1454,11 @@ The author declares no known conflict of interest. <!-- TODO(author): confirm an
 
 #### 12.7.5 Software Availability and DOI
 
-The OpenRocket Plus source code is available at <https://github.com/AidanSYu/openrocketsupersonic>. A persistent software archive will be deposited on Zenodo: `[SOFTWARE-DOI-TODO]`. The validation dataset (Rocket Flight Database v1.0) is already deposited and is citable as <https://doi.org/10.5281/zenodo.19976138>.
+The OpenRocket Plus source code is available at <https://github.com/AidanSYu/openrocketsupersonic>. A persistent software archive will be deposited on Zenodo: `[SOFTWARE-DOI-TODO]`. The validation dataset (Rocket Flight Database v1.2 — 28 flights) is deposited at the same concept DOI as the original v1.0 release and is citable as <https://doi.org/10.5281/zenodo.19976138>.
 
 #### 12.7.6 Reproduction Recipe for the 25-Flight Corpus Closure
 
-The headline aggregate apogee error of 4.49% across the 25-flight corpus is reproducible from the source tree as follows. The pinned commit for the manuscript revision is `<MANUSCRIPT-COMMIT-TODO>` on branch `supersonic-aero-dev`; replace `<COMMIT>` below with the value reported by `git rev-parse HEAD` after the manuscript-tag commit is created.
+The headline aggregate apogee statistics (mean signed $-0.44\%$, MAE 4.33\%) across the 28-flight corpus are reproducible from the source tree as follows. The pinned commit for the manuscript revision is `<MANUSCRIPT-COMMIT-TODO>` on branch `supersonic-aero-dev`; replace `<COMMIT>` below with the value reported by `git rev-parse HEAD` after the manuscript-tag commit is created.
 
 ```bash
 git clone https://github.com/AidanSYu/openrocketsupersonic.git
@@ -1414,7 +1485,7 @@ A regression tolerance of $\pm 2$ percentage points per case is enforced by the 
 9. Chapman, D. R. (1951). "An Analysis of Base Pressure at Supersonic Velocities and Comparison with Experiment." NACA Report 1051.
 10. Champigny, P. and Lacau, R. G. (1994). "Lateral Aerodynamics of a Missile at High Angles of Attack." AGARD CP-536, as cited in `BarrowmanCalculator` and `VortexSideforceBenchmarkTest`; the repository's local AGARD CP-536 PDF is a different proceedings volume and is not used as a source artifact for this claim.
 11. DATCOM (1978). "USAF Stability and Control DATCOM." Air Force Flight Dynamics Laboratory, AFFDL-TR-79-3032, revised.
-12. Devan, L. and Ashwood, R. (1965). "The Base Drag of Blunt-Trailing-Edge Airfoils and Bodies at Transonic and Supersonic Speeds." NASA TN D-721. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the production turbulent base-drag correlation. Verify and attach before camera-ready.]`
+12. **Reference removed.** The previously listed "Devan, L. and Ashwood, R. (1965). 'The Base Drag of Blunt-Trailing-Edge Airfoils and Bodies at Transonic and Supersonic Speeds.' NASA TN D-721" could not be independently verified through NTRS or DTIC search. The production turbulent base-drag correlation $C_{d,\text{base}} = 0.064 + 0.186/M^{2}$ is anchored against ESDU 77021 (Reference 14 below) and NACA TN 3393 (Reference 32 below); the "Devan-Ashwood" descriptor is retained in the code comments as a historical attribution but the primary verifiable source is ESDU 77021.
 13. Dupuis, A. and Hathaway, W. (1997). "Aeroballistic Range Tests of the Basic Finner Reference Projectile at Supersonic Velocities." DTIC ADA636861.
 14. ESDU (1977). "Estimation of Base Drag in the Absence of a Propulsive Jet." ESDU Data Item 77021.
 15. ESDU (1978). "Drag of a Smooth Flat Plate at Zero Incidence." ESDU Data Item 78019. Historical skin-friction context; the current production skin-friction path is Van Driest II rather than this item.
@@ -1435,7 +1506,7 @@ A regression tolerance of $\pm 2$ percentage points per case is enforced by the 
 30. Nielsen, J. N. (1960). *Missile Aerodynamics*. McGraw-Hill.
 31. Paul, R. and Wedemeyer, E. (1982). "Aerodynamic Characteristics of Ogive-Cylinder Bodies at High Angles of Attack." EOARD-TR-82-7. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the vortex-asymmetry $K_v=0.20$ calibration (Section 9.9.3). Verify and attach before camera-ready.]`
 32. Pitts, W. C., Nielsen, J. N., and Kaattari, G. E. (1957). "Lift and Center of Pressure of Wing-Body-Tail Combinations at Subsonic, Transonic, and Supersonic Speeds." NACA Report 1307. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the PNK $F_{WB}/F_{BW}$ interference factors (Table 12.1). Verify and attach before camera-ready.]`
-33. Platou, A. S. (1963). "The Magnus Force on a Short Body at Supersonic Speeds." BRL Report 1193. `[CITATION-TODO: PDF/digitized data not in repo; load-bearing for the Magnus body-fraction $0.3$ calibration (Section 9.9.2). Verify and attach before camera-ready.]`
+33. Platou, A. S. (1965). "Magnus Characteristics of Finned and Nonfinned Projectiles." *AIAA Journal*, **3**(1), 83–90. DOI: 10.2514/3.2791. (Replaces the previously cited "BRL Report 1193, 1963," for which no NTRS/DTIC record could be located; the AIAA Journal publication is the verifiable primary source for Platou's Magnus measurements.)
 34. Puckett, A. E. and Stewart, H. J. (1947). "Aerodynamic Performance of Delta Wings at Supersonic Speeds." *Journal of the Aeronautical Sciences*, 14(10).
 35. Sutherland, W. (1893). "The Viscosity of Gases and Molecular Force." *Philosophical Magazine*, Series 5, 36(223), pp. 507--531.
 36. Tobak, M. and Wehrend, W. R. (1956). "Stability Derivatives of Cones at Supersonic Speeds." NACA TN 3788.
@@ -1453,15 +1524,17 @@ A regression tolerance of $\pm 2$ percentage points per case is enforced by the 
 48. Bunescu, I., Hothazie, M.-V., Stoican, M.-G., Pricop, M.-V., Onel, A.-I., and Afilipoae, T.-P. (2025). "Numerical Study of the Basic Finner Model in Rolling Motion." *Aerospace*, **12**(5), 371. DOI: 10.3390/aerospace12050371. Open access (CC BY 4.0).
 49. Bollermann, B. and Walker, R. L. (1973). "Design, Development and Flight Test of the Super Loki Stable Booster Rocket Systems." AFCRL-TR-73-0412 / AD-766737, Space Data Corp., Phoenix AZ, prepared for AFCRL Hanscom, 30 June 1973.
 50. Sahu, J., Nietubicz, C. J., and Steger, J. L. (1983). "Numerical Computation of Base Flow for a Projectile at Transonic Speed." ARBRL-TR-02495 / AD-A130-293, US Army Ballistic Research Laboratory, Aberdeen Proving Ground, MD, June 1983. Cited as the secondary CFD anchor for transonic base-flow validation; not exercised as a comparator in the present revision (Section 9.10).
+51. Vidanović, N. D., Rašuo, B. P., Damljanović, D. B., Vuković, Đ. S., and Ćurčić, D. S. (2014). "Validation of the CFD code used for determination of aerodynamic characteristics of nonstandard AGARD-B calibration model." *Thermal Science*, **18**(4), pp. 1223–1233. DOI: 10.2298/TSCI130409104V. Reference CFD dataset cited in Section 9.12; no closed-loop OpenRocket Plus comparator at the AGARD-B geometry in the present revision.
+52. Sznajder, J. (2025). "Computational Determination of Dynamic Stability Derivatives." *Transactions on Aerospace Research*, No. 4, pp. 98–121. DOI: 10.2478/tar-2025-0021. ANSYS Fluent computations of $C_{mq}$ and $C_{m\dot\alpha}$ on the Army-Navy Basic Finner over $M = 0.9$--$5.0$ using three independent CFD techniques (MRF, FOM, IRM); used as the primary CFD-side $C_{mq}$ comparator in Section 9.11.
 
 **External validation artifacts:**
 
-- Yu, A. (2026). *Rocket Flight Database, v1.0* [Data set]. Zenodo. <https://doi.org/10.5281/zenodo.19976138>.
+- Yu, A. (2026). *Rocket Flight Database, v1.2* [Data set]. Zenodo. Concept DOI: <https://doi.org/10.5281/zenodo.19976138>.
 - Rogers, C. E. *RASAero II Comparisons with Altitude Data.* <https://www.rasaero.com/comparisons-alt.htm>. Source for measured apogees and reference RASAero II predictions.
 
 **Internal validation artifacts** (not external references; included for traceability):
 
-- `paper/data/corpus_summary_2026_05_01.md` -- 25-flight integrated corpus baseline.
+- `paper/data/corpus_summary_2026_05_01.md` -- 25-flight v1.0 integrated corpus baseline; v1.2 28-flight summary at `paper/data/analysis/corpus_bias_variance_2026_05_11/corpus_bias_variance_summary.md`.
 - `paper/data/csv/simvreal_baseline_2026_05_01.csv` -- per-case CSV regression baseline.
 - `paper/data/md/rasaero_head_to_head_2026_05_01.md` -- this work versus RASAero II head-to-head on the same imported flights.
 - `paper/data/md/dynamic_stability_benchmark.md` -- full Mach sweep for $C_{mq}$, roll damping, Magnus.

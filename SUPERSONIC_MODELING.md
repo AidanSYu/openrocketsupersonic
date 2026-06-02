@@ -503,6 +503,35 @@ Plus: Van Driest II skin friction (A-level, replaces Eckert in production)
 - **Transonic area rule**: `TransonicAreaRule.java` utility exists but is not integrated into `BarrowmanDragCalculator`. Would capture fin-body interference wave drag at M 0.95-1.3.
 - **Aeroelastic coupling**: `AeroelasticModel.java` exists but is disabled (Q_THRESHOLD = 1e12). Needs validation against real flutter/divergence data before re-enabling.
 
+### Phase 6h: Hoerner cylindrical-afterbody hypersonic pressure drag (NEW, 2026-05-06)
+
+**Status:** Diagnosed during V2 corpus expansion. Not yet implemented.
+
+**Symptom.** Nine independent Nike-Apache flights from NASA X-721-67-103 (1965 Wallops/WSMR set) overshoot apogee by +24% to +38% in ORP. Error scales monotonically with peak Mach: Nike-Deacon (M=5.0) closes at −1%, Nike-Cajun UM (M=6.2) at +17%, Nike-Apache 1965 (M=6.4–7.0) at +24-38%. Motor mass, total impulse, Isp, and burnout velocity have all been verified against NASA X-721-66-568 spec — all correct. The bias accumulates during the ballistic coast from Apache burnout (M=7, ~24 km altitude) to apogee (~200 km, M=0).
+
+**Diagnosis.** Reference: NASA X-721-66-568 Appendix A p.66 ("APACHE DRAG COEFFICIENTS", Case 1 COASTING):
+
+| Mach | Cd handbook | Cd ORP | Deficit |
+|---:|---:|---:|---:|
+| 5.0 | 0.454 | 0.378 | **+0.076** |
+| 6.0 | 0.412 | 0.349 | +0.063 |
+| 7.0 | 0.388 | 0.338 | +0.050 |
+| 8.0 | 0.384 | 0.331 | +0.053 |
+
+Mean Cd deficit for M ≥ 5: **+0.0595**. The deficit lives entirely in the pressure-Cd component, which **plateaus flat at 0.234 from M=2 through M=8** in ORP — the handbook curve sits around 0.30 in that regime.
+
+Root cause: `BarrowmanDragCalculator.java` lines 1453-1489 multiplies the slender-body supersonic pressure-drag correction by a smoothstep that decays to **zero at M=5** (`SLENDER_BODY_MACH_DECAY_END = 5.0`). For high-L/D bodies (Apache L/D = 17.4), Hoerner Ch. 17 documents BL-displacement / viscous-inviscid pressure drag persisting at all supersonic Mach. ORP turns that contribution off entirely above M=5.
+
+**Proposed fix.**
+1. Extend `SLENDER_BODY_MACH_DECAY_END` from 5.0 to ~12.0 (structural correction, max ~0.006 Cd contribution — small on its own).
+2. Add a new `hypersonicBodyPressureCD` term gated on `bodyLD > 15 AND mach > 3`, magnitude calibrated against the X-721-66-568 Case 1 table (target adds Cd ≈ 0.06 at M=5, decaying gradually). This is the term that actually closes the 0.06 gap.
+
+**Validation gates.** Nike-Deacon corpus (currently −1.06% / −0.89%) must not move > ±2 pp. Apache nine-flight 1965 mean error +24-38% must close to within ±10%. Transonic Raven/Rabia corpus and SimVReal high-L/D outliers (anchored by `Fix C` in BarrowmanDragCalculator) must not regress.
+
+**Existing diagnostic infrastructure.** `core/src/test/java/info/openrocket/core/aerodynamics/NikeApacheCoastCdDiagnosticTest.java` loads `nike_apache.ork`, deactivates the booster, sweeps coast Mach, and prints the comparison table above. This is the fast feedback loop for any fix attempt.
+
+**Why deferred.** Calibration of the new hypersonic-body-pressure term needs corpus-level recalibration across Apache + Cajun + Deacon + transonic HPR + SimVReal in parallel, not a single-vehicle tune. Estimated 1-2 weeks of focused work including new corpus admission of the 9 Nike-Apache 1965 flights and Cajun UM once the bias closes.
+
 ### Phase 7: Advanced Geometries & Multi-Body Dynamics
 - 7a. Multi-body shock interference (parallel staging)
 - 7b. Ring fin / tube fin supersonic model (Kantrowitz limit)

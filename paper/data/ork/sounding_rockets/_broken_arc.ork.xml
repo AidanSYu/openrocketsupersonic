@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding='utf-8'?>
+<openrocket version="1.8" creator="ORP corpus build script (paper/data/ork/sounding_rockets/_build_orks.py)">
+  <rocket>
+    <name>Arcas Rocketsonde</name>
+    <id>e5f41f3c-f45a-4093-ad00-75c818fa7316</id>
+    <axialoffset method="absolute">0.0</axialoffset>
+    <position type="absolute">0.0</position>
+    <comment>Arcas Type C meteorological sounding rocket (4.5 EX2 MOD 0 / 29-KS-336 MARC 2B1 motor).
+Source: DTIC AD-235341, "Final Report: Development of the Arcas Rocketsonde System",
+Webster, Roberts, Donnell (Atlantic Research Corp), 29 February 1960.
+Geometry: Table I (master dimensions); Figures 1 (general), 5 (motor).
+Single-stage end-burning solid; 12.5 lb payload, ~210,000 ft apogee nominal,
+best demonstrated 249,000 ft (Section "Performance Flights").
+Total impulse 9089 lbf-s @ 70F; action time 29.0 s; avg thrust 336 lbf.</comment>
+    <designer>ORP corpus build (auto-generated from source PDFs)</designer>
+    <revision>2026-05-02 v1</revision>
+    <motorconfiguration configid="7dcda44c-8f3c-4b44-9232-7c0f450ee165" default="true">
+      <name>4.5 EX2 MOD 0</name>
+      <stage number="0" active="true"/>
+    </motorconfiguration>
+    <referencetype>maximum</referencetype>
+
+    <subcomponents>
+      <stage>
+        <name>Arcas</name>
+
+        <subcomponents>
+          <nosecone>
+            <name>Nose cone (4-caliber secant ogive, 18.1 in)</name>
+            <id>05bf8789-6267-43a5-9908-23a8c2db34d9</id>
+            <finish>polished</finish>
+            <material type="bulk" density="2700.0">Aluminum (Table I p.10: aluminum cone with steel tip)</material>
+            <length>0.459740</length>
+            <thickness>0.001524</thickness>
+            <shape>ogive</shape>
+            <shapeparameter>1.0</shapeparameter>
+            <aftradius>0.056515</aftradius>
+            <aftshoulderradius>0.0</aftshoulderradius>
+            <aftshoulderlength>0.0</aftshoulderlength>
+            <aftshoulderthickness>0.0</aftshoulderthickness>
+            <aftshouldercapped>false</aftshouldercapped>
+            <isflipped>false</isflipped>
+            <overridemass>0.680389</overridemass>
+            <overridesubcomponentsmass>false</overridesubcomponentsmass>
+          </nosecone>
+
+          <bodytube>
+            <name>Parachute housing (13.4 in aluminum)</name>
+            <id>37febc31-74c7-422f-9604-733596ac04a8</id>
+            <finish>normal</finish>
+            <material type="bulk" density="2700.0">Aluminum</material>
+            <length>0.340360</length>
+            <thickness>0.001524</thickness>
+            <radius>0.056515</radius>
+            <overridemass>7.257478</overridemass>
+            <overridesubcomponentsmass>true</overridesubcomponentsmass>
+
+            <subcomponents>
+              <parachute>
+                <name>15-ft silk parachute</name>
+                <id>6bb8c347-1323-42f6-a0f2-e9412676bb99</id>
+                <axialoffset method="middle">0.0</axialoffset>
+                <position type="middle">0.0</position>
+                <packedlength>0.10</packedlength>
+                <packedradius>0.04</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <cd>auto</cd>
+                <material type="surface" density="0.05">Silk metallized for radar</material>
+                <deployevent>apogee</deployevent>
+                <deployaltitude>200.0</deployaltitude>
+                <deploydelay>0.0</deploydelay>
+                <diameter>4.572</diameter>
+                <linecount>8</linecount>
+                <linelength>4.572</linelength>
+                <linematerial type="line" density="0.0035">Nylon</linematerial>
+              </parachute>
+            </subcomponents>
+          </bodytube>
+
+          <bodytube>
+            <name>Arcas motor case (4130 steel, 60.7 in, 4.5 EX2 MOD 0)</name>
+            <id>df11d49f-3cb0-400f-a755-6dfdde0effba</id>
+            <finish>normal</finish>
+            <material type="bulk" density="7850.0">4130 Steel</material>
+            <length>1.544320</length>
+            <thickness>0.001016</thickness>
+            <radius>0.056515</radius>
+            <overridemass>10.659421</overridemass>
+            <overridesubcomponentsmass>true</overridesubcomponentsmass>
+              <motormount>
+                <ignitionevent>automatic</ignitionevent>
+                <ignitiondelay>0.0</ignitiondelay>
+                <overhang>0.0</overhang>
+                <motor configid="7dcda44c-8f3c-4b44-9232-7c0f450ee165">
+                  <type>single</type>
+                  <manufacturer>Atlantic Research Corp</manufacturer>
+                  <digest>arcas-29ks336</digest>
+                  <designation>29-KS-336</designation>
+                  <diameter>0.103988</diameter>
+                  <length>1.467104</length>
+                  <delay>none</delay>
+                </motor>
+                <ignitionconfiguration configid="7dcda44c-8f3c-4b44-9232-7c0f450ee165">
+                  <ignitionevent>automatic</ignitionevent>
+                  <ignitiondelay>0.0</ignitiondelay>
+                </ignitionconfiguration>
+              </motormount>
+
+            <subcomponents>
+              <trapezoidfinset>
+                <name>Arcas fins (4x double-wedge cast aluminum, 23.5 in^2 each)</name>
+                <id>10cb7bcc-516d-4b24-a369-6692e8d981dc</id>
+                <instancecount>4</instancecount>
+                <fincount>4</fincount>
+                <radiusoffset method="surface">0.0</radiusoffset>
+                <angleoffset method="relative">0.0</angleoffset>
+                <rotation>0.0</rotation>
+                <axialoffset method="bottom">0.0</axialoffset>
+                <position type="bottom">0.0</position>
+                <finish>normal</finish>
+                <material type="bulk" density="2700.0">Cast aluminum</material>
+                <thickness>0.005080</thickness>
+                <crosssection>airfoil</crosssection>
+                <cant>0.0</cant>
+                <filletradius>0.0</filletradius>
+                <filletmaterial type="bulk" density="2700.0">Aluminum</filletmaterial>
+                <rootchord>0.177800</rootchord>
+                <tipchord>0.101600</tipchord>
+                <sweeplength>0.038100</sweeplength>
+                <height>0.108585</height>
+              </trapezoidfinset>
+            </subcomponents>
+          </bodytube>
+        </subcomponents>
+      </stage>
+    </subcomponents>
+  </rocket>
+
+  <simulations>
+  </simulations>
+</openrocket>

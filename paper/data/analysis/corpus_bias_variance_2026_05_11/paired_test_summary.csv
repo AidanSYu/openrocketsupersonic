@@ -1,0 +1,2 @@
+n,median_diff_abs_pp,mean_diff_abs_pp,orp_wins,ras_wins,ties,wilcoxon_W,wilcoxon_p,ttest_rel_t,ttest_rel_p
+25,-0.390000,-0.847200,14,11,0,129.500000,0.374558,-1.088394,0.287231

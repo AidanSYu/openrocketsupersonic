@@ -1023,7 +1023,10 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 			gamma = AtmosphericConditions.effectiveGamma(T0_approx);
 		}
 
-		double cpMax = calculateCpMax(mach, gamma);
+		// JSR 2026-05-11 sensitivity sweep: Cp_max multiplicative scale.
+		// AblationConfig.cpMaxScale defaults to 1.0 in production.
+		double cpMax = calculateCpMax(mach, gamma)
+				* info.openrocket.core.aerodynamics.AblationConfig.cpMaxScale;
 
 		int N = SHOCK_EXPANSION_STRIPS;
 		double dx = length / N;

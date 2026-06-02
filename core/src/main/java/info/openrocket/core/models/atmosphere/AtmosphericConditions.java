@@ -154,7 +154,10 @@ public class AtmosphericConditions implements Cloneable, Monitorable {
 	 * @return The current air density in kg/m3
 	 */
 	public double getDensity() {
-		return getPressure() / (getGasConstant() * getTemperature());
+		// JSR 2026-05-11 sensitivity sweep: optional density scaling. Default = 1.0
+		// (production-identical). Used by the corpus parameter-sensitivity test.
+		double rho = getPressure() / (getGasConstant() * getTemperature());
+		return rho * info.openrocket.core.aerodynamics.AblationConfig.atmosphericDensityScale;
 	}
 
 	/**

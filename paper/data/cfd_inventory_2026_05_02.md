@@ -92,3 +92,38 @@ Scope: identify PDFs in `paper/data/pdf/` that contain published CFD (RANS / URA
 ## Bottom-line recommendation
 
 **Yes — the AST CFD-comparator demand can be satisfied from PDFs already in repo.** Use Bunescu et al. 2025 (`aerospace-12-00371-v2.pdf`) as the primary CFD comparator for the existing Basic Finner validation case — it is URANS k-epsilon CFD on the same geometry over M 0.4-3.5, with digitizable C_N, C_X, C_m, C_lp, C_np, C_Yp data and an open-access CC BY license. As a secondary CFD comparator on a different gap (transonic base drag, M 0.9-1.2), use Sahu, Nietubicz, Steger 1983 (`NUMERICAL COMPUTATION OF BASE FLOW...pdf`), which provides Thin-Layer Navier-Stokes base/pressure/friction/total drag for a secant-ogive-cylinder-boattail projectile and includes an experiment-vs-CFD-vs-McDrag overlay (Figure 14) that is an ideal template for our own comparison panel. No new papers need to be sourced.
+
+---
+
+## Update 2026-05-11 (JSR readiness)
+
+Two additional CFD comparators digitized for the JSR submission. Both are open-access, peer-reviewed, modern (2014/2025) and complement Bunescu by covering different geometry classes and a different aerodynamic quantity:
+
+### 3. Vidanovic et al. 2014 — SST k-omega CFD on AGARD-B (DIGITIZED 2026-05-11)
+- **PDF:** `paper/data/pdf/Validation_of_the_CFD_code_used_for_determination_.pdf` (Thermal Science 18(4), 1223-1233, DOI 10.2298/TSCI130409104V)
+- **CSV:** `paper/data/csv/vidanovic_agard_b_cfd_2014.csv`
+- **Memo:** `paper/data/md/vidanovic_agard_b_cfd_comparator_2026_05_11.md`
+- **What:** SST k-omega ANSYS Fluent on AGARD-B calibration model with both standard parabolic-arc and non-standard circular-arc noses. M = 0.596 and 1.602, AoA -4 to +12 deg. Includes VTI Belgrade T-38 trisonic wind-tunnel validation (CFD-vs-experiment 0.3-3% on CD).
+- **JSR use:** Reference for "state of the art CFD-vs-experiment agreement on a calibration model." No ORP comparator wired yet — OpenRocket Plus does not currently ship an AGARD-B `.ork` (wing-body geometry). Listed as B-level reference dataset; ORK build is a follow-up.
+
+### 4. Sznajder 2025 — ANSYS Fluent pitch-damping on Basic Finner (DIGITIZED 2026-05-11)
+- **PDF:** `paper/data/pdf/Computational_determination_of_dyna.pdf` (Transactions on Aerospace Research, eISSN 2545-2835, DOI 10.2478/tar-2025-0021)
+- **CSV (CFD data):** `paper/data/csv/sznajder_anf_cmq_cfd_2025.csv`
+- **CSV (ORP comparator):** `paper/data/csv/sznajder_anf_cmq_comparator_2026_05_11.csv`
+- **Memo:** `paper/data/md/sznajder_anf_cmq_cfd_comparator_2026_05_11.md`
+- **What:** Three independent CFD methods (Moving Reference Frame, Forced Oscillation, Indicial Response) on standard Army-Navy Basic Finner, M = 0.9-5.0, AoA = 0 deg. Cmq and Cm_alphadot separately. Self-validated against DREV-TM-9703 free-flight experiment (which is the same dataset as the existing ORP anchor ADA636861).
+- **ORP vs Sznajder (Cmq + Cm_alphadot sum):** MAPE 53.0% all 10 points; MAPE 31.6% excluding 2 transonic-peak overshoots. ORP underpredicts |damping| by 27-36% across M = 1.29-4.5 with sign and Mach-trend correct. **Transonic peak (M = 1.08-1.11) overshoots by 110-160%** due to `k_transonic` Gaussian augmentation in `BarrowmanStabilityCalculator`.
+- **JSR use:** B-level CFD comparator. Sign and magnitude of supersonic residual matches the existing Bhagwandin & Sahu 2013 (ARL-TR-6725) comparator — two independent CFD sources confirm ORP is conservative on Basic Finner pitch damping. Documents transonic over-augmentation as known calibration gap.
+
+### Bottom-line, updated for JSR
+
+For the JSR submission, the validation pipeline now has **four CFD comparators** at four different regime / geometry / quantity combinations:
+
+| Comparator | Geometry | Quantity | Regime | Status |
+|---|---|---|---|---|
+| Bunescu 2025 URANS | Basic Finner | C_N, C_X | M 0.4-3.5 | Java test wired |
+| Sahu 1983 TLNS | Ogive-cyl-boattail | Cd_base, Cd_total | M 0.9-1.2 | Memo only |
+| Vidanovic 2014 SST | AGARD-B | CD, CL, Cm | M 0.6, 1.6 | Reference (no ORK) |
+| Sznajder 2025 Fluent | Basic Finner | Cmq, Cm_alphadot | M 0.9-4.5 | Memo + comparator CSV |
+
+That is enough breadth (two geometries × two quantities × two Mach bands) to satisfy a JSR reviewer's "compare to CFD" demand, and the comparison includes both wins (Sahu transonic base drag region) and disclosed losses (Sznajder transonic Cmq overshoot, Bunescu MAPE 39%) — honest treatment over cherry-picking.

@@ -418,12 +418,11 @@ public class SupersonicTestRockets {
 	 * AFF is geometrically distinct from the Army-Navy Basic Finner (ANF):
 	 * tangent ogive vs. 10-deg cone, clipped-delta fins vs. 1x1 cal square fins.
 	 * <p>
-	 * The fin planform dimensions are not given verbatim in the prompt context;
-	 * the values used here (root chord ~1.0 cal, tip chord ~0.5 cal, sweep
-	 * length ~0.5 cal, exposed semispan ~1.0 cal) are placeholders selected to
-	 * reproduce the "clipped-delta with sharp LE/TE" topology described in the
-	 * paper. They are NOT calibrated to AFF planform tables and should be
-	 * refined when those tables are digitized.
+	 * Fin planform from ARL-TR-6725 Figure 3 (page 9), all in calibers:
+	 * root chord 1.33, tip chord 0.66, leading-edge sweep 53.0&deg;
+	 * (sweep length 0.67), exposed semispan 0.50 (total tip-to-tip 2.00 minus
+	 * body 1.00, halved), thickness 0.047, hexagonal section with 0.25 cal
+	 * LE/TE bevels and sharp LE/TE (R 0.004 cal).
 	 */
 	public static Rocket makeAirForceModifiedFinner() {
 		Rocket rocket = new Rocket();
@@ -451,13 +450,13 @@ public class SupersonicTestRockets {
 		body.setFinish(ExternalComponent.Finish.POLISHED);
 		stage.addChild(body);
 
-		// 4 clipped-delta fins. Geometry placeholder; see Javadoc note.
+		// 4 clipped-delta fins, ARL-TR-6725 Figure 3.
 		// Trailing edge flush with body base, sharp LE/TE -> HEXAGONAL (double-wedge).
-		double finRoot = 1.0 * d;
-		double finTip = 0.5 * d;
-		double finSweep = 0.5 * d;     // sweep distance from root LE to tip LE
-		double finSpan = 1.0 * d;      // exposed semispan
-		double finThickness = 0.08 * d;
+		double finRoot = 1.33 * d;
+		double finTip = 0.66 * d;
+		double finSweep = 0.67 * d;    // horizontal LE shift; tan(53.0°) * 0.50 cal = 0.664
+		double finSpan = 0.50 * d;     // exposed semispan ((2.00 - 1.00) / 2)
+		double finThickness = 0.047 * d;
 
 		TrapezoidFinSet fins = new TrapezoidFinSet(4, finRoot, finTip, finSweep, finSpan);
 		fins.setName("Clipped-Delta Fins");

@@ -1,0 +1,62 @@
+# Terrier-Improved Malemute screening model
+#
+# Purpose:
+#   Replacement v2 sounding-rocket candidate for the spin/dart class.
+#   The NASA handbook gives useful vehicle dimensions and burn time, but not
+#   full thrust or mass histories.
+
+vehicle:
+  name: "Terrier-Improved Malemute MK12"
+  stages: 2
+  class: "screening"
+  reason: "modern 100 km+ two-stage solid stack without dart separation"
+
+sources:
+  - path: "paper/data/pdf/NASA_TP_20230006855_Sounding_Rockets_User_Handbook.pdf"
+    citekey: "NASA/TP-20230006855"
+    role: "vehicle geometry/performance envelope, Appendix A.6 p.147-149"
+  - url: "https://www.nasa.gov/missions/sounding-rockets/nasa-successfully-launches-student-experiments-from-wallops/"
+    citekey: "NASA Wallops 2016-08-17"
+    role: "specific RockSat-X flight target, 95 mile altitude"
+
+booster:
+  motor: "Terrier MK12"
+  diameter_in: 18.0
+  length_in: 169.0
+  fins: "four 4.8 sq ft fins in cruciform"
+  cite: "NASA/TP-20230006855 p.147"
+  thrust_curve: "SYNTHESIZED_FROM_SCREENING_ASSUMPTION"
+
+sustainer:
+  motor: "Improved Malemute"
+  diameter_in: 16.0
+  length_in: 130.0
+  burn_time_s: 11.7
+  loaded_mass_lb: 1408.0
+  loaded_mass_basis: "3315 lb MK12 stack without payload minus 1907 lb inferred Terrier MK12"
+  roll_rate: "burnout roll rate generally 4 cycles/s"
+  cite: "NASA/TP-20230006855 p.147"
+  thrust_curve: "SYNTHESIZED_FROM_LEGACY_AVERAGE_THRUST"
+
+payload_screening:
+  mass_lb: 700.0
+  diameter_in: 17.26
+  length_in: 200.0
+  nose: "11 degree total angle cone"
+  basis: "within handbook flown range of 600-1000 lb and 180-250 in"
+
+flight_target:
+  event: "RockSat-X 2016"
+  launch_site: "Wallops Flight Facility"
+  launch_date: "2016-08-17"
+  reported_altitude_miles: 95.0
+  reported_apogee_ft: 501600.0
+  confidence: "medium: NASA flight page altitude, screening payload/motor assumptions"
+
+missing_from_source:
+  - exact Terrier MK12 thrust curve
+  - exact Improved Malemute thrust curve
+  - Improved Malemute propellant mass
+  - exact RockSat-X payload mass and geometry
+  - upper-stage fin planform
+  - exact stage ignition/separation timing

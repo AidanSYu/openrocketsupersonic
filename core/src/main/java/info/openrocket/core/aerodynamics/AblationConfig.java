@@ -51,6 +51,25 @@ public final class AblationConfig {
 	public static volatile boolean disableDatcomFinWaveDrag = readSysProp(
 			"orp.ablation.disable.datcomfinwavedrag");
 
+	// ==================== JSR 2026-05-11 parameter sensitivity sweep ====================
+	// These scaling fields apply a *multiplicative* or *value override* perturbation to a
+	// physical-model parameter. Defaults are 1.0 (or the nominal value) so the production
+	// path is unaffected when the test harness is idle. See
+	// {@code JSRParameterSensitivityTest} for the corpus sweep using these knobs.
+
+	/** Multiplicative scale applied to the total {@code totalForces.setCD(...)} result. */
+	public static volatile double cdScale = 1.0;
+	/** Van Driest II recovery factor override (nominal 0.88 per NASA TN D-6945). */
+	public static volatile double vd2RecoveryOverride = 0.88;
+	/** Multiplicative scale applied to Modified Newtonian Cp_max in SymmetricComponentCalc. */
+	public static volatile double cpMaxScale = 1.0;
+	/** Devan-Ashwood base drag intercept A override (nominal 0.064). */
+	public static volatile double baseDragAOverride = 0.064;
+	/** Slender-body decay end Mach override (nominal 5.0 per Phase 6h finding). */
+	public static volatile double slenderBodyDecayEndOverride = 5.0;
+	/** Multiplicative scale applied to atmospheric density (sensitivity sweep only). */
+	public static volatile double atmosphericDensityScale = 1.0;
+
 	private AblationConfig() {
 		// utility
 	}
@@ -63,12 +82,25 @@ public final class AblationConfig {
 		disableK1Floor = false;
 		disableFinnedBaseCore = false;
 		disableDatcomFinWaveDrag = false;
+		// Sensitivity-sweep scales reset to nominal/production values.
+		cdScale = 1.0;
+		vd2RecoveryOverride = 0.88;
+		cpMaxScale = 1.0;
+		baseDragAOverride = 0.064;
+		slenderBodyDecayEndOverride = 5.0;
+		atmosphericDensityScale = 1.0;
 	}
 
 	/** True iff any ablation flag is currently active. */
 	public static boolean anyActive() {
 		return disableShockGeometry || disablePNK || disableVanDriestII
-				|| disableK1Floor || disableFinnedBaseCore || disableDatcomFinWaveDrag;
+				|| disableK1Floor || disableFinnedBaseCore || disableDatcomFinWaveDrag
+				|| cdScale != 1.0
+				|| vd2RecoveryOverride != 0.88
+				|| cpMaxScale != 1.0
+				|| baseDragAOverride != 0.064
+				|| slenderBodyDecayEndOverride != 5.0
+				|| atmosphericDensityScale != 1.0;
 	}
 
 	private static boolean readSysProp(String key) {
