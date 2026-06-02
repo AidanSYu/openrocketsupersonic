@@ -143,11 +143,61 @@ subprojects {
     }
 
     test {
-        useJUnitPlatform()
-        finalizedBy jacocoTestReport
+        useJUnitPlatform {
+            // Tiered execution keeps day-to-day runs fast without losing coverage: the
+            // excluded tiers are one flag away and CI runs everything. See agent memory
+            // / docs for which tag means what.
+            //   default   -> fast unit + analytical correctness tests only
+            //   -Pslow    -> ALSO heavy validation benchmarks (corpus accuracy, Mach
+            //                sweeps); run when changing aerodynamic models
+            //   -Psweeps  -> ALSO paper-data regeneration sweeps that write paper/data
+            if (!project.hasProperty('slow'))   excludeTags 'slow'
+            if (!project.hasProperty('sweeps')) excludeTags 'sweep'
+        }
 
-        // Parallel test execution: run test classes in separate JVM forks
-        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+        // JaCoCo bytecode instrumentation adds ~20-40% overhead to the numeric-heavy
+        // simulation tests and is only needed to produce the coverage report (CI).
+        // Make it opt-in: pass -Pcoverage to instrument + generate the report. Default
+        // runs are uninstrumented for speed -- this changes no test result, only whether
+        // coverage data is collected.
+        jacoco {
+            enabled = project.hasProperty('coverage')
+        }
+        if (project.hasProperty('coverage')) {
+            finalizedBy jacocoTestReport
+        }
+
+        // --- Test parallelism, sized to BOTH cores and physical RAM --------------------
+        // Parallelism comes from Gradle forks (separate JVMs), NOT JUnit-internal threads
+        // (disabled in core/src/test/resources/junit-platform.properties). Rationale:
+        //   * No RAM over-commit: the old `processors/2` default = 16 forks x 4g = 64g on a
+        //     64g box -> GC thrash / paging. Here forks = min(cores, 70%-of-RAM / heap).
+        //   * The heavy @Isolated sweep tests get their OWN process, so they run
+        //     concurrently with the rest (one shared JVM would serialise them via @Isolated)
+        //     AND can't corrupt each other's global static AblationConfig (separate procs).
+        // Override the computed default with -PtestForks=N; heap per fork with -PtestHeap
+        // (default 5g, applied in core/build.gradle).
+        def heapGb = Math.max(1, ((project.findProperty('testHeap') ?: '5g').toString()
+                .replaceAll('[^0-9]', '') as int))
+        def cores = Runtime.runtime.availableProcessors()
+        // Conservative fallback if physical-RAM detection fails: cores/4 keeps
+        // forks x heap modest rather than risking the old over-commit.
+        def forksByRam = Math.max(1, cores.intdiv(4))
+        try {
+            def osBean = java.lang.management.ManagementFactory.operatingSystemMXBean
+            long totalRamBytes = -1L
+            for (String m : ['getTotalMemorySize', 'getTotalPhysicalMemorySize']) {
+                if (totalRamBytes <= 0L) {
+                    try { totalRamBytes = (osBean."$m"()) as long } catch (ignored) {}
+                }
+            }
+            if (totalRamBytes > 0L) {
+                int usableGb = (int) (totalRamBytes / (1024L * 1024L * 1024L) * 0.70d)
+                forksByRam = Math.max(1, usableGb.intdiv(heapGb))
+            }
+        } catch (ignored) {}
+        maxParallelForks = (project.findProperty('testForks')
+                ?: Math.max(1, Math.min(cores, forksByRam))) as int
 
         testLogging {
             events 'PASSED', 'FAILED', 'SKIPPED', 'STANDARD_OUT'
@@ -181,9 +231,12 @@ subprojects {
 
     spotbugsTest.enabled = false
 
-    // Always evaluate coverage as part of the verification lifecycle
+    // Coverage verification runs as part of `check` only when explicitly requested
+    // (-Pcoverage); see the test{} block above. SpotBugs always runs.
     tasks.named('check') {
-        dependsOn jacocoTestCoverageVerification
+        if (project.hasProperty('coverage')) {
+            dependsOn jacocoTestCoverageVerification
+        }
         dependsOn spotbugsMain
     }
 

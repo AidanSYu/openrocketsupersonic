@@ -253,8 +253,12 @@ tasks.withType(Test).configureEach {
                 "ORP-test-binary-${project.name}-${System.currentTimeMillis()}-${ProcessHandle.current().pid()}")
     )
     // High-altitude supersonic validation sims (MESOS 293K ft, M 4+) accumulate large
-    // per-step flight-data arrays; the default 512 MB heap OOMs mid-flight.
-    maxHeapSize = '4g'
+    // per-step flight-data arrays; the default 512 MB heap OOMs mid-flight. Each fork runs
+    // ONE class at a time (JUnit-internal parallelism is off), so this is per-class peak;
+    // 5g gives headroom over the ~4g a single MESOS flight needs. Fork COUNT is sized to
+    // RAM in the root build.gradle so forks x this heap never over-commits. Override with
+    // -PtestHeap (keep -PtestForks in step on small-RAM machines).
+    maxHeapSize = (project.findProperty('testHeap') ?: '5g')
 }
 
 clean.dependsOn([externalComponentsDelete])

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -62,6 +63,7 @@ import info.openrocket.core.util.BaseTestCase;
  * simulations to time out when they run simultaneously.
  */
 @ResourceLock("AERO_CPU_HEAVY")
+@Tag("slow")  // heavy corpus accuracy benchmark (~1.8 min); excluded by default, run with -Pslow
 public class SimVRealBenchmarkTest extends BaseTestCase {
 
     /** Path to SimVReal CDX1 files, relative to project root */

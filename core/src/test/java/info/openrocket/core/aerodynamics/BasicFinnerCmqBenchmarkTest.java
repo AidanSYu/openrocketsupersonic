@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.inject.Guice;
@@ -96,6 +97,7 @@ import info.openrocket.core.util.Coordinate;
  * <p>Per AST roadmap rules: MAPE &ge; 40 % &rArr; document as a finding, do
  * not claim closure. This test IS the finding artifact.
  */
+@Tag("slow")  // heavy Cmq benchmark (~13 s); excluded by default, run with -Pslow
 public class BasicFinnerCmqBenchmarkTest {
 
 	/**

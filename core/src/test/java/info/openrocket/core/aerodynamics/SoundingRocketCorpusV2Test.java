@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -88,6 +89,7 @@ import info.openrocket.core.util.CoordinateIF;
  * helical-launcher work.
  */
 @ResourceLock("AERO_CPU_HEAVY")
+@Tag("slow")  // heavy corpus validation (~8.8 min); excluded by default, run with -Pslow
 public class SoundingRocketCorpusV2Test {
 
     private static final String ORK_DIR_REL = "paper/data/ork/sounding_rockets";

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -74,6 +75,7 @@ import info.openrocket.core.startup.Application;
  * No production source is modified.
  */
 @ResourceLock("AERO_CPU_HEAVY")
+@Tag("sweep")  // paper-data regeneration (parameter sensitivity sweep, ~6.8 min); excluded by default, run with -Psweeps
 public class SensitivityAnalysisTest {
 
     private static final String ORK_DIR_REL = "paper/data/ork/sounding_rockets";

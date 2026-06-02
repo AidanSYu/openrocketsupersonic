@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.inject.Guice;
@@ -55,6 +56,7 @@ import info.openrocket.core.util.Coordinate;
  * <p>
  * Run: {@code ./gradlew :core:test --tests info.openrocket.core.aerodynamics.PublicationAnalyticalDataExportTest}
  */
+@Tag("sweep")  // paper-data regeneration (analytical dataset export); excluded by default, run with -Psweeps
 public class PublicationAnalyticalDataExportTest {
 
 	private static final double GAMMA = 1.4;

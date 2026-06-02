@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -56,6 +57,7 @@ import info.openrocket.core.util.BaseTestCase;
 @Isolated("AblationConfig scaling fields must not be observed by concurrent tests")
 @ResourceLock("AERO_CPU_HEAVY")
 @SuppressWarnings("unused")  // FlightCase/Param/SweepRow carry diagnostic fields for traceability
+@Tag("sweep")  // paper-data regeneration (sensitivity sweep, ~12.5 min); excluded by default, run with -Psweeps
 public class JSRParameterSensitivityTest extends BaseTestCase {
 
 	private static final double FT_PER_M = 3.28084;
