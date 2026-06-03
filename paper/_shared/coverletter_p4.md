@@ -1,7 +1,7 @@
 **Aidan Yu**
 Independent Researcher (acknowledges Duke University support)
 ORCID: 0009-0005-9589-5314
-aidansyu@gmail.com
+asy22@duke.edu
 
 3 June 2026
 

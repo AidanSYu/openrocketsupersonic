@@ -100,15 +100,14 @@ Sec.~\ref{sec:limitations}.
     independently documented thrust curves and geometry, not reconstructions, so
     that an above-Mach-5 integrated claim rests on measurement rather than on
     inferred inputs.
-  \item \textbf{Recover the MESOS regression.} The two-stage MESOS~293K closure
-    predicts $-6.96\%$ (273{,}056~ft) from the current archived code release---a
-    disclosed regression relative to the earlier RFD~v1.2 snapshot ($291{,}601$~ft,
-    $-0.6\%$), which was produced by an earlier code version. The $-6.96\%$ value
-    is itself reproducible from the present release, and the flight remains within
-    the $\pm10\%$ band; the root cause is under investigation, and the next RFD
-    release will re-sync the model column. Isolating and recovering this regression
-    is required before the two-stage staging-and-coast model can be presented as
-    fully validated.
+  \item \textbf{Tighten the two-stage high-Mach closure.} The two-stage
+    MESOS~293K closure carries the corpus's largest single-flight error, $-6.96\%$
+    (273{,}056~ft) from the current archived code release, reproducible in
+    isolation and within the $\pm10\%$ band. As the only high-Mach two-stage flight
+    it couples stage separation, coast-phase aerodynamics, and Mach-4 base drag in
+    a single result. Decomposing this error---and adding a second high-Mach
+    two-stage flight to the corpus---is required before the two-stage
+    staging-and-coast model can be presented as fully validated.
   \item \textbf{Anchor the pitch-damping multiplier to wind-tunnel data.} The
     transonic pitch-damping ($C_{m_q}$) augmentation relies on a single $3\times$
     multiplier that overshoots reference computations by 110--160\% per
@@ -126,5 +125,5 @@ Sec.~\ref{sec:limitations}.
 All source code, the 25-flight Rocket Flight Database~\cite{rfd_zenodo}, and the
 analysis scripts that regenerate every figure and table are released under
 permissive licenses for end-to-end reproduction. Community contributions on any
-of the above items---particularly the transonic blending fix and the MESOS
-regression---are warmly invited through the open-source release.
+of the above items---particularly the transonic blending fix and the two-stage
+high-Mach closure---are warmly invited through the open-source release.

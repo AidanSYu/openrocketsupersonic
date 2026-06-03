@@ -178,14 +178,22 @@ count that ALL papers must use. Provenance and reconciliation:
 
 ---
 
-## F. MESOS 293K — DISCLOSED REGRESSION (the honest position)
-- Current archived code predicts MESOS 293K at **−6.96% (273,056 ft)**. This is the value used THROUGHOUT all papers.
-- It is a **disclosed regression** from the RFD v1.2 snapshot's earlier-code value of −0.6% (291,601 ft).
-- The −6.96% **reproduces in isolation** (genuine current-code value); the earlier −0.6% was an earlier code version.
-- ⚠️ `VALIDATION_MATRIX.md` is STALE on this point — it still claims −0.6% is "canonical" and blames
-  the −6.96% on "JUnit 5 parallel-execution contamination." That hypothesis was REFUTED (isolation run
-  confirmed −6.96%). Do NOT cite the contamination story. The next RFD release re-syncs the model column.
-- −6.96% is still within the ±10% admission band, so the 25/25 headline is unchanged.
+## F. MESOS 293K — THE STANDING TWO-STAGE HIGH-MACH RESULT (the honest position)
+- Current archived code predicts MESOS 293K at **−6.96% (273,056 ft)** against the measured 293,488 ft.
+  This is the **standing, correct model prediction** and the value used THROUGHOUT all papers.
+- It is the **largest single-flight error in the corpus** and the highest-Mach case (the only high-Mach
+  two-stage closure); it bounds the framework's accuracy at the top of the validated envelope, where
+  staging, coast-phase aerodynamics, and Mach-4 base drag compound.
+- The −6.96% **reproduces in isolation** from the archived code release (genuine current-code value).
+- ⚠️ There is **NO "regression" and NO earlier validated value.** Earlier drafts and database snapshots
+  reported −0.6% / −0.64% (291,601 ft) for this flight; that figure was **erroneous (a drafting artifact),
+  has no defensible derivation, and is WITHDRAWN.** There is no defensible path back to it. Do NOT describe
+  −6.96% as a regression from −0.6%, do NOT say the cause is "under investigation," do NOT promise to
+  "re-sync/recover" a prior value, and do NOT cite the "JUnit parallel-execution contamination" story
+  (also refuted). −6.96% simply IS the model's prediction for this flight.
+- The published Rocket Flight Database (version of record) carries the −6.96% value in its model column;
+  an earlier deposited version (v1.2) that carried the erroneous figure is superseded.
+- −6.96% is within the ±10% admission band, so the 25/25 headline is unchanged.
 
 ---
 
@@ -215,7 +223,7 @@ count that ALL papers must use. Provenance and reconciliation:
 ## I. IDENTIFIERS
 - RFD dataset: Zenodo DOI **10.5281/zenodo.19976138** (v1.2), CC-BY-4.0; mirror https://github.com/AidanSYu/rocket-flight-database
 - Code: https://github.com/AidanSYu/openrocketsupersonic ; archival code Zenodo DOI + release tag = **mint at submission (BLOCKED on user push)**.
-- Author: Aidan Yu, ORCID 0009-0005-9589-5314, Independent Researcher (acknowledges Duke University support). Email aidansyu@gmail.com.
+- Author: Aidan Yu, ORCID 0009-0005-9589-5314, Independent Researcher (acknowledges Duke University support). Email asy22@duke.edu.
 - AI disclosure required per AIAA Oct-2024 policy (and good practice in all venues): generative AI used for language editing / formatting / code review only; all claims/equations/numbers authored & verified by the human author; no AI authorship.
 - License: code GPL-3.0; data CC-BY-4.0.
 
@@ -246,7 +254,7 @@ genuinely distinct research question.
 3. High-Mach set reported in FULL (3 pass / 17 fail), never cherry-picked to "28/28".
 4. Two base-drag constants disclosed as partly in-sample; generalization shown via decontaminated holdout.
 5. Pre-pass = architecture + local-flow fidelity (0.15pp apogee), not a gross-apogee win.
-6. MESOS −6.96% disclosed as a regression (no contamination story).
+6. MESOS −6.96% (273,056 ft) is the standing prediction for the hardest two-stage high-Mach case and the corpus's largest single-flight error — NOT a regression; the earlier −0.6%/291,601 ft figure is withdrawn (no contamination story).
 7. No own CFD — four published comparators + corroborating fifth.
 8. Cmq pitch-damping is B-level (+110–160% overshoot) — a limitation, never a headline.
 9. No fabricated citations (no Devan-Ashwood; no paulwedemeyer for Kv).

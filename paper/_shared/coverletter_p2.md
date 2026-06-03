@@ -26,4 +26,4 @@ Sincerely,
 Aidan Yu
 Independent Researcher (with acknowledged support from Duke University)
 ORCID 0009-0005-9589-5314
-aidansyu@gmail.com
+asy22@duke.edu

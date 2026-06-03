@@ -99,8 +99,8 @@ when each is propagated through the full corpus?*
 - **`SimVRealModelMechanismAblationTest`** (`@Tag("sweep")`, `@Isolated`) — the existing mechanism-ablation
   harness; the per-closure swap is the same pattern with a different knob. **Copy its `@Isolated` +
   `RASAeroMotorsLoader.clearAllMotors()` discipline** — the `static volatile` ablation flags and the motor
-  cache cause cross-test contamination under parallel execution if you don't isolate (this exact bug produced
-  the spurious MESOS −0.6%→−6.96% confusion; see CANONICAL_FACTS §F).
+  cache cause cross-test contamination under parallel execution if you don't isolate — isolate to keep
+  per-closure runs clean and regenerable (see CANONICAL_FACTS §F for the MESOS value).
 
 ---
 
@@ -150,7 +150,7 @@ answering AST's "no own CFD" objection.
 
 - **`paper/_shared/CANONICAL_FACTS.md`** — single source of truth for ALL numbers/claims/framing. Every number
   in the upgraded paper MUST match it (esp. §A headline, §B in-sample+holdout, §C ablation 8.10/0.87/0.39/0.15,
-  §D component benchmarks, §F MESOS −6.96% disclosed regression — no contamination story, §H no Devan-Ashwood,
+  §D component benchmarks, §F MESOS −6.96% standing largest-error value (NOT a regression; −0.6% withdrawn, no contamination story), §H no Devan-Ashwood,
   §J anti-salami scope boundaries). Corpus = **23 single-stage + 2 two-stage** (AeroPac 104K + MESOS).
 - **`paper/_shared/SUBMISSION_READINESS.md`** — per-paper status + the user-action checklist (DOIs, sequencing).
 - The full AST adversarial verdict (decision NO_GO, required-before-submit list, salami & circularity analyses,
