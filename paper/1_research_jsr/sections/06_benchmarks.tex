@@ -84,31 +84,20 @@ rather than a validated A-level subsystem; it is presented with its thin-cone
 limitation in Sec.~\ref{subsec:b-level} and is not counted among the A-level
 rows above.
 
-\begingroup
-\footnotesize
-\setlength{\LTcapwidth}{\textwidth}
-\begin{longtable}{@{}r p{0.215\textwidth} p{0.225\textwidth} p{0.175\textwidth} p{0.235\textwidth}@{}}
+\begin{table*}[htbp]
+\centering
 \caption{Representative externally benchmarked A-level subsystems, with primary
 reference, Mach range, and headline metric. Analytical and atmospheric rows are
 code-verification results (near-exact agreement); drag and stability rows are
 physical validations against published wind-tunnel, ballistic-range, free-flight,
 or tabulated data, with the semi-empirical residual reported as a mean absolute
 percent error (MAPE) or mean absolute error (MAE).}
-\label{tab:benchmarks}\\
+\label{tab:benchmarks}
+\begingroup\footnotesize
+\begin{tabular}{@{}r p{0.215\textwidth} p{0.225\textwidth} p{0.175\textwidth} p{0.235\textwidth}@{}}
 \toprule
 \# & Subsystem & Primary reference & Mach range & Headline metric \\
 \midrule
-\endfirsthead
-\multicolumn{5}{@{}l}{\footnotesize\itshape Table \thetable\ (continued)}\\
-\toprule
-\# & Subsystem & Primary reference & Mach range & Headline metric \\
-\midrule
-\endhead
-\midrule
-\multicolumn{5}{r@{}}{\footnotesize\itshape continued on next page}\\
-\endfoot
-\bottomrule
-\endlastfoot
 1  & Speed of sound                & U.S.\ Std.\ Atm.\ 1976~\cite{nasa1976ussa}        & sea level--80\,km          & max error $0.016\%$ \\
 2  & Sutherland viscosity          & Incropera / NIST~\cite{incropera2007}             & 150--500\,K                & MAPE $0.54\%$ vs.\ tables \\
 3  & Normal-shock relations        & NACA Report~1135~\cite{naca1135}                  & $M = 1.5$--10              & max error $<0.01\%$ \\
@@ -129,8 +118,10 @@ percent error (MAPE) or mean absolute error (MAE).}
 18 & Crossflow fin $C_{d,c}$       & Hoerner / Jorgensen~\cite{hoerner1965}            & crossflow                  & 1.42 (within range) \\
 19 & Magnus body fraction          & Platou 1965~\cite{platou1965}                     & supersonic                 & 0.30 within $0.30$--$0.80$ \\
 20 & Finned-vehicle total drag     & Basic Finner~\cite{dupuis1997}                    & $M = 1.08$--4.30, 8 pts    & MAPE $11.8\%$ \\
-\end{longtable}
+\bottomrule
+\end{tabular}
 \endgroup
+\end{table*}
 
 \subsection{Secondary and Internally Calibrated Rows}
 \label{subsec:secondary}

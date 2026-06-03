@@ -280,12 +280,13 @@ matched the exact analytical result to less than \SI{0.01}{\percent}.
   \label{fig:rayleigh_pitot}
 \end{figure}
 
-\begin{table*}[t]
+\begin{table*}[htbp]
   \centering
   \caption{Mach blending regions used in the present work; all transitions are
     $C^1$ continuous to maintain Runge--Kutta trajectory stability.}
   \label{tab:mach_blending}
-  \begin{tabular}{@{}llll@{}}
+  \begingroup\footnotesize
+  \begin{tabularx}{\textwidth}{@{}X l X l@{}}
     \toprule
     Physical quantity & Mach band & Method & Reference \\
     \midrule
@@ -322,5 +323,6 @@ matched the exact analytical result to less than \SI{0.01}{\percent}.
       & $1.0$--$1.1$ & Smoothstep toward freestream
       & Sec.~\ref{subsec:beta} \\
     \bottomrule
-  \end{tabular}
+  \end{tabularx}
+  \endgroup
 \end{table*}

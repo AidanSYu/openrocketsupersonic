@@ -80,14 +80,17 @@ Short Fin Can, Kinsel, Torrent — placed in DEV):
 ---
 
 ## C. MECHANISM ABLATION (re-run in isolation; valid)
-Effect of disabling each mechanism on corpus apogee error (mean |Δ| over the ablation set =
-**24 of the 25 corpus flights (MESOS 293K excluded; 23 single-stage plus the AeroPac 104K
-two-stage closure)**):
+Effect of disabling each mechanism on apogee error (mean |Δ| over the archived
+**24-flight mechanism-ablation subset: 23 single-stage flights plus the AeroPac 104K
+two-stage closure**). MESOS 293K remains part of the companion 25-flight validation
+corpus; it is not part of the archived ablation artifact that produced these deltas.
 
-> ⚠️ ABLATION-SET FIX (cross-paper audit): the ablation set is **NOT** "24 single-stage." It is
-> the 25-flight corpus minus MESOS 293K, and those 24 flights INCLUDE the AeroPac 104K two-stage
-> flight (flight_id 22). Correct framing everywhere = **"24 of the 25 corpus flights (MESOS 293K
-> excluded; 23 single-stage plus the AeroPac 104K two-stage closure)."**
+> ⚠️ ABLATION-SET FIX (cross-paper audit): the ablation set is **NOT** "24 single-stage."
+> It is the archived 24-flight mechanism-ablation subset and those 24 flights INCLUDE
+> the AeroPac 104K two-stage flight (flight_id 22). Correct framing everywhere =
+> **"archived 24-flight mechanism-ablation subset: 23 single-stage flights plus the
+> AeroPac 104K two-stage closure."** Do not imply MESOS 293K is bad data; it remains
+> valid in the companion 25-flight validation corpus.
 | Mechanism | mean \|Δ\| | max \|Δ\| (flight) | Note |
 |---|---|---|---|
 | Finned-base augmentation (FINNED_BASE_K, EXTERNAL/Basic-Finner) | **8.10 pp** | 39.5 (Kinsel M2.19) | **dominant apogee driver** |

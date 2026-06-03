@@ -23,7 +23,7 @@ Supersonic and Hypersonic Aerodynamic Extensions for OpenRocket: A Technical Rep
 ### Authors
 - Family name: `Yu`
 - Given name: `Aidan`
-- Affiliation: `Independent Researcher (acknowledges Duke University support)`
+- Affiliation: `Duke University`
 - ORCID: `0009-0005-9589-5314`
 
 ### Description / Abstract
@@ -36,8 +36,8 @@ models, local-flow coupling for fin stability, static and dynamic stability
 corrections, high-angle-of-attack effects, and numerical hardening for
 six-degree-of-freedom simulation.
 
-Validation is reported claim by claim: 27 externally benchmarked subsystem
-results against published wind-tunnel and free-flight data, 9 results
+Validation is reported claim by claim: 20 externally benchmarked A-level
+subsystem results against published wind-tunnel and free-flight data, 9 results
 calibrated against the integrated 25-flight corpus, and 1 negative external
 benchmark (NACA RM-10) that bounds an excluded geometry family.
 
@@ -48,7 +48,7 @@ absolute error with 22/25 within +/-10%. The honest claim is statistical
 parity with this version-locked RASAero II comparison set, not superiority:
 a paired Wilcoxon signed-rank test on absolute errors shows no significant
 difference. The corpus is published separately as the Rocket Flight Database
-v1.2 (doi:10.5281/zenodo.19976138).
+(doi:10.5281/zenodo.19976138).
 
 The complete OpenRocket Plus source code is available as an open-source
 fork at https://github.com/AidanSYu/openrocketsupersonic.
