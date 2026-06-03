@@ -97,7 +97,7 @@ def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(10.0, 7.5))
-    ax.set_xlim(0, 10)
+    ax.set_xlim(-0.9, 10)
     ax.set_ylim(0, 10)
     ax.set_aspect("equal")
     ax.axis("off")
@@ -226,10 +226,10 @@ def main() -> int:
     # -----------------------------------------------------------------------
     # Caption text on the left margin (small) describing flow direction
     # -----------------------------------------------------------------------
-    ax.text(0.10, 5.0, "data flow",
+    ax.text(-0.50, 5.0, "data flow",
             fontsize=ANNOT_SIZE, color="0.45",
-            rotation=90, ha="left", va="center")
-    ax.annotate("", xy=(0.05, 4.0), xytext=(0.05, 6.0),
+            rotation=90, ha="center", va="center")
+    ax.annotate("", xy=(-0.72, 4.0), xytext=(-0.72, 6.0),
                 arrowprops=dict(arrowstyle="-|>", color="0.55", linewidth=1.2))
 
     fig.savefig(OUT_PATH, dpi=200, bbox_inches="tight", facecolor="white")
