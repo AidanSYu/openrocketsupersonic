@@ -24,7 +24,7 @@ I am depositing the attached technical report documenting the OpenRocket Plus ae
 
 This report (Paper 4) is the full technical record; the journal/software/data manuscripts are non-overlapping distillations. Per prior-publication policy, a gray-literature deposit of this kind is low-risk and is disclosed to every venue.
 
-**Data, code, and AI disclosure.** The validation corpus is published separately as the Rocket Flight Database v1.2 (Zenodo DOI 10.5281/zenodo.19976138, CC-BY-4.0). The source code is at github.com/AidanSYu/openrocketsupersonic (GPL-3.0; archival code DOI minted at submission). Generative AI assisted with language editing, formatting, and code review only; all claims, equations, and numbers were authored and verified by me, and no AI is credited as an author.
+**Data, code, and AI disclosure.** The validation corpus is published separately as the Rocket Flight Database (Zenodo DOI 10.5281/zenodo.20531977, CC-BY-4.0). The source code is at github.com/AidanSYu/openrocketsupersonic (GPL-3.0; archival code DOI minted at submission). Generative AI assisted with language editing, formatting, and code review only; all claims, equations, and numbers were authored and verified by me, and no AI is credited as an author.
 
 I confirm the work is original, the deposit does not infringe third-party rights, and the above companion relationships are disclosed in full. Thank you for hosting this record.
 

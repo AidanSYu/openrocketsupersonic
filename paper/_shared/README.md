@@ -46,7 +46,7 @@ paper/
 │                       CLEANUP_PLAN.md, ast-metadata.yaml, …) and legacy/ (pre-2026-05 PDF builds; do not cite)
 │
 └── data/             Validation evidence & analysis
-    ├── analysis/     v1.2 corpus statistics, uncertainty, sensitivity sweep
+    ├── analysis/     corpus statistics, uncertainty, sensitivity sweep
     ├── snapshots/    historical frozen corpus baselines
     ├── outlier_closure/  per-flight closure sheets
     ├── csv/          numeric data underlying figures/tables
@@ -58,7 +58,7 @@ paper/
     └── legacy/       historical working notes (incl. the load-bearing rm10_vs_basic_finner_diagnostic.md)
 ```
 
-## Corpus headline (Rocket Flight Database v1.2, 25 flights)
+## Corpus headline (Rocket Flight Database, 25 flights)
 
 | Metric | Value |
 |---|---|
@@ -71,7 +71,7 @@ paper/
 | Largest single-flight error | MESOS 293K: **−6.96%** (273,056 ft) — within ±10%; the standing current-code value (not a regression) |
 
 Source: `data/analysis/corpus_bias_variance_2026_05_11/`. Corpus data:
-[Rocket Flight Database on Zenodo](https://doi.org/10.5281/zenodo.19976138) (CC-BY-4.0).
+[Rocket Flight Database on Zenodo](https://doi.org/10.5281/zenodo.20531977) (CC-BY-4.0).
 
 ## Building the deliverables
 

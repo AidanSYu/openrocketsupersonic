@@ -27,7 +27,7 @@ I am pleased to submit the original research article "A Shock-Geometry Pre-Pass 
 
 The Zenodo technical report is a non-peer-reviewed self-archived superset; it is cited as documentation, not a competing prior publication.
 
-**Data, code, and AI disclosure.** The Rocket Flight Database is archived at Zenodo (DOI 10.5281/zenodo.19976138, v1.2, CC-BY-4.0) with a GitHub mirror; the OpenRocket-Plus source (github.com/AidanSYu/openrocketsupersonic, GPL-3.0) carries an archival code Zenodo DOI minted at submission, with analysis scripts that regenerate every reported figure and statistic. In accordance with the AIAA policy on artificial intelligence (October 2024), a generative AI assistant (Anthropic Claude) was used for language editing, formatting, and code review only; all claims, equations, and numerical results were authored, derived, and verified by the human author, who takes full responsibility. No AI system qualifies for authorship.
+**Data, code, and AI disclosure.** The Rocket Flight Database is archived at Zenodo (DOI 10.5281/zenodo.20531977, CC-BY-4.0) with a GitHub mirror; the OpenRocket-Plus source (github.com/AidanSYu/openrocketsupersonic, GPL-3.0) carries an archival code Zenodo DOI minted at submission, with analysis scripts that regenerate every reported figure and statistic. In accordance with the AIAA policy on artificial intelligence (October 2024), a generative AI assistant (Anthropic Claude) was used for language editing, formatting, and code review only; all claims, equations, and numerical results were authored, derived, and verified by the human author, who takes full responsibility. No AI system qualifies for authorship.
 
 Thank you for your consideration. I would be glad to provide any further information.
 
