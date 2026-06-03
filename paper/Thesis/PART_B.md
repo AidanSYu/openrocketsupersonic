@@ -527,8 +527,7 @@ collapses to $\sin^2\beta\,[M_1^2(\gamma + \cos 2\beta) + 2]$. Dividing yields (
 #### 5.3.3 Weak and Strong Shock Solutions
 
 For a given pair $(M_1, \theta)$, equation (5.27) is transcendental in $\beta$ and
-generally admits **two** solutions (Fig. 5.1 illustrates the $\theta(\beta)$ curve
-qualitatively):
+generally admits **two** solutions:
 
 1. **Weak shock** ($\beta_{\text{weak}}$): the smaller root. Downstream flow is
    typically supersonic ($M_2 > 1$) except in a narrow band immediately below the
@@ -1092,9 +1091,9 @@ The eight tabulated rows in
 [`taylor_maccoll_cone_shock.csv`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/csv/taylor_maccoll_cone_shock.csv) and the
 NASA Glenn 10°-cone-at-$M_1 = 2.35$ reference case are the closure data for the
 Taylor-Maccoll shooter. Cone-shock angles agree with published Taylor-Maccoll tables
-to $<0.83\%$ (worst case at $M_1 = 5$, $\theta_c = 30^\circ$, residual $0.30^\circ$),
-with the dominant residual mechanism being the digitization precision of the
-$0.1^\circ$-rounded reference values:
+to a maximum relative error of $0.825\%$ (worst case at $M_1 = 5$, $\theta_c = 30^\circ$,
+residual $0.30^\circ$), within the $1\%$ acceptance gate, with the dominant residual
+mechanism being the digitization precision of the $0.1^\circ$-rounded reference values:
 
 | $M_1$ | $\theta_c$ (deg) | $\beta_{\text{cone}}$ Computed (deg) | Reference (deg) | Residual (deg) | Rel. error |
 |------:|------------------:|--------------------------------------:|------------------:|---------------:|-----------:|
@@ -1105,7 +1104,7 @@ $0.1^\circ$-rounded reference values:
 | 3.0   | 25                | 34.490                                 | 34.30              | 0.190          | 0.55%      |
 | 5.0   | 10                | 15.608                                 | 15.50              | 0.108          | 0.70%      |
 | 5.0   | 20                | 24.943                                 | 25.10              | 0.157          | 0.63%      |
-| 5.0   | 30                | 35.604                                 | 35.90              | 0.296          | 0.83%      |
+| 5.0   | 30                | 35.604                                 | 35.90              | 0.296          | 0.82%      |
 
 The
 [`ObliqueShockSolverTest.coneShockAngle`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/test/java/info/openrocket/core/aerodynamics/shocks/ObliqueShockSolverTest.java)
@@ -1134,21 +1133,26 @@ not reflect a solver defect on our side.
 #### 5.4.8 Three-Dimensional Relief in Numbers
 
 For completeness, the 3D-relief magnitude — the difference between the planar wedge
-shock and the conical shock at the same half-angle and Mach — is tabulated below. Note
-that at $M_1 = 2.5$, $\theta = 30^\circ$ the wedge shock is detached (the deflection
-exceeds $\theta_{\max}$) but the cone shock remains attached, illustrating how 3D relief
-*extends* the maximum half-angle for which an attached shock exists.
+shock and the conical shock at the same half-angle and Mach — is tabulated below over the
+same validated $(M_1, \theta_c)$ grid used in §5.4.7 and §5.3.8, so that every
+$\beta_{\text{cone}}$ is the validated Taylor-Maccoll solver output and every
+$\beta_{\text{wedge}}$ is the validated planar $\beta(\theta)$ solution. The conical shock
+is weaker (smaller $\beta$) than the wedge shock at every point — the `coneShockLessThanWedge`
+test confirms this inequality — and where the deflection exceeds the planar
+$\theta_{\max}(M_1)$ the wedge shock detaches while the cone shock can remain attached,
+illustrating how 3D relief *extends* the maximum half-angle for which an attached shock
+exists.
 
 | $M_1$ | $\theta_c$ (deg) | $\beta_{\text{cone}}$ (deg) | $\beta_{\text{wedge}}$ (deg) | Relief $\Delta\beta$ (deg) |
 |------:|------------------:|----------------------------:|-----------------------------:|---------------------------:|
-| 2.0   | 10                | 33.11                       | 39.31                         | 6.20                       |
-| 2.0   | 20                | 43.05                       | 53.42                         | 10.37                      |
-| 2.5   | 10                | 28.67                       | 32.83                         | 4.16                       |
-| 2.5   | 20                | 37.07                       | 44.41                         | 7.34                       |
-| 2.5   | 30                | 48.65                       | (detached)                    | N/A                        |
-| 3.0   | 10                | 25.88                       | 27.38                         | 1.50                       |
-| 3.0   | 20                | 33.42                       | 37.76                         | 4.34                       |
-| 3.0   | 30                | 43.12                       | 52.58                         | 9.46                       |
+| 2.0   | 10                | 31.206                      | 39.31                         | 8.10                       |
+| 2.0   | 20                | 37.796                      | 53.42                         | 15.62                      |
+| 3.0   | 10                | 21.715                      | 27.38                         | 5.67                       |
+| 3.0   | 20                | 29.615                      | 37.76                         | 8.15                       |
+| 3.0   | 25                | 34.490                      | 44.14                         | 9.65                       |
+| 5.0   | 10                | 15.608                      | 19.38                         | 3.77                       |
+| 5.0   | 20                | 24.943                      | 29.80                         | 4.86                       |
+| 5.0   | 30                | 35.604                      | 42.34                         | 6.74                       |
 
 The 3D relief is most pronounced at large half-angles and moderate Mach, decaying
 asymptotically as $M_1 \to \infty$ (the hypersonic small-disturbance limit, where wedge

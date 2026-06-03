@@ -6,7 +6,3 @@ vehicle,source_doc,apogee_real_ft,apogee_orp_ft,err_pct,max_mach,max_velocity_mp
 "Arcas Performance Flight 5 (secant)","DTIC AD-235341 p.16 (4-cal secant ogive, 25-KS-325, 171.4k ft)",171400,54973,-67.93,2.535,748.2,123.9,142.9,""
 "Nike-Apache NASA 14.108 GI","Dembrow/Jamieson 1963 p.1-3; NASA TM X-55700 p.6/p.64-65 (76 lb payload, effective ~83 deg, exact apogee bracketed)",528000,694137,31.47,6.498,1934.6,427.5,443.3,"DESCENT-NAN (apogee captured): Simulation values exceeded limits.  Try selecting a shorter time step."
 "Black Brant V VB (AAF-VB-32)","DTIC AD0733141 p.10 / p.14 Table 1 (Churchill 3 Mar 1971, 273.6 km)",897638,835071,-6.97,7.224,2146.5,150.9,704.5,"DESCENT-NAN (apogee captured): Simulation values exceeded limits.  Try selecting a shorter time step."
-"Super Loki Instrumented Dart (F4-1)","AFCRL-TR-73-0412 Table 6.1 (F4-1, 80 deg QE, sea level)",232000,46877,-79.79,2.837,954.8,587.8,111.5,""
-"Viper 3A Flight 1-4","AFCRL-TR-73-0412 Table 8.4 (E4.5-1, 27 SEP 72, dart 380 kft)",380000,623,-99.84,1.397,476.0,648.5,0.9,""
-"Viper 3A Flight 1-5","AFCRL-TR-73-0412 Table 8.4 (E4.5-1, 27 SEP 72, dart 397 kft)",397000,623,-99.84,1.397,476.0,648.5,0.9,""
-"Viper 3A Flight 1-6","AFCRL-TR-73-0412 Table 8.4 (E4.5-1, 02 OCT 72, dart 394 kft)",394000,623,-99.84,1.397,476.0,648.5,0.9,""

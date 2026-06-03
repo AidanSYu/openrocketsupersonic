@@ -51,12 +51,20 @@ RASAero~II predictions for the same flights.
 Because the corpus deviates from normality (Sec.~\ref{sec:corpus-dist}), every
 interval below is a 95\% non-parametric percentile bootstrap confidence
 interval (\num{20000} resamples, fixed seed \texttt{0x51A7EA}). The mean-error
-interval is $[-2.41,+1.72]\,\si{\percent}$; it brackets zero, so the predictor
-is statistically unbiased on this corpus. The remaining intervals are
+interval is $[-2.41,+1.72]\,\si{\percent}$; it brackets zero, so no bias is
+detectable on this corpus. We are careful not to overstate this as proven
+unbiasedness: at $n=25$ the interval is roughly \SI{\pm 2}{pp} wide, so a small
+true bias would not be resolved, and bracketing zero is an absence of evidence
+for bias rather than evidence of its absence. The remaining intervals are
 $[4.20,6.25]\,\si{\percent}$ for $\sigma$, $[4.38,6.19]\,\si{\percent}$ for RMSE,
 and $[3.78,5.70]\,\si{\percent}$ for MAE. The within-\SI{\pm 5}{\percent} rate of
-\SI{56}{\percent} carries an interval of $[36,76]\,\si{\percent}$, while the
-within-\SI{\pm 10}{\percent} rate is $100\%\,[100,100]$. Decomposing the mean
+\SI{56}{\percent} carries an interval of $[36,76]\,\si{\percent}$. The
+within-\SI{\pm 10}{\percent} rate is \SI{100}{\percent} (\num{25} of
+\num{25}); because the bootstrap is degenerate for an all-pass proportion
+(every resample contains only passing flights, returning $[100,100]$ as an
+artifact), we instead report an exact binomial Clopper--Pearson interval,
+whose lower bound is \SI{86.3}{\percent} at \SI{95}{\percent} two-sided
+confidence. Decomposing the mean
 squared error into squared bias and variance yields a $\text{bias}^2/\text{MSE}$
 ratio of \num{0.01} for ORP, against \num{0.16} for RASAero~II: the ORP residual
 is essentially pure variance. Operationally this means the remaining error is
@@ -181,7 +189,7 @@ distributions underlying the headline intervals.
   \includegraphics[width=\columnwidth]{bootstrap_distributions}
   \caption{Bootstrap sampling distributions (\num{20000} resamples, seed
     \texttt{0x51A7EA}) for the headline ORP statistics. The mean-error
-    distribution straddles zero, supporting the unbiasedness conclusion.}
+    distribution straddles zero; no bias is detectable at this sample size.}
   \label{fig:corpus-bootstrap}
 \end{figure}
 
@@ -194,8 +202,14 @@ error, the paired mean difference $|\text{ORP}|-|\text{RAS}|$ is
 \SI{-0.60}{pp} with a 95\% non-parametric percentile bootstrap confidence
 interval of $[-2.16,+0.96]\,\si{pp}$, which straddles zero. The Wilcoxon
 signed-rank test on the paired absolute errors returns $W=143.0$, $p=0.615$:
-the methods are not distinguishable in accuracy on this corpus, with ORP closer
-on \num{13} flights and RASAero~II closer on \num{12}. The Bland--Altman limits
+no significant difference in accuracy is detected on this corpus, with ORP closer
+on \num{13} flights and RASAero~II closer on \num{12}. We read this as a failure
+to reject rather than as positive proof of equivalence: at $n=25$ the paired test
+has limited power, so $p=0.615$ alone is absence of evidence for a difference, not
+evidence of its absence. Equivalence is supported more defensibly by the bootstrap
+interval on the paired mean above, which lies entirely within roughly
+\SI{\pm 2}{pp}---a two-one-sided-test argument against any difference larger than
+that margin---than by the non-significant Wilcoxon $p$-value. The Bland--Altman limits
 of agreement are \SI{\pm 14.3}{\percent} about a mean offset of
 \SI{-2.84}{\percent}. The honest claim supported by these statistics is
 \emph{parity}, not superiority. We further disclose an important asymmetry: the

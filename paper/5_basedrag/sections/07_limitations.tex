@@ -1,0 +1,98 @@
+% Limitations — Paper 5 (base-drag closure intercomparison).
+% BODY only; the master supplies \section{Limitations}.
+% Every number per paper/_shared/CANONICAL_FACTS.md (sections A, B, C, D, K).
+% Citation rule (FACTS H): NO Devan-Ashwood; the 0.064+0.186/M^2 form is an
+% empirical correlation validated vs NACA TN 3393 + consistent with ESDU 77021.
+% NOTE: \cite{yu2026jsr} is a PLACEHOLDER key (companion JSR paper, under review).
+
+The intercomparison reported above is bounded by six limitations, stated here
+plainly rather than deferred, so that the dominance of the base-drag closure in
+the apogee error budget is read against an honest account of where that closure
+is least constrained.
+
+\paragraph{The base-drag treatment carries two distinct empirical exposures.}
+The dominant apogee mechanism identified by the ablation---finned-base
+augmentation, contributing a mean $8.10$~pp to corpus apogee error when disabled
+versus $0.15$~pp for the shock-geometry pre-pass---is governed by the scale
+factor \texttt{FINNED\_BASE\_K}$=0.55$. This factor is calibrated externally
+against the Basic Finner aeroballistic-range data~\cite{dupuis1997}, not against
+the flight corpus; it is B-level only in that it lacks an isolated
+finned-base-pressure dataset, but it is \emph{not} corpus-frozen and so does not
+make the headline in-sample. The genuinely corpus-frozen constants are two
+\emph{separate} closures: $\texttt{THICK\_BL\_K}=2.2$ (anchor: Raven) in the
+thick-boundary-layer base-drag amplifier and $\texttt{SLENDER\_BODY\_K}=0.0025$
+(anchors: Raven, Rabia, Kinsel) in the slender-body pressure-drag term. Because
+those two constants were fitted with reference to flights that also appear in the
+validation corpus, the headline statistics are \emph{partly in-sample}. The
+mitigation for that exposure is the decontaminated prospective holdout of
+\S\ref{subsec:holdout}: every flight that either constant touched (Raven, Rabia,
+Rabia Short~Fin~Can, Kinsel, Torrent) is placed in the development split, so that
+the development set ($n=13$) returns a mean apogee error of $+0.22\%$ and MAE
+$5.47\%$, while the genuinely blind holdout ($n=12$) returns $-1.03\%$ and MAE
+$3.95\%$. The holdout being \emph{more} accurate than the development set is
+evidence that those two corpus-frozen constants generalize rather than overfit.
+That holdout does \emph{not} isolate \texttt{FINNED\_BASE\_K}, whose defense
+rests instead on its external Basic-Finner anchor and the component
+base-pressure benchmarks; promoting it to A-level against an independent
+finned-base-pressure dataset would remove its remaining empirical exposure and
+remains the single most valuable closure target for this model. The broader
+integrated-corpus context for these splits is reported in the companion flagship
+article~\cite{yu2026jsr}.
+
+\paragraph{The RM-10 geometry family is excluded, not closed.}
+Against the NACA RM-10 finned-body drag benchmark the model overpredicts by
+roughly $80\%$ MAPE---a deliberately retained negative benchmark rather than a
+suppressed failure, used to bound out a geometry family rather than to validate
+the headline claim. The deficit decomposes across three envelope violations of
+the very closures compared here. First, the Viswanath boattail
+correction~\cite{viswanath1996} is extrapolated outside its calibrated
+$6$--$16^{\circ}$ half-angle band, so its boattail relief is over-credited.
+Second, the finned-base augmentation over-credits base suction when an upstream
+boattail relief is present, because its calibration anchor is the
+\emph{flat-base} Basic Finner~\cite{dupuis1997} and not a tapered afterbody.
+Third, the DATCOM~4.1.5.1 fin wave-drag routine~\cite{datcom1978} carries no
+calibrated entry for the sharp-leading-edge $10\%$ circular-arc biconvex fins of
+this body. The RM-10 family---a high-fineness body with a tapered afterbody and
+$60^{\circ}$ swept-arc fins---is thus formally excluded from the headline claim
+rather than tuned against Basic Finner, and it bounds the geometry envelope over
+which the present base-drag closure conclusions apply: the result holds for the
+flat-or-near-flat-base, moderately fineness slender finned vehicles of the
+corpus, not for tapered-afterbody, highly swept-arc-fin configurations.
+
+\paragraph{Transonic base-drag blending is the disclosed regime weakness.}
+The transonic band ($0.8 \le M \le 1.3$) carries a corpus mean signed apogee
+error of $-3.66\%$, the only regime in which the commercial baseline is the more
+accurate predictor and the regime that most strains the C1-continuous Hermite
+blend used to carry base drag through the sonic transition. The empirical base
+correlation $C_{d,\text{base}} = 0.064 + 0.186/M^2$, validated against
+NACA~TN~3393~\cite{chapman1955} and consistent with ESDU~77021~\cite{esdu77021},
+is a high-supersonic form; its transonic continuation rests on the blended peak
+rather than on a dedicated transonic base-pressure dataset, and this is where
+the closure is least constrained.
+
+\paragraph{The Sahu transonic CFD comparator is deferred.}
+The thin-layer Navier--Stokes base-flow solution of Sahu and co-workers on a
+secant-ogive--cylinder--boattail at $M = 0.9$--$1.2$~\cite{sahu1983} is the most
+directly relevant transonic base-drag comparator in the literature, but its
+digitization is deferred to a closure memo: the reference geometry is
+structurally different from the flat-base Basic Finner fixture and would require
+a separate vehicle model to exercise faithfully. Closing this comparator is the
+natural next step for the transonic weakness noted above.
+
+\paragraph{No author-produced CFD.}
+All computational-fluid-dynamics points used as comparators are published,
+third-party results; we ran no own CFD. The base-drag closures are therefore
+benchmarked against tabulated wind-tunnel and free-flight base-pressure data and
+against the integrated flight corpus, not against an independent in-house
+high-fidelity simulation. This is a scope decision appropriate to an open-source
+engineering-level trajectory tool, but it means the base-pressure field itself
+is validated only indirectly---through integrated apogee and through external
+component data, never against a first-principles solution of our own.
+
+\paragraph{Ground-truth heterogeneity imposes an irreducible floor.}
+The flight corpus aggregates altimeter, GPS, and radar apogee records of
+differing provenance and precision; the resulting measurement heterogeneity sets
+an approximately $1\%$ floor on any apogee-accuracy claim. We do not subtract
+this floor from the reported errors, so the statistics are conservative: a
+portion of the residual attributed to base-drag modeling is in fact ground-truth
+noise that no closure can recover.

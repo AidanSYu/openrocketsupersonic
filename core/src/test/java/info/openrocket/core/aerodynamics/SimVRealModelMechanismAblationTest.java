@@ -60,16 +60,22 @@ public class SimVRealModelMechanismAblationTest extends BaseTestCase {
 	private static final double FT_PER_METER = 3.28084;
 	private static final long PER_CASE_TIMEOUT_MS = 240_000;
 
-	private static final String[] RASP_ENG_PATHS = {
-			"simvreal/rasp.eng",
-			"c:/Code/OpenRocket Plus/simvreal/rasp.eng",
-	};
+	private static final String RASP_ENG_PATH = "simvreal/rasp.eng";
 
 	@BeforeAll
 	static void setup() {
 		AblationConfig.reset();
-		for (String path : RASP_ENG_PATHS) {
-			loadMotorsIntoRASAeroCache(new File(path), "rasp.eng");
+		// Clear the JVM-global RASAero motor cache so this class binds only its own
+		// rasp.eng curves regardless of which test class ran before it.
+		RASAeroMotorsLoader.clearAllMotors();
+		// Resolve the RASP motor file via the same repo-root walk-up used for the
+		// CDX1 dir; a plain cwd-relative path fails under Gradle (cwd=core/) and
+		// silently leaves the motor cache empty -> every flight aborts (24 abnormal).
+		File rasp = findDir(RASP_ENG_PATH);
+		if (rasp != null) {
+			loadMotorsIntoRASAeroCache(rasp, "rasp.eng");
+		} else {
+			System.out.println("WARNING: " + RASP_ENG_PATH + " not found; SimVReal motors will not bind.");
 		}
 	}
 

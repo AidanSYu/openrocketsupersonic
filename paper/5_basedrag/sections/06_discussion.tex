@@ -1,0 +1,213 @@
+% Discussion — Paper 5 (base-drag closure intercomparison).
+% Body only; master supplies \section{Discussion}.
+% Every number per paper/_shared/CANONICAL_FACTS.md (sections A, B, C, D).
+% Headline: base-drag fidelity is the highest-leverage modeling investment for
+% integrated supersonic-rocket apogee; the shock pre-pass is essential for
+% LOCAL-flow fidelity but apogee-inert (0.15 pp); the in-sample FINNED_BASE_K is
+% handled by the holdout and bounded by external benchmarks. Relate to (do NOT
+% repeat) the companion JSR integrated result. Discuss generality across vehicle
+% classes. No Devan-Ashwood; Cd_base = 0.064 + 0.186/M^2 is empirical, anchored on
+% NACA TN 3393 + ESDU 77021. \cite{yu2026jsr} is the companion-paper placeholder key.
+
+\subsection{Base-drag fidelity is the highest-leverage modeling investment}
+\label{sec:disc-budget}
+
+The central result of the ablation (Section~\ref{sec:results}) is a sharp
+ordering of mechanisms by their leverage on integrated apogee. Disabling the
+finned-base augmentation closure moves the corpus mean apogee error by $8.10$~pp,
+an order of magnitude more than any other supersonic mechanism: Van~Driest~II
+compressible skin friction contributes $0.87$~pp~\cite{hopkins1971}, the
+DATCOM~4.1.5.1 fin wave-drag term $0.39$~pp~\cite{datcom1978,ulmann1956}, and the
+shock-geometry pre-pass only $0.15$~pp. The Pitts--Nielsen--Kaattari fin-body
+interference floor moves apogee by $0.00$~pp. The base-flow closure is therefore
+not merely one term among several: on this corpus it is the single dominant
+driver of where the integrated trajectory ends up.
+
+This ordering carries a direct prescription for where modeling effort should go.
+A practitioner extending an open-source trajectory code to supersonic speeds
+faces a long menu of candidate refinements --- higher-order wave-drag theory,
+boundary-layer transition modeling, crossflow corrections, refined pitch
+damping --- and finite time to implement them. The ablation says plainly that,
+for the quantity most users ultimately care about, base-flow fidelity is the
+highest-leverage investment, returning roughly nine times the apogee accuracy per
+unit of modeling effort as the next-ranked mechanism and about 54 times that of
+the shock-geometry pre-pass. The closure branches described here --- the
+Chapman--Korst turbulent shear-layer theory~\cite{chapman1955,chapman1958}, the
+Chapman laminar branch~\cite{chapman1950}, the ESDU~77021 bodies-of-revolution
+correlation~\cite{esdu77021}, the empirical $C_{d,\text{base}} = 0.064 +
+0.186/M^2$ form, and the Viswanath boattail-relief
+correction~\cite{viswanath1996} --- together make up the term that carries this
+leverage. We do not isolate the apogee contribution of each branch separately;
+the ablation attributes the leverage to the base-drag term as a whole, and within
+it the finned-base augmentation is the component the corpus is most sensitive to.
+The prescription is that refining base-flow fidelity, and especially the
+treatment of the finned base, returns more apogee accuracy than refining any
+other supersonic sub-model first.
+
+\subsection{Mechanism attribution versus local-flow fidelity}
+\label{sec:disc-prepass}
+
+It is tempting to equate architectural prominence with apogee leverage, and the
+shock-geometry pre-pass is the case where that equation breaks. The pre-pass is
+the most structurally celebrated component of the supersonic extension: it solves
+the oblique-shock and Taylor--Maccoll cone field once per timestep and threads the
+post-shock local conditions into every downstream model. Yet it moves integrated
+apogee by only $0.15$~pp, with a maximum single-flight effect of $3.6$~pp
+(FMJ Black~Rock~6, $M=2.46$). The reason is not that the pre-pass is wrong but
+that apogee integrates a trajectory whose drag impulse is dominated by the
+lower-Mach portion of the ascent, and the pre-pass is inert below $M=1$. A
+mechanism can be both physically essential and apogee-irrelevant.
+
+The pre-pass earns its place for a different reason: local-flow fidelity. The
+post-shock conditions it produces feed fin loads and static stability, where they
+have been verified to match Taylor--Maccoll cone
+tables~\cite{taylormaccoll1933,sims1964} to better than $1\%$ and the analytic
+shoulder-expansion result to numerical precision. It is also the architectural
+seam that makes the downstream supersonic closures --- including the base-flow
+models studied here, which depend on the local edge conditions at separation ---
+well-posed in the first place. The honest framing is thus twofold: the pre-pass
+is indispensable for correct \emph{local} aerodynamics (fin loads, static and
+dynamic stability, recovery-event timing) and as an enabling architecture, but it
+is not a gross-apogee mechanism. Conflating the two would misdirect a reader
+toward refining shock geometry when the apogee error budget sits almost entirely
+in the base-flow term.
+
+This is precisely why mechanism attribution, rather than aggregate accuracy
+alone, is the useful product of an ablation study. An integrated parity statistic
+tells a user that the tool works; it does not tell a developer \emph{which}
+sub-model to improve next. The decomposition here answers that second question,
+and its answer --- base flow first, everything else second --- redirects future
+modeling and validation effort toward the term that actually controls the
+trajectory-integrated result.
+
+\subsection{In-sample exposure of the finned-base closure, stated plainly}
+\label{sec:disc-insample}
+
+The dominant mechanism is also the one carrying empirical calibration, and
+intellectual honesty requires confronting that directly rather than burying it.
+There are two distinct in-sample exposures here, applied by different parts of the
+code, and they must be separated to be answered honestly.
+
+The first exposure is in the base-flow \emph{scale} constants. Two corpus-frozen
+boundary-layer scale factors enter the base-drag treatment ---
+$\mathrm{THICK\_BL\_K}=2.2$, anchored on the Raven flight, and
+$\mathrm{SLENDER\_BODY\_K}=0.0025$, anchored on Raven, Rabia, and Kinsel. Because
+those two constants were fitted with reference to flights that also appear in the
+validation corpus, the headline aggregate is \emph{partly in-sample}. This is the
+exposure the decontaminated holdout was designed to neutralize, and it neutralizes
+it directly. Every flight that either scale constant touched --- Raven, Rabia,
+Rabia Short~Fin~Can, Kinsel, and the Torrent diagnostic case --- was placed in the
+development partition, leaving a genuinely blind holdout. The development partition
+($n=13$) returns a mean signed error of $+0.22\%$ and a mean absolute error of
+$5.47\%$; the holdout ($n=12$), which neither scale constant ever saw, returns mean
+$-1.03\%$ and MAE $3.95\%$. The holdout is \emph{more} accurate than the
+development set. Overfit closures degrade on unseen data; a closure whose scale
+factors improve on the holdout is generalizing the underlying base-flow physics
+rather than memorizing the calibration flights. This inversion --- holdout better
+than dev --- is strong evidence that the two scale constants generalize.
+
+The second exposure is the finned-base augmentation factor itself
+($\mathrm{FINNED\_BASE\_K}$), the constant whose disabling produces the $8.10$~pp
+dominant-mechanism result. We state plainly that the decontaminated holdout above
+does \emph{not} isolate this factor: the holdout split was constructed to quarantine
+the two boundary-layer scale constants, not the flights that informed the
+finned-base augmentation, so it cannot be read as a clean-room test of the dominant
+lever. The defense of $\mathrm{FINNED\_BASE\_K}$ therefore rests not on that holdout
+but on external bounding. The component benchmarks of Section~\ref{sec:results}
+fix the relevant physics from outside the corpus entirely: the turbulent clean-body
+closures reproduce the NACA~TN~3393 nonlifting-body base pressures to $15.9\%$ MAPE
+(and the Hart free-flight subset to $4.0\%$)~\cite{chapman1955}, the Chapman laminar
+branch to $4.4\%$~\cite{chapman1955,chapman1950}, and the magnitude of the
+finned-base augmentation itself sits inside the $40$--$60\%$ over-clean-body band
+reported in aeroballistic-range testing of the Basic Finner~\cite{dupuis1997} and in
+Hoerner's afterbody-drag compendium~\cite{hoerner1965}. The augmentation factor is
+thus fixed by external finned-afterbody data, not by the flight corpus; it does not
+invent the mechanism. We make no claim that any of these constants are physically
+derived --- they are disclosed calibrations --- but the external Basic-Finner anchor
+of the augmentation factor, together with the holdout generalization of the two
+corpus-frozen scale constants, is what licenses naming the finned base the dominant
+apogee driver. Elevating $\mathrm{FINNED\_BASE\_K}$ from its present total-drag
+anchor to an isolated finned-base base-pressure benchmark is a clean direction for
+future work.
+
+\subsection{Relation to the integrated companion study}
+\label{sec:disc-companion}
+
+The present paper and its integrated-validation companion answer different
+questions, and the divergence is the point. The question here is one of mechanism
+leverage --- \emph{which} closure governs the trajectory-integrated result --- and
+its answer is that the apogee accuracy rests disproportionately on the base-flow
+closure while the celebrated shock-geometry architecture is, by the apogee metric,
+nearly inert. The companion paper~\cite{yu2026jsr} asks instead whether the
+integrated tool predicts supersonic apogee and how it compares to the commercial
+baseline~\cite{rogers2015}, and reports that integrated-parity result; it does not
+decompose \emph{why} the prediction lands where it does. The two studies share a
+corpus and a code base but pursue distinct ends, and the value of reading them
+together is that the present decomposition explains the structure underlying the
+companion's aggregate. The claim defended here is a statement about mechanism
+leverage, not about aggregate parity, and it stands on the ablation and the
+holdout alone.
+
+\subsection{Generality across vehicle classes}
+\label{sec:disc-generality}
+
+How far does ``base drag governs apogee'' carry beyond the present corpus? The
+mechanism that makes base drag dominant --- a large, separated aft-face pressure
+deficit acting through the low-supersonic band where the climb-to-apogee integral
+is weighted most heavily --- is generic to slender, fin-stabilized,
+flat-or-near-flat-base vehicles, the class that spans the corpus from minimum-diameter
+amateur high-power rockets through university-competition airframes to the
+single- and two-stage sounding rockets that reach the upper Mach range. Within
+that class the conclusion is expected to be robust, because every member shares
+the same qualitative base-flow topology and the same trajectory weighting toward
+the lower-supersonic regime. The corpus itself spans Mach~$0.54$ to $4.33$ and a
+wide spread of fineness ratios and fin geometries, and the dominance of the
+drag-coefficient term is not an artifact of one airframe: a per-flight
+sensitivity sweep (Fig.~\ref{fig:tornado}) shows that the overall drag-coefficient
+scale --- of which base drag is the dominant supersonic component --- is the
+single most leveraged parameter for predicted apogee across structurally diverse
+vehicles spanning the low-supersonic to upper-Mach range, dwarfing launch
+geometry and integration-timestep sensitivities on every flight shown.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{sensitivity_tornado_composite.png}
+\caption{Per-flight apogee sensitivity (tornado) for representative
+high-supersonic vehicles: change in predicted apogee for a $\pm 1\sigma$ swing in
+each model parameter. The overall drag-coefficient scale --- whose supersonic
+budget is dominated by the base-drag term identified in
+Table~\ref{tab:ablation} --- is the most leveraged parameter on every vehicle,
+far ahead of launch-rod angle, launch altitude, and integration timestep. This
+flight-by-flight consistency across structurally different airframes is direct
+evidence that the leverage of the base-drag term on integrated apogee is generic
+to the slender fin-stabilized class, not an artifact of a single geometry.}
+\label{fig:tornado}
+\end{figure}
+
+The conclusion does, however, have boundaries that should be stated rather than
+assumed. Three vehicle attributes shift the apogee error budget away from base
+drag. First, \emph{aggressive boattailing}: a well-designed aft taper converts a
+large fraction of the base area to a recompressing surface, so the Viswanath
+relief~\cite{viswanath1996} shrinks the base term and a larger share of the
+budget migrates to forebody and fin wave drag --- and, as the retained RM-10
+negative benchmark shows, an upstream boattail can drive the finned-base
+augmentation outside its flat-base calibration envelope entirely. Second,
+\emph{boundary-layer state}: the corpus is overwhelmingly turbulent at
+separation, but a true perfect-finish, laminar-to-the-base vehicle is governed by
+the Chapman laminar branch~\cite{chapman1950}, whose much smaller base drag (a
+$44\%$ component swing relative to the turbulent form on the same TN~3393 data)
+reduces the term's absolute apogee leverage even though base flow remains the
+relevant closure. Third, \emph{flight regime}: the dominance is a low-supersonic
+phenomenon. For a vehicle that spends most of its impulse subsonically, base drag
+recedes behind skin friction and form drag; for a sustained-hypersonic vehicle,
+forebody wave drag and real-gas effects grow in relative weight as the
+$0.186/M^2$ term decays, and the present corpus offers no inferential support
+above Mach~$4.33$. The defensible scope of the result is therefore: \emph{for
+slender, fin-stabilized, blunt-or-lightly-tapered-base vehicles flying through the
+transonic and low-supersonic regime, the base-drag closure --- and specifically
+the treatment of the finned base --- is the highest-leverage determinant of
+integrated apogee.} That is the regime in which the overwhelming majority of
+amateur, collegiate, and meteorological sounding-rocket flights operate, which is
+what makes the result broadly useful rather than corpus-specific; it is also a
+falsifiable boundary, and extending the ablation to boattailed, perfect-finish,
+and sustained-hypersonic vehicles is a natural test of where it ceases to hold.

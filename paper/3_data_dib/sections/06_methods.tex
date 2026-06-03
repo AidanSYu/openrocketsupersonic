@@ -1,0 +1,119 @@
+% Experimental Design, Materials and Methods
+% Describes HOW each column of the dataset was produced. No new scientific
+% conclusions are drawn here; the analysis and its interpretation belong to the
+% companion research article \cite{yu2026jsr}. All numbers match
+% paper/_shared/CANONICAL_FACTS.md and the published CSV files.
+
+This section documents how each column of the database was produced. No new
+analysis or scientific interpretation is presented here; those belong to the
+companion research article \cite{yu2026jsr}, which this data article accompanies.
+The design principle is that the three quantity groups in
+\texttt{flight\_comparison.csv} --- measured ground truth, the commercial
+reference prediction, and the open-source prediction of this work --- originate
+from three independent sources, so that the paired comparison is non-circular.
+The measured and commercial-reference columns are never regenerated locally; only
+the \texttt{apogee\_thiswork\_ft} column is produced by the archived code release
+described below.
+
+\subsection{Measured ground truth (real apogees and flight metadata)}
+
+The columns \texttt{apogee\_real\_ft}, \texttt{peak\_mach},
+\texttt{flight\_data\_type}, \texttt{data\_source}, \texttt{diameter\_in}, and
+\texttt{launch\_site\_alt\_ft} are externally measured quantities transcribed from
+published flight records; they are not computed by this work. For the 23
+single-stage flights of the headline corpus, the apogees and the associated flight
+metadata are the values published in C.~E. Rogers' RASAero~II altitude-comparison
+collection \cite{rogers2015,rogers_rasaero_alt}, which records each flight together
+with the instrumentation used to determine apogee (barometric altimeter, optical
+track, GPS, or integrated accelerometer; see the \texttt{flight\_data\_type}
+column). The two two-stage vehicles---the AeroPac~104K Two-Stage and MESOS~293K---take
+their measured apogees ($104{,}659$~ft and $293{,}488$~ft, respectively) from the
+flight record in the same way. The heterogeneity of the measurement
+methods across the corpus implies a non-uniform ground-truth uncertainty floor of
+order one percent, which is reported as-is and not subtracted from any error
+figure.
+
+For the exploratory high-Mach set in
+\texttt{sounding\_rockets\_exploratory.csv}, the real apogees in
+\texttt{real\_apogee\_ft} are radar-, beacon-, or GPS-tracked values taken from the
+primary historical document cited per row in the \texttt{source\_doc} field (e.g.
+the NACA Nike--Deacon flight report \cite{heitkotter1956} and the Black~Brant~VB
+flight report \cite{dtic_ad0733141}; the Nike--Apache radar apogees are taken from
+the NASA Goddard Wallops radar-apogee report X-721-67-103 named in those rows'
+\texttt{source\_doc} field). Each row's provenance is therefore self-contained
+in \texttt{source\_doc}; the corresponding provenance statement is given in the
+repository's \texttt{reproducibility.md}.
+
+\subsection{Commercial reference predictions (RASAero~II)}
+
+The columns \texttt{apogee\_rasaero\_ft} and \texttt{err\_rasaero\_pct} are the
+RASAero~II \cite{rogers2015} altitude predictions \emph{as recorded by C.~E. Rogers}
+in his public RASAero~II altitude-comparison set
+\cite{rogers_rasaero_alt}. They are transcribed from that published source and were
+\emph{not} re-run by this work. Consequently they are version-locked recorded
+predictions rather than fresh, independently re-run pre-flight cases; the companion
+research article \cite{yu2026jsr} frames the comparison accordingly. Reproducing
+these specific predictions would require the original RASAero~II configuration files
+and software version used by Rogers, which are outside the scope of this dataset.
+
+\subsection{This-work predictions (OpenRocket-Plus)}
+
+The columns \texttt{apogee\_thiswork\_ft}, \texttt{err\_thiswork\_pct}, and
+\texttt{abs\_err\_delta\_pp} are produced by OpenRocket-Plus, the supersonic
+extension of the open-source OpenRocket simulator \cite{niskanen2009}, as embodied
+in its archived code release. Each flight is represented by a per-vehicle
+\texttt{.ork} model built from the geometry, mass, and motor specification given in
+the vehicle's source documentation; for the two-stage MESOS~293K closure the model
+uses reconstructed KIP-EX motors. The \texttt{err\_thiswork\_pct} value is the
+signed relative error of the predicted apogee against the measured apogee in the
+same row, and \texttt{abs\_err\_delta\_pp} is the paired difference of absolute
+errors, RASAero~II minus this work,
+$\lvert\texttt{err\_rasaero\_pct}\rvert -
+\lvert\texttt{err\_thiswork\_pct}\rvert$, in percentage points.
+
+At a high level, each \texttt{.ork} model is flown through the standard OpenRocket
+six-degree-of-freedom flight-dynamics integrator with the launch-site elevation set
+from \texttt{launch\_site\_alt\_ft} and a standard atmosphere
+\cite{nasa1976ussa}. The aerodynamic build extends the Barrowman-type method
+\cite{barrowman1967} of baseline OpenRocket \cite{niskanen2009} with the supersonic
+and base-drag models documented in the companion research article
+\cite{yu2026jsr}; the engineering provenance of those component models is recorded
+there and in the related software and technical-report companions. Predicted
+apogee is read from the simulation output. The reported \texttt{peak\_mach} for each
+flight characterizes the regime reached.
+
+\subsection{The MESOS~293K model-column disclosure}
+
+One of the 25 \texttt{apogee\_thiswork\_ft} values differs from the value first
+published in RASAero~II-comparison snapshot v1.2 of the database, and this is
+disclosed plainly. For MESOS~293K, the present archived code release predicts
+$273{,}056$~ft, an error of $-6.96\%$ against the measured $293{,}488$~ft; this is
+the value carried in the published CSV and used throughout the companion article
+\cite{yu2026jsr}. The earlier v1.2 snapshot, produced under an earlier code
+version, recorded $291{,}601$~ft ($-0.6\%$). The difference is a genuine,
+reproducible regression of the model between code versions: running the MESOS
+flight in isolation under the present archived release reproduces $273{,}056$~ft,
+confirming that the change is a real model-version difference and not a
+test-harness or execution artifact. The other 24 model values are unchanged from
+v1.2. Because $-6.96\%$ remains within the $\pm 10\%$ admission band, the
+$25/25$-within-$\pm 10\%$ membership of the headline corpus is unaffected. A future
+release of the database will re-synchronize the model column to the present
+archived code.
+
+\subsection{Reproducibility of the derived statistics}
+
+The two \texttt{err\_*\_pct} columns and \texttt{abs\_err\_delta\_pp} are stored
+rounded to limited precision; all reported summary statistics are recomputed from
+the full-precision \texttt{apogee\_*\_ft} columns, so the apogee values are the
+single source of truth. Two Python scripts distributed with the dataset regenerate
+every derived figure from the published \texttt{flight\_comparison.csv}:
+\texttt{analyze.py} recomputes the corpus bias/variance summary (mean signed error,
+standard deviation, RMSE, MAE, and the $\pm 5\%$/$\pm 10\%$ counts), and
+\texttt{uncertainty\_quantification.py} regenerates the bootstrap confidence
+intervals and the paired RASAero~II comparison (including the Wilcoxon signed-rank
+test on absolute error \cite{wilcoxon1945}). The reproduction recipe, software
+versions, and seed are listed in the repository's \texttt{reproducibility.md}. The
+interpretation of these statistics --- the unbiasedness of the mean error, the
+statistical-parity finding versus RASAero~II, and the per-regime and in-sample
+disclosures --- is presented and defended in the companion research article
+\cite{yu2026jsr} and is deliberately not repeated here.

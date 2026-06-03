@@ -1,0 +1,192 @@
+% =====================================================================
+% Section 4 body: Benchmark and Mechanism-Ablation Methodology.
+% Master supplies the \section header. This fragment is the BODY only.
+% Organized to LEAD with external (non-in-sample) component benchmarks, then the
+% mechanism-attribution (ablation) experiment, then the in-sample defense.
+% NOTE: the "component intercomparison" here benchmarks closure BRANCHES against
+% base-pressure datasets; it does NOT swap closures at apogee (out of scope).
+% All numbers per paper/_shared/CANONICAL_FACTS.md sections B, C, D.
+% Citation rule (Sec. H): the empirical Cd_base = 0.064 + 0.186/M^2 is an
+% EMPIRICAL fit validated vs NACA TN 3393 and consistent with ESDU 77021;
+% NO Devan-Ashwood. Companion JSR paper = \cite{yu2026jsr} (placeholder).
+% =====================================================================
+
+The methodology has three parts, ordered from the most external evidence to
+the most in-sample. The \emph{component intercomparison}
+(Section~\ref{sec:method-component}) is the substantive physics of the paper: it
+asks how each candidate base-drag closure reproduces \emph{measured} base
+pressure in isolation, against external wind-tunnel and free-flight data that
+played no part in any corpus calibration. The \emph{mechanism ablation}
+(Section~\ref{sec:method-ablation}) is the motivating experiment: it asks how
+much each implemented aerodynamic mechanism actually moves integrated apogee, by
+disabling it one at a time across the flight corpus, and it is what singles out
+base drag as the dominant driver. The \emph{decontaminated holdout}
+(Section~\ref{sec:method-holdout}) is the in-sample defense: it asks whether the
+two corpus-frozen base-drag scale constants generalize to flights that never
+informed their calibration, pre-empting the circularity critique that the
+ablation substrate would otherwise invite. We lead with the externally validated
+closure fidelity, use the ablation as the finding that motivates a base-drag
+study at all, and confront the in-sample constants head-on rather than letting
+them read as the result.
+
+\subsection{Component intercomparison protocol}
+\label{sec:method-component}
+
+Each base-drag closure introduced in Section~\ref{sec:basedrag-models} is
+exercised against published base-pressure data with the boundary-layer state and
+length Reynolds number $\mathrm{Re}_{L}$ matched to the reference condition, so
+that closures are compared on the flow regime each was derived for rather than
+averaged across regimes. The discriminator is deliberate: as
+Section~\ref{subsec:laminar} shows, applying a turbulent correlation to laminar
+separation data inflates the error by an order of magnitude, so the protocol
+conditions closure selection on the boundary-layer state and not on Mach number
+alone. The error metric throughout is the mean absolute percentage error (MAPE)
+of the predicted base-pressure or base-drag coefficient against the digitized
+reference points. Three external datasets anchor the comparison, none of which
+was used to tune any integrated-trajectory constant; a fourth, computational,
+comparator is identified but deferred.
+
+\paragraph{NACA TN 3393 (turbulent and laminar).} The primary anchor is the
+Reller and Hamaker base-pressure investigation of nonlifting bodies of revolution
+at Mach 2.73--4.98~\cite{chapman1955}, which reports base pressure for both
+turbulent and laminar boundary-layer states on the same geometries and therefore
+exercises both base-drag branches against a single, internally consistent
+experiment. Against the turbulent points the empirical correlation
+$C_{d,\mathrm{base}} = 0.064 + 0.186/M^{2}$ of Eq.~\eqref{eq:empirical} attains a
+MAPE of $15.9\%$; against the laminar points the Chapman laminar closure of
+Eq.~\eqref{eq:laminar} attains $4.4\%$~\cite{chapman1955}. The laminar closure is
+thus markedly more faithful on its target regime, and the two branches are not
+interchangeable: applying the turbulent correlation to the same laminar data
+yields a MAPE of $44\%$. This is the quantitative basis for treating ``the''
+base-drag closure as a state-dependent family rather than a single object.
+
+\paragraph{Hart NACA RM L52E06 (transonic turbulent).} To extend the turbulent
+comparison below the TN~3393 floor and through the transonic base-drag peak near
+$M \approx 1.05$, the turbulent closure is additionally compared against the Hart
+free-flight base-pressure measurements (NACA~RM~L52E06~\cite{hart1952basedrag}),
+where it attains a MAPE of $4.0\%$. The two turbulent anchors together span the transonic
+peak (Hart) and the supersonic decay (TN~3393), and bracket the band in which the
+empirical correlation $C_{d,\mathrm{base}} = 0.064 + 0.186/M^{2}$ and the degree-4
+transonic blend of Section~\ref{subsec:transonic} operate. The Hart finless
+free-flight reading of $0.250 \pm 0.013$ near the peak also fixes the transonic
+anchor point of that blend.
+
+\paragraph{Chapman laminar data.} The laminar branch is anchored on the laminar
+subset of the same TN~3393 experiment~\cite{chapman1955}, against which the
+Chapman laminar closure attains the $4.4\%$ MAPE quoted above. This isolates the
+``perfect-finish'' / delayed-transition case relevant to highly polished slender
+vehicles, for which the turbulent correlation over-predicts base drag, and
+provides the externally validated counterpart to the laminar branch invoked for
+the smoothest airframes in the corpus.
+
+\paragraph{Transonic CFD comparator (deferred, disclosed).} A fourth comparison is
+identified but not executed in this work: the Sahu, Nietubicz and Steger
+thin-layer Navier--Stokes computation of base flow on a secant-ogive-cylinder-%
+boattail projectile at transonic speed
+($M \approx 0.9$--$1.2$)~\cite{sahu1983} would provide an independent, CFD-grade
+check of the closures through the transonic peak, where the empirical and
+Chapman--Korst forms hand off to the degree-4 blend. Its geometry is structurally
+different from the projectile families used for the other anchors, so reproducing
+it would require building a separate vehicle model and digitizing the published
+base-pressure distributions. We disclose this comparison as \emph{deferred}---it
+is documented as a memo only and is not exercised as a quantitative comparator
+here---rather than report a partial result. We claim \emph{no computational fluid
+dynamics of our own}; \cite{sahu1983} is a published third-party computation cited
+as a prospective comparator.
+
+\subsection{Controlled mechanism-ablation protocol}
+\label{sec:method-ablation}
+
+The component intercomparison establishes closure fidelity in isolation but does
+not establish which mechanism governs the \emph{integrated} apogee error. A
+closure that matches a wind-tunnel point to a few percent may still move apogee by
+much more, or much less, than its component error suggests, because apogee
+integrates the drag history over a trajectory weighted toward the lower-Mach
+portion of the flight. To resolve this, we run a controlled ablation on $24$ of the $25$ corpus
+flights---the externally selected supersonic altitude-comparison set, spanning
+Mach~$0.54$--$3.46$, used for the integrated validation reported in the companion
+flagship study~\cite{yu2026jsr}. The ablation set is the full corpus with the
+MESOS~293K case excluded, leaving $23$ single-stage flights plus the AeroPac~104K
+two-stage closure. Here the corpus is the \emph{substrate for a
+mechanism-attribution experiment}, not the basis for an accuracy headline; MESOS~293K
+is the single case excluded because its high-Mach staging physics confound a
+single-mechanism attribution.
+
+The protocol disables one aerodynamic mechanism at a time, re-flies all $24$
+of these trajectories, and records the change in the corpus mean absolute apogee error,
+$\overline{|\Delta|}$, relative to the fully enabled baseline. Five mechanisms are
+ablated: the finned-base drag augmentation $\Phi_{\text{fin}}$ of
+Eq.~\eqref{eq:finnedbase}; the Van~Driest~II compressible skin-friction
+transformation~\cite{hopkins1971}; the DATCOM Section~4.1.5.1 fin wave-drag
+closure~\cite{datcom1978,ulmann1956}; the shock-geometry pre-pass; and the
+Pitts--Nielsen--Kaattari fin--body interference correction, together with its
+$K_{1}$ floor.
+
+Each mechanism is ablated \emph{in isolation}---disabled singly, with every other
+mechanism held at its baseline state, and the corpus re-run from a clean
+configuration for each ablation. This isolation discipline is essential and not
+incidental: the ablation flags are evaluated as shared static state, so toggling
+several mechanisms within a single process risks cross-contaminating the recorded
+baseline and corrupting the attribution. Running each ablation as an independent,
+clean corpus pass removes that contamination, and the resulting single-mechanism
+apogee sensitivities are the per-mechanism $\overline{|\Delta|}$ values reported
+in Section~\ref{sec:results}.
+
+The ranking that emerges---and the finding that motivates this paper---is steeply
+ordered. The finned-base augmentation dominates the apogee error budget at a mean
+$\overline{|\Delta|}$ of $8.10$~pp (reaching $39.5$~pp on the Mach-2.19 A-601
+Kinsel flight), more than an order of magnitude larger than the next mechanism.
+Compressible skin friction contributes $0.87$~pp, the DATCOM fin wave-drag term
+$0.39$~pp, and the shock-geometry pre-pass---the celebrated architectural
+innovation of the companion paper---only $0.15$~pp, because that pre-pass is inert
+below Mach~1 and apogee integrates a trajectory dominated by lower-Mach drag; the
+PNK interference term, with its $K_{1}$ floor, registers no measurable apogee
+effect ($0.00$~pp). Base drag, not shock geometry, governs the apogee error
+budget, which is what licenses a focused base-drag closure study distinct from the
+integrated parity result of~\cite{yu2026jsr}.
+
+\subsection{Decontaminated prospective holdout for the corpus-frozen constants}
+\label{sec:method-holdout}
+
+The turbulent base-drag branch carries two scale constants that were frozen
+against the corpus rather than against an independent component dataset: a
+thick-boundary-layer scale, \texttt{THICK\_BL\_K}~$=2.2$, and a slender-body
+scale, \texttt{SLENDER\_BODY\_K}~$=0.0025$. Because these constants were tuned on
+corpus flights, the integrated result is \emph{partly in-sample}, and a naive
+corpus-wide accuracy figure would be optimistically biased. We disclose this
+plainly and test generalization with a decontaminated prospective holdout, which
+is the defense against the circularity critique that follows from using a
+corpus-calibrated quantity as the ablation substrate of
+Section~\ref{sec:method-ablation}.
+
+The decontamination rule is strict: \emph{every} flight that either constant
+touched during calibration---the anchor flights for both constants and the
+source-diagnostic flight---is quarantined in the development partition. This
+decontamination is applied as an overlay on the corpus's existing
+development/holdout bookkeeping: the five flights involved in fixing the two
+constants (Raven, Rabia, Rabia Short Fin Can, Kinsel, and Torrent) are placed in
+the development partition (DEV) together with the cases already reserved for
+closure development and ablation, while no calibration-touched flight is allowed
+to remain in the blind set (HOLDOUT). This yields a development partition of
+thirteen flights and a holdout of twelve. We stress that this calibration
+decontamination is a stricter criterion than, and is not to be conflated with,
+the corpus's prospective forward-freeze protocol, which partitions flights by
+whether they may be re-tuned after a freeze date rather than by whether they
+informed the two scale constants, and therefore assigns three of the
+calibration-touched flights differently. The constants are frozen on DEV and
+never re-touched; HOLDOUT is scored exactly once. If the constants merely overfit
+the corpus, HOLDOUT accuracy should degrade relative to DEV; if they capture a
+transferable physical scaling, HOLDOUT accuracy should hold or improve.
+
+The split yields a development partition of $n=13$ (mean signed error $+0.22\%$,
+MAE $5.47\%$) and a blind holdout of $n=12$ (mean signed error $-1.03\%$, MAE
+$3.95\%$). These partition statistics are computed from the per-flight apogee
+errors of the archived corpus-baseline artifact, evaluated against the
+current-code MESOS~293K value, so the split is regenerable from the released data
+under the membership stated above. The holdout is \emph{more} accurate than the
+development partition ($3.95\% < 5.47\%$), which is the primary in-sample defense:
+the two corpus-frozen base-drag constants generalize to unseen flights rather than
+overfitting the calibration set. This result is what permits the corpus to serve
+as the ablation substrate in Section~\ref{sec:method-ablation} without
+circularity, and it is consistent with the holdout reported in the companion
+study~\cite{yu2026jsr}.

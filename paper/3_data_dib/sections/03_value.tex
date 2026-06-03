@@ -1,0 +1,44 @@
+% Value of the Data (mandatory bulleted list). The master supplies the
+% \section*{Value of the Data} header; this fragment is only the itemize.
+% All numbers MUST match paper/_shared/CANONICAL_FACTS.md and the CSVs.
+% Descriptive only — no scientific conclusions (those belong to the parent
+% JSR research article \cite{yu2026jsr}).
+\begin{itemize}
+
+  \item The database is, to the authors' knowledge, the first openly published,
+        externally curated apogee benchmark for supersonic sounding rockets and
+        high-power rocketry: the 25-flight headline corpus is drawn from a
+        third-party RASAero~II altitude-comparison collection \cite{rogers2015},
+        so flight selection is independent of any outcome of the simulator
+        described in the parent article \cite{yu2026jsr}.
+
+  \item Each flight is supplied with a paired commercial-baseline prediction
+        (RASAero~II \cite{rogers2015}) alongside the measured apogee, enabling a
+        head-to-head, apples-to-apples evaluation of any rocket-trajectory
+        simulator against both ground truth and an established reference tool
+        without re-deriving the baseline.
+
+  \item Every reported statistic is reproducible: the published analysis scripts
+        regenerate all signed errors, summary statistics, and bootstrap
+        confidence intervals directly from the full-precision apogee columns, so
+        reusers can audit and re-derive every figure rather than trusting
+        pre-computed values.
+
+  \item The corpus spans the subsonic, transonic, and supersonic regimes from
+        Mach~0.54 to Mach~4.33, with an exploratory extension of roughly 20
+        historical high-Mach sounding-rocket flights reaching toward Mach~7
+        (e.g.\ Black Brant~V~VB at Mach~7.22), giving a continuous Mach ladder
+        for regime-by-regime assessment.
+
+  \item The data are reusable for validating or benchmarking any rocket
+        aerodynamics or trajectory tool---including open-source codes such as
+        OpenRocket \cite{niskanen2009}, RocketPy \cite{rocketpy2021}, and
+        engineering-level prediction methods \cite{sooy2005}---against a common,
+        version-locked set of flights.
+
+  \item Each record carries vehicle, motor, body-diameter, launch-site altitude,
+        and instrumentation-type metadata, together with the cited source
+        document, so reusers can reconstruct and re-simulate the flights or trace
+        every value back to its original published record.
+
+\end{itemize}

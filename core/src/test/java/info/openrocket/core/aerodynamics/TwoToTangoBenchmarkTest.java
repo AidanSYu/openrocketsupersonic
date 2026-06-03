@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import info.openrocket.core.document.OpenRocketDocument;
 import info.openrocket.core.document.Simulation;
@@ -38,6 +39,9 @@ import info.openrocket.core.startup.OpenRocketCore;
  *   waltz                 J495AP + H550    20,932 ft   M ~1.54
  *   twototangomeme        K478  + N3114RR 135,443 ft   M ~4.36  (aspirational)
  */
+// Shares the JVM-global RASAeroMotorsLoader cache; must not mutate it concurrently
+// with SimVRealBenchmarkTest et al., hence the shared exclusive resource lock.
+@ResourceLock("AERO_CPU_HEAVY")
 public class TwoToTangoBenchmarkTest {
 
     /** Subdirectory under the project root where the CDX1 files were saved */
@@ -60,6 +64,11 @@ public class TwoToTangoBenchmarkTest {
     @BeforeAll
     static void setup() {
         OpenRocketCore.initialize();
+        // Clear the JVM-global RASAero motor cache so this class binds only its own
+        // curves and does not leave its estimated-impulse stub motors (J495AP, etc.)
+        // in the shared static List for a later class (e.g. SimVRealBenchmarkTest) to
+        // bind by first-match. See RASAeroMotorsLoader.allMotors.
+        RASAeroMotorsLoader.clearAllMotors();
         for (String path : RASP_ENG_PATHS) {
             loadMotorsIntoRASAeroCache(path);
         }

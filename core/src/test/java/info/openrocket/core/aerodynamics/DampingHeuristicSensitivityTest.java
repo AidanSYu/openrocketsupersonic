@@ -75,6 +75,9 @@ public class DampingHeuristicSensitivityTest extends BaseTestCase {
 
     @BeforeAll
     static void setup() {
+        // Clear the JVM-global RASAero motor cache so this class binds only its own
+        // rasp.eng curves (first-match lookup over a no-dedup static List).
+        RASAeroMotorsLoader.clearAllMotors();
         // Preload RASAero motors
         for (String path : new String[]{"simvreal/rasp.eng", "c:/Code/OpenRocket Plus/simvreal/rasp.eng"}) {
             File file = new File(path);

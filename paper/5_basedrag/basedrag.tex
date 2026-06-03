@@ -1,0 +1,76 @@
+% =====================================================================
+% Paper 5 — Base-drag closure intercomparison (research article).
+% Venue selected by the paper5 workflow's research phase (candidates:
+% Aerospace (MDPI), J. Aerospace Engineering, Aerospace Science & Technology).
+% elsarticle preprint format compiles as a submittable initial-submission PDF
+% for Elsevier ("Your Paper Your Way") and ports easily to MDPI.
+% Master file; body fragments in sections/*.tex written by the workflow.
+% Build: pdflatex basedrag -> bibtex basedrag -> pdflatex x2.
+% ANTI-SALAMI: this paper's headline is the base-drag-dominates-apogee question,
+% NOT the Paper-1 integrated-parity result. All numbers per CANONICAL_FACTS.md.
+% =====================================================================
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage{lineno}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}{../data/png/}{../data/analysis/corpus_bias_variance_2026_05_11/}{../data/analysis/corpus_uncertainty_2026_06_02/}}
+
+\journal{Journal of Aerospace Engineering (ASCE)}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Base Drag Dominates the Apogee Error Budget in Open-Source Supersonic Rocket Simulation: A Mechanism-Attribution Study with External Base-Pressure Benchmarks}
+
+\author[aff]{Aidan Yu}
+\ead{aidansyu@gmail.com}
+\address[aff]{Independent Researcher; Duke University, Durham, NC, USA}
+
+\begin{abstract}
+\input{sections/01_abstract}
+\end{abstract}
+
+\begin{keyword}
+base drag \sep boattail \sep supersonic rocket \sep trajectory simulation \sep
+mechanism ablation \sep Chapman--Korst \sep apogee prediction
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+\input{sections/02_introduction}
+
+\section{The Supersonic Base-Drag Closure and Its Components}
+\input{sections/03_basedrag_models}
+
+\section{Benchmark and Mechanism-Ablation Methodology}
+\input{sections/04_methodology}
+
+\section{Results}
+\input{sections/05_results}
+
+\section{Discussion}
+\input{sections/06_discussion}
+
+\section{Limitations}
+\input{sections/07_limitations}
+
+\section{Conclusions}
+\input{sections/08_conclusions}
+
+\section*{Data and Code Availability}
+\input{sections/09_backmatter}
+
+\bibliographystyle{elsarticle-num}
+\bibliography{basedrag}
+
+\end{document}

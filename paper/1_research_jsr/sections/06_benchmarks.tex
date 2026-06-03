@@ -124,7 +124,7 @@ percent error (MAPE) or mean absolute error (MAE).}
 13 & Compressible skin friction (Van Driest~II) & Hopkins \& Inouye~\cite{hopkins1971} & $M = 1.5$--9        & best-of-class transformation \\
 14 & Static stability $C_{N_\alpha}$ & NASA TM~X-653~\cite{nielsen1962}                & $M = 0.6$--5.82, 10 pts    & MAPE $6.84\%$ \\
 15 & Static stability $x_{CP}/d$   & NASA TM~X-653~\cite{nielsen1962}                  & $M = 0.6$--5.82, 10 pts    & MAPE $7.11\%$ \\
-16 & Pitch damping $C_{m_q}$, body & Tobak NACA TN~3788~\cite{tobak1956}               & $M = 1.5$--3               & $39\%$ at $M=1.5$; sign-correct, conservative \\
+16 & Body-alone pitch damping $C_{m_q}$ (no fins) & Tobak NACA TN~3788~\cite{tobak1956}               & $M = 1.5$--3               & $39\%$ at $M=1.5$; sign-correct, conservative (distinct from the finned Basic Finner $C_{m_q}$, Sec.~\ref{subsec:b-level}) \\
 17 & Crossflow body $C_{d,c}$      & Jorgensen TR~R-474~\cite{jorgensen1977}           & supersonic crossflow       & exact match (1.20) \\
 18 & Crossflow fin $C_{d,c}$       & Hoerner / Jorgensen~\cite{hoerner1965}            & crossflow                  & 1.42 (within range) \\
 19 & Magnus body fraction          & Platou 1965~\cite{platou1965}                     & supersonic                 & 0.30 within $0.30$--$0.80$ \\
@@ -167,10 +167,12 @@ $3\times$ multiplier and a transonic Gaussian peak ($k = 3.5$ at $M \approx 1$),
 selected to close the angular-rate residual on the flight corpus. Three
 independent reference datasets quantify the consequence, and because they are
 distinct data they are reported separately rather than reconciled to a single
-number. (i)~Against the Army--Navy Basic Finner free-flight $C_{m_q}$ data of
-Dupuis and Hathaway~\cite{dupuis1997}, the augmented model is sign-correct but
-exhibits a supersonic MAPE near $69\%$ (under-prediction) over the supersonic
-points. (ii)~Against the independent Bhagwandin and Sahu URANS free-flight
+number. (i)~Against the Army--Navy Basic Finner \emph{finned}-vehicle free-flight
+$C_{m_q}$ data of Dupuis and Hathaway~\cite{dupuis1997}---a different
+configuration and reference from the body-alone Tobak TN~3788 row
+(\#16, $39\%$ at $M=1.5$) in Table~\ref{tab:benchmarks}---the augmented model is
+sign-correct but exhibits a supersonic MAPE near $69\%$ (under-prediction) over the
+supersonic points. (ii)~Against the independent Bhagwandin and Sahu URANS free-flight
 comparison~\cite{bhagwandin2013} the same model returns a supersonic MAPE of
 $18.96\%$ on the AFF planform (5 points, $M = 1.30$--$2.50$) and $28.02\%$ on the
 ANF planform (8 points, $M = 1.29$--$4.50$), sign-consistent with the Basic Finner

@@ -23,8 +23,8 @@ Supersonic and Hypersonic Aerodynamic Extensions for OpenRocket: A Technical Rep
 ### Authors
 - Family name: `Yu`
 - Given name: `Aidan`
-- Affiliation: `Duke University`
-- ORCID: *(add yours; get one at https://orcid.org/register if you don't have it)*
+- Affiliation: `Independent Researcher (acknowledges Duke University support)`
+- ORCID: `0009-0005-9589-5314`
 
 ### Description / Abstract
 ```
@@ -41,11 +41,14 @@ results against published wind-tunnel and free-flight data, 9 results
 calibrated against the integrated 25-flight corpus, and 1 negative external
 benchmark (NACA RM-10) that bounds an excluded geometry family.
 
-The integrated 25-flight corpus closes at 4.49% mean absolute apogee error
-with 25/25 flights within +/-10%; on the same imported geometries the
-RASAero II predictions average 5.26% with 22/25 within +/-10%. The corpus
-is published separately as the Rocket Flight Database v1.0
-(doi:10.5281/zenodo.19976138).
+The integrated 25-flight corpus closes at 4.74% mean absolute apogee error
+(mean signed error -0.38%, sigma 5.44%) with 25/25 flights within +/-10%; on
+the same imported geometries the RASAero II predictions average 5.34% mean
+absolute error with 22/25 within +/-10%. The honest claim is statistical
+parity with this version-locked RASAero II comparison set, not superiority:
+a paired Wilcoxon signed-rank test on absolute errors shows no significant
+difference. The corpus is published separately as the Rocket Flight Database
+v1.2 (doi:10.5281/zenodo.19976138).
 
 The complete OpenRocket Plus source code is available as an open-source
 fork at https://github.com/AidanSYu/openrocketsupersonic.

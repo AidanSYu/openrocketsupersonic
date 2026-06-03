@@ -230,7 +230,9 @@ public class FinSetCalcTest {
 	}
 
 	/**
-	 * Test that rounded cross-section fins get half the base drag.
+	 * Test that rounded cross-section fins shed a full blunt-trailing-edge base
+	 * wake (RASAero "Rounded" convention; the legacy half-base-drag rule was
+	 * retired during the SimVReal corpus calibration).
 	 */
 	@Test
 	public void testRoundedFinPressureAndBaseDragSeparation() {
@@ -254,14 +256,20 @@ public class FinSetCalcTest {
 		assertTrue(pressureCD > 0, "Rounded fin pressure CD should be positive");
 		assertTrue(componentBaseCD > 0, "Rounded fin base CD should be positive");
 
-		// Rounded fins get half the base drag
+		// RASAero-style ROUNDED fins are treated as blunt-/near-blunt-trailing-edge
+		// plates that shed a FULL base wake (FinSetCalc.calculateComponentBaseCD):
+		// the legacy "half base drag" rule was replaced during the SimVReal corpus
+		// calibration (it was a source of CalIsp/L500 overdrag). The Phase 6j
+		// trailing-edge term is SQUARE-only, so ROUNDED has no baseCD-independent
+		// component and the full baseCD*scaleFactor is the expected base CD.
 		double refArea = conditions.getRefArea();
 		double span = fins.getSpan();
 		double thickness = fins.getThickness();
 		double scaleFactor = span * thickness / refArea;
-		double expectedBase = (baseCD / 2) * scaleFactor;
+		double expectedBase = baseCD * scaleFactor;
 
-		assertEquals(expectedBase, componentBaseCD, EPSILON, "Rounded fin base CD should be half of baseCD * scaleFactor");
+		assertEquals(expectedBase, componentBaseCD, EPSILON,
+				"Rounded fin base CD should equal baseCD * scaleFactor (full blunt-TE base wake)");
 	}
 
 	/**

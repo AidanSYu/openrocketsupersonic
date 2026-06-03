@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import info.openrocket.core.document.OpenRocketDocument;
 import info.openrocket.core.document.OpenRocketDocumentFactory;
@@ -32,12 +33,18 @@ import info.openrocket.core.util.BaseTestCase;
  * These checks guard against loader-path and cross-run state drift for Qu8k,
  * which is sensitive enough to expose hidden inconsistency.
  */
+// Shares the JVM-global RASAeroMotorsLoader cache; must not mutate it concurrently
+// with SimVRealBenchmarkTest et al., hence the shared exclusive resource lock.
+@ResourceLock("AERO_CPU_HEAVY")
 public class SimVRealImportPathConsistencyTest extends BaseTestCase {
 
 	private static final double FT_PER_M = 3.28084;
 
 	@BeforeAll
 	static void loadMotors() {
+		// Clear the JVM-global RASAero motor cache so this class binds only its own
+		// rasp.eng curves regardless of which test class ran before it.
+		RASAeroMotorsLoader.clearAllMotors();
 		loadMotorsIntoRasaeroCache("simvreal/rasp.eng");
 		loadMotorsIntoRasaeroCache("c:/Code/OpenRocket Plus/simvreal/rasp.eng");
 	}

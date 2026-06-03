@@ -92,7 +92,7 @@ The Taylor-Maccoll cone-flow solver `ObliqueShockSolver.solveCone(M_\infty, \the
 $$
 M_2^2 = \frac{1 + \tfrac{\gamma-1}{2}M_1^2}{\gamma M_1^2 - \tfrac{\gamma-1}{2}}, \qquad
 \frac{p_2}{p_1} = \frac{2\gamma M_1^2 - (\gamma-1)}{\gamma+1}, \qquad
-\frac{T_2}{T_1} = \frac{p_2}{p_1}\cdot\frac{M_2^2}{M_1^2}\cdot\frac{1+\tfrac{\gamma-1}{2}M_1^2}{1+\tfrac{\gamma-1}{2}M_2^2}.
+\frac{T_2}{T_1} = \frac{1+\tfrac{\gamma-1}{2}M_1^2}{1+\tfrac{\gamma-1}{2}M_2^2}.
 $$
 
 In the detached-shock case the post-shock Mach is subsonic. The flow re-accelerates around a streamlined body, so the algorithm allows the body-tube branch (Section 7.3.2) to reset to freestream when it observes $M_\text{local} < 1$ behind a supersonic freestream.
@@ -518,12 +518,12 @@ $$
 
 | $M$ | $K_2$ |
 |:---:|:-----:|
-| 1.5 | 3.178 |
-| 2.0 | 1.167 |
-| 2.5 | 0.614 |
-| 3.0 | 0.393 |
-| 4.0 | 0.202 |
-| 5.0 | 0.131 |
+| 1.5 | 1.144 |
+| 2.0 | 0.733 |
+| 2.5 | 0.660 |
+| 3.0 | 0.634 |
+| 4.0 | 0.616 |
+| 5.0 | 0.609 |
 
 **Second-order AoA correction:**
 $$
@@ -538,12 +538,12 @@ $$
 
 | $M$ | $K_3$ |
 |:---:|:-----:|
-| 1.5 | 10.44 |
-| 2.0 | 1.80 |
-| 2.5 | 0.65 |
-| 3.0 | 0.33 |
-| 4.0 | 0.12 |
-| 5.0 | 0.06 |
+| 1.5 | 5.120 |
+| 2.0 | 1.105 |
+| 2.5 | 0.981 |
+| 3.0 | 1.124 |
+| 4.0 | 1.516 |
+| 5.0 | 1.926 |
 
 The implementation pre-tabulates $K_1$, $K_2$, $K_3$ on a $0.1$-Mach grid from $M = 1.5$ to $M = 5.0$ in a static initialiser ([`FinSetCalc.java`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/main/java/info/openrocket/core/aerodynamics/barrowman/FinSetCalc.java) lines 559–578) and queries via `LinearInterpolator`.
 
@@ -893,7 +893,7 @@ Constant & Value & Source & Code location & Validation \\
 \texttt{STRIPS\_PER\_COMPONENT} (surface march) & 20 & Implementation choice & \texttt{SG.java:45} & Cone 0\% vs \texttt{solveCone}; shoulder $4{\times}10^{-11}\%$ vs \texttt{downstreamMach} \\
 \texttt{MIN\_TURN\_ANGLE} (shock/exp.\ threshold) & $10^{-6}$ rad & Numerical guard & \texttt{SG.java:48} & --- \\
 Subsonic body lift coefficient $K_\text{sub}$ & 1.10 & Galejs empirical (subsonic wind-tunnel) & \texttt{SCC.BODY\_LIFT\_K}:43 & --- \\
-Supersonic body lift target & 0 (down-blend) & Ward 1949 slender-body; RASAero II convention; MESOS 293K & \texttt{getEffectiveBodyLiftK}:390--401 & MESOS 293K: $-0.6\%$ apogee \\
+Supersonic body lift target & 0 (down-blend) & Ward 1949 slender-body; RASAero II convention; MESOS 293K & \texttt{getEffectiveBodyLiftK}:390--401 & MESOS 293K: $-6.96\%$ apogee (within $\pm 10\%$ band) \\
 Body $C_{N\alpha}$/CP transonic band & $M \in [0.8, 1.3]$ & Matches base-drag and PNK bands & \texttt{SCC.STABILITY\_BLEND\_*}:71--72 & $C^1$-continuous \\
 CP supersonic shift fraction & 0.30 & RASAero II (5 geometries) & \texttt{getEffectiveCpPosition}:299 & NSCFB $x_{CP}$ MAPE 7.1\% \\
 Body crossflow $C_{d,c}$ (sub.\ baseline) & 1.20 & Jorgensen TR R-474 Tab.\ 1 & \texttt{SCC.SUBSONIC\_CDC}:50 & Exact match \\
@@ -920,10 +920,10 @@ Local-flow correction threshold & $|M_\text{local}{-}M_\infty| \ge 0.10$ & Rejec
 
 Constants for dynamic stability ($C_{mq}$ accumulation, Magnus, vortex side force) are documented in Chapter 9 and collected separately. Brief callouts:
 
-- **Pitch damping $C_{mq}$** validated to $39\,\%$ at $M = 1.5$ vs Tobak & Wehrend NACA TN 3788 via the eq. (54) axis transfer and the length-to-diameter normalization; externally benchmarked.
-- **Transonic $C_{mq}$ augmentation** (Gaussian peak $3.5\times$) compared against AEDC-TR-76-58 Fig. 12 roll-damping data; over-predicts by $\approx 3.6\times$ at $M \in [1.05, 1.12]$, calibrated against integrated flight data rather than against the AEDC component dataset alone. The Sznajder 2025 ANSYS Fluent CFD comparator on the same Basic Finner geometry (Section 8.9 below; PART_E §9.11) independently shows the same transonic over-augmentation direction, with overshoot $+110$ to $+160$ percent at $M = 1.08$--$1.11$ vs the CFD-side reference.
+- **Pitch damping $C_{mq}$** is held at **B-level** (a disclosed limitation, not a headline claim): the eq. (54) axis transfer and length-to-diameter normalization match Tobak & Wehrend NACA TN 3788 to $39\,\%$ at $M = 1.5$, but the Basic Finner $C_{mq}$ MAPE is $\approx 69\,\%$ (sign correct, supersonic under-prediction). $C_{mq}$ affects predicted dynamic stability/coning, not the apogee statistics, which are insensitive to $C_{mq}$.
+- **Transonic $C_{mq}$ augmentation** (Gaussian peak $3.5\times$) compared against AEDC-TR-76-58 Fig. 12 roll-damping data; over-predicts at $M \in [1.05, 1.12]$, calibrated against integrated flight data rather than against the AEDC component dataset alone. The Sznajder 2025 ANSYS Fluent CFD comparator on the same Basic Finner geometry (Section 8.9 below; PART_E §9.11) independently shows the same transonic over-augmentation direction, with overshoot $+110$ to $+160$ percent at $M = 1.08$--$1.11$ vs the CFD-side reference (the authoritative overshoot magnitude).
 - **Magnus body fraction 0.3** within the Platou (AIAA Journal **3**(1), 83–90, 1965, DOI 10.2514/3.2791) measured 0.3–0.8 range; externally benchmarked. (The original master citation "BRL Report 1193, 1963" could not be independently verified; the AIAA Journal publication is the verifiable primary source for the same Platou work.)
-- **Vortex $K_v = 0.20$, onset $20°$, saturation $40°$** within Paul & Wedemeyer ogive-cylinder $C_Y(\alpha)$ envelope; externally benchmarked.
+- **Vortex $K_v = 0.20$, onset $20°$, saturation $40°$** presented as an internally-calibrated coefficient: no independently verifiable literature anchor was found for this value, so it is reported as a corpus-/range-calibrated constant rather than an externally benchmarked one.
 
 ### 8.9 Published CFD Comparators
 
@@ -933,7 +933,7 @@ In addition to the wind-tunnel and free-flight stability benchmarks tabulated ab
 
 | Source | Geometry | Quantity | Mach range | ORP comparison status |
 |---|---|---|---|---|
-| Bunescu et al. (2025), URANS | Basic Finner (ANF) | $C_N$, $C_X$ | 0.4--3.5 | Java comparator (`BunescuANFCfdComparatorTest`); $C_X$ MAPE 39.1% on 5 points at AoA = $0°$ |
+| Bunescu et al. (2025), URANS | Basic Finner (ANF) | $C_N$, $C_X$ | 0.4--3.5 | Java comparator (`BunescuANFCfdComparatorTest`); $C_X$ MAPE 39.1\% (combined $C_N$+$C_X$ MAPE 43.1\%); correct trend, loose absolute — qualitative |
 | Sahu et al. (1983), TLNS | Secant-ogive-cyl.-boattail | $C_{Db}$, $C_{D,\text{tot}}$ | 0.9--1.2 | PDF in repo; comparator deferred — geometry requires a separate ORP rocket model |
 | Vidanović et al. (2014), SST k-$\omega$ | AGARD-B | $C_D$, $C_L$, $C_m$ | 0.596, 1.602 | Reference dataset only; AGARD-B `.ork` not shipped (deferred future work) |
 | Sznajder (2025), Fluent MRF/FOM/IRM | Basic Finner (ANF) | $C_{mq} + C_{m\dot\alpha}$ | 0.9--4.5 | Comparator wired; supersonic MAPE 31.6% on 8 points ($M \ge 1.29$); transonic overshoot $+110$ to $+160\%$ |

@@ -84,9 +84,9 @@ post-shock Mach number:
 \begin{equation}
 C_{d,\,\mathrm{wave}} = \begin{cases}
 \dfrac{K}{\beta}\left(\dfrac{t}{c}\right)^2,
-   & \cot\Lambda_{LE} < \beta \quad (\text{supersonic LE}),\\[2.0ex]
+   & \beta\cot\Lambda_{LE} \ge 1 \quad (\text{supersonic LE}),\\[2.0ex]
 K\cot\Lambda_{LE}\left(\dfrac{t}{c}\right)^2,
-   & \cot\Lambda_{LE} > \beta \quad (\text{subsonic LE}),
+   & \beta\cot\Lambda_{LE} < 1 \quad (\text{subsonic LE}),
 \end{cases}
 \label{eq:datcom-fin}
 \end{equation}
@@ -182,8 +182,10 @@ $C_f = C_{f,\,\mathrm{inc}}/F_c$. Hopkins and Inouye~\cite{hopkins1971}
 demonstrated that Van~Driest~II gave the best agreement with experiment among
 candidate transformations over $M = 1.5$--$9$. At $M = 5$ the compressible $C_f$
 is approximately half of its incompressible value at matched length Reynolds
-number (Fig.~\ref{fig:vd2}), a reduction that the reference-temperature method
-underestimates by roughly a factor of two.
+number (Fig.~\ref{fig:vd2}); the Eckert reference-temperature method reproduces
+this trend to within roughly $10\%$ over $M = 1.5$--$9$, and Van~Driest~II was
+retained for its slightly closer agreement with experiment at the upper end of
+this range~\cite{hopkins1971}.
 
 \begin{figure}[t]
 \centering

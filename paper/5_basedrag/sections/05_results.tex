@@ -1,0 +1,161 @@
+% Results — body of \section{Results} (master supplies the heading).
+% All numbers per paper/_shared/CANONICAL_FACTS.md (sections C, D, B, A).
+% Headline = base-drag-dominates-apogee; do NOT restate Paper 1 parity stats.
+% Citation rule (CANONICAL_FACTS H): NO Devan-Ashwood; the 0.064+0.186/M^2
+% correlation is an empirical fit validated against NACA TN 3393 + ESDU 77021.
+\label{sec:results}% anchors \ref{sec:results} from 04_methodology + 06_discussion to \section{Results}
+
+We present the results in three layers that move from the isolated closure to
+the integrated trajectory. First we benchmark each base-drag branch against the
+published base-pressure measurement that anchors it
+(\S\ref{subsec:component}) --- the externally validated, out-of-sample physics
+on which the comparison rests. Second, we report the controlled mechanism
+ablation that ranks the integrated-apogee leverage of every drag contribution
+(\S\ref{subsec:ablation}) --- the motivating finding that localizes base drag
+at the top of the error budget. Third, because two of the base-drag closures
+carry corpus-frozen scale constants, we test directly whether those constants
+generalize off the development set (\S\ref{subsec:holdout}), pre-empting the
+circularity that an in-sample calibration would otherwise invite.
+
+\subsection{Component intercomparison against base-pressure data}
+\label{subsec:component}
+
+Table~\ref{tab:component} compares each base-drag closure against the
+base-pressure data that anchors it; these are external, third-party
+measurements, not flights from the calibration corpus, and they carry the
+substantive physics of the comparison. The turbulent Chapman--Korst
+shear-layer closure reproduces the NACA~TN~3393 nonlifting-body base
+pressures~\cite{chapman1955} to a mean absolute percentage error (MAPE) of
+15.9\% over the digitized Mach~2.73--4.48 series, and to 4.0\% against the Hart
+RM~L52E06 transonic base-pressure set used to anchor the lower-Mach blend. The
+Chapman laminar branch~\cite{chapman1955}, applicable to delayed-transition
+``perfect-finish'' bodies, reproduces the TN~3393 laminar series to 4.4\%
+MAPE --- nearly four times tighter than the turbulent closure, and a clean
+discriminator between the two boundary-layer states: applying the turbulent
+correlation to the laminar data instead degrades the MAPE to roughly 44\%. The
+compact empirical correlation $C_{d,\text{base}} = 0.064 + 0.186/M^2$ is
+presented not as an independent anchor but as an engineering fit that we verify
+to be consistent with the TN~3393 turbulent envelope~\cite{chapman1955} and
+with ESDU~77021~\cite{esdu77021} across the supersonic span; the Viswanath
+boattail correction~\cite{viswanath1996} is exercised only inside its
+$6$--$16^{\circ}$ trailing-edge-angle validity window. The 15.9\% turbulent
+residual is the largest of the base-drag errors, consistent with the
+well-known difficulty of predicting turbulent base pressure --- which is
+sensitive to approach boundary-layer thickness, surface finish, and base
+geometry detail not fixed by the reference geometry alone --- yet the closure
+reproduces the correct Mach trend and order of magnitude throughout. Published
+transonic base-flow CFD on a comparable ogive--cylinder--boattail
+afterbody~\cite{sahu1983} corroborates the same trend qualitatively.
+
+\begin{table}[htbp]
+\centering
+\caption{Base-drag closures benchmarked in isolation against published,
+out-of-sample base-pressure data. MAPE is the mean absolute percentage error
+over the digitized reference points; all values per the canonical validation
+matrix. The empirical correlation is reported as ``consistent'' because it is
+checked for envelope agreement rather than fitted to these points.}
+\label{tab:component}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}l l X l@{}}
+\toprule
+Closure & Regime / state & Reference & MAPE \\
+\midrule
+Turbulent Chapman--Korst & supersonic, turbulent BL & NACA TN 3393~\cite{chapman1955} & 15.9\% \\
+Turbulent (transonic blend) & $M\!\approx\!0.85$--$1.5$ & Hart RM L52E06~\cite{hart1952basedrag} & 4.0\% \\
+Chapman laminar & supersonic, laminar BL & NACA TN 3393~\cite{chapman1955} & 4.4\% \\
+$0.064 + 0.186/M^2$ & supersonic engineering fit & cf.\ TN 3393~\cite{chapman1955}, ESDU 77021~\cite{esdu77021} & consistent \\
+Viswanath boattail & $6$--$16^{\circ}$ TE angle & \cite{viswanath1996} & in-window \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Mechanism ablation: base drag dominates the apogee budget}
+\label{subsec:ablation}
+
+The component MAPEs above quantify each closure's pointwise fidelity but say
+nothing about its leverage on \emph{integrated} apogee. To isolate that
+leverage we disabled each drag mechanism in turn and re-ran 24 of the 25
+corpus flights (MESOS 293K excluded; 23 single-stage plus the AeroPac 104K
+two-stage closure), spanning Mach 0.54--3.46, recording the resulting shift
+in mean absolute apogee error. The mechanisms are mutually orthogonal in the
+code, so each row of Table~\ref{tab:ablation} is a clean one-at-a-time effect
+rather than an interaction term.
+
+\begin{table}[htbp]
+\centering
+\caption{Mechanism ablation: effect of disabling each model on corpus apogee
+error (mean and maximum $|\Delta|$ in percentage points, 24 of the 25 corpus
+flights: MESOS 293K excluded; 23 single-stage plus the AeroPac 104K two-stage
+closure). The finned-base/base-drag augmentation is the dominant apogee
+driver --- roughly $9\times$ the next mechanism, $\sim\!20\times$ the fin wave
+drag, and $\sim\!54\times$ the shock-geometry pre-pass.}
+\label{tab:ablation}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}X r r X@{}}
+\toprule
+Mechanism & Mean $|\Delta|$ (pp) & Max $|\Delta|$ (pp) & Note \\
+\midrule
+Finned-base augmentation (\textsc{finned\_base\_k}) & \textbf{8.10} & 39.5 (Kinsel, $M\,2.19$) & \textbf{dominant apogee driver} \\
+Van Driest II skin friction~\cite{hopkins1971} & 0.87 & 7.9 (Qu8k, $M\,3.46$) & matters at high Mach \\
+DATCOM 4.1.5.1 fin wave drag~\cite{datcom1978} & 0.39 & 1.9 (Proteus) & modest \\
+ShockGeometry pre-pass & 0.15 & 3.6 (FMJ BR6, $M\,2.46$) & inert subsonically \\
+PNK interference / $K_1$ floor & 0.00 & 0.00 & no apogee effect \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The ranking is unambiguous. Disabling the finned-base/base-drag augmentation
+moves the corpus mean apogee error by 8.10~pp --- approximately a factor of
+nine above the next-largest term (Van Driest~II compressible skin friction,
+0.87~pp~\cite{hopkins1971}), a factor of twenty above DATCOM~4.1.5.1 fin wave
+drag (0.39~pp~\cite{datcom1978}), and a factor of $\sim\!54$ above the
+shock-geometry pre-pass (0.15~pp); the Pitts--Nielsen--Kaattari interference
+and $K_1$ floor register no measurable apogee effect at all. Its peak effect,
+39.5~pp on the Kinsel $M\,2.19$ flight, exceeds the entire apogee error budget
+of every other mechanism combined. The shock-geometry pre-pass, by contrast, is
+inert below $M\!=\!1$ and contributes only 0.15~pp to integrated apogee:
+apogee integrates a trajectory dominated by lower-Mach drag, so the pre-pass's
+value lies in local-flow fidelity (correct post-shock conditions for fin loads
+and stability) and as an architectural seam for downstream supersonic models,
+not in gross-apogee accuracy. This is the
+central finding of the paper --- among the mechanisms governing
+supersonic-rocket apogee, the base-drag closure sits at the top of the error
+budget, while the architecturally prominent shock-geometry pre-pass barely
+moves the integrated result.
+
+\subsection{Generalization of the base-drag constants}
+\label{subsec:holdout}
+
+Two of the base-drag closures carry corpus-frozen scale constants:
+$\textsc{thick\_bl\_k}=2.2$ in the thick-boundary-layer base-drag amplifier and
+$\textsc{slender\_body\_k}=0.0025$ in the slender-body pressure-drag closure.
+These constants belong to those two secondary closures, not to the finned-base
+augmentation, whose scale factor $K_{\text{fin}}=0.55$ is fixed externally
+against the Basic Finner~\cite{dupuis1997} (\S\ref{subsec:finnedbase}). Because
+the two corpus-frozen constants are calibrated with reference to flights that
+also appear in the corpus, the aggregate is in part in-sample, and we test their
+generalization head-on with a decontaminated prospective holdout: every flight
+that either constant touched during calibration (Raven, Rabia, Rabia Short Fin
+Can, Kinsel, Torrent) is placed in the development split, leaving a genuinely
+blind holdout. The development split ($n\!=\!13$) attains a mean absolute apogee
+error of 5.47\% (mean signed $+0.22\%$); the blind holdout ($n\!=\!12$) attains
+3.95\% (mean signed $-1.03\%$). The holdout is \emph{more} accurate than the
+development set, so the two corpus-frozen constants generalize rather than
+overfit, and the in-sample calibration does not inflate the headline result.
+This holdout quarantines those two secondary constants; the dominant finned-base
+term is defended separately by its external Basic Finner anchor and the
+component base-pressure benchmarks above.
+
+Taken together, the three layers tell a single story: the base-drag closure is
+the pointwise-hardest term to predict (15.9\% turbulent MAPE against
+TN~3393~\cite{chapman1955}), the highest-leverage term for integrated apogee
+(8.10~pp ablation effect, $\sim\!9\times$ the next mechanism), and --- in its two
+corpus-frozen secondary constants --- a generalizing one (blind holdout
+3.95\% below development 5.47\%). We defer the integrated head-to-head against
+the commercial baseline, and the trajectory-level accuracy statistics, to the
+companion study~\cite{yu2026jsr}; the contribution here is the mechanistic
+localization of base drag at the top of the supersonic-apogee error budget,
+together with the external base-pressure validation of the closures that occupy
+it.

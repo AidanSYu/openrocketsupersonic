@@ -46,6 +46,9 @@ public class CDX1SettingSensitivityTest extends BaseTestCase {
 
     @BeforeAll
     static void setup() {
+        // Clear the JVM-global RASAero motor cache so this class binds only its own
+        // rasp.eng curves (first-match lookup over a no-dedup static List).
+        RASAeroMotorsLoader.clearAllMotors();
         for (String path : RASP_ENG_PATHS) {
             File file = new File(path);
             if (!file.exists()) continue;

@@ -1,0 +1,51 @@
+% Objective — Data in Brief body fragment.
+% Section header (\section{Objective}) is supplied by the master dib.tex.
+% Descriptive only: motivates the dataset, names the parent JSR article, cites
+% RASAero II and OpenRocket. NO new scientific conclusions, NO RASAero result
+% argument (that belongs to the companion JSR paper). All numbers match
+% paper/_shared/CANONICAL_FACTS.md and the released CSVs.
+
+Validating a flight-trajectory simulator in the supersonic regime requires a
+ground-truth corpus that pairs measured flight outcomes with the predictions of
+an established reference tool. For hobby- and sounding-rocket aerodynamics, no
+such corpus has been openly available: published flight records are scattered
+across primary sources in differing formats, and the most widely used commercial
+predictions for these vehicles---those produced by RASAero~II~\cite{rogers2015}---are
+not distributed as a machine-readable, reusable table alongside the corresponding
+measured apogees. As a result, comparisons between open-source simulators such as
+OpenRocket~\cite{niskanen2009} and a commercial baseline have typically been made
+on small, internally selected sets of flights, which makes the resulting accuracy
+statistics difficult to reproduce and easy to bias through outcome-based selection.
+
+The Rocket Flight Database addresses this gap. Its headline component is a
+25-flight corpus spanning Mach 0.54--4.33, drawn from Rogers' publicly published
+RASAero~II altitude-comparison collection (23 single-stage high-power flights plus
+two two-stage flights---the AeroPac~104K Two-Stage at Mach~3.04 and the MESOS~293K
+flight, the highest-Mach case at Mach~4.33). Because the
+flights were selected externally---by the authors of the commercial comparison set
+rather than curated by us for favourable outcomes---and because each record carries
+both the measured apogee and the paired RASAero~II prediction, the table supports an
+outcome-independent, reproducible validation of supersonic apogee prediction. The
+ground-truth column reports instrumented apogees (barometric, GPS, optical-track,
+and integrated-accelerometer records), and the commercial-reference column reproduces
+Rogers' recorded RASAero~II predictions verbatim; only the OpenRocket-Plus prediction
+column is regenerated from the archived simulator code, so the comparison is
+non-circular.
+
+A companion exploratory table extends the database to roughly twenty historical
+high-Mach sounding-rocket flights (Black Brant~V, Nike--Apache, Nike--Cajun,
+Nike--Deacon, Arcas, and HEROS~3), reported in full---including the cases that fall
+well outside the headline admission band---to document the simulator's behaviour
+beyond Mach~4.33 without selection bias.
+
+This dataset is the validation corpus underlying the companion research article that
+introduces OpenRocket-Plus, an open-source supersonic extension of
+OpenRocket~\cite{niskanen2009}, and reports its integrated apogee accuracy against
+the RASAero~II baseline~\cite{yu2026jsr}. That parent article presents and interprets
+the comparison result; the present article is descriptive and confines itself to the
+data's schema, provenance, and reuse value. Releasing the corpus openly under a
+permissive licence lets other investigators independently reproduce those statistics,
+benchmark alternative tools---including newer open-source trajectory frameworks such
+as RocketPy~\cite{rocketpy2021} and recent amateur-supersonic flight studies
+\cite{quintart2025,lowcostroll2025}---and extend the corpus with additional
+instrumented flights.

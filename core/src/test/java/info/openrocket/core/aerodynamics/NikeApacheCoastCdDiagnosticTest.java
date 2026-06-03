@@ -1,13 +1,12 @@
 package info.openrocket.core.aerodynamics;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.Locale;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -82,6 +81,12 @@ import info.openrocket.core.startup.Application;
  *   gradlew core:test --tests info.openrocket.core.aerodynamics.NikeApacheCoastCdDiagnosticTest
  * </pre>
  */
+// Sets the JVM-global Application injector with a MotorDatabase binding (which the
+// default ServicesForTesting injector used by BaseTestCase does NOT provide). Must run
+// in isolation: a concurrent class's @BeforeAll would otherwise overwrite the global
+// injector before this test's body runs, dropping the MotorDatabase binding and causing
+// Guice "No implementation for MotorDatabase was bound".
+@Isolated("relies on a JVM-global Application injector with a MotorDatabase binding not present in the default test injector")
 public class NikeApacheCoastCdDiagnosticTest {
 
     /** Apache Case 1 COASTING handbook values, M = 1.0 .. 8.0 (Handbook Apx A p.66). */
@@ -139,6 +144,10 @@ public class NikeApacheCoastCdDiagnosticTest {
     @Test
     void dumpApacheCoastCdVsHandbook() throws Exception {
         File ork = findOrk("nike_apache.ork");
+        // Diagnostic-only test (no assertions): skip cleanly if the canonical ORK is
+        // not present, rather than failing the build with an exception under Gradle.
+        Assumptions.assumeTrue(ork != null,
+                "nike_apache.ork not found from any repo anchor; skipping Apache coast-Cd dump.");
         // The nine-flight Nike-Apache 1965 ORKs all derive from nike_apache.ork
         // (see _build_nike_apache_1965_orks.py); they share the canonical Apache
         // geometry. So computing Cd against the canonical .ork directly is
@@ -245,17 +254,19 @@ public class NikeApacheCoastCdDiagnosticTest {
         System.out.println();
     }
 
+    /**
+     * Locate {@code paper/data/ork/sounding_rockets/<name>} by walking up from the
+     * working directory. Gradle runs with cwd={@code core/} while IDEs run from the
+     * repo root, so a fixed relative path is not portable. Returns {@code null} if
+     * not found; callers skip the diagnostic rather than failing the build.
+     */
     private static File findOrk(String name) {
-        Path[] candidates = {
-                Paths.get("paper", "data", "ork", "sounding_rockets", name),
-                Paths.get("..", "paper", "data", "ork", "sounding_rockets", name),
-        };
-        for (Path p : candidates) {
-            File f = p.toFile();
+        File dir = new File(System.getProperty("user.dir"));
+        for (int i = 0; i < 8 && dir != null; i++) {
+            File f = new File(dir, "paper/data/ork/sounding_rockets/" + name);
             if (f.exists()) return f;
+            dir = dir.getParentFile();
         }
-        throw new IllegalStateException("could not locate " + name +
-                " (tried: " + List.of(candidates) + " from " +
-                new File(".").getAbsolutePath() + ")");
+        return null;
     }
 }

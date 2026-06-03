@@ -1,0 +1,303 @@
+% Section body only: the master supplies \section{The Supersonic Base-Drag Closure
+% and Its Components} and \input's this file. Start at \subsection.
+% Content: the supersonic base-drag closure and its component branches, each with
+% governing equation, regime of validity, and source; plus the C^1-continuous
+% transonic blend. We DESCRIBE the closure and note that alternative literature
+% closures exist; we DO NOT swap them one at a time and report per-closure apogee
+% deltas (that experiment is out of scope). Mined from the ChapmanKorstBaseDrag /
+% BarrowmanDragCalculator code.
+% CITATION RULE (CANONICAL_FACTS.md Sec. H): the empirical Cd_base = 0.064 + 0.186/M^2
+% correlation is presented as EMPIRICAL, validated vs NACA TN 3393 and consistent with
+% ESDU 77021. NO Devan-Ashwood. All numbers per _shared/CANONICAL_FACTS.md.
+\label{sec:basedrag-models}
+
+This section specifies the supersonic base-drag closure as implemented and its
+component branches. Each branch contributes to the base-drag coefficient
+$C_{d,\text{base}}$ referenced to the base area
+$A_{\text{base}} = \pi R_{\text{base}}^{2}$, so that its contribution to the
+vehicle axial-force coefficient is $C_{d,\text{base}}\,A_{\text{base}}/A_{\text{ref}}$.
+For each branch we state its governing equation, its regime of validity, and the
+published source against which it was assessed. Three of the six components are
+geometry-independent functions of Mach number and boundary-layer state --- the
+turbulent Chapman--Korst shear-layer model, the Chapman laminar correlation, and
+the empirical supersonic correlation --- consolidated under the ESDU~77021 data
+item; the remaining three are geometry modifiers applied multiplicatively to the
+clean-body value: the ESDU~77021 boundary-layer-thickness correction, the
+Viswanath boattail relief, and the finned-base augmentation. The branches are
+stitched together below Mach~$1.5$ by a single $C^{1}$-continuous transonic
+blend, described last. Table~\ref{tab:closures} collects the inventory. The
+engineering literature offers \emph{alternative} closures for several of these
+branches --- competing turbulent base-pressure correlations, different
+boattail-relief models, and several finned-base treatments --- that disagree in
+functional form and were calibrated on different geometry families; we note these
+alternatives where relevant, but this study describes and benchmarks the closure
+as implemented rather than substituting alternatives one at a time and reporting
+per-closure apogee deltas, which is outside its scope.
+
+\subsection{Empirical supersonic correlation}
+\label{subsec:empirical}
+
+The workhorse turbulent closure is the two-coefficient empirical correlation
+%
+\begin{equation}
+C_{d,\text{base}} = 0.064 + \frac{0.186}{M^{2}}, \qquad M > 1.3 ,
+\label{eq:empirical}
+\end{equation}
+%
+applicable to a slender axisymmetric afterbody with a turbulent boundary layer at
+separation. The two coefficients encode the two physical asymptotes of supersonic
+base flow: the leading constant $0.064$ is the nonzero high-Mach floor toward
+which the base-pressure coefficient asymptotes as the freestream entrains the
+wake, and the $0.186/M^{2}$ term captures the decay of the base-pressure deficit
+with dynamic pressure as Mach number rises. We present
+Eq.~\eqref{eq:empirical} strictly as an empirical fit: it reproduces the
+turbulent NACA~TN~3393~\cite{chapman1955} nonlifting-body base-pressure
+measurements over $M = 2.73$--$4.48$ to a mean absolute percentage error of
+$15.9\%$ (and the Hart free-flight subset to $4.0\%$), and its functional form is
+consistent with the recommended supersonic base-pressure correlation
+consolidated in ESDU~77021~\cite{esdu77021}. No further provenance is claimed for
+the two coefficients beyond this benchmark agreement.
+
+\subsection{Chapman laminar base drag}
+\label{subsec:laminar}
+
+For perfect-finish vehicles whose surface is smooth enough that boundary-layer
+transition is delayed and the layer remains laminar to the base, the turbulent
+form of Eq.~\eqref{eq:empirical} over-predicts the base suction. The Chapman
+laminar correlation~\cite{chapman1950} applies instead:
+%
+\begin{equation}
+C_{p,b,\text{lam}} = \frac{C_{\text{lam}}}{M^{2}\sqrt{\mathrm{Re}_{L}}} ,
+\qquad C_{\text{lam}} = 1870 ,
+\label{eq:laminar}
+\end{equation}
+%
+with $\mathrm{Re}_{L}$ the body-length Reynolds number. The $\mathrm{Re}_{L}^{-1/2}$
+scaling follows from laminar free-shear-layer mixing theory --- a laminar layer
+carries less momentum, mixes less, and recompresses to a lower base pressure than
+a turbulent layer --- and the $M^{-2}$ factor again arises from normalizing the
+base-pressure deficit by freestream dynamic pressure. The constant
+$C_{\text{lam}} = 1870$ is a geometric-mean fit to the four condensation-corrected
+laminar TN~3393 points ($M = 2.73$--$4.48$, $\mathrm{Re}_{L} \approx 4$--$6 \times
+10^{6}$), giving a mean absolute percentage error of $4.4\%$ against those data.
+Applying the turbulent form of Eq.~\eqref{eq:empirical} to the same laminar data
+yields a mean absolute percentage error of $44\%$: the boundary-layer state at
+separation is the dominant discriminator between the two branches, which is
+precisely why a base-drag benchmark cannot treat ``the'' base-drag closure
+as a single object. Equation~\eqref{eq:laminar} is blended into the turbulent
+result over $M = 1.3$--$2.5$ by the Hermite smoothstep $s(t) = 3t^{2} - 2t^{3}$,
+weighted by the local laminar fraction so that a fully turbulent body never sees
+the laminar branch; a clamp at the near-vacuum limit $2/(\gamma M^{2})$ prevents
+unphysical growth at low Reynolds number.
+
+\subsection{Chapman--Korst turbulent shear-layer model}
+\label{subsec:chapmankorst}
+
+The Chapman--Korst dead-air recompression theory~\cite{chapman1955} provides a
+turbulent base-pressure estimate from boundary-layer edge conditions, used here
+as the supersonic-side closure that the empirical correlation blends \emph{into}.
+The supersonic shear layer separating at the base corner reattaches on the wake
+axis at a recompression point; the balance between corner expansion and
+shear-layer recompression fixes the base pressure. For a thin turbulent boundary
+layer the clean-body coefficient follows the same family as
+Eq.~\eqref{eq:empirical} with an added $M^{-4}$ term, calibrated to the turbulent
+cylindrical-afterbody tabulation of ESDU~77021~\cite{esdu77021}:
+%
+\begin{equation}
+C_{d,\text{base}}^{\,\text{thin}} = 0.060 + \frac{0.190}{M^{2}}
+   + \frac{0.005}{M^{4}} .
+\label{eq:chapmankorst}
+\end{equation}
+%
+This reproduces the ESDU anchor values $C_{d,\text{base}} \approx 0.145$, $0.110$,
+$0.085$, and $0.070$ at $M = 1.5$, $2.0$, $3.0$, and $5.0$, respectively, which
+agree closely with Eq.~\eqref{eq:empirical} for a thin layer --- as expected,
+since both describe the same recompression physics. Equation~\eqref{eq:chapmankorst}
+is the baseline to which the boundary-layer-thickness correction of
+Section~\ref{subsec:esdu} is applied. It is blended into the empirical correlation
+over $M = 1.2$--$1.4$ by the same smoothstep $s(t)$, so that pure
+Eq.~\eqref{eq:empirical} governs below $M = 1.2$ and the Chapman--Korst form
+governs above $M = 1.4$.
+
+\subsection{ESDU~77021 boundary-layer-thickness correction}
+\label{subsec:esdu}
+
+ESDU~77021~\cite{esdu77021} consolidates a broad experimental corpus of base
+pressure on bodies of revolution at supersonic and hypersonic Mach numbers
+without base injection or combustion, and is the reference data item for the
+turbulent closures above. Beyond fixing the thin-layer baseline of
+Eq.~\eqref{eq:chapmankorst}, it supplies the dependence on boundary-layer
+thickness: a thicker layer entrains more mass into the recirculating wake, raises
+base pressure, and so \emph{reduces} base drag. The correction is applied as a
+multiplicative factor on the thin-layer coefficient,
+%
+\begin{equation}
+f_{\delta} = 1 - k(M)\sqrt{\theta/R_{\text{base}}} ,
+\qquad k(M) = 0.8 + \frac{0.2}{M} ,
+\label{eq:esdu-bl}
+\end{equation}
+%
+where $\theta$ is the turbulent momentum thickness at the base, estimated from the
+flat-plate correlation $\theta/x = 0.036\,\mathrm{Re}_{x}^{-1/5}$, and
+$\theta/R_{\text{base}}$ is clamped to $[10^{-5}, 0.5]$ with $f_{\delta}$ clamped
+to $[0.3, 1.0]$. For a typical rocket ($\theta/R_{\text{base}} \approx 0.01$) the
+reduction is a few percent; for an unusually thick layer
+($\theta/R_{\text{base}} \approx 0.1$) it reaches $20$--$30\%$. This correction is
+the mechanism by which the slender, high-fineness airframes in the corpus carry a
+distinct base-drag signature from short, blunt bodies, and it is the
+literature-anchored counterpart to the corpus-frozen thick-boundary-layer
+amplification disclosed in the companion study~\cite{yu2026jsr}.
+
+\subsection{Viswanath boattail relief}
+\label{subsec:viswanath}
+
+When the afterbody tapers inward to a boattail, the converging flow turns through
+a compression that raises base pressure and shrinks the base area, reducing base
+drag below the blunt-base value. Following Viswanath~\cite{viswanath1996}, the
+relief is applied as a multiplicative retention factor $\eta_{bt}$ on the
+clean-body base drag, parameterized by the boattail half-angle
+$\theta_{bt} = \arctan\!\big[(R_{\text{fore}} - R_{\text{aft}})/L_{bt}\big]$ and,
+in the effective regime, by Mach number:
+%
+\begin{equation}
+\eta_{bt} =
+\begin{cases}
+0.25 + 0.05\,\theta_{bt}, & \theta_{bt} < 6^{\circ},\\[1.0ex]
+\big[\,0.55 + 0.04(\theta_{bt} - 6^{\circ})\,\big]\,\big[1 + 0.1\max(0, M-1)\big],
+   & 6^{\circ} \le \theta_{bt} < 16^{\circ},\\[1.0ex]
+0.95 - 0.05(\theta_{bt} - 16^{\circ}), & \theta_{bt} \ge 16^{\circ},
+\end{cases}
+\label{eq:viswanath}
+\end{equation}
+%
+with $\eta_{bt}$ clamped to $[0, 1]$. For well-chosen boattail angles of
+$6$--$16^{\circ}$ this yields a $15$--$40\%$ base-drag reduction, consistent with
+the afterbody-drag-management survey of Viswanath~\cite{viswanath1996}. The factor
+is applied to the wake \emph{downstream} of a boattail and is not also applied on
+the boattail component itself, which would double-count the relief and can drive
+the aft base drag to zero on steep imported geometries that still expose a finite
+blunt exit area.
+
+\subsection{Finned-base augmentation (externally calibrated, B-level)}
+\label{subsec:finnedbase}
+
+The dominant apogee mechanism (\S\ref{subsec:ablation}) is the augmentation of
+base drag by the tail fins. Fins mounted at or just ahead of the base disrupt the
+recompression of the body wake, deepening the base suction relative to the
+clean-body value; aeroballistic-range data on the Basic Finner~\cite{dupuis1997}
+and the afterbody-drag compendium of Hoerner~\cite{hoerner1965} consistently show
+$40$--$60\%$ higher base drag for four-fin configurations than for the
+corresponding smooth cylindrical afterbody over $M = 1.5$--$3$, which we use as an
+external \emph{bound} on the plausible magnitude of the effect rather than as a
+calibration target. The augmentation is applied as a multiplicative factor on the
+post-relief base drag, written here in its full implemented form,
+%
+\begin{equation}
+\Phi_{\text{fin}} = 1 + K_{\text{fin}}\,
+   \frac{1 - e^{-n_{\text{fins}}/1.4}}{1 - e^{-4/1.4}}\,
+   \operatorname{clamp}\!\Big(\frac{s_{\max}}{R_{\text{base}}},\,0.3,\,1\Big)\,
+   f(M) ,
+\qquad K_{\text{fin}} = 0.55 ,
+\label{eq:finnedbase}
+\end{equation}
+%
+where the fin count $n_{\text{fins}}$ enters through a saturating term normalized
+to unity at the four-fin reference (wake disruption is not linear in fin count:
+three corner-wake sectors already nearly divide the base shear layer, so a
+three-fin body is not under-counted), $s_{\max}$ is the maximum fin span, and the
+Mach ramp $f(M)$ rises from $0$ at $M = 0.2$ to $0.30$ at $M = 0.8$, then from
+$0.30$ to $1$ over $M = 0.8$--$1.3$, holds through the low-supersonic band to
+$M = 3.0$, then decays as $3/M$ above $M = 3.0$ as the fins become progressively
+submerged in the body shock cone. At the four-fin reference (four rectangular
+fins, $s_{\max}/R_{\text{base}} = 2.0$, where both geometry factors saturate to
+unity) the scale constant $K_{\text{fin}} = 0.55$ gives a $\sim\!50\%$
+augmentation at $M = 2$, inside the $40$--$60\%$ literature bound above; companion
+scale constants of $1.00$ for rounded-trailing-edge fins and $1.35$ for fin-can
+sleeve geometries cover the remaining corpus afterbody types.
+
+We classify $K_{\text{fin}}$ as a \emph{B-level} constant in the specific sense
+that it lacks validation against an isolated finned-base base-\emph{pressure}
+dataset. It is \emph{not} corpus-frozen: the value $0.55$ is calibrated
+externally against the Basic Finner aeroballistic-range data~\cite{dupuis1997}
+so that it reproduces the $\sim\!50\%$ augmentation measured there at $M = 2$,
+which also places it inside the $40$--$60\%$ over-clean-body band of the same
+fixture and the Hoerner compendium~\cite{hoerner1965}. Its anchor is thus a
+published external fixture, not flights drawn from the calibration corpus, so it
+does not make the headline in-sample. The constant nonetheless does not yet carry
+the A-level external validation of Eqs.~\eqref{eq:empirical} and
+\eqref{eq:laminar}, which are checked against isolated base-pressure data, and
+this B-to-A gap is the explicit limitation of the augmentation closure. The
+distinction is material precisely because the mechanism ablation of
+\S\ref{subsec:ablation} ranks this term as the dominant driver of integrated
+apogee error, shifting mean corpus apogee error by $8.10$ percentage points when
+removed --- about $54$ times the $0.15$-point effect of the
+shock-geometry pre-pass. The two genuinely corpus-frozen constants in the
+base-drag treatment belong to \emph{different} closures --- the
+thick-boundary-layer base-drag amplifier ($\textsc{thick\_bl\_k}$) and the
+slender-body pressure-drag term ($\textsc{slender\_body\_k}$) --- and it is those
+two constants, not $K_{\text{fin}}$, that the decontaminated prospective holdout
+of \S\ref{subsec:holdout} quarantines and shows to generalize (blind holdout MAE
+$3.95\%$ below development $5.47\%$). The defense of $K_{\text{fin}}$ is instead
+its external Basic Finner anchor and the component base-pressure benchmarks.
+Elevating $K_{\text{fin}}$ from this total-drag anchor to A-level validation
+against an isolated finned-base base-pressure dataset is identified in the
+Conclusions as the single highest-value evidence gap raised by this work.
+
+\subsection{Transonic blend and $C^{1}$ continuity}
+\label{subsec:transonic}
+
+Below $M = 1.5$ the supersonic closures above are not valid, and the base drag
+instead rises to a transonic peak near $M \approx 1.05$, where a flat-based body
+reaches $C_{d,\text{base}} \approx 0.25$. The transonic band $M = 0.85$--$1.5$ is
+represented by a degree-4 polynomial anchored at three points: the peak value
+$C_{d,\text{base}} = 0.25$ at $M = 1.05$, the free-flight plateau
+$C_{d,\text{base}} = 0.230$ at $M = 1.30$ (just below the Hart
+NACA~RM~L52E06~\cite{hart1952basedrag} finless free-flight reading of
+$0.250 \pm 0.013$, within its digitization uncertainty), and a $C^{1}$ handoff to
+the supersonic correlation at $M = 1.5$.
+The polynomial is constructed to be continuous in both value and first derivative
+at the regime boundaries, and the laminar, Chapman--Korst, and boattail blends of
+the preceding subsections all use the same Hermite smoothstep
+$s(t) = 3t^{2} - 2t^{3}$, which has zero derivative at its endpoints. This global
+$C^{1}$ continuity is not cosmetic: a discontinuity in $C_{d,\text{base}}$ or its
+slope near Mach~1 drives the fourth-order Runge--Kutta trajectory integrator to
+oscillate whenever the vehicle repeatedly crosses the sonic line during boost and
+coast, and the resulting integration noise would contaminate the very apogee
+sensitivity this paper sets out to measure. The same continuity discipline is
+applied across every Mach-regime transition in the underlying simulator, as
+detailed in the companion paper~\cite{yu2026jsr}.
+
+\begin{table*}[t]
+\centering
+\caption{Components of the supersonic base-drag closure as implemented. Each is
+referenced to base area; geometry modifiers (ESDU~77021 BL correction, Viswanath,
+finned-base) are applied multiplicatively to the clean-body coefficient. Status A
+denotes external component validation against an isolated base-pressure dataset; B
+denotes a disclosed constant lacking such an isolated dataset (here, the
+finned-base augmentation, calibrated externally against the Basic Finner
+total-drag fixture). Alternative literature closures exist for several branches
+but are not swapped in or scored at apogee in this study.}
+\label{tab:closures}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{l l X X c}
+\toprule
+Component & Regime & Governing form & Source & Status \\
+\midrule
+Empirical supersonic & $M > 1.3$, turbulent BL & Eq.~\eqref{eq:empirical},
+   $0.064 + 0.186/M^{2}$ & NACA~TN~3393~\cite{chapman1955}, ESDU~77021~\cite{esdu77021} & A \\
+Chapman laminar & $M = 1.3$--$2.5$, laminar BL & Eq.~\eqref{eq:laminar},
+   $C_{\text{lam}}/(M^{2}\sqrt{\mathrm{Re}_{L}})$ & Chapman~\cite{chapman1950}, NACA~TN~3393~\cite{chapman1955} & A \\
+Chapman--Korst turbulent & $M = 1.2$--$5{+}$ & Eq.~\eqref{eq:chapmankorst},
+   $0.060 + 0.190/M^{2} + 0.005/M^{4}$ & ESDU~77021~\cite{esdu77021} & A \\
+ESDU~77021 BL correction & $M > 1.2$, thick BL & Eq.~\eqref{eq:esdu-bl},
+   $1 - k(M)\sqrt{\theta/R}$ & ESDU~77021~\cite{esdu77021} & A \\
+Viswanath boattail & Any $M$, boattail geometry & Eq.~\eqref{eq:viswanath},
+   $\eta_{bt}(\theta_{bt}, M)$ & Viswanath~\cite{viswanath1996} & A \\
+Finned-base augmentation & $M = 0.8$--$5{+}$, finned body & Eq.~\eqref{eq:finnedbase},
+   $1 + K_{\text{fin}}\,g(n)\,h(s_{\max}/R)\,f(M)$ & Basic Finner~\cite{dupuis1997}, Hoerner~\cite{hoerner1965} (bound) & B \\
+Transonic blend & $M = 0.85$--$1.5$ & Degree-4 polynomial, peak $0.25$ at $M{=}1.05$
+   & Hart~RM~L52E06~\cite{hart1952basedrag} anchor & A \\
+\bottomrule
+\end{tabularx}
+\end{table*}
