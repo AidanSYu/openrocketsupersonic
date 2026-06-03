@@ -3,22 +3,21 @@ weight in an \emph{integrated} apogee prediction is rarely isolated. We ask how 
 base-drag term weighs on the apogee of fin-stabilized supersonic sounding rockets relative
 to the other supersonic submodels, and whether the closure that carries that weight can be
 anchored to external base-pressure data. The base-drag closure as implemented---turbulent
-Chapman--Korst shear-layer theory, the Chapman laminar correlation~\cite{chapman1950}, an
-ESDU~77021~\cite{esdu77021} boundary-layer-thickness correction, the empirical
-$C_{d,\text{base}} = 0.064 + 0.186/M^2$ correlation, a Viswanath~\cite{viswanath1996}
-boattail correction, and a finned-base augmentation term---is benchmarked against external,
-out-of-sample base-pressure measurements, and a controlled mechanism ablation then disables
-each drag contribution in isolation across 24 of the 25 corpus flights (the MESOS~293K
-case excluded; 23 single-stage plus the AeroPac~104K two-stage closure) spanning
-Mach 0.54--3.46~\cite{rogers2015}. The turbulent closure reproduces NACA~TN~3393~\cite{chapman1955}
-base pressures to a mean absolute percentage error of 15.9\% (the Hart NACA~RM~L52E06
-free-flight subset to 4.0\%) and the Chapman laminar branch to 4.4\%. The ablation shows
-that base-drag augmentation moves the mean apogee error by 8.10 percentage points---the
-dominant mechanism, roughly nine times the next supersonic submodel (Van Driest~II
-compressible skin friction, 0.87~pp~\cite{hopkins1971}) and about 54 times the
-shock-geometry pre-pass (0.15~pp). A decontaminated prospective holdout (mean absolute error
-3.95\% versus 5.47\% on development flights) shows that the corpus-frozen base-drag constants
+Chapman--Korst shear-layer theory, a Chapman laminar correlation, an ESDU~77021
+boundary-layer-thickness correction, an empirical power-law base-drag correlation, a
+Viswanath boattail correction, and a finned-base augmentation term---is benchmarked against
+external, out-of-sample base-pressure measurements, and a controlled mechanism ablation then
+disables each drag contribution in isolation across an archived 24-flight subset (23
+single-stage flights plus the AeroPac~104K two-stage closure) spanning Mach 0.54 to 3.46.
+The turbulent closure reproduces the reference NACA~TN~3393 nonlifting-body base pressures
+to a mean absolute percentage error of 15.9\% (and the Hart free-flight subset to 4.0\%),
+and the Chapman laminar branch to 4.4\%. The ablation shows that base-drag augmentation
+moves the mean apogee error by 8.10 percentage points---the dominant mechanism, roughly nine
+times the next supersonic submodel (compressible skin friction, 0.87 percentage points) and
+about 54 times the shock-geometry pre-pass (0.15 percentage points). A decontaminated
+prospective holdout, on which the model is more accurate than on the development flights
+(mean absolute error 3.95\% versus 5.47\%), shows that the corpus-frozen base-drag constants
 generalize rather than overfit. We frame these results as a mechanism-attribution study,
 backed by external base-pressure benchmarks, that locates base drag at the top of the apogee
-error budget---not a per-closure apogee intercomparison, and not an integrated-validation or
-parity claim---complementing the integrated study reported separately~\cite{yu2026jsr}.
+error budget---not a per-closure intercomparison, and not an integrated-validation or parity
+claim---complementing the integrated study reported separately.

@@ -9,9 +9,13 @@
 % ANTI-SALAMI: this paper's headline is the base-drag-dominates-apogee question,
 % NOT the Paper-1 integrated-parity result. All numbers per CANONICAL_FACTS.md.
 % =====================================================================
-\documentclass[preprint,12pt]{elsarticle}
+% ASCE J. Aerospace Engineering initial-review manuscript: ASCE accepts a generic
+% double-spaced, line-numbered manuscript for review (the ascelike-new template is a
+% revision-stage requirement). authoryear -> ASCE-style author-date citations.
+\documentclass[preprint,authoryear,12pt]{elsarticle}
 
 \usepackage{lineno}
+\usepackage{setspace}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
@@ -23,9 +27,12 @@
 \usepackage[hidelinks]{hyperref}
 \graphicspath{{figures/}{../data/png/}{../data/analysis/corpus_bias_variance_2026_05_11/}{../data/analysis/corpus_uncertainty_2026_06_02/}}
 
-\journal{Journal of Aerospace Engineering (ASCE)}
+% No \journal{} macro for ASCE -- that is an Elsevier/elsarticle field. Venue is the
+% Journal of Aerospace Engineering (ASCE); stated on the title page / in the cover letter.
 
 \begin{document}
+\doublespacing
+\linenumbers
 
 \begin{frontmatter}
 
@@ -33,7 +40,7 @@
 
 \author[aff]{Aidan Yu}
 \ead{asy22@duke.edu}
-\address[aff]{Independent Researcher; Duke University, Durham, NC, USA}
+\address[aff]{Department of Mechanical Engineering \& Materials Science, Duke University, Durham, NC~27708, USA}
 
 \begin{abstract}
 \input{sections/01_abstract}
@@ -67,10 +74,10 @@ mechanism ablation \sep Chapman--Korst \sep apogee prediction
 \section{Conclusions}
 \input{sections/08_conclusions}
 
-\section*{Data and Code Availability}
+\section*{Data Availability Statement}
 \input{sections/09_backmatter}
 
-\bibliographystyle{elsarticle-num}
+\bibliographystyle{elsarticle-harv}
 \bibliography{basedrag}
 
 \end{document}

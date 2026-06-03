@@ -49,8 +49,8 @@
 
 \title{A Shock-Geometry Pre-Pass for Supersonic Rocket Aerodynamic Prediction and Flight Validation}
 
-\author{Aidan Yu\footnote{Independent Researcher; corresponding author, asy22@duke.edu; ORCID \href{https://orcid.org/0009-0005-9589-5314}{0009-0005-9589-5314}.}}
-\affil{Independent Researcher}
+\author{Aidan Yu\footnote{Department of Mechanical Engineering \& Materials Science, Duke University, Durham, NC~27708; corresponding author, asy22@duke.edu; ORCID \href{https://orcid.org/0009-0005-9589-5314}{0009-0005-9589-5314}.}}
+\affil{Department of Mechanical Engineering \& Materials Science, Duke University}
 
 \begin{document}
 
@@ -63,20 +63,18 @@ framework to compressible flight through a once-per-timestep \emph{shock-geometr
 pre-pass} that resolves local post-shock flow along the airframe and exposes it
 to each downstream drag, normal-force, and stability calculator. The pre-pass
 unifies classical compressible methods---Taylor--Maccoll cone flow,
-Prandtl--Meyer expansion, shock relations, Van~Driest~II skin friction, and
-DATCOM fin wave drag---in one open implementation, and twenty component models
-are externally benchmarked against published references. The simulator is
-validated against a 25-flight ground-truth corpus spanning
-Mach~0.54 to~4.33: the mean signed apogee error is $-0.38\%$ (95\% bootstrap
-confidence interval $[-2.41,
-+1.72]$, root-mean-square error $5.34\%$), and all 25~flights fall within
-$\pm10\%$ of measured apogee. On a decontaminated 12-flight blind holdout the
-model is \emph{more} accurate (mean absolute error $3.95\%$) than on the 13
-development flights ($5.47\%$), so the two corpus-frozen base-drag constants
-generalize rather than overfit. Against RASAero~II on the 25 paired flights
-there is no significant difference in absolute error (Wilcoxon $p = 0.615$).
-High-Mach prediction is exploratory: of 20 historical flights only
-three fall within $\pm10\%$. All code, data, and analysis are released for
+Prandtl--Meyer expansion, oblique- and normal-shock relations, compressible skin
+friction, and semi-empirical fin wave drag---in one open implementation, and
+twenty component models are externally benchmarked against published references.
+The simulator is validated against a twenty-five-flight ground-truth corpus
+spanning the subsonic through supersonic range to Mach four: the mean signed
+apogee error is small, its bootstrap confidence interval brackets zero, and every
+flight falls within ten percent of measured apogee. On a decontaminated blind
+holdout the model is \emph{more} accurate than on the development flights, so the
+two corpus-frozen base-drag constants generalize rather than overfit. Against
+RASAero~II, the leading commercial comparator, there is no statistically
+significant difference in absolute error. High-Mach prediction is reported only
+as an exploratory capability. All code, data, and analysis are released for full
 reproduction.
 \end{abstract}
 

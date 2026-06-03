@@ -73,12 +73,13 @@ on the reference hardware (single-threaded Intel Core~i7), which is below the
 measurement floor of the simulator's per-timestep budget. The full
 input/output contract is given in Table~\ref{tab:prepass-contract}.
 
-\begin{table*}[t]
+\begin{table*}[htbp]
 \caption{\texttt{ShockGeometry} calculator input/output contract. Subsonic
 column gives the pass-through value returned below $M_\infty = 1.0$.}
 \label{tab:prepass-contract}
 \centering
-\begin{tabular}{@{}llll@{}}
+\begingroup\footnotesize
+\begin{tabularx}{\textwidth}{@{}l l X l@{}}
 \toprule
 Field & Direction & Description & Subsonic value \\
 \midrule
@@ -91,7 +92,8 @@ Field & Direction & Description & Subsonic value \\
 \texttt{shockStandoff} & out & Detached-shock standoff distance for blunt noses & $\infty$ (no shock) \\
 \texttt{activationBlend} & out & $C^1$ blend weight $w \in [0,1]$ through $M = 1.0$--$1.1$ & returns 0.0 \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
+\endgroup
 \end{table*}
 
 Figure~\ref{fig:prepass-block} shows the data-flow block diagram.

@@ -10,9 +10,10 @@ tags:
 authors:
   - name: Aidan Yu
     orcid: 0009-0005-9589-5314
+    corresponding: true
     affiliation: 1
 affiliations:
-  - name: Independent Researcher
+  - name: Department of Mechanical Engineering & Materials Science, Duke University
     index: 1
 date: 3 June 2026
 bibliography: paper.bib
@@ -200,7 +201,7 @@ article [@yu2026jsr].
 | Basic Finner total drag (M 1.08–4.30) | ADA636861 [@dupuis1997] | MAPE | 11.8% |
 | Hypersonic cone foredrag (M 6.5–17.2) | DTIC AD0487365 [@grabow1965] | MAPE | 19.7% |
 
-![Nose/body wave-drag coefficient versus Mach number for five nose shapes, comparing OpenRocket-Plus against NACA RM A52H28 wind-tunnel data. The headline accuracy metric is the aggregate mean absolute error, MAE = 0.029; the corresponding MAPE of 29.3% is inflated by the small absolute drag values of the power-law and Haack shapes and is reported here only for context.](data/png/naca_rm_a52h28_validation.png)
+![Nose/body wave-drag coefficient versus Mach number for five nose shapes, comparing OpenRocket-Plus against NACA RM A52H28 wind-tunnel data. The headline accuracy metric is the aggregate mean absolute error, MAE = 0.029; the corresponding MAPE of 29.3% is inflated by the small absolute drag values of the power-law and Haack shapes and is reported here only for context.](figures/naca_rm_a52h28_validation.png)
 
 The shock solver matches NACA 1135 tabular values to better than 0.01% across the
 supersonic range. Nose/body wave drag is validated on five distinct nose shapes
@@ -250,14 +251,30 @@ including the in-sample disclosure for two base-drag scale constants and a
 decontaminated prospective holdout demonstrating generalization, is given in the
 companion article [@yu2026jsr].
 
+# Research impact statement
+
+OpenRocket-Plus is the simulation engine behind the integrated supersonic
+flight-validation study reported in the companion article [@yu2026jsr] and the
+openly released Rocket Flight Database [@rfd_zenodo]. By extending the widely
+adopted OpenRocket simulator into the supersonic regime, it makes reproducible,
+inspectable supersonic trajectory analysis — previously available to this user
+community only through the closed-source RASAero II — accessible to high-power
+rocketry, university, and research users, and provides an open, auditable baseline
+for future open-source aerodynamic development.
+
 # Acknowledgements
 
-The author thanks the OpenRocket development community for the original
-open-source codebase on which this work builds, and acknowledges support from
-Duke University. Generative AI assistants (Anthropic Claude) were used for
-language editing, formatting, and code review only; all aerodynamic models,
-equations, validation comparisons, numerical results, and citation verifications
-were authored and independently verified by the human author against primary
-references. No AI authorship is claimed.
+The author thanks Earl H. Dowell (William Holland Professor of Mechanical
+Engineering & Materials Science, Duke University) for guidance and discussions,
+and the OpenRocket development community for the original open-source codebase
+on which this work builds.
+
+# AI usage disclosure
+
+Generative AI assistants (Anthropic Claude) were used for language editing,
+formatting, and code review only; all aerodynamic models, equations, validation
+comparisons, numerical results, and citation verifications were authored and
+independently verified by the human author against primary references. No AI
+authorship is claimed.
 
 # References

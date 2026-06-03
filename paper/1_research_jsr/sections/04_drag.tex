@@ -234,11 +234,12 @@ residual is $+57\%$ for the thinnest cones at the lowest Reynolds number.}
 \label{fig:cone-drag}
 \end{figure}
 
-\begin{table*}[t]
+\begin{table*}[htbp]
 \centering
 \caption{Drag submodel inventory (present work).}
 \label{tab:drag-inventory}
-\begin{tabularx}{\textwidth}{l l X l l}
+\begingroup\footnotesize
+\begin{tabularx}{\textwidth}{@{}l l X X l@{}}
 \toprule
 Submodel & Regime & Source / formulation & Validation source & Metric \\
 \midrule
@@ -266,4 +267,5 @@ Modified Newtonian & $M > 5$ & $C_p = C_{p,\max}\sin^2\theta$
    & DTIC~AD0487365~\cite{grabow1965} & MAPE $19.7\%$ \\
 \bottomrule
 \end{tabularx}
+\endgroup
 \end{table*}

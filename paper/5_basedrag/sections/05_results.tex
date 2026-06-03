@@ -75,19 +75,21 @@ Viswanath boattail & $6$--$16^{\circ}$ TE angle & \cite{viswanath1996} & in-wind
 
 The component MAPEs above quantify each closure's pointwise fidelity but say
 nothing about its leverage on \emph{integrated} apogee. To isolate that
-leverage we disabled each drag mechanism in turn and re-ran 24 of the 25
-corpus flights (MESOS 293K excluded; 23 single-stage plus the AeroPac 104K
-two-stage closure), spanning Mach 0.54--3.46, recording the resulting shift
+leverage we disabled each drag mechanism in turn and re-ran the archived
+24-flight mechanism-ablation subset (23 single-stage flights plus the AeroPac
+104K two-stage closure), spanning Mach 0.54--3.46, recording the resulting shift
 in mean absolute apogee error. The mechanisms are mutually orthogonal in the
 code, so each row of Table~\ref{tab:ablation} is a clean one-at-a-time effect
 rather than an interaction term.
 
 \begin{table}[htbp]
 \centering
-\caption{Mechanism ablation: effect of disabling each model on corpus apogee
-error (mean and maximum $|\Delta|$ in percentage points, 24 of the 25 corpus
-flights: MESOS 293K excluded; 23 single-stage plus the AeroPac 104K two-stage
-closure). The finned-base/base-drag augmentation is the dominant apogee
+\caption{Mechanism ablation: effect of disabling each model on apogee
+error (mean and maximum $|\Delta|$ in percentage points) over the archived
+24-flight mechanism-ablation subset: 23 single-stage flights plus the AeroPac
+104K two-stage closure. MESOS 293K remains part of the companion 25-flight
+validation corpus but is not included in this ablation artifact. The
+finned-base/base-drag augmentation is the dominant apogee
 driver --- roughly $9\times$ the next mechanism, $\sim\!20\times$ the fin wave
 drag, and $\sim\!54\times$ the shock-geometry pre-pass.}
 \label{tab:ablation}
