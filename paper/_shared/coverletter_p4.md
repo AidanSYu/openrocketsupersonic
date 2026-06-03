@@ -1,5 +1,5 @@
 **Aidan Yu**
-Independent Researcher (acknowledges Duke University support)
+Department of Mechanical Engineering & Materials Science, Duke University
 ORCID: 0009-0005-9589-5314
 asy22@duke.edu
 

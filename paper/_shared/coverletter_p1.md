@@ -1,7 +1,7 @@
 # Cover Letter — Submission to AIAA *Journal of Spacecraft and Rockets*
 
 Aidan Yu
-Independent Researcher
+Department of Mechanical Engineering & Materials Science, Duke University
 ORCID 0009-0005-9589-5314
 asy22@duke.edu
 
@@ -34,4 +34,4 @@ Thank you for your consideration. I would be glad to provide any further informa
 Sincerely,
 
 Aidan Yu
-Independent Researcher (acknowledging the support of Duke University)
+Department of Mechanical Engineering & Materials Science, Duke University

@@ -24,6 +24,6 @@ Thank you for your consideration. I confirm this work is original and is not und
 
 Sincerely,
 Aidan Yu
-Independent Researcher (with acknowledged support from Duke University)
+Department of Mechanical Engineering & Materials Science, Duke University
 ORCID 0009-0005-9589-5314
 asy22@duke.edu
