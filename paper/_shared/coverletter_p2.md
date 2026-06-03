@@ -18,7 +18,7 @@ I am pleased to submit *OpenRocket-Plus: Open-Source Supersonic Aerodynamic Exte
 
 These are companion works across different outlets and genres, not fragments of one study.
 
-**Availability and disclosure.** The code is openly available at https://github.com/AidanSYu/openrocketsupersonic under GPL-3.0; a tagged release with an archival Zenodo DOI is minted at submission. The Rocket Flight Database is published at Zenodo DOI 10.5281/zenodo.19976138 (v1.2, CC-BY-4.0). Per JOSS policy and good practice, generative AI assistants were used for language editing, formatting, and code review only; all models, equations, numerical results, and citation verifications were authored and independently verified by the human author. No AI authorship is claimed.
+**Availability and disclosure.** The code is openly available at https://github.com/AidanSYu/openrocketsupersonic under GPL-3.0; a tagged release with an archival Zenodo DOI is minted at submission. The Rocket Flight Database is published at Zenodo DOI 10.5281/zenodo.20531977 (CC-BY-4.0). Per JOSS policy and good practice, generative AI assistants were used for language editing, formatting, and code review only; all models, equations, numerical results, and citation verifications were authored and independently verified by the human author. No AI authorship is claimed.
 
 Thank you for your consideration. I confirm this work is original, the software is open and reusable, and the manuscript is not under review elsewhere.
 

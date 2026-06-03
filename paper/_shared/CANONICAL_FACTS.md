@@ -7,8 +7,8 @@ reviewers cross-check companion papers. If a source draft (`paper.md`, `AST_PAPE
 `Thesis/PART_*.md`, `VALIDATION_MATRIX.md`) disagrees with this file, **this file wins**
 and the source must be reconciled to it.
 
-Provenance: regenerated from `rocket-flight-database/flight_comparison.csv` (published RFD
-v1.2, model column = current archived code) via `paper/data/analysis/*/analyze.py` +
+Provenance: regenerated from `rocket-flight-database/flight_comparison.csv` (published RFD,
+model column = current archived code) via `paper/data/analysis/*/analyze.py` +
 `uncertainty_quantification.py`, and `paper/1_research_jsr/_DRAFTING_BRIEF.md` (the JSR
 flagship brief, already through two adversarial review rounds). The JSR paper
 (`1_research_jsr/`) is the reconciled reference implementation of these facts.
@@ -195,7 +195,7 @@ count that ALL papers must use. Provenance and reconciliation:
   "re-sync/recover" a prior value, and do NOT cite the "JUnit parallel-execution contamination" story
   (also refuted). −6.96% simply IS the model's prediction for this flight.
 - The published Rocket Flight Database (version of record) carries the −6.96% value in its model column;
-  an earlier deposited version (v1.2) that carried the erroneous figure is superseded.
+  an earlier deposited version that carried the erroneous figure is superseded.
 - −6.96% is within the ±10% admission band, so the 25/25 headline is unchanged.
 
 ---
@@ -224,7 +224,7 @@ count that ALL papers must use. Provenance and reconciliation:
 ---
 
 ## I. IDENTIFIERS
-- RFD dataset: Zenodo DOI **10.5281/zenodo.19976138** (v1.2), CC-BY-4.0; mirror https://github.com/AidanSYu/rocket-flight-database
+- RFD dataset: Zenodo DOI **10.5281/zenodo.20531977**, CC-BY-4.0; mirror https://github.com/AidanSYu/rocket-flight-database
 - Code: https://github.com/AidanSYu/openrocketsupersonic ; archival code Zenodo DOI + release tag = **mint at submission (BLOCKED on user push)**.
 - Author: Aidan Yu, ORCID 0009-0005-9589-5314, Independent Researcher (acknowledges Duke University support). Email asy22@duke.edu.
 - AI disclosure required per AIAA Oct-2024 policy (and good practice in all venues): generative AI used for language editing / formatting / code review only; all claims/equations/numbers authored & verified by the human author; no AI authorship.

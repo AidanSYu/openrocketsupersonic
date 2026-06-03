@@ -48,7 +48,7 @@ absolute error with 22/25 within +/-10%. The honest claim is statistical
 parity with this version-locked RASAero II comparison set, not superiority:
 a paired Wilcoxon signed-rank test on absolute errors shows no significant
 difference. The corpus is published separately as the Rocket Flight Database
-(doi:10.5281/zenodo.19976138).
+(doi:10.5281/zenodo.20531977).
 
 The complete OpenRocket Plus source code is available as an open-source
 fork at https://github.com/AidanSYu/openrocketsupersonic.
@@ -96,7 +96,7 @@ Add each as `IsSupplementedBy` or `References`:
 | Relation | Identifier | Resource type |
 |---|---|---|
 | `IsSupplementedBy` | `https://github.com/AidanSYu/openrocketsupersonic` | Software |
-| `IsSupplementedBy` | `10.5281/zenodo.19976138` | Dataset |
+| `IsSupplementedBy` | `10.5281/zenodo.20531977` | Dataset |
 | `References` | `https://www.rasaero.com/comparisons-alt.htm` | Other |
 
 ### Funding
