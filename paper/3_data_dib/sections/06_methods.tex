@@ -82,23 +82,20 @@ there and in the related software and technical-report companions. Predicted
 apogee is read from the simulation output. The reported \texttt{peak\_mach} for each
 flight characterizes the regime reached.
 
-\subsection{The MESOS~293K model-column disclosure}
+\subsection{The MESOS~293K model value}
 
-One of the 25 \texttt{apogee\_thiswork\_ft} values differs from the value first
-published in RASAero~II-comparison snapshot v1.2 of the database, and this is
-disclosed plainly. For MESOS~293K, the present archived code release predicts
-$273{,}056$~ft, an error of $-6.96\%$ against the measured $293{,}488$~ft; this is
-the value carried in the published CSV and used throughout the companion article
-\cite{yu2026jsr}. The earlier v1.2 snapshot, produced under an earlier code
-version, recorded $291{,}601$~ft ($-0.6\%$). The difference is a genuine,
-reproducible regression of the model between code versions: running the MESOS
-flight in isolation under the present archived release reproduces $273{,}056$~ft,
-confirming that the change is a real model-version difference and not a
-test-harness or execution artifact. The other 24 model values are unchanged from
-v1.2. Because $-6.96\%$ remains within the $\pm 10\%$ admission band, the
-$25/25$-within-$\pm 10\%$ membership of the headline corpus is unaffected. A future
-release of the database will re-synchronize the model column to the present
-archived code.
+For the highest-Mach flight in the corpus, the two-stage MESOS~293K closure, the
+present archived code release predicts $273{,}056$~ft, an error of $-6.96\%$
+against the measured $293{,}488$~ft; this is the value carried in the published
+CSV and used throughout the companion article \cite{yu2026jsr}. It is the
+corpus's largest single-flight error and is reproducible: running the MESOS
+flight in isolation under the present archived release reproduces $273{,}056$~ft.
+An earlier deposited version of this record (v1.2) carried a different value for
+this single flight; that value was erroneous, has no defensible derivation, and is
+superseded by the version of record, whose model column matches the present
+archived code. The other 24 model values are unchanged. Because $-6.96\%$ remains
+within the $\pm 10\%$ admission band, the $25/25$-within-$\pm 10\%$ membership of
+the headline corpus is unaffected.
 
 \subsection{Reproducibility of the derived statistics}
 

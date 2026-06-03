@@ -1,5 +1,0 @@
-This is BibTeX, Version 0.99e (MiKTeX 25.12)
-The top-level auxiliary file: basedrag.aux
-The style file: elsarticle-num.bst
-Database file #1: basedrag.bib
-bibtex: major issue: So far, you have not checked for MiKTeX updates.

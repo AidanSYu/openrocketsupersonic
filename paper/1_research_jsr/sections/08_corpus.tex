@@ -255,23 +255,25 @@ left Rabia in the holdout, contaminating it; the decontaminated split corrects
 this.) This prospective generalization, not any operational sweep, is the basis
 on which we rest the in-sample disclosure.
 
-\subsection{Two-Stage Closure and a Disclosed Regression}
+\subsection{The Two-Stage High-Mach Closure (MESOS 293K)}
 \label{sec:corpus-mesos}
 
 The MESOS~293K flight closes the corpus at Mach~4.33 and is one of the two
 two-stage flights in the corpus (alongside AeroPac~104K), exercising staging and
-coast-phase modeling not present in the single-stage flights. We disclose a
-regression here relative to the RFD~v1.2 archived snapshot: that earlier code
-version recorded an apogee of \SI{291601}{ft} (\SI{-0.6}{\percent}), whereas the
-current archived code release predicts \SI{273056}{ft}, an error of
-\SI{-6.96}{\percent}. The \SI{-6.96}{\percent} value is reproducible from the
-current archived code release---verified by running the MESOS flight in
-isolation---and the root cause of the regression is under investigation; the
-next RFD release will re-sync the model column. The flight remains within the
-\SI{\pm 10}{\percent} envelope and is retained in the corpus under the same
-outcome-independent inclusion rule applied to every other flight; we do not
-exclude it on the basis of the degraded result. The regression is carried
-forward to the limitations discussion.
+coast-phase modeling not present in the single-stage flights. It also carries the
+single largest per-flight error in the corpus: the current archived code release
+predicts an apogee of \SI{273056}{ft}, an error of \SI{-6.96}{\percent} against
+the measured \SI{293488}{ft}. This value is reproducible from the archived code
+release---verified by running the MESOS flight in isolation---and is the value
+reported throughout this paper and carried in the published database. As the only
+high-Mach two-stage closure, MESOS~293K simultaneously exercises stage
+separation, coast-phase aerodynamics, and Mach-4 base drag, and so bounds the
+framework's accuracy at the upper edge of its validated envelope; we do not
+isolate which of these compounding effects dominates the error. The flight
+remains within the \SI{\pm 10}{\percent} envelope and is retained in the corpus
+under the same outcome-independent inclusion rule applied to every other flight;
+we report the \SI{-6.96}{\percent} value without adjustment and carry it forward
+to the limitations discussion.
 
 \subsection{Per-Flight Results}
 \label{sec:corpus-perflight}

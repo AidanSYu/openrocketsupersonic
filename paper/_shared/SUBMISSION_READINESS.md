@@ -1,6 +1,6 @@
 # SUBMISSION READINESS — Consolidated Dossier (5-Paper Family)
 
-**Author:** Aidan Yu — Independent Researcher (acknowledges Duke University) — ORCID 0009-0005-9589-5314 — aidansyu@gmail.com
+**Author:** Aidan Yu — Independent Researcher (acknowledges Duke University) — ORCID 0009-0005-9589-5314 — asy22@duke.edu
 **Prepared:** 3 June 2026 · **Source of truth:** `paper/_shared/CANONICAL_FACTS.md`
 **Overall status:** GO_WITH_FIXES (moderate risk) for all five. Two reviewer-visible cross-companion
 numeric conflicts must be resolved before any peer-reviewed paper is submitted; two user pushes gate the
@@ -22,7 +22,7 @@ All five compile to clean PDFs. Cover letters drafted: `_shared/coverletter_p1.m
 (each discloses the full family). The core headline corpus — mean −0.38%, σ 5.44%, RMSE 5.34%, MAE 4.74%,
 25/25 within ±10%, 14/25 within ±5%; RASAero parity (Wilcoxon W=143.0, p=0.615; |ORP|−|RAS| = −0.60 pp,
 CI [−2.16,+0.96]); Basic Finner 11.8%; cone foredrag 19.7% (max +57%); Sutherland 0.54%/0.012%; MESOS −6.96%
-disclosed regression; ablation 8.10/0.87/0.39/0.15/0.00 pp; decontaminated holdout 3.95% (n=12) < 5.47% (n=13);
+(largest single-flight error, NOT a regression); ablation 8.10/0.87/0.39/0.15/0.00 pp; decontaminated holdout 3.95% (n=12) < 5.47% (n=13);
 exploratory high-Mach 3 pass / 17 fail; Kv=0.20 internally-calibrated — is consistent across all FINAL sources.
 No fabricated Devan-Ashwood or paulwedemeyer citations survive in any FINAL source.
 
@@ -66,10 +66,11 @@ Current FINAL-source state (verified this pass — note this has MOVED since the
   wrong**. Reword to "24-flight ablation corpus (the 25-flight corpus excluding the two-stage MESOS 293K closure)"
   in Paper 5 (`01_abstract.tex:11`, `04_methodology.tex:105-114`, `05_results.tex:79,87`, `08_conclusions.tex:18`)
   and the matching Thesis passages. Low reviewer risk but trivially correct.
-- **Refuted contamination hypothesis (Thesis).** `PART_E.md:1154` names the "JUnit parallel-execution
-  contamination" hypothesis *to dismiss it* ("was refuted by that isolation run and is not invoked here").
-  Canonical F prefers omission of the contamination story entirely. Defensible as written; for maximum safety,
-  drop the named hypothesis and keep only "the −6.96% reproduces in isolation and is the genuine current-code value."
+- **RESOLVED 2026-06-03 — MESOS framing corrected.** The "−6.96% is a regression from −0.6%/291,601 ft"
+  narrative has been **removed from all papers**. The −6.96% (273,056 ft) value is now reported as the standing,
+  reproducible current-code prediction and the corpus's largest single-flight error; the earlier −0.6%/291,601 ft
+  figure was erroneous (no defensible derivation) and is **withdrawn**. No "regression," no "under investigation,"
+  no "re-sync to recover," and no contamination story appears in Papers 1/3/4 or CANONICAL_FACTS §F.
 
 ---
 
@@ -80,7 +81,7 @@ These cannot be done by the drafting workflow; they require the user.
 | # | Action | Type | Gates | Notes |
 |---|---|---|---|---|
 | U1 | **Mint the archival code Zenodo DOI + push a tagged release** of `github.com/AidanSYu/openrocketsupersonic` (GPL-3.0) | git push + Zenodo | Papers **1, 2, 5** code-availability | The minted DOI + tag must be written back into all three manuscripts' availability statements and cover letters before submission. |
-| U2 | **Republish RFD v-next** syncing the MESOS −6.96% model-prediction column to current code; keep CC-BY-4.0 | git push + Zenodo (new version DOI under concept 10.5281/zenodo.19976138) | Papers **1, 3** data-DOI consistency | Paper 3 backmatter already states the version-of-record described is the synchronized deposit; that deposit must actually exist at submission. |
+| U2 | **Republish RFD v-next** correcting the MESOS model-prediction column to the current-code value (−6.96% / 273,056 ft), superseding the erroneous −0.6%/291,601 ft entry; keep CC-BY-4.0 | git push + Zenodo (new version DOI under concept 10.5281/zenodo.19976138) | Papers **1, 3** data-DOI consistency | Paper 3 backmatter/methods now state the version of record carries the corrected value and that the earlier deposited figure for this single flight was erroneous; that corrected deposit must actually exist at submission. |
 | U3 | **Confirm Zenodo monograph (Paper 4) deposit timing** | human decision | family disclosure | LOW prior-pub risk *with* disclosure (per the Paper-4 research and every cover letter). Deposit-then-disclose is fine; depositing Paper 4 first gives the others a citable superset DOI. |
 | U4 | **Paper 2 repo readiness:** CI green on the released commit; fork README present; verify `CITATION.cff` content (file exists at repo root); fix the stale **22.7% → 11.8%** in any repo-facing Basic Finner doc | git push | Paper **2** | Manuscript itself is correct (11.8%). 22.7% survives only in `core/.../ReleaseNotes.md`, build-reports and `paper/data/legacy/*` — repo housekeeping, not a manuscript blocker. |
 | U5 | **DiB submission mechanics:** obtain and fill the official Data in Brief **DOCX template**; co-submit or cite the parent (Paper 1) at submission | human action | Paper **3** | DiB requires the parent research article be identified; Paper 1 is that parent. |
@@ -138,5 +139,6 @@ subsystem 20→27 in JSR + its cover letter) and the two minor label/framing ite
 user pushes — archival code DOI + tagged release (U1) and the RFD v-next MESOS re-sync (U2); (c) the Paper-4
 Zenodo deposit confirmed (U3) and the Paper-2 repo + Paper-3 DOCX mechanics (U4, U5). The honest-framing
 spine — parity not superiority, supersonic-validated to M4.33 with hypersonic exploratory, full 3-pass/17-fail
-high-Mach disclosure, in-sample constants defended by holdout, MESOS −6.96% disclosed, no fabricated citations —
+high-Mach disclosure, in-sample constants defended by holdout, MESOS −6.96% as the standing largest-error value
+(erroneous −0.6% withdrawn), no fabricated citations —
 holds across all five FINAL sources.

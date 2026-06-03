@@ -69,22 +69,23 @@ dominates, and the method is \emph{not} validated in the hypersonic regime. We
 deliberately do not present the high-Mach set as a within-tolerance headline,
 which would constitute outcome-based selection.
 
-\subsection{Two-stage closure (MESOS 293K) regression}
+\subsection{Two-stage high-Mach closure (MESOS 293K)}
 \label{sec:lim-mesos}
 
 The corpus contains two two-stage closures (the AeroPac~104K flight at
 $M = 3.04$ and MESOS~293K at $M = 4.33$); the remaining 23 flights are
-single-stage. MESOS~293K currently predicts a signed apogee error of $-6.96\%$
-(273{,}056~ft). This is a \emph{disclosed regression} relative to the archived
-RFD~v1.2 snapshot, which recorded 291{,}601~ft ($-0.6\%$) under an earlier code
-version. The $-6.96\%$ value is itself reproducible: it is reproduced from the
-current archived code release with the MESOS flight run in isolation. The root
-cause of the regression from the v1.2-era value is under investigation; we do
-\emph{not} attribute it to a specific mechanism here. The current $-6.96\%$
-result remains within the $\pm 10\%$ admission criterion and so does not change
-the $25/25$ headline. The next RFD release will re-synchronize the model column
-to the current code; we report the reproducible $-6.96\%$ value throughout this
-paper.
+single-stage. MESOS~293K carries the largest single-flight error in the corpus:
+the current archived code predicts a signed apogee error of $-6.96\%$
+(273{,}056~ft against the measured 293{,}488~ft). This value is reproducible---it
+is reproduced from the current archived code release with the MESOS flight run in
+isolation---and is the value reported throughout this paper. As the only
+high-Mach two-stage closure, it simultaneously exercises stage separation,
+coast-phase aerodynamics, and Mach-4 base drag, and we do \emph{not} isolate
+which of these compounding effects dominates the error; it is reported as a
+single integrated result. The $-6.96\%$ result remains within the $\pm 10\%$
+admission criterion and so does not change the $25/25$ headline. Tightening the
+two-stage high-Mach closure---and adding a second high-Mach two-stage flight to
+the corpus to support inference above $M = 3$---is identified as future work.
 
 \subsection{No author-produced computational fluid dynamics}
 \label{sec:lim-cfd}

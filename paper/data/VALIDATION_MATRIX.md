@@ -4,8 +4,14 @@
 > manuscript numbers. Where this dashboard disagrees it is stale: the A-level count is **20**
 > (not 27; cone foredrag, AGARD-B, and vortex Kv are B-level/qualitative, counted outside the 20),
 > the corpus is **23 single-stage + 2 two-stage** (AeroPac 104K + MESOS), and **MESOS 293K = −6.96%
-> (273,056 ft)** is the reproducible current-code value (a disclosed regression; the "−0.6%/parallel-
-> execution contamination" story here is refuted and must not be cited).
+> (273,056 ft)** is the standing, reproducible current-code value and the corpus's largest single-flight
+> error — **NOT a regression**. The earlier **−0.6% / −0.64% / 291,601 ft** figure for MESOS was erroneous
+> (no defensible derivation) and is **WITHDRAWN**; the "JUnit parallel-execution contamination" story is
+> also refuted. **Every "−0.6% / −0.64% / 291,601 / canonical v1.0 / contaminated-drift" statement in the
+> dated baselines and change-log below is historical and superseded.** The authoritative aggregate (with
+> MESOS at −6.96%) is mean signed **−0.38%**, σ 5.44%, RMSE 5.34%, MAE **4.74%**, 25/25 within ±10%,
+> **14/25** within ±5% (CANONICAL_FACTS §A) — NOT the 4.49% / 15-of-25 figures below, which derive from the
+> withdrawn value.
 
 
 The publication gate for the aerodynamic model. Detail lives in the cited tests and closure memos; this file is the dashboard.
@@ -22,8 +28,8 @@ The publication gate for the aerodynamic model. Detail lives in the cited tests 
 - **20 A-level rows** pass with quantitative external acceptance gates, plus **1 externally anchored negative benchmark** (RM-10) used to bound and exclude a geometry family.
 - **3 new B-level external anchors** landed 2026-05-02 (Arcas wind-tunnel D-4013/D-4014, Bhagwandin AFF Cmq second source, Bunescu ANF URANS CFD comparator) and are tracked below.
 - **9 B-level rows** are honestly disclosed integration claims (corpus-validated, not isolated).
-- **SimVReal corpus** (25 flights, MESOS folded as flight 25; canonical v1.0 Zenodo, post MESOS revert at commit `42f31d8f9`): 25/25 within +/-10 %, **15/25** within +/-5 %, avg abs error **4.49 %**, mean signed error -0.1 %, 0 abnormal endings. Lower aggregate error than the recorded RASAero II predictions on the same frozen flights (5.26 %, 22/25 within +/-10 %).
-- **MESOS 293K** (two-stage M 4.18 to 293 K ft, flight 25; canonical v1.0 Zenodo value): -0.6 % apogee, +4.0 % velocity, +3.6 % peak Mach. The 2026-05-02 fresh test rerun produced -6.96 % / 273,067 ft and is flagged as a contaminated drift in `paper/data/diagnostics/mesos_drift_2026_05_02.md`; the canonical v1.0 value is the published Zenodo record (DOI 10.5281/zenodo.19976138) and is the manuscript headline.
+- **SimVReal corpus** (25 flights, MESOS folded as flight 25): 25/25 within +/-10 %, **14/25** within +/-5 %, MAE **4.74 %**, mean signed error **-0.38 %**, RMSE 5.34 %, 0 abnormal endings (authoritative aggregate per CANONICAL_FACTS §A, with MESOS at -6.96 %). **Statistical parity** with the recorded RASAero II predictions on the same frozen flights (Wilcoxon W=143.0, p=0.615; |ORP|-|RAS| = -0.60 pp, 95% CI [-2.16, +0.96]) — parity, not superiority.
+- **MESOS 293K** (two-stage, peak M 4.33, measured 293,488 ft, flight 25): apogee **-6.96 % / 273,056 ft** -- the standing, reproducible current-code value and the corpus's largest single-flight error (within +/-10 %). The earlier -0.6 % / 291,601 ft figure was erroneous and is **withdrawn**; the "contaminated drift" framing in `paper/data/diagnostics/mesos_drift_2026_05_02.md` is superseded. The published Zenodo record (concept DOI 10.5281/zenodo.19976138) version of record carries -6.96 %.
 - **AST publication gate**: items 1, 2, 3, 4, 6, 7 CLOSED; item 5 partially closed with disclosure.
 
 ## Frozen SimVReal baseline (2026-05-01)

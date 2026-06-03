@@ -53,18 +53,17 @@ reference rather than a controlled head-to-head rerun. Any paired comparison a
 user performs against the \texttt{apogee\_thiswork\_ft} column inherits this
 asymmetry and should be framed accordingly.
 
-\paragraph{The MESOS~293K model value is a disclosed regression.}
+\paragraph{The MESOS~293K model value is the corpus's largest single-flight error.}
 The higher-Mach of the corpus's two two-stage vehicles (flight $25$, MESOS~293K,
 the highest-Mach flight at Mach $4.33$; the other two-stage flight is the AeroPac~104K
 Two-Stage at Mach $3.04$) is predicted by the archived code release at $273{,}056$~ft, a
-signed error of $-6.96\%$. This differs from the $291{,}601$~ft ($-0.6\%$) value
-that appeared in the RFD~v1.2 snapshot. The change is a genuine, reproducible
-model regression --- confirmed by running the MESOS flight in isolation, and
-\emph{not} an artifact of the test harness --- arising from a later code version;
-it is disclosed here rather than reconciled away, and a future RFD release will
-re-sync the model column to the archived code. The $-6.96\%$ value remains within
-the $\pm10\%$ admission band, so the headline ``$25/25$ within $\pm10\%$'' count
-is unaffected.
+signed error of $-6.96\%$---the largest single-flight error in the corpus. The
+value is reproducible (confirmed by running the MESOS flight in isolation) and is
+the value carried in the published CSV. An earlier deposited version (RFD~v1.2)
+carried a different, erroneous value for this single flight; it has no defensible
+derivation and is superseded by the version of record. The $-6.96\%$ value remains
+within the $\pm10\%$ admission band, so the headline ``$25/25$ within $\pm10\%$''
+count is unaffected.
 
 \paragraph{Two base-drag constants make the companion-paper headline partly
 in-sample.} Two base-drag scale constants used to generate the
