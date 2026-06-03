@@ -123,7 +123,7 @@ answering AST's "no own CFD" objection.
 
 ## 5. SOURCES TO MINE for the closure equations & framing
 
-- `paper/AST_PAPER.md` §5 (drag models) — the existing base-drag derivations + the C1-continuous transonic blend.
+- `AST_PAPER.md` (this folder, `paper/5_basedrag/`) §5 (drag models) — the existing base-drag derivations + the C1-continuous transonic blend.
 - `paper/data/md/naca_tn_3393_validation_report.md` — TN 3393 turbulent/laminar base drag (15.9% / 4.4%).
 - `paper/data/legacy/transonic_base_drag_source_hunt.md`, `paper/data/legacy/m2_3_base_drag_source_hunt.md`.
 - `paper/data/outlier_closure/*.md` — per-flight base-drag closure diagnostics.

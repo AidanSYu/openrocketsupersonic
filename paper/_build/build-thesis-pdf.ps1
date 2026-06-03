@@ -14,7 +14,7 @@
     .\paper\build-thesis-pdf.ps1
 #>
 $ErrorActionPreference = "Stop"
-$PaperRoot = $PSScriptRoot
+$PaperRoot = Split-Path $PSScriptRoot -Parent   # script now lives in paper/_build/, so paper/ is its parent
 $ThesisDir = Join-Path $PaperRoot "Thesis"
 Set-Location $PaperRoot
 
@@ -36,7 +36,7 @@ if (-not $pdflatex) {
 
 $outPdf = Join-Path $ThesisDir "OpenRocketPlus-Thesis.pdf"
 $md = Join-Path $ThesisDir "FULL_TECHNICAL_REPORT.md"
-$meta = Join-Path $PaperRoot "thesis-metadata.yaml"
+$meta = Join-Path $PSScriptRoot "thesis-metadata.yaml"   # metadata lives alongside this script in paper/_build/
 
 # Concatenate PART_A..E with explicit blank lines between files. Without the
 # blank-line separators, headings like "## 5. Shock Relations" at the start of

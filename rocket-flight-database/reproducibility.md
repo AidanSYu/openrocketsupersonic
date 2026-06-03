@@ -54,7 +54,7 @@ python paper/data/analysis/corpus_uncertainty_2026_06_02/uncertainty_quantificat
 The analysis scripts recompute every signed error from the full-precision
 `apogee_*_ft` columns (the published `err_*_pct` columns are stored rounded to one
 decimal), so the table's apogee values are the single source of truth. JDK 21 is
-required for the Gradle build; Python deps are pinned in `paper/requirements.txt`.
+required for the Gradle build; Python deps are pinned in `paper/_build/requirements.txt`.
 
 ## Scope and honest disclosures
 

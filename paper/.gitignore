@@ -1,0 +1,7 @@
+# Python caches (figure-generation + .ork build scripts)
+__pycache__/
+*.pyc
+
+# Regenerable JOSS build output. The canonical deliverable is the staged
+# root copy 2_JOSS_OpenRocketPlus.pdf; intermediate joss_paper.pdf is not tracked.
+joss_paper.pdf

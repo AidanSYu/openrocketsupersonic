@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 # Make plot_style.py importable.
 PAPER_ROOT = Path(__file__).resolve().parents[2]   # .../paper
-sys.path.insert(0, str(PAPER_ROOT))
+sys.path.insert(0, str(PAPER_ROOT / "_build"))     # plot_style.py now lives in paper/_build/
 from plot_style import (
     apply_style, TAB10, REF_MARKERS, REF_KW, MODEL_KW,
     TITLE_SIZE, LABEL_SIZE, LEGEND_SIZE, DPI,
