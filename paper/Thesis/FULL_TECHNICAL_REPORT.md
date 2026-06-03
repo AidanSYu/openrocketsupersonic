@@ -6148,7 +6148,7 @@ The author thanks the OpenRocket maintainers and contributors, on whose open-sou
 
 #### 12.7.2 Author Affiliation
 
-Sole author: Aidan Yu, Independent Researcher (acknowledges Duke University support). ORCID [0009-0005-9589-5314](https://orcid.org/0009-0005-9589-5314). Corresponding author: <asy22@duke.edu>.
+Sole author: Aidan Yu, Department of Mechanical Engineering & Materials Science, Duke University. ORCID [0009-0005-9589-5314](https://orcid.org/0009-0005-9589-5314). Corresponding author: <asy22@duke.edu>.
 
 #### 12.7.3 Conflict of Interest
 

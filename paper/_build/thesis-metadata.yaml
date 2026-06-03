@@ -4,7 +4,7 @@ subtitle: "Technical Report"
 author:
   - "Aidan Yu"
 institute:
-  - "Independent Researcher"
+  - "Department of Mechanical Engineering & Materials Science, Duke University"
 date: "May 2026"
 # Default Pandoc LaTeX template (report = \chapter for #, \section for ##)
 documentclass: report
@@ -163,7 +163,7 @@ include-before: |
     \vspace{2.5cm}
     {\Large\bfseries Aidan Yu\par}
     \vspace{0.3cm}
-    {\large Independent Researcher\par}
+    {\large Department of Mechanical Engineering \& Materials Science, Duke University\par}
     \vspace{1.2cm}
     {\large May 2026\par}
     \vfill

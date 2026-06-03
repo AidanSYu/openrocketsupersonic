@@ -226,7 +226,7 @@ count that ALL papers must use. Provenance and reconciliation:
 ## I. IDENTIFIERS
 - RFD dataset: Zenodo DOI **10.5281/zenodo.20531977**, CC-BY-4.0; mirror https://github.com/AidanSYu/rocket-flight-database
 - Code: https://github.com/AidanSYu/openrocketsupersonic ; archival code Zenodo DOI + release tag = **mint at submission (BLOCKED on user push)**.
-- Author: Aidan Yu, ORCID 0009-0005-9589-5314, Independent Researcher (acknowledges Duke University support). Email asy22@duke.edu.
+- Author: Aidan Yu, ORCID 0009-0005-9589-5314, Department of Mechanical Engineering & Materials Science, Duke University. Email asy22@duke.edu.
 - AI disclosure required per AIAA Oct-2024 policy (and good practice in all venues): generative AI used for language editing / formatting / code review only; all claims/equations/numbers authored & verified by the human author; no AI authorship.
 - License: code GPL-3.0; data CC-BY-4.0.
 

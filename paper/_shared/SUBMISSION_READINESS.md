@@ -1,6 +1,6 @@
 # SUBMISSION READINESS — Consolidated Dossier (5-Paper Family)
 
-**Author:** Aidan Yu — Independent Researcher (acknowledges Duke University) — ORCID 0009-0005-9589-5314 — asy22@duke.edu
+**Author:** Aidan Yu — Department of Mechanical Engineering & Materials Science, Duke University — ORCID 0009-0005-9589-5314 — asy22@duke.edu
 **Prepared:** 3 June 2026 · **Source of truth:** `paper/_shared/CANONICAL_FACTS.md`
 **Overall status:** GO_WITH_FIXES (moderate risk) for all five. Two reviewer-visible cross-companion
 numeric conflicts must be resolved before any peer-reviewed paper is submitted; two user pushes gate the
