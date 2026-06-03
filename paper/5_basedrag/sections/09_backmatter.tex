@@ -3,7 +3,7 @@
 % All identifiers per CANONICAL_FACTS.md SI. Venue = ASCE Journal of Aerospace
 % Engineering -> AI disclosure kept venue-neutral (no AIAA-specific policy citation).
 
-The flight ground-truth used in this intercomparison is the Rocket Flight Database
+The flight ground-truth used in this study is the Rocket Flight Database
 (RFD), v1.2, archived on Zenodo under DOI
 \href{https://doi.org/10.5281/zenodo.19976138}{10.5281/zenodo.19976138} and released
 under the Creative Commons Attribution 4.0 (CC-BY-4.0) license \cite{rfd_zenodo}; a
@@ -12,14 +12,16 @@ working mirror is maintained at
 (OpenRocket-Plus, an extension of OpenRocket \cite{niskanen2009}) is openly developed at
 \url{https://github.com/AidanSYu/openrocketsupersonic} under the GPL-3.0 license; an
 archival snapshot of the exact code version used in this study, together with a matching
-Zenodo DOI and a tagged release, is minted at submission. The base-drag closures
-compared here---Chapman--Korst turbulent and Chapman laminar \cite{chapman1955},
-ESDU~77021 \cite{esdu77021}, the empirical $C_{D,\text{base}} = 0.064 + 0.186/M^2$
-correlation, the Viswanath boattail treatment \cite{viswanath1996}, and the finned-base
-augmentation---are implemented in that repository.
+Zenodo DOI and a tagged release, is minted at submission. The base-drag closure
+branches benchmarked in this study---the turbulent Chapman--Korst shear-layer model,
+the Chapman laminar correlation \cite{chapman1950}, the ESDU~77021
+boundary-layer-thickness correction \cite{esdu77021}, the empirical
+$C_{D,\text{base}} = 0.064 + 0.186/M^2$ correlation, the Viswanath boattail treatment
+\cite{viswanath1996}, and the finned-base augmentation---are implemented in that
+repository.
 
 The analysis and ablation scripts that regenerate every table and figure in this paper
-(the per-mechanism isolation runs and the base-drag closure intercomparison) reside in
+(the per-mechanism isolation runs and the component base-pressure benchmarks) reside in
 the \texttt{paper/data/analysis/} tree of the code repository and operate directly on the
 published RFD comparison set, so every reported quantity is reproducible from the
 archived artifacts. The companion integrated-validation study \cite{yu2026jsr} provides

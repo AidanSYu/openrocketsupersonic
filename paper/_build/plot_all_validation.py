@@ -31,7 +31,7 @@ from plot_style import (
     SINGLE_FIG, WIDE_FIG, TALL_FIG, DPI,
 )
 
-DATA_DIR = SCRIPT_DIR / "data"
+DATA_DIR = SCRIPT_DIR.parent / "data"   # script in paper/_build/; data lives at paper/data
 CSV  = DATA_DIR / "csv"
 PNG  = DATA_DIR / "png"
 
@@ -743,7 +743,7 @@ TN3650_CSV = Path(
 
 
 def plot_tn3650_fin_wave_drag():
-    csv_path = SCRIPT_DIR.parent / TN3650_CSV
+    csv_path = SCRIPT_DIR.parent.parent / TN3650_CSV   # repo root is two levels above paper/_build/
     if not csv_path.exists():
         raise FileNotFoundError(f"tn3650 required CSV not found: {csv_path}")
     df = pd.read_csv(csv_path)
@@ -778,7 +778,7 @@ def plot_tobak_cmq():
     csv_path = CSV / "tobak_cmq_benchmark.csv"
     if not csv_path.exists():
         # Check alternate location
-        csv_path = SCRIPT_DIR.parent / "core" / "paper" / "data" / "csv" / "tobak_cmq_benchmark.csv"
+        csv_path = SCRIPT_DIR.parent.parent / "core" / "paper" / "data" / "csv" / "tobak_cmq_benchmark.csv"
     if not csv_path.exists():
         raise FileNotFoundError("tobak_cmq required CSV not found in paper/data/csv or core/paper/data/csv")
     df = pd.read_csv(csv_path, comment="#")
