@@ -9,7 +9,7 @@ $$
 with
 
 - $C_{D,\text{friction}}$ — viscous skin-friction integrated over all wetted surfaces, computed via the Van Driest II compressible transformation at supersonic Mach (Section 6.3);
-- $C_{D,\text{pressure}}$ — forebody/wave drag from nose cones, body shoulders, transitions, and fin leading edges (Section 6.1 for axisymmetric components, Section 6.4 for fins);
+- $C_{D,\text{pressure}}$ — forebody/wave drag from nose cones, body shoulders, transitions, and fin leading edges, plus a slender-body supersonic body-pressure contribution on long cylindrical afterbodies (Section 6.1 for axisymmetric components, Section 6.1.8 for the slender-body term, Section 6.4 for fins);
 - $C_{D,\text{base}}$ — afterbody base drag arising from the low-pressure recirculation behind every blunt aft face (Section 6.2);
 - $C_{D,\text{override}}$ — any user-specified per-component drag override (carried unchanged from upstream OpenRocket);
 - $C_{D,i} = C_N \sin\alpha$ — lift-induced drag from the axial projection of the normal force at angle of attack (Section 6.5).
@@ -18,7 +18,7 @@ with
 
 The output $C_D$ is converted to an axial-force coefficient $C_{D,\text{axial}} = f(\alpha)\,C_D$ by `calculateAxialCD()` (Section 6.6) before it is returned to the 6-DOF stepper, and the same call also adds two non-axisymmetric pressure-drag mechanisms: forward-facing step drag at body diameter discontinuities (Section 6.7) and shock–boundary-layer interaction at fin roots (Section 6.8). Section 6.9 closes the chapter with a quantitative drag budget at $M=0.5$, $M=2.0$, and $M=5.0$, and Section 6.10 collects every transonic blend window in one table for cross-reference.
 
-> **Validation map for this chapter.** The headline drag claims are: nose wave drag MAE 0.029 vs NACA RM A52H28 across 5 nose families; turbulent base drag MAPE 15.9% vs NACA TN 3393 (4 points, $M = 2.73$–$4.48$); laminar base drag MAPE 4.4% vs the same TN 3393 dataset; fin wave drag against NACA TN 3650 (12 free-flight source rows, with the current diagnostic MAPE computed over the 10 non-Mach-1.10 rows) plus exact-to-numerical-precision agreement with the Ackeret formula on 15 unswept cases; total finned-vehicle drag MAPE 11.9% vs ADA636861 Basic Finner over $M=1.08$–$4.30$; hypersonic cone foredrag MAPE 19.7% vs DTIC AD0487365 across 11 points $M=6.5$–$17.2$; and AGARD-B (AEDC-TR-70-100) drag trend closure by per-row tolerance gates over $M=0.2$–$1.0$ rather than by a single MAE gate.
+> **Validation map for this chapter.** The headline drag claims are: nose wave drag MAE 0.029 vs NACA RM A52H28 across 5 nose families; turbulent base drag MAPE 15.9% vs NACA TN 3393 (4 points, $M = 2.73$–$4.48$); laminar base drag MAPE 4.4% vs the same TN 3393 dataset; fin wave drag against NACA TN 3650 (12 free-flight source rows, with the current diagnostic MAPE computed over the 10 non-Mach-1.10 rows) plus exact-to-numerical-precision agreement with the Ackeret formula on 15 unswept cases; total finned-vehicle drag MAPE 11.8% vs ADA636861 Basic Finner over $M=1.08$–$4.30$; hypersonic cone foredrag MAPE 19.7% vs DTIC AD0487365 across 11 points $M=6.5$–$17.2$; and AGARD-B (AEDC-TR-70-100) drag trend closure by per-row tolerance gates over $M=0.2$–$1.0$ rather than by a single MAE gate.
 
 
 ### 6.1 Nose and Body Wave Drag
@@ -38,7 +38,7 @@ The four models are:
 
 Below the drag-divergence Mach $M_{dd}$ all four return zero; through the transonic regime ($M_{dd}\le M \le 1.5$) wave drag is built up by the C1 Hermite onset of Section 6.1.4 joined to the empirical TR-R-100 transonic table where applicable, and then handed off to the analytical models from $M=1.5$ upward.
 
-The per-shape selection logic is in `SymmetricComponentCalc.calculatePressureCD()` (lines 415–500) and `buildAnalyticalWaveDragCurve()` (lines 812–860). An expanding shoulder (Transition with $R_{\text{aft}} > R_{\text{fore}}$) is treated as a body that sits under an expansion fan and contributes zero pressure drag at supersonic Mach (line ~450 of the same file); only contracting shoulders behave as nose-like compression surfaces.
+The per-shape selection logic is in `SymmetricComponentCalc.calculatePressureCD()` (lines 415–500) and `buildAnalyticalWaveDragCurve()` (lines 812–860). An expanding shoulder (Transition with $R_{\text{aft}} > R_{\text{fore}}$) is treated as a body that sits under an expansion fan and contributes zero pressure drag at supersonic Mach (line ~450 of the same file); only contracting shoulders behave as nose-like compression surfaces. A smooth cylindrical body tube returns zero pressure drag in this classical treatment; the supersonic body-pressure increment that long slender airframes nevertheless radiate is added separately by the slender-body term of Section 6.1.8, which `BarrowmanDragCalculator.calculatePressureCD()` sums into the body total.
 
 
 #### 6.1.1 Taylor–Maccoll Exact Solution for Cones
@@ -251,15 +251,15 @@ $$
 C_{p,\max} \;=\; \frac{2}{1.4\,M^{2}}\left[\left(\frac{5.76\,M^{2}}{5.6\,M^{2} - 0.8}\right)^{3.5}\!\frac{2.8\,M^{2} - 0.4}{2.4} \;-\; 1\right].
 $$
 
-The asymptotic values agree with the NACA 1135 normal-shock tables to better than $0.01\%$ on all 15 spot checks (validation in [`paper/data/md/rayleigh_pitot_cpmax.md`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/md/rayleigh_pitot_cpmax.md)):
+The tabulated values agree with the NACA 1135 normal-shock tables to better than $0.01\%$ on all 15 spot checks (validation in [`paper/data/md/rayleigh_pitot_cpmax.md`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/md/rayleigh_pitot_cpmax.md)):
 
 | $M$ | $C_{p,\max}$ ($\gamma = 1.4$) |
 |---|---|
-| 1.0 | 1.000 (isentropic stagnation) |
-| 2.0 | 1.278 |
-| 3.0 | 1.583 |
-| 5.0 | 1.734 |
-| 10.0 | 1.812 |
+| 1.0 | 1.276 |
+| 2.0 | 1.657 |
+| 3.0 | 1.756 |
+| 5.0 | 1.809 |
+| 10.0 | 1.832 |
 | $\infty$ | 1.839 |
 
 **Real-gas $\gamma$ correction.** Above $M = 5$, the stagnation temperature exceeds $\sim 2000$ K and vibrational excitation of N$_2$ and O$_2$ reduces the effective ratio of specific heats. The effective $\gamma$ used in $C_{p,\max}$ is read from `AtmosphericConditions.effectiveGamma(T_0)` evaluated at the approximate stagnation temperature
@@ -268,16 +268,7 @@ $$
 T_0 \approx T_\infty\!\left(1 + \tfrac{\gamma-1}{2}M^{2}\right).
 $$
 
-The piecewise function in `AtmosphericConditions` is
-
-$$
-\gamma_{\text{eff}}(T_0) \;=\; \begin{cases}
-1.4 & T_0 \le 800 \;\text{K} \\
-1.4 - 7.5\times 10^{-5}\,(T_0 - 800) & 800 < T_0 \le 2000\;\text{K} \\
-1.31 - 2.5\times 10^{-5}\,(T_0 - 2000) & 2000 < T_0 \le 4000\;\text{K} \\
-1.25 & T_0 > 4000 \;\text{K}
-\end{cases}
-$$
+The function `AtmosphericConditions.effectiveGamma(T_0)` is **not** a linear fit: it evaluates the Einstein quantum-harmonic-oscillator model for the vibrational specific heat of the N$_2$/O$_2$ mixture and clamps the result to $[1.30,\,1.40]$. The full derivation, the Java listing, and the tabulated values ($\gamma_{\text{eff}} = 1.40$ for $T_0 \le 800$ K, $1.371$ at $1000$ K, $1.349$ at $1500$ K, $1.330$ at $2000$ K, decreasing toward the $1.30$ floor above $\sim$$5000$ K) are given in Part A, Section 3.3, and the same quantity is validated in Part E, Section 11.5.3. The lower clamp $\gamma_{\text{eff}} \ge 1.30$ is enforced because below it molecular dissociation (not modeled) would dominate.
 
 **Blend with shock-expansion (M 4.0–6.0).** Both `buildAnalyticalWaveDragCurve()` and `extendWithShockExpansion()` use a cubic Hermite smoothstep $w = 3t^2 - 2t^3$, $t = (M - 4.0)/2.0$ to fade from the analytical (Taylor–Maccoll or shock-expansion) result into Modified Newtonian theory:
 
@@ -328,17 +319,31 @@ Conical nose, $\theta_c = 15^\circ$, fineness ratio $f = L/(2R) \approx 1.87$, i
 **At $M = 5.0$ (in the Newtonian blend window):**
 
 1. Pure Taylor–Maccoll gives $C_d \approx 0.185$.
-2. Modified Newtonian gives $C_{p,\max} = 1.734$, $\sin^2(15^\circ) = 0.0670$, so the single-strip Newtonian estimate is $C_d \approx 1.734 \times 0.0670 = 0.116$.
+2. Modified Newtonian gives $C_{p,\max} = 1.809$, $\sin^2(15^\circ) = 0.0670$, so the single-strip Newtonian estimate is $C_d \approx 1.809 \times 0.0670 = 0.121$.
 3. Blend weight at $M = 5.0$: $t = 0.5$, $w = 3(0.5)^2 - 2(0.5)^3 = 0.5$.
-4. Blended: $C_d = 0.5 \times 0.185 + 0.5 \times 0.116 = 0.151$.
+4. Blended: $C_d = 0.5 \times 0.185 + 0.5 \times 0.121 = 0.153$.
 
 | Mach | Taylor–Maccoll $C_d$ | Newtonian $C_d$ | Blended $C_d$ |
 |---|---|---|---|
 | 2.0 | 0.202 | – | 0.202 |
 | 3.0 | 0.209 | – | 0.209 |
-| 5.0 | 0.185 | 0.116 | 0.151 |
+| 5.0 | 0.185 | 0.121 | 0.153 |
 
 A52H28 sanity check across all five reference nose families (digitized in [`paper/data/csv/NACA_RM_A52H28_digitized_points.csv`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/csv/NACA_RM_A52H28_digitized_points.csv)): the current JUnit benchmark reports aggregate MAE approximately 0.029 with a gate of 0.035 after the Van Driest II skin-friction change. The older `paper/data/csv/naca_rm_a52h28_metrics.csv` and `paper/data/md/naca_validation_report.md` still preserve the pre-Van-Driest/Eckert export value (MAE 0.0147, RMSE 0.0190) and should be read as stale provenance until regenerated. The bias isolation memo [`paper/data/md/a52h28_bias_isolation.md`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/md/a52h28_bias_isolation.md) attributes the cone residual to the shape-agnostic transonic polynomial and the quarter-power family residual (~10–15% flat) to TR-R-100 fineness scaling — both architectural rather than physical errors.
+
+
+#### 6.1.8 Slender-Body Supersonic Body-Pressure Term
+
+The classical Barrowman treatment returns zero pressure drag for a smooth cylindrical body tube (`SymmetricComponentCalc` lines 422–423). At $M > 1$ this is a truncation: a long cylindrical afterbody radiates a weak system of shocklets driven by boundary-layer displacement growth, surface imperfections (joints, fasteners, paint ridges), and viscous–inviscid interaction with the nose–body shoulder shock. Hoerner (1965, Ch. 17) and Tanner (1984) document a non-zero body pressure drag on long cylindrical afterbodies at supersonic speeds ($C_{dp}\sim 0.02$–$0.05$ for $L/D = 20$–$40$ at $M = 1$–$3$). `BarrowmanDragCalculator.calculateSlenderBodyPressureCD()` (line 1467) adds this increment, which `calculatePressureCD()` sums into the body pressure total (line 865) and distributes across active body tubes for the per-component breakdown:
+
+$$
+C_{D,\text{slender}} \;=\; \mathrm{SLENDER\_BODY\_K}\,\cdot\,\min\!\bigl(L/d - 15,\;25\bigr)\,\cdot\,f_M(M),
+\qquad \mathrm{SLENDER\_BODY\_K} = 0.0025,
+$$
+
+where $L/d$ is the cylindrical-body fineness ratio (nose, transitions, and boattails excluded; `computeBodyTubeLength()` requires fore radius $\approx$ aft radius). Both gates must be satisfied for any effect: body $L/d > 15$ and $M > 1.05$. The Mach factor ramps in over $M = 1.05$–$1.3$ via the smoothstep $w = 3t^2 - 2t^3$, plateaus to $M = 3.0$, then decays back to zero by $M = 5.0$ (the shrinking Mach cone reduces the effective shock-radiator length); the $L/d$ excess is capped at $25$ to bound runaway on pathological geometries.
+
+The functional form (linear in $L/d$-excess, gated and Mach-faded as above) is physics-motivated, but the scale constant `SLENDER_BODY_K = 0.0025` is **B-level / corpus-frozen** against the 25-flight validation corpus apogee residual — anchored to the Raven, Rabia, and Kinsel ORP-specific residuals (the source diagnostic also used Torrent) — rather than against an isolated component benchmark. It is therefore the third partly-in-sample scale constant, alongside the base-drag `FINNED_BASE_K` and `THICK_BL_K` of Section 6.2.8, and is not counted toward the external-benchmark headline. Its generalization is defended by the same decontaminated prospective holdout: every flight any constant touched (Raven, Rabia, Rabia Short Fin Can, Kinsel, Torrent) is placed in the development split, and the genuinely blind holdout is more accurate than the development split (holdout MAE 3.95% vs development-split MAE 5.47%), indicating the constants generalize rather than overfit.
 
 
 ### 6.2 Base Drag
@@ -359,7 +364,7 @@ C_{D,\text{base}}^{\text{component}}
 \end{aligned}
 $$
 
-The factors are described in turn in Sections 6.2.1–6.2.8. Five of them are externally anchored against published data. The finned-body augmentation $k_{\text{finned}}$ and the thick-boundary-layer multiplier $k_{\text{thick-BL}}$ are calibrated against the 28-flight corpus apogee residual — a circular calibration that is not counted toward the external-benchmark headline. The corresponding component-level dataset (finned-body base pressure across the transonic-to-supersonic range) does not exist in a form that has been located in the public literature.
+The factors are described in turn in Sections 6.2.1–6.2.8. Five of them are externally anchored against published data. The finned-body augmentation $k_{\text{finned}}$ and the thick-boundary-layer multiplier $k_{\text{thick-BL}}$ carry two base-drag scale constants (`FINNED_BASE_K` and `THICK_BL_K = 2.2`) that are corpus-frozen against the 25-flight validation corpus apogee residual rather than against an isolated component benchmark, so the headline is partly in-sample on those constants — this is disclosed plainly and not counted toward the external-benchmark headline. Together with the slender-body pressure constant `SLENDER_BODY_K = 0.0025` of Section 6.1.8, these are the three partly-in-sample scale constants in the drag model. The generalization of all three is defended by a single decontaminated prospective holdout (every flight any constant touched placed in the development split): the genuinely blind holdout is more accurate than the development split (holdout MAE 3.95% vs dev MAE 5.47%), indicating the constants generalize rather than overfit. The corresponding component-level dataset (finned-body base pressure across the transonic-to-supersonic range) does not exist in a form that has been located in the public literature.
 
 
 #### 6.2.1 Subsonic Hoerner Correlation
@@ -381,7 +386,7 @@ $$
 C_{d,\text{base}}(M) \;=\; \mathrm{BASE\_DRAG\_A} + \frac{\mathrm{BASE\_DRAG\_B}}{M^{2}} \;=\; 0.064 + \frac{0.186}{M^{2}}.
 $$
 
-The constants `BASE_DRAG_A = 0.064` and `BASE_DRAG_B = 0.186` are fitted to turbulent cylindrical-afterbody base-pressure data in the form recommended by ESDU 77021 (Engineering Sciences Data Unit, *Base pressure on bodies of revolution at supersonic and hypersonic Mach numbers without fuel injection or combustion*, 1977). The original code comment attributed the constants to "Devan & Ashwood / NASA TN D-721"; that identifier could not be independently verified in NTRS and has been replaced by the ESDU 77021 attribution, which is the closest verifiable primary source for this $a + b/M^2$ form. Two physical features of this form are worth noting:
+The constants `BASE_DRAG_A = 0.064` and `BASE_DRAG_B = 0.186` define an empirical correlation that is validated against the turbulent cylindrical-afterbody base-pressure data of NACA TN 3393 (Reller & Hamaker 1955; see the validation table below) and is consistent with the $a + b/M^2$ form recommended by ESDU 77021 (Engineering Sciences Data Unit, *Base pressure on bodies of revolution at supersonic and hypersonic Mach numbers without fuel injection or combustion*, 1977). An earlier code comment attributed the constants to "Devan & Ashwood / NASA TN D-721"; that identifier could not be independently verified in NTRS and has been dropped — the correlation is presented as an empirical fit anchored to NACA TN 3393 and consistent with ESDU 77021, with no Devan–Ashwood citation. Two physical features of this form are worth noting:
 
 - **Nonzero asymptote.** $C_{d,\text{base}} \to 0.064$ as $M \to \infty$, matching the observed behavior that base pressure does not vanish at very high Mach. The legacy $0.25/M$ model used by the original OpenRocket decays to zero, which underestimates base drag by ~30% at $M = 5$ for cylindrical bodies.
 - **$1/M^2$ decay.** The dominant supersonic decay matches the expansion-fan physics at the base corner, where the Prandtl–Meyer expansion angle increases with Mach and reduces the base pressure coefficient.
@@ -423,19 +428,19 @@ baseDragTransonicPoly = baseDragInterp.interpolator(
     0.214,   // subsonic value at M=0.85
     0.25,    // peak at M=1.05
     0.230,   // Hart anchor near M=1.30
-    0.147,   // Devan-Ashwood at M=1.50
+    0.147,   // ESDU 77021-form handoff at M=1.50
     0.221,   // subsonic derivative at M=0.85
-   -0.110);  // Devan-Ashwood derivative at M=1.50
+   -0.110);  // ESDU 77021-form derivative at M=1.50
 ```
 
-The polynomial is degree 5 with six constraints, including a Hart anchor at $M = 1.30$. Without that anchor a four-point polynomial would extrapolate from the Devan-Ashwood model at $M = 1.30$ at $\sim 0.174$, under-reading Hart by 30%.
+The polynomial is degree 5 with six constraints, including a Hart anchor at $M = 1.30$. Without that anchor a four-point polynomial would extrapolate from the ESDU 77021-form correlation at $M = 1.30$ at $\sim 0.174$, under-reading Hart by 30%.
 
 The interior anchor `BASE_CD_AT_MID = 0.230` is set deliberately just below the Hart reading of $0.250 \pm 0.013$ to keep the peak inside $[0.25, 0.26]$ without overshooting and without regressing the TN 3393 turbulent agreement above $M = 2.7$ — this design constraint is carried in the comment block at lines 60–69 of `BarrowmanDragCalculator.java`.
 
 
 #### 6.2.4 Chapman Laminar Base Drag
 
-For rockets configured with `Rocket.isPerfectFinish() == true` and `forceTurbulentBL == false`, the boundary layer can remain laminar over a significant fraction of the body, and the Devan–Ashwood turbulent correlation systematically overestimates base drag at high Mach — the laminar shear layer at the base corner has much lower momentum than the turbulent one, producing less wake recompression and lower (more negative) base pressure than the turbulent correlation predicts. The Chapman (1950) NACA TN 2137 laminar correlation provides the correct scaling, implemented in [`ChapmanKorstBaseDrag.laminarBaseDragCoefficient(mach, reL)`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/main/java/info/openrocket/core/aerodynamics/ChapmanKorstBaseDrag.java):
+For rockets configured with `Rocket.isPerfectFinish() == true` and `forceTurbulentBL == false`, the boundary layer can remain laminar over a significant fraction of the body, and the turbulent ESDU 77021-form correlation systematically overestimates base drag at high Mach — the laminar shear layer at the base corner has much lower momentum than the turbulent one, producing less wake recompression and lower (more negative) base pressure than the turbulent correlation predicts. The Chapman (1950) NACA TN 2137 laminar correlation provides the correct scaling, implemented in [`ChapmanKorstBaseDrag.laminarBaseDragCoefficient(mach, reL)`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/main/java/info/openrocket/core/aerodynamics/ChapmanKorstBaseDrag.java):
 
 $$
 C_{p,b,\text{lam}} \;=\; \frac{C_{\text{LAM}}}{M^{2}\,\sqrt{\mathrm{Re}_L}},
@@ -446,17 +451,17 @@ The constant $1870$ is carried as `C_LAM_SUPERSONIC` and is documented in the so
 
 A vacuum-pressure cap is imposed: $C_{p,b,\text{lam}} \le 2/(\gamma M^{2})$ corresponds to base pressure at zero (perfect vacuum on the wake side), which is the physical maximum.
 
-**Blending with the turbulent branch.** The transition from the Devan–Ashwood / transonic polynomial to the Chapman laminar formula is blended over $M \in [1.3, 2.5]$ via cubic Hermite smoothstep ($t = (M - 1.3)/1.2$, $w = 3t^2 - 2t^3$). Below $M = 1.3$ only Devan–Ashwood is used (no laminar/turbulent base distinction has yet established at the corner); above $M = 2.5$ the full Chapman laminar formula is used.
+**Blending with the turbulent branch.** The transition from the ESDU 77021-form / transonic polynomial to the Chapman laminar formula is blended over $M \in [1.3, 2.5]$ via cubic Hermite smoothstep ($t = (M - 1.3)/1.2$, $w = 3t^2 - 2t^3$). Below $M = 1.3$ only the turbulent ESDU 77021-form correlation is used (no laminar/turbulent base distinction has yet established at the corner); above $M = 2.5$ the full Chapman laminar formula is used.
 
 In the dispatch (lines 970–984 of `BarrowmanDragCalculator.calculateBaseCD()`), the laminar branch is mixed with the turbulent value by the Michel-criterion laminar fraction $f_{\text{lam}}$ (Section 6.3.3):
 
 $$
-C_{d,\text{base}}^{\text{eff}} \;=\; f_{\text{lam}}\,C_{d,\text{base}}^{\text{Chapman}} + (1 - f_{\text{lam}})\,C_{d,\text{base}}^{\text{Devan-Ashwood}}.
+C_{d,\text{base}}^{\text{eff}} \;=\; f_{\text{lam}}\,C_{d,\text{base}}^{\text{Chapman}} + (1 - f_{\text{lam}})\,C_{d,\text{base}}^{\text{turb}}.
 $$
 
 For non-perfect-finish rockets the laminar fraction is forced to a small cap (≤ 5%) inside `calculateFrictionCD()` because surface roughness from paint, couplers, and fin fillets trips transition almost immediately, so the Chapman branch is in practice activated only on smooth tunnel models.
 
-**Validation.** [`ChapmanLaminarBaseDragTest`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/test/java/info/openrocket/core/aerodynamics/ChapmanLaminarBaseDragTest.java) MAPE gate is $\le 10\%$ on the four TN 3393 laminar points; the achieved MAPE is $4.4\%$, vs $44\%$ for Devan–Ashwood applied to the same data. Spot values from the test:
+**Validation.** [`ChapmanLaminarBaseDragTest`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/test/java/info/openrocket/core/aerodynamics/ChapmanLaminarBaseDragTest.java) MAPE gate is $\le 10\%$ on the four TN 3393 laminar points; the achieved MAPE is $4.4\%$, vs $44\%$ for the turbulent ESDU 77021-form correlation applied to the same data. Spot values from the test:
 
 | $M$ | $\mathrm{Re}_L$ | TN 3393 $C_{p,b}$ (lam.) | Chapman $C_{p,b}$ |
 |---|---|---|---|
@@ -470,7 +475,7 @@ The test also checks the analytical $\sqrt{\mathrm{Re}}$ scaling: doubling $\sqr
 
 #### 6.2.5 Chapman–Korst Free Shear Layer (Turbulent, Optional)
 
-[`ChapmanKorstBaseDrag.blendedBaseDrag(mach, M_e, thetaRatio)`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/main/java/info/openrocket/core/aerodynamics/ChapmanKorstBaseDrag.java) implements a more physically based turbulent base-drag model that resolves the boundary-layer thickness at the base corner. It is currently an available/tested utility rather than an active production path: `BarrowmanDragCalculator.calculateBaseCD()` uses the Devan--Ashwood/transonic polynomial path and, when the boundary-layer state is laminar, calls `ChapmanKorstBaseDrag.blendedLaminarBaseDrag()`.
+[`ChapmanKorstBaseDrag.blendedBaseDrag(mach, M_e, thetaRatio)`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/main/java/info/openrocket/core/aerodynamics/ChapmanKorstBaseDrag.java) implements a more physically based turbulent base-drag model that resolves the boundary-layer thickness at the base corner. It is currently an available/tested utility rather than an active production path: `BarrowmanDragCalculator.calculateBaseCD()` uses the ESDU 77021-form / transonic polynomial path and, when the boundary-layer state is laminar, calls `ChapmanKorstBaseDrag.blendedLaminarBaseDrag()`.
 
 The baseline thin-BL coefficient is fitted to ESDU 77021 Table 1 (turbulent cylindrical afterbody) as
 
@@ -484,7 +489,7 @@ $$
 f(\theta/r) \;=\; 1 - k(M_e)\,\sqrt{\theta/r},\qquad k(M_e) = 0.8 + 0.2/M_e,\qquad f \in [0.3, 1.0].
 $$
 
-The blend with Devan--Ashwood spans $M = 1.2$--$1.4$ with a smoothstep weight. Below $M = 1.2$ only Devan--Ashwood is used; above $M = 1.4$ the Chapman--Korst result takes over for turbulent boundary layers when this utility is called. The thick-BL multiplier of Section 6.2.8 captures related boundary-layer-thickness sensitivity in the production simulator path.
+The blend with the ESDU 77021-form correlation spans $M = 1.2$--$1.4$ with a smoothstep weight. Below $M = 1.2$ only the ESDU 77021-form correlation is used; above $M = 1.4$ the Chapman--Korst result takes over for turbulent boundary layers when this utility is called. The thick-BL multiplier of Section 6.2.8 captures related boundary-layer-thickness sensitivity in the production simulator path.
 
 
 #### 6.2.6 Power-On Base Drag Reduction
@@ -572,7 +577,7 @@ with $\theta_{\text{bt}}$ in degrees and the result clamped to $[0,1]$. The Visw
 
 #### 6.2.8 Finned-Body Base Augmentation and Thick-BL Multiplier
 
-The two corrections below have physics-motivated functional forms but their scale constants are set by the 28-flight corpus apogee residual, not by an isolated component benchmark. They are circular calibrations — the same corpus is the calibration target and a validation target — and are not counted in the external-benchmark headline. A dedicated finned-body base-pressure dataset would convert these from circular to confirmatory; no such public dataset has been located.
+The two corrections below have physics-motivated functional forms but their scale constants (`FINNED_BASE_K` and `THICK_BL_K = 2.2`) are corpus-frozen against the 25-flight corpus apogee residual, not against an isolated component benchmark. They make the headline partly in-sample on those two constants — disclosed plainly — and are not counted in the external-benchmark headline. Their generalization is defended by a decontaminated prospective holdout (every flight any constant touched placed in the development split), in which the genuinely blind holdout is more accurate than the development split (holdout MAE 3.95% vs development-split MAE 5.47%), indicating the constants generalize rather than overfit; a dedicated finned-body base-pressure dataset would convert these from partly-in-sample to fully confirmatory, but no such public dataset has been located.
 
 **Finned-body augmentation (`calculateFinnedBaseAugmentation`, lines 1111–1265).** Fins at or near the aft base disrupt the smooth near-wake recompression, creating corner vortices and shock–wake interaction that increase base suction. ADA636861 (Basic Finner) and Hoerner Chapter 16 both show 40–60% higher base drag on 4-fin configurations vs smooth cylindrical afterbodies at $M = 1.5$–$3$. The augmentation has the structure
 
@@ -589,13 +594,13 @@ with the following ingredients:
 
 The 4-fin Basic Finner geometry produces approximately 50% augmentation at $M = 2$, which is the calibration anchor.
 
-**Thick-BL multiplier (`calculateThickBLBaseMultiplier`, lines 1325–1430).** Minimum-diameter, high body-L/D airframes develop a turbulent boundary layer whose thickness $\delta$ approaches the body radius $R$ at the base station. In that regime ($\delta/R \gtrsim 0.5$) the Devan–Ashwood correlation — calibrated on moderate-L/D bodies where $\delta/R \ll 1$ — systematically under-predicts base suction by 30–40% because the thick BL nearly fills the wake and the free shear layer / inviscid core assumption breaks down. The implementation uses the 1/7-power flat-plate turbulent BL correlation $\delta/x = 0.37/\mathrm{Re}_x^{0.2}$ and applies the multiplier
+**Thick-BL multiplier (`calculateThickBLBaseMultiplier`, lines 1325–1430).** Minimum-diameter, high body-L/D airframes develop a turbulent boundary layer whose thickness $\delta$ approaches the body radius $R$ at the base station. In that regime ($\delta/R \gtrsim 0.5$) the ESDU 77021-form correlation — calibrated on moderate-L/D bodies where $\delta/R \ll 1$ — systematically under-predicts base suction by 30–40% because the thick BL nearly fills the wake and the free shear layer / inviscid core assumption breaks down. The implementation uses the 1/7-power flat-plate turbulent BL correlation $\delta/x = 0.37/\mathrm{Re}_x^{0.2}$ and applies the multiplier
 
 $$
 k_{\text{thick-BL}} \;=\; \mathrm{min}\!\left[1 + K\,\max(0,\,\delta/R - 0.5)\,f_M(M)\,g_{L/D}(L/D),\;1.8\right],\qquad K = 2.2.
 $$
 
-Both gates must be satisfied for any effect: $M > 0.9$ (smoothstep ramp through $0.9$–$1.1$, Mach decay back to zero by $M = 3.0$) and body $L/D > 25$ (smoothstep ramp through $L/D = 25$–$30$). The cap at $1.8$ prevents runaway on pathological geometries. The scale constant $K = 2.2$ is calibrated against the 28-flight validation corpus with Raven (1.75 in tube, body $L/D = 41.7$, peak $M = 1.12$) as the primary anchor; see [`paper/data/outlier_closure/raven_closure.md`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/outlier_closure/raven_closure.md) and the [`ThickBLBaseDragMultiplierTest`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/test/java/info/openrocket/core/aerodynamics/ThickBLBaseDragMultiplierTest.java) regression battery.
+Both gates must be satisfied for any effect: $M > 0.9$ (smoothstep ramp through $0.9$–$1.1$, Mach decay back to zero by $M = 3.0$) and body $L/D > 25$ (smoothstep ramp through $L/D = 25$–$30$). The cap at $1.8$ prevents runaway on pathological geometries. The scale constant $K = \mathrm{THICK\_BL\_K} = 2.2$ is corpus-frozen against the 25-flight validation corpus with Raven (1.75 in tube, body $L/D = 41.7$, peak $M = 1.12$) as the primary anchor; see [`paper/data/outlier_closure/raven_closure.md`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/outlier_closure/raven_closure.md) and the [`ThickBLBaseDragMultiplierTest`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/test/java/info/openrocket/core/aerodynamics/ThickBLBaseDragMultiplierTest.java) regression battery.
 
 
 #### 6.2.9 Worked Examples
@@ -606,9 +611,9 @@ Cylindrical body (no boattail, no fin-can sleeve), 4-fin tail with rectangular A
 
 **At $M = 1.05$ (transonic peak).** Polynomial returns $0.250$. Augmentation factor $f_M(1.05) \approx 0.30 + 0.70 \times 0.25/0.5 = 0.65$, $k_{\text{finned}} \approx 1 + 0.55 \times 1.0 \times 0.8 \times 0.65 \approx 1.286$. Final: $0.250 \times 1.286 = 0.321$ (component-level coefficient before area rescaling).
 
-**At $M = 2.0$ (supersonic).** Devan–Ashwood: $0.064 + 0.186/4.0 = 0.111$. $f_M(2.0) = 1.0$, $k_{\text{finned}} \approx 1 + 0.55 \times 1.0 \times 0.8 \times 1.0 = 1.44$. Final: $0.111 \times 1.44 = 0.160$.
+**At $M = 2.0$ (supersonic).** ESDU 77021-form: $0.064 + 0.186/4.0 = 0.111$. $f_M(2.0) = 1.0$, $k_{\text{finned}} \approx 1 + 0.55 \times 1.0 \times 0.8 \times 1.0 = 1.44$. Final: $0.111 \times 1.44 = 0.160$.
 
-**At $M = 5.0$ (high supersonic).** Devan–Ashwood: $0.064 + 0.186/25.0 = 0.0714$. $f_M(5.0) = 3/5 = 0.60$, $k_{\text{finned}} \approx 1 + 0.55 \times 1.0 \times 0.8 \times 0.60 = 1.264$. Final: $0.0714 \times 1.264 = 0.090$.
+**At $M = 5.0$ (high supersonic).** ESDU 77021-form: $0.064 + 0.186/25.0 = 0.0714$. $f_M(5.0) = 3/5 = 0.60$, $k_{\text{finned}} \approx 1 + 0.55 \times 1.0 \times 0.8 \times 0.60 = 1.264$. Final: $0.0714 \times 1.264 = 0.090$.
 
 **Old vs current code (Mach-only correlation, no fin/boattail/Re corrections):**
 
@@ -617,10 +622,10 @@ Cylindrical body (no boattail, no fin-can sleeve), 4-fin tail with rectangular A
 | 0.5 | 0.1525 | 0.1525 | Subsonic Hoerner unchanged |
 | 0.9 | 0.225 | $\approx 0.230$ | Polynomial enters at $M = 0.85$ |
 | 1.05 | 0.25 | 0.250 | Polynomial peak (Hart-anchored) |
-| 1.30 | $\sim 0.20$ | 0.230 | Hart anchor (new in Prompt 13) |
-| 1.50 | 0.167 | 0.147 | Devan–Ashwood handoff |
-| 2.0 | 0.125 | 0.111 | Devan–Ashwood |
-| 5.0 | 0.050 | 0.071 | Devan–Ashwood nonzero asymptote |
+| 1.30 | $\sim 0.20$ | 0.230 | Hart anchor |
+| 1.50 | 0.167 | 0.147 | ESDU 77021-form handoff |
+| 2.0 | 0.125 | 0.111 | ESDU 77021-form |
+| 5.0 | 0.050 | 0.071 | ESDU 77021-form nonzero asymptote |
 
 
 ### 6.3 Skin Friction Drag
@@ -673,7 +678,7 @@ $$
 **Step 2 — Transformation function $F_c$ (`computeVD2Fc`, lines 712–732).** Define the intermediate quantities
 
 $$
-m \;=\; 0.2\,r\,M^{2},\qquad F \;=\; T_w/T_e,\qquad A \;=\; \sqrt{r m / F},\qquad B \;=\; (1 + r m - F)/F.
+m \;=\; \tfrac{\gamma-1}{2}\,M^{2} \;=\; 0.2\,M^{2},\qquad F \;=\; T_w/T_e,\qquad A \;=\; \sqrt{r m / F},\qquad B \;=\; (1 + r m - F)/F.
 $$
 
 Then
@@ -924,7 +929,7 @@ At $\alpha = 15^\circ$ the lift-induced drag is comparable to or larger than all
 
 ### 6.6 Axial Drag Conversion
 
-The drag coefficient $C_D$ computed in Section 6.0 represents the magnitude of the drag force vector (aligned with the freestream velocity). In the 6-DOF stepper this must be converted to an axial-force coefficient $C_{D,\text{axial}}$ resolved along the body axis:
+The drag coefficient $C_D$ assembled at the head of this chapter (Section 6) represents the magnitude of the drag force vector (aligned with the freestream velocity). In the 6-DOF stepper this must be converted to an axial-force coefficient $C_{D,\text{axial}}$ resolved along the body axis:
 
 $$
 C_{D,\text{axial}} \;=\; f(\alpha) \cdot C_D.
@@ -952,7 +957,7 @@ $$
 C_{D,\text{step}} \;=\; C_{p,\text{stag}}(M)\,\cdot\,\frac{A_{\text{step}}}{S_{\text{ref}}}.
 $$
 
-**Reattachment recovery.** The current production code does not separately add a reattachment-recovery term on body steps; the stagnation-pressure term alone captures the dominant mechanism inside the validation window of the 28-flight corpus. (The free-interaction theory of Chapman–Kuehn–Larson is used at fin roots in Section 6.8 below.)
+**Reattachment recovery.** The current production code does not separately add a reattachment-recovery term on body steps; the stagnation-pressure term alone captures the dominant mechanism inside the validation window of the 25-flight corpus. (The free-interaction theory of Chapman–Kuehn–Larson is used at fin roots in Section 6.8 below.)
 
 The stagnation Cp is applied at all Mach numbers without a transonic activation gate. A previous prototype used a smoothstep $w = 3t^2 - 2t^3$, $t = (M - 0.95)/0.15$ for $M \in [0.95, 1.1]$ to ramp the term in only at transonic Mach, but it was removed because turning the term off below $M = 0.95$ produced $C^0$ discontinuities in the per-component drag that caused integrator oscillation across the gate.
 
@@ -1011,7 +1016,7 @@ $$
 C_{D,\text{SBLI}} \;=\; \frac{C_{p,\text{plateau}}\,L_{\text{sep}}\,s\,n_{\text{fins}}}{S_{\text{ref}}}.
 $$
 
-The SBLI **chord reduction** of Section 6.8.2 is active in production. The **SBLI pressure drag** term in this section is **not active**: enabling both terms simultaneously double-counts the separation loss, because the chord reduction already removes the lift- and drag-producing area where the plateau pressure would have acted. The two terms are alternative empirical accountings of the same physical event, and the chord-reduction form gave better agreement with the 28-flight corpus. The pressure-drag formulas are documented here for completeness; activating them would require recalibrating the chord-reduction floor against fin-only test data, which is on the deferred list (Section 12.3).
+The SBLI **chord reduction** of Section 6.8.2 is active in production. The **SBLI pressure drag** term in this section is **not active**: enabling both terms simultaneously double-counts the separation loss, because the chord reduction already removes the lift- and drag-producing area where the plateau pressure would have acted. The two terms are alternative empirical accountings of the same physical event, and the chord-reduction form gave better agreement with the 25-flight corpus. The pressure-drag formulas are documented here for completeness; activating them would require recalibrating the chord-reduction floor against fin-only test data, which is on the deferred list (Section 12.3).
 
 
 ### 6.9 Drag Budget Summary
@@ -1081,7 +1086,7 @@ Skin friction is drastically reduced (~80% lower than the incompressible value a
 
 The differences are concentrated at supersonic speeds where the analytical models replace extrapolated empirical data. The original code overpredicted drag at $M = 1.5$–$3.0$ (continued use of transonic correlations into the supersonic regime) and entirely lacked predictions above $M \approx 3$. The extended models provide accurate drag prediction from $M = 0$ through $M = 10$.
 
-**Vehicle-level closure.** [`BasicFinnerDragBenchmarkTest`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/test/java/info/openrocket/core/aerodynamics/BasicFinnerDragBenchmarkTest.java) validates the assembled total drag against the 8 ADA636861 (Dupuis & Hathaway 1997) Basic Finner $C_{X0}$ multi-fit points over $M = 1.08$–$4.30$ at MAPE 11.9% (post-Prompt-13 baseline; tight regression gate at 14% in `testTightMAPEGate()`). Pointwise comparison from [`paper/data/csv/basic_finner_comparison.csv`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/csv/basic_finner_comparison.csv):
+**Vehicle-level closure.** [`BasicFinnerDragBenchmarkTest`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/core/src/test/java/info/openrocket/core/aerodynamics/BasicFinnerDragBenchmarkTest.java) validates the assembled total drag against the 8 ADA636861 (Dupuis & Hathaway 1997) Basic Finner $C_{X0}$ multi-fit points over $M = 1.08$–$4.30$ at MAPE 11.8% (tight regression gate at 14% in `testTightMAPEGate()`). Pointwise comparison from [`paper/data/csv/basic_finner_comparison.csv`](https://github.com/AidanSYu/openrocketsupersonic/blob/main/paper/data/csv/basic_finner_comparison.csv):
 
 | $M$ | $C_{X0}$ exp | $C_D$ model | Friction | Pressure | Base | $\Delta\%$ |
 |---|---|---|---|---|---|---|
@@ -1115,9 +1120,9 @@ Section & Quantity & Mach & Below & Above & Anchor \\
 6.1.6 & Empirical to analytical & 1.3--1.5 & TR-R-100 & T--M / shock-exp & Smoothstep \\
 6.1.6 & Dahlem--Buck override & 1.3--1.5 & TR-R-100 & $C_d^{\text{cone}}\,K\,f$ & POWER/PARABOLIC/HAACK \\
 6.1.6 & Shock-exp to Newtonian & 4.0--6.0 & Shock-exp & Modified Newtonian & All shapes \\
-6.2.3 & Subsonic to Devan--Ashwood & 0.85--1.5 & $0.12 + 0.13 M^{2}$ & $0.064 + 0.186/M^{2}$ & Deg-5 poly, Hart-anchored \\
-6.2.4 & Devan--Ashwood to Chapman lam. & 1.3--2.5 & Devan--Ashwood & Chapman laminar & Smoothstep, perfect finish \\
-6.2.5 & Devan--Ashwood to Chapman--Korst & 1.2--1.4 & Devan--Ashwood & Chapman--Korst & Smoothstep, optional \\
+6.2.3 & Subsonic to ESDU 77021-form & 0.85--1.5 & $0.12 + 0.13 M^{2}$ & $0.064 + 0.186/M^{2}$ & Deg-5 poly, Hart-anchored \\
+6.2.4 & ESDU 77021-form to Chapman lam. & 1.3--2.5 & ESDU 77021-form & Chapman laminar & Smoothstep, perfect finish \\
+6.2.5 & ESDU 77021-form to Chapman--Korst & 1.2--1.4 & ESDU 77021-form & Chapman--Korst & Smoothstep, optional \\
 6.3.4 & Subsonic to Van Driest II & 0.9--1.1 & $C_{f,\text{sub}}$ & $C_f^{\text{VD II}}$ & Linear blend \\
 6.4.2 & Zero to DATCOM wave drag & 0.9--1.2 & 0 & $C_{d,w}^{\text{DATCOM}}$ & $C^1$ cubic Hermite \\
 6.4.4 & TE Hoerner to backward step & 0.9--1.2 & $0.12\,t/c$ & $0.135(t/c)/\sqrt{\beta}$ & Smoothstep \\

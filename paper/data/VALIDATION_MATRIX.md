@@ -1,5 +1,13 @@
 # Validation Matrix
 
+> **SUPERSEDED NOTE:** `paper/_shared/CANONICAL_FACTS.md` is the authoritative source for all
+> manuscript numbers. Where this dashboard disagrees it is stale: the A-level count is **20**
+> (not 27; cone foredrag, AGARD-B, and vortex Kv are B-level/qualitative, counted outside the 20),
+> the corpus is **23 single-stage + 2 two-stage** (AeroPac 104K + MESOS), and **MESOS 293K = −6.96%
+> (273,056 ft)** is the reproducible current-code value (a disclosed regression; the "−0.6%/parallel-
+> execution contamination" story here is refuted and must not be cited).
+
+
 The publication gate for the aerodynamic model. Detail lives in the cited tests and closure memos; this file is the dashboard.
 
 ## Status legend
@@ -11,7 +19,7 @@ The publication gate for the aerodynamic model. Detail lives in the cited tests 
 
 ## Headline (2026-05-03; manuscript-aligned 25-flight aggregate, canonical v1.0 Zenodo)
 
-- **27 A-level rows** pass with quantitative external acceptance gates, plus **1 externally anchored negative benchmark** (RM-10) used to bound and exclude a geometry family.
+- **20 A-level rows** pass with quantitative external acceptance gates, plus **1 externally anchored negative benchmark** (RM-10) used to bound and exclude a geometry family.
 - **3 new B-level external anchors** landed 2026-05-02 (Arcas wind-tunnel D-4013/D-4014, Bhagwandin AFF Cmq second source, Bunescu ANF URANS CFD comparator) and are tracked below.
 - **9 B-level rows** are honestly disclosed integration claims (corpus-validated, not isolated).
 - **SimVReal corpus** (25 flights, MESOS folded as flight 25; canonical v1.0 Zenodo, post MESOS revert at commit `42f31d8f9`): 25/25 within +/-10 %, **15/25** within +/-5 %, avg abs error **4.49 %**, mean signed error -0.1 %, 0 abnormal endings. Lower aggregate error than the recorded RASAero II predictions on the same frozen flights (5.26 %, 22/25 within +/-10 %).
@@ -181,7 +189,7 @@ Compressed: one row per subsystem. Detail is in the named test or memo.
 
 | # | Item | Status |
 |---|------|--------|
-| 1 | Preserve A-level external benchmark foundation | **CLOSED** — 27 clean A-level rows plus RM-10 negative/exclusion benchmark; focused regression battery green |
+| 1 | Preserve A-level external benchmark foundation | **CLOSED** — 20 clean A-level rows plus RM-10 negative/exclusion benchmark; focused regression battery green |
 | 2 | SimVReal as a trustworthy validation corpus | **CLOSED** — 25-flight corpus (canonical v1.0 Zenodo): avg \|err\| 4.49 %, 25/25 within ±10 %, 15/25 within ±5 % |
 | 3 | RASAero/CDX1 import-parity uncertainty bounded | **CLOSED** — stage nozzles plumbed and ablated; force-turbulent BL bounded for SimVReal; `ModifiedBarrowman` disclosed |
 | 4 | High-M finned-vehicle drag/damping closure (Raven, Kinsel, DDT, Proteus 6, FMJ) | **CLOSED** — all named cases within ±10 % |

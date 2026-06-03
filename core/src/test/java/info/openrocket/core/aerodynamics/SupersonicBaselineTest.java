@@ -100,14 +100,20 @@ public class SupersonicBaselineTest {
 		assertRelativeEquals("Ogive-Cylinder CD at M" + mach, expectedCD, cd, TOLERANCE_CD);
 	}
 
+	// Transonic/supersonic fin-bearing CD locks re-baselined 2026-06-02 to the
+	// current production model: the fin wave-drag / finned-base path strengthened
+	// by ~12-18% in M0.9-3.0 since these snapshots were first captured. The current
+	// fin drag is externally anchored by Basic Finner (ADA636861, 11.9% MAPE),
+	// NACA TN 3650, and the 28-flight corpus; these remain internal 10%-tolerance
+	// regression locks, not external truth.
 	@ParameterizedTest(name = "Cone-Cylinder-Fins CD at M{0}")
 	@CsvSource({
 			"0.3,  0.666307",
 			"0.5,  0.660039",
 			"0.9,  0.772317",
-			"1.1,  1.007036",
-			"1.5,  0.765996",
-			"2.0,  0.684093",
+			"1.1,  1.148272",
+			"1.5,  0.861956",
+			"2.0,  0.757102",
 			"3.0,  0.592231",
 			"5.0,  0.512342",
 	})
@@ -120,10 +126,10 @@ public class SupersonicBaselineTest {
 	@CsvSource({
 			"0.3,  0.580737",
 			"0.5,  0.593828",
-			"0.9,  0.588382",
-			"1.1,  0.679698",
+			"0.9,  0.680260",
+			"1.1,  0.805694",
 			"1.5,  0.673388",
-			"2.0,  0.577892",
+			"2.0,  0.679300",
 			"3.0,  0.540661",
 			"5.0,  0.478152",
 	})
@@ -137,10 +143,10 @@ public class SupersonicBaselineTest {
 			"0.3,  0.462336",
 			"0.5,  0.492205",
 			"0.9,  0.659554",
-			"1.1,  0.729573",
-			"1.5,  0.627805",
-			"2.0,  0.548577",
-			"3.0,  0.457403",
+			"1.1,  0.870680",
+			"1.5,  0.725368",
+			"2.0,  0.619032",
+			"3.0,  0.509662",
 			"5.0,  0.384010",
 	})
 	public void testVonKarmanFinsCd(double mach, double expectedCD) {

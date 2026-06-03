@@ -1,0 +1,117 @@
+% Section body only: the master supplies \section{Introduction} and \input's this file.
+% Headline contribution (anti-salami): mechanism attribution + external base-pressure
+% benchmarks showing base drag dominates the apogee error budget. NOT a per-closure
+% apogee-swap experiment (we do not run one). NOT the Paper-1 integrated-parity result.
+% All numbers per _shared/CANONICAL_FACTS.md.
+
+For a slender finned rocket flying supersonically, the pressure deficit acting
+over the blunt aft face --- the base drag --- is not a small correction. Once
+the boundary layer separates at the base and the recirculating wake closes
+behind a free shear layer, the base pressure falls well below ambient, and the
+resulting axial force is a large fraction of the total zero-lift drag: of order
+one quarter to one half across the low-supersonic band where most amateur and
+sounding-rocket flights spend the bulk of their powered and coasting time. The
+contribution peaks near $M \approx 1.05$, where the base-drag coefficient of a
+flat-based body reaches roughly $C_{d,\text{base}} \approx 0.25$, and then
+decays as the freestream entrains the wake at higher Mach number. Because this
+term is both large and concentrated in the speed range that dominates the
+climb-to-apogee integral, the choice of base-drag closure is one of the most
+consequential modeling decisions in a supersonic trajectory code.
+
+It is also one of the least settled. Base pressure resists first-principles
+prediction --- it depends on boundary-layer state at separation, base geometry,
+afterbody taper, and, for a finned vehicle, on the fins themselves --- so the
+engineering literature offers a proliferation of competing closures rather than
+a single accepted law. Chapman's free-shear-layer analysis and the
+Chapman--Korst recompression model underpin the turbulent base-pressure
+estimates that remain the reference for nonlifting bodies of revolution
+\cite{chapman1955}; the ESDU~77021 data item consolidates a broad experimental
+corpus into a recommended base-pressure correlation for supersonic and
+hypersonic Mach numbers \cite{esdu77021}; and practical rocketry codes often
+fall back on compact empirical fits such as
+$C_{d,\text{base}} = 0.064 + 0.186/M^{2}$, which captures the observed
+high-Mach decay with two coefficients. Layered on top of these are
+geometry-specific modifiers: a boattail reduces base area and turns the flow,
+cutting base drag by a substantial margin for well-chosen aft-taper angles
+\cite{viswanath1996}, whereas a blunt base does not; and a four-fin tail can
+either relieve or augment the base suction relative to the clean-body value,
+depending on how the fin wakes and the body wake interact. The closures
+disagree not only in magnitude but in functional form, and each was calibrated
+on a particular geometry family. High-fidelity computation has since resolved
+the near-wake structure in detail --- thin-layer Navier--Stokes solutions
+recover the transonic base flow of an ogive-cylinder-boattail projectile, for
+instance \cite{sahu1983} --- but such methods are too costly to embed inside a
+six-degree-of-freedom trajectory integrator that must evaluate aerodynamic
+coefficients thousands of times per flight, so engineering codes still rely on
+the semi-empirical closures above. The open question this paper addresses is
+therefore not which closure is most physically complete, but \emph{how much} the
+base-drag term as a whole weighs on the single number a designer cares about ---
+the predicted apogee --- relative to the other supersonic submodels, and whether
+the closure that carries that weight can be anchored to external base-pressure
+measurements rather than to the flight corpus alone.
+
+Despite the maturity of the individual closures, the open literature does not
+quantify, in a reproducible way, how heavily the base-drag term weighs in a full
+six-degree-of-freedom flight against the other supersonic submodels --- the
+single number a designer ultimately cares about being the predicted apogee.
+Component-level validations report base-pressure or base-drag error against
+wind-tunnel data, but a base-drag coefficient that matches a tunnel point to
+within a few percent may still move apogee by far more, or far less, than its
+component error suggests, because apogee integrates the drag history over a
+trajectory weighted toward the lower-Mach portion of the flight. Conversely, a
+submodel with a larger component error can be nearly inert at apogee if its
+disagreement falls outside the speed range that dominates the integral. The
+established open-source simulator OpenRocket \cite{niskanen2009} did not model
+supersonic base drag at all, while the commercial reference RASAero~II
+\cite{rogers2015} embeds its base-drag treatment in closed source, so neither
+tool exposes the per-mechanism apogee sensitivity in a form that can be audited
+or reproduced.
+
+The companion study \cite{yu2026jsr} established the integrated context for the
+present work: an open-source supersonic extension of OpenRocket, validated
+against a 25-flight external corpus spanning Mach~0.54 to~4.33, that achieves
+apogee-prediction parity with the commercial RASAero~II baseline. A mechanism
+ablation reported in that work isolated the contribution of each supersonic
+model to the corpus apogee error and produced a striking ranking. Disabling the
+finned-base augmentation shifted mean apogee error by $8.10$ percentage points
+(up to $39.5$ percentage points on the Mach-2.19 A-601 Kinsel flight) --- by far
+the dominant driver of integrated apogee accuracy. The remaining mechanisms
+were comparatively minor: compressible (Van~Driest~II) skin friction accounted
+for $0.87$ percentage points, the DATCOM~4.1.5.1 fin wave-drag term for
+$0.39$ percentage points, and the shock-geometry pre-pass --- the celebrated
+architectural innovation of the companion paper --- for only $0.15$ percentage
+points, because that pre-pass is inert below Mach~1 and apogee integrates a
+trajectory dominated by lower-Mach drag. In other words, the base-drag closure,
+not the shock geometry, governs the apogee error budget.
+
+This paper takes that ablation result as its point of departure and asks a
+distinct research question: \emph{how much does the base-drag term weigh in the
+integrated supersonic-rocket apogee error budget relative to the other
+supersonic submodels, and can the closure that carries that weight be anchored
+to external base-pressure measurements?} Where the companion paper
+\cite{yu2026jsr} reports an integrated parity result and treats base drag as one
+component among many, this paper diverges into a focused mechanism attribution
+supported by external component benchmarks. The contribution has three parts.
+First, we describe the base-drag closure as implemented --- the Chapman--Korst
+turbulent shear-layer model \cite{chapman1955}, the Chapman laminar correlation
+\cite{chapman1950}, the ESDU~77021 boundary-layer-thickness correction
+\cite{esdu77021}, the empirical $C_{d,\text{base}} = 0.064 + 0.186/M^{2}$
+correlation (presented as an empirical fit validated against the NACA~TN~3393
+base-pressure data \cite{chapman1955} and consistent with ESDU~77021
+\cite{esdu77021}, with no reliance on any unverifiable correlation), the
+Viswanath boattail correction \cite{viswanath1996}, and a finned-base
+augmentation term --- and we \emph{benchmark} its branches against external,
+out-of-sample base-pressure data (NACA~TN~3393 turbulent and laminar, and the
+Hart NACA~RM~L52E06 free-flight set). Alternative literature closures exist for
+several of these branches, and we note where they differ in form and calibration
+geometry; we do \emph{not}, however, substitute them one at a time and report
+per-closure apogee deltas --- that closure-swap experiment is outside the scope
+of this study. Second, we report a controlled \emph{mechanism ablation} that
+disables each implemented aerodynamic mechanism in isolation across the corpus
+and quantifies how much each moves integrated apogee, localizing the base-drag
+term at the top of the error budget. Third, we confront the in-sample exposure of
+the corpus-frozen base-drag constants head-on with a decontaminated prospective
+holdout, which tests whether they generalize. The remainder of the paper
+specifies the closure and its components, details the benchmark and ablation
+methodology, reports the component-benchmark, ablation, and holdout results, and
+discusses what the ranking implies for open supersonic trajectory modeling.

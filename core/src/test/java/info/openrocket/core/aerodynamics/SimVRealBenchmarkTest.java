@@ -69,25 +69,35 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
     /** Path to SimVReal CDX1 files, relative to project root */
     private static final String SIMVREAL_DIR = "simvreal/RasAero Sims";
 
-    /** Path to the RASP motor file that ships with the SimVReal corpus */
-    private static final String[] RASP_ENG_PATHS = {
-            "simvreal/rasp.eng",
-            "c:/Code/OpenRocket Plus/simvreal/rasp.eng",
-    };
+    /** Path to the RASP motor file that ships with the SimVReal corpus, relative to repo root */
+    private static final String RASP_ENG_PATH = "simvreal/rasp.eng";
     static final int BENCHMARK_RANDOM_SEED = 0x51A7EA;
 
     @BeforeAll
     static void setup() {
+        // Start from a clean RASAero motor cache. allMotors is a JVM-global static
+        // List with no dedup; getMotorFromRASAero returns the FIRST designation match.
+        // If a prior test class (e.g. TwoToTango stubs) already appended same-named
+        // motors, this benchmark would bind the wrong thrust curve and the corpus
+        // avg|error| inflates (observed 7.79% in suite runs vs 4.65% in isolation).
+        // Clearing here makes the binding order-independent and reproducible.
+        RASAeroMotorsLoader.clearAllMotors();
         // Preload the RASAero motor database that SimVReal CDX1 files reference by name.
-        // Without this, ~5 rockets (Proteus6, Kinsel, etc.) fail with hasMotors=false
-        // because the default OpenRocket motor DB doesn't contain these curves.
-        for (String path : RASP_ENG_PATHS) {
-            loadMotorsIntoRASAeroCache(path);
+        // Without this, every rocket fails with hasMotors=false and the whole corpus
+        // aborts at t=0, because the default OpenRocket motor DB doesn't contain these
+        // curves. The motor file is resolved robustly from the repo root so the
+        // benchmark reproduces under Gradle (cwd=core/) as well as from an IDE.
+        File rasp = resolveRepoFile(RASP_ENG_PATH);
+        if (rasp != null) {
+            loadMotorsIntoRASAeroCache(rasp);
+        } else {
+            System.out.println("WARNING: " + RASP_ENG_PATH + " not found from any anchor; "
+                    + "SimVReal motors will not bind and the corpus will abort.");
         }
     }
 
-    private static void loadMotorsIntoRASAeroCache(String path) {
-        File file = new File(path);
+    private static void loadMotorsIntoRASAeroCache(File file) {
+        String path = file.getPath();
         if (!file.exists()) return;
         try (InputStream stream = new FileInputStream(file)) {
             RASPMotorLoader loader = new RASPMotorLoader();
@@ -224,23 +234,48 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
     }
 
     /**
-     * Find the SimVReal directory by walking up from the test class location.
+     * Resolve a path relative to the repository root, robustly, regardless of the
+     * JVM working directory. Gradle runs tests with the working directory set to
+     * the {@code core/} module dir, while an IDE may use the repo root, so a plain
+     * cwd-relative lookup (and the old hardcoded "c:/Code/OpenRocket Plus/..."
+     * fallback) silently failed and left the motor cache empty — which made every
+     * SimVReal flight abort with hasMotors=false. This walks up from both the
+     * working directory and the compiled-class location until it finds the path.
+     *
+     * @return the resolved File (which exists), or null if not found.
+     */
+    static File resolveRepoFile(String relative) {
+        // 1. Direct (works when cwd == repo root)
+        File direct = new File(relative);
+        if (direct.exists()) return direct;
+
+        // 2. Anchors to walk up from: working dir, and the compiled class location
+        List<Path> anchors = new ArrayList<>();
+        try {
+            anchors.add(Paths.get(System.getProperty("user.dir")));
+        } catch (Exception ignore) { }
+        try {
+            anchors.add(Paths.get(SimVRealBenchmarkTest.class.getProtectionDomain()
+                    .getCodeSource().getLocation().toURI()));
+        } catch (Exception ignore) { }
+
+        for (Path anchor : anchors) {
+            Path current = anchor;
+            for (int i = 0; i < 8 && current != null; i++) {
+                File candidate = current.resolve(relative).toFile();
+                if (candidate.exists()) return candidate;
+                current = current.getParent();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find the SimVReal directory by walking up from the working directory and the
+     * compiled test class location.
      */
     private static File findSimVRealDir() {
-        // Try relative to working directory (project root)
-        File dir = new File(SIMVREAL_DIR);
-        if (dir.exists()) return dir;
-
-        // Try walking up from current directory
-        Path current = Paths.get(System.getProperty("user.dir"));
-        for (int i = 0; i < 5; i++) {
-            File candidate = current.resolve(SIMVREAL_DIR).toFile();
-            if (candidate.exists()) return candidate;
-            current = current.getParent();
-            if (current == null) break;
-        }
-
-        return null;
+        return resolveRepoFile(SIMVREAL_DIR);
     }
 
     /**
@@ -960,15 +995,7 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
         final double FT_TO_M = 0.3048;
 
         // ---- locate MESOS directory ----
-        String[] mesosDirCandidates = {
-                "simvreal/Docs/Mesos",
-                "c:/Code/OpenRocket Plus/simvreal/Docs/Mesos",
-        };
-        File mesosDir = null;
-        for (String p : mesosDirCandidates) {
-            File d = new File(p);
-            if (d.exists()) { mesosDir = d; break; }
-        }
+        File mesosDir = resolveRepoFile("simvreal/Docs/Mesos");
         if (mesosDir == null) {
             System.out.println("SKIP testMesosFlight: simvreal/Docs/Mesos directory not found.");
             return;
@@ -1161,12 +1188,9 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
         final double RASAERO_MAXVEL_FPS = 2_229.373;
 
         // Locate CDX1
-        File cdx1 = null;
-        for (String base : new String[]{SIMVREAL_DIR, "c:/Code/OpenRocket Plus/" + SIMVREAL_DIR}) {
-            File f = new File(base, "L500Roc.CDX1");
-            if (f.exists()) { cdx1 = f; break; }
-        }
-        assertNotNull(cdx1, "L500Roc.CDX1 not found");
+        File simvrealDir = findSimVRealDir();
+        File cdx1 = simvrealDir == null ? null : new File(simvrealDir, "L500Roc.CDX1");
+        assertNotNull(cdx1 != null && cdx1.exists() ? cdx1 : null, "L500Roc.CDX1 not found");
 
         GeneralRocketLoader loader = new GeneralRocketLoader(cdx1);
         OpenRocketDocument doc = loader.load();
@@ -1381,12 +1405,9 @@ public class SimVRealBenchmarkTest extends BaseTestCase {
         final double REAL_APOGEE_FT = 42_771.0;
         final double RASAERO_APOGEE_FT = 41_098.0;
 
-        File cdx1 = null;
-        for (String base : new String[]{SIMVREAL_DIR, "c:/Code/OpenRocket Plus/" + SIMVREAL_DIR}) {
-            File f = new File(base, "Kinsel_P4935_A-601_Rocket.CDX1");
-            if (f.exists()) { cdx1 = f; break; }
-        }
-        assertNotNull(cdx1, "Kinsel CDX1 not found");
+        File simvrealDir = findSimVRealDir();
+        File cdx1 = simvrealDir == null ? null : new File(simvrealDir, "Kinsel_P4935_A-601_Rocket.CDX1");
+        assertNotNull(cdx1 != null && cdx1.exists() ? cdx1 : null, "Kinsel CDX1 not found");
 
         GeneralRocketLoader loader = new GeneralRocketLoader(cdx1);
         OpenRocketDocument doc = loader.load();

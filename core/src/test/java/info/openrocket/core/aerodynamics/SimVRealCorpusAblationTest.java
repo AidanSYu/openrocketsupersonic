@@ -56,10 +56,7 @@ public class SimVRealCorpusAblationTest extends BaseTestCase {
 	private static final String REPORT_DIR = "build/reports/simvreal-ablation";
 	private static final double FT_PER_METER = 3.28084;
 
-	private static final String[] RASP_ENG_PATHS = {
-			"simvreal/rasp.eng",
-			"c:/Code/OpenRocket Plus/simvreal/rasp.eng",
-	};
+	private static final String RASP_ENG_PATH = "simvreal/rasp.eng";
 
 	private static final Set<String> NOZZLE_ABLATION_CASES = Set.of(
 			"Don't Debate This",
@@ -87,8 +84,18 @@ public class SimVRealCorpusAblationTest extends BaseTestCase {
 
 	@BeforeAll
 	static void setup() {
-		for (String path : RASP_ENG_PATHS) {
-			loadMotorsIntoRASAeroCache(new File(path), "rasp.eng");
+		// Clear the JVM-global RASAero motor cache so this class binds only its own
+		// rasp.eng curves (first-match lookup over a no-dedup static List would
+		// otherwise pick up same-named motors appended by an earlier test class).
+		RASAeroMotorsLoader.clearAllMotors();
+		// Resolve the RASP motor file via the same repo-root walk-up as the CDX1
+		// dir; a plain cwd-relative path fails under Gradle (cwd=core/) and leaves
+		// the motor cache empty -> every flight ABORTs with NO_MOTORS_DEFINED.
+		File rasp = findDir(RASP_ENG_PATH);
+		if (rasp != null) {
+			loadMotorsIntoRASAeroCache(rasp, "rasp.eng");
+		} else {
+			System.out.println("WARNING: " + RASP_ENG_PATH + " not found; SimVReal motors will not bind.");
 		}
 	}
 

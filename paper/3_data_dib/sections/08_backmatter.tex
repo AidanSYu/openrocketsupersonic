@@ -1,0 +1,66 @@
+% Back matter: Ethics, CRediT, Declarations, Acknowledgements, Data Availability.
+% Section headers below; the master (dib.tex) does NOT pre-declare them, so they
+% are issued here. All claims/numbers match paper/_shared/CANONICAL_FACTS.md.
+
+\section*{Ethics Statement}
+The authors have read and followed the ethical requirements for publication in
+\textit{Data in Brief}. This work did not involve human subjects, animal
+experiments, or data collected from social media platforms. All data in the
+Rocket Flight Database are drawn from openly published sources or are produced
+by the authors' own simulations: the measured flight apogees and the paired
+RASAero~II \cite{rogers2015} reference predictions are the publicly released
+RASAero~II altitude-comparison values \cite{rogers_rasaero_alt}, and the
+exploratory high-Mach ground truth is taken from published flight-test reports
+(cited per row in the dataset). No third-party copyrighted material is
+redistributed beyond the fair, factual description of published numerical
+results needed to document the corpus; the externally sourced columns are
+attributed to their originators and are not represented as this work's own
+measurements.
+
+\section*{CRediT Author Statement}
+\textbf{Aidan Yu}: Conceptualization; Data curation; Software; Validation;
+Writing -- original draft; Writing -- review \& editing.
+
+\section*{Declaration of Competing Interest}
+The authors declare that they have no known competing financial interests or
+personal relationships that could have appeared to influence the work reported
+in this paper.
+
+\section*{Acknowledgements}
+The author thanks C.~E.~Rogers (Rogers Aeroscience) for compiling and publicly
+releasing the RASAero~II altitude-comparison set \cite{rogers2015,rogers_rasaero_alt},
+which provides the externally curated ground truth and the paired
+commercial-simulator predictions that anchor this database; the OpenRocket
+\cite{niskanen2009} and RASAero communities for the open flight records and
+documentation on which the corpus draws; and Duke University for institutional
+support. This research received no specific grant from any funding agency in the
+public, commercial, or not-for-profit sectors.
+
+\section*{Data Availability}
+The Rocket Flight Database is openly archived on Zenodo under
+DOI~\href{https://doi.org/10.5281/zenodo.19976138}{10.5281/zenodo.19976138}
+(CC-BY-4.0) \cite{rfd_zenodo}, with a continuously updated mirror at
+\url{https://github.com/AidanSYu/rocket-flight-database}. The
+version-of-record described here is the synchronized release deposited at the
+time of submission, whose \texttt{apogee\_thiswork\_ft} column matches the
+current archived model code and the values printed in this article; the cited
+DOI resolves to that synchronized deposit. Twenty-four of the twenty-five
+\texttt{apogee\_thiswork\_ft} values in the headline corpus are unchanged from
+the earlier RFD~v1.2 snapshot; the single exception is the MESOS~293K two-stage
+closure, for which the current archived model code predicts $273{,}056$~ft
+($-6.96\%$) versus the $291{,}601$~ft ($-0.6\%$) value carried in the v1.2
+snapshot. This is a genuine, reproducible model change (confirmed by running the
+flight in isolation), not a data error, and at $-6.96\%$ it remains within the
+$\pm 10\%$ admission band so the $25/25$ headline is unchanged. The historical
+v1.2 snapshot remains available as a prior version of the same Zenodo record.
+Companion
+analysis scripts and the full reproduction recipe are described in the dataset's
+\texttt{reproducibility.md}; the scientific validation result is reported in the
+companion research article \cite{yu2026jsr}.
+
+\section*{Generative AI Disclosure}
+During the preparation of this work the author used generative AI tools to assist
+with language editing, formatting, and code review only. All claims, equations,
+and numerical values were authored and verified by the human author, who takes
+full responsibility for the content of the publication. No AI system is listed as
+an author or contributor.

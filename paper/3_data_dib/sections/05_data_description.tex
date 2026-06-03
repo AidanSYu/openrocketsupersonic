@@ -1,0 +1,184 @@
+% Data Description — body fragment (the \section{Data Description} header is
+% provided by the master dib.tex). DESCRIPTIVE ONLY: no interpretation, no new
+% scientific conclusions; the comparison result is argued in the companion JSR
+% research article \cite{yu2026jsr}. Every number below is taken verbatim from
+% the two CSV files and is consistent with paper/_shared/CANONICAL_FACTS.md.
+
+The Rocket Flight Database is distributed as two comma-separated-value (CSV)
+files together with a plain-text reproducibility statement. The first file,
+\texttt{flight\_comparison.csv}, is the headline corpus: 25 instrumented
+flights with paired apogee predictions from a commercial trajectory simulator
+(RASAero~II \cite{rogers2015,rogers_rasaero_alt}) and from the open-source
+predictor described in the companion research article \cite{yu2026jsr}. The
+second file, \texttt{sounding\_rockets\_exploratory.csv}, is a separate
+exploratory set of historical high-Mach sounding-rocket flights that is
+deliberately held outside the headline corpus. Throughout both files, all
+apogee values are reported in feet (ft) and all error values in percent~(\%);
+peak Mach is dimensionless and body diameter is in inches~(in). No values in
+the two distributed files are rounded beyond the precision shown; the
+single-decimal \texttt{err\_*\_pct} columns are convenience columns recomputed
+downstream from the full-precision apogee columns
+(see \texttt{reproducibility.md}).
+
+\subsection{File 1: \texttt{flight\_comparison.csv} (25-flight headline corpus)}
+
+Each row is one flight. The 14 columns are defined in
+Table~\ref{tab:cols_comparison}. The corpus spans peak Mach 0.54 to 4.33 and
+body diameters from 1.75~in to 8.00~in; two flights are two-stage vehicles for
+which a slash-separated pair of stage diameters and motor designations is
+recorded (AeroPac~104K Two-Stage and MESOS~293K).
+
+\begin{table}[htbp]
+\centering
+\caption{Column dictionary for \texttt{flight\_comparison.csv}.}
+\label{tab:cols_comparison}
+\small
+\begin{tabularx}{\textwidth}{@{}lll X@{}}
+\toprule
+Column & Type & Unit & Description \\
+\midrule
+\texttt{flight\_id}          & integer & ---     & Sequential record identifier (1--25). \\
+\texttt{vehicle\_name}       & string  & ---     & Rocket / project name as published in the source comparison set. \\
+\texttt{motor}               & string  & ---     & Motor designation(s) and manufacturer; a slash separates per-stage motors for two-stage vehicles. \\
+\texttt{diameter\_in}        & float   & in      & Body reference diameter; a slash separates per-stage diameters for two-stage vehicles. \\
+\texttt{peak\_mach}          & float   & ---     & Peak flight Mach number. \\
+\texttt{launch\_site\_alt\_ft} & integer & ft    & Launch-site elevation above mean sea level. \\
+\texttt{apogee\_real\_ft}    & integer & ft      & Measured (ground-truth) apogee. \\
+\texttt{apogee\_rasaero\_ft} & integer & ft      & Apogee predicted by RASAero~II (commercial reference). \\
+\texttt{apogee\_thiswork\_ft} & integer & ft     & Apogee predicted by the open-source predictor of this work. \\
+\texttt{err\_rasaero\_pct}   & float   & \%      & Signed relative apogee error of RASAero~II vs.\ measured. \\
+\texttt{err\_thiswork\_pct}  & float   & \%      & Signed relative apogee error of this work vs.\ measured. \\
+\texttt{abs\_err\_delta\_pp} & float   & pp      & $|\text{err\_rasaero}|-|\text{err\_thiswork}|$ in percentage points (paired absolute-error difference). \\
+\texttt{flight\_data\_type}  & string  & ---     & Instrumentation class of the measured apogee (see below). \\
+\texttt{data\_source}        & string  & ---     & Origin of the record (the published RASAero~II altitude-comparison set). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The \texttt{flight\_data\_type} column records how the measured apogee was
+obtained, taking one of four values in this file:
+\begin{itemize}
+  \item \textbf{Barometric Altimeter} --- apogee from an onboard pressure
+        altimeter (17 of 25 flights);
+  \item \textbf{GPS} --- apogee from an onboard GPS receiver (3 flights:
+        A-601~Kinsel, AeroPac~104K Two-Stage, MESOS~293K);
+  \item \textbf{Optical Track} --- apogee from ground-based optical tracking
+        (3 flights: Kline-Rogers~L500 and the two Full~Metal~Jacket flights);
+  \item \textbf{Integrated Accelerometer} --- apogee from twice-integrated
+        onboard accelerometer data (2 flights: Proteus~6 and Qu8k).
+\end{itemize}
+The measured-truth, RASAero~II, and ``this work'' columns are produced
+independently of one another, so the per-flight comparison is non-circular;
+the provenance split is documented in \texttt{reproducibility.md}.
+
+Table~\ref{tab:headline25} reproduces the 25-flight corpus verbatim from
+\texttt{flight\_comparison.csv}: vehicle, peak Mach, measured apogee, and the
+RASAero~II and this-work apogees with their signed percent errors. All apogees
+are in feet and all errors in percent.
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}r >{\raggedright\arraybackslash}p{0.24\textwidth} r r r r r r@{}}
+\caption{The 25-flight headline corpus (\texttt{flight\_comparison.csv}),
+reproduced verbatim. Apogees in feet; errors in percent (signed, vs.\
+measured).}\label{tab:headline25}\\
+\toprule
+ID & Vehicle & Peak & Measured & RAS & RAS & This work & This work \\
+   &         & Mach & apogee (ft) & apogee (ft) & err (\%) & apogee (ft) & err (\%) \\
+\midrule
+\endfirsthead
+\multicolumn{8}{c}{\tablename~\thetable\ (continued)}\\
+\toprule
+ID & Vehicle & Peak & Measured & RAS & RAS & This work & This work \\
+   &         & Mach & apogee (ft) & apogee (ft) & err (\%) & apogee (ft) & err (\%) \\
+\midrule
+\endhead
+\midrule
+\multicolumn{8}{r}{\textit{continued on next page}}\\
+\endfoot
+\bottomrule
+\endlastfoot
+1  & Thunder \& Lightning                & 0.54 & 3577   & 3989   & 11.52 & 3877   & 8.4  \\
+2  & Gibb                                & 0.55 & 3913   & 4310   & 10.15 & 3989   & 1.9  \\
+3  & Cancer Descending                   & 0.56 & 6188   & 6328   & 2.26  & 6044   & $-2.3$ \\
+4  & EZI-65 J450ST                       & 0.60 & 3965   & 4214   & 6.28  & 4158   & 4.9  \\
+5  & Caliber Isp 04 AVTC Team 2          & 0.64 & 3710   & 3871   & 4.34  & 3890   & 4.9  \\
+6  & Caliber Isp 04 AVTC Team 3          & 0.64 & 3964   & 3871   & $-2.35$ & 3889 & $-1.9$ \\
+7  & Caliber Isp 04 AVTC Team 1          & 0.66 & 3837   & 3943   & 2.76  & 3960   & 3.2  \\
+8  & Byrum                               & 0.75 & 5732   & 5280   & $-7.89$ & 6161 & 7.5  \\
+9  & Ion Drive                           & 0.79 & 8027   & 8642   & 7.66  & 7730   & $-3.7$ \\
+10 & Caliber Isp 05 ARO-414 (Discovery)  & 0.81 & 4930   & 4831   & $-2.01$ & 4772 & $-3.2$ \\
+11 & Blister                             & 0.83 & 9026   & 8347   & $-7.52$ & 8268 & $-8.4$ \\
+12 & Caliber Isp 05 ARO-414 (Columbia)   & 0.84 & 5085   & 4842   & $-4.78$ & 4777 & $-6.1$ \\
+13 & Rabia - Short Fin Can               & 0.86 & 10584  & 10376  & $-1.97$ & 9916 & $-6.3$ \\
+14 & Raven                               & 1.07 & 8815   & 9288   & 5.37  & 9489   & 7.6  \\
+15 & Rabia                               & 1.14 & 12745  & 12777  & 0.25  & 11913  & $-6.5$ \\
+16 & Torrent                             & 1.22 & 12807  & 13852  & 8.16  & 12455  & $-2.8$ \\
+17 & Kline-Rogers L500                   & 1.98 & 24771  & 26485  & 6.92  & 24179  & $-2.4$ \\
+18 & A-601 Kinsel                        & 2.19 & 42771  & 41086  & $-3.94$ & 46499 & 8.7 \\
+19 & Full Metal Jacket - BALLS 005       & 2.31 & 37981  & 38820  & 2.21  & 37256  & $-1.9$ \\
+20 & Full Metal Jacket - Black Rock 6    & 2.46 & 30038  & 32646  & 8.68  & 29239  & $-2.7$ \\
+21 & Proteus 6                           & 2.87 & 85067  & 86799  & 2.04  & 91339  & 7.4  \\
+22 & AeroPac 104K Two-Stage              & 3.04 & 104659 & 113786 & 8.72  & 103602 & $-1.0$ \\
+23 & Don't Debate This                   & 3.04 & 56573  & 62308  & 10.14 & 53150  & $-6.1$ \\
+24 & Qu8k                                & 3.46 & 121478 & 116254 & $-4.30$ & 119187 & $-1.9$ \\
+25 & MESOS 293K                          & 4.33 & 293488 & 289789 & $-1.26$ & 273056 & $-6.96$ \\
+\end{longtable}
+\endgroup
+
+All 25 flights have a measured apogee, a RASAero~II apogee, and a this-work
+apogee. The corpus contains no flight above Mach 4.33; the highest-Mach record
+is the two-stage MESOS~293K closure (peak Mach 4.33, measured apogee
+293{,}488~ft), for which this work records an apogee of 273{,}056~ft
+($-6.96\%$). The value-of-the-data and detailed comparison statistics are
+presented in the companion research article \cite{yu2026jsr}; this article
+describes the data only.
+
+\subsection{File 2: \texttt{sounding\_rockets\_exploratory.csv} (exploratory
+high-Mach set)}
+
+The second file holds 20 historical high-Mach sounding-rocket flights
+simulated with the same open-source predictor and reported in full as an
+exploratory capability set that is excluded from the headline corpus. Each row
+is one flight; the eight columns are defined in
+Table~\ref{tab:cols_exploratory}.
+
+\begin{table}[htbp]
+\centering
+\caption{Column dictionary for \texttt{sounding\_rockets\_exploratory.csv}.}
+\label{tab:cols_exploratory}
+\small
+\begin{tabularx}{\textwidth}{@{}lll X@{}}
+\toprule
+Column & Type & Unit & Description \\
+\midrule
+\texttt{vehicle}             & string & ---  & Vehicle / flight designation. \\
+\texttt{source\_doc}         & string & ---  & Primary published source for the measured apogee (radar / beacon / GPS), cited per row. \\
+\texttt{real\_apogee\_ft}    & integer & ft  & Measured (ground-truth) apogee. \\
+\texttt{orp\_apogee\_ft}     & integer & ft  & Apogee predicted by the open-source predictor of this work (blank for transparently reported simulation-error rows). \\
+\texttt{err\_thiswork\_pct}  & float  & \%   & Signed relative apogee error of this work vs.\ measured (blank where no apogee was produced). \\
+\texttt{peak\_mach}          & float  & ---  & Peak flight Mach number (blank where no trajectory was produced). \\
+\texttt{headline\_admissible} & string & --- & Whether the flight falls within $\pm 10\%$; values are ``within +/-10\%'', ``NO (>10\% error)'', or ``NO (sim error)''. \\
+\texttt{note}                & string & ---  & Free-text note recording solver-termination and reconstruction caveats (e.g.\ ascent-only cutoff, descent NaN, zero-apogee, simulation error). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Of the 20 exploratory flights, 3 fall within $\pm 10\%$ of the measured apogee:
+Black~Brant~V~VB (AAF-VB-32) at peak Mach 7.224 with error $-6.97\%$
+\cite{dtic_ad0733141}, Nike-Deacon no.~1 at peak Mach 4.956 with error
+$-1.06\%$, and Nike-Deacon no.~2 at peak Mach 5.079 with error $-0.89\%$. The
+remaining 17 flights fall outside $\pm 10\%$ and are reported transparently:
+the Nike-Apache family over-predicts ($+24$ to $+36\%$), the Nike-Cajun
+University~of~Michigan sounding flight over-predicts ($+16.56\%$), and the
+Arcas (blunt and secant-ogive) and HEROS~3 flights under-predict ($-29$ to
+$-69\%$). This count of 17 also includes two transparently reported
+non-nominal solver outcomes: one zero-apogee record (Nike-Apache NASA~14.210~GI,
+\texttt{orp\_apogee\_ft}~$=0$, \texttt{err\_thiswork\_pct}~$=-100.0$,
+flagged ``ZERO APOGEE'' in the note) and one simulation-error record
+(Nike-Cajun Hurricane, with \texttt{orp\_apogee\_ft},
+\texttt{err\_thiswork\_pct} and \texttt{peak\_mach} left blank and marked
+``NO (sim error)''). As with File~1, all apogees are in feet and all errors in
+percent. The full set is published here so that the exploratory outcomes are
+reported without selection.

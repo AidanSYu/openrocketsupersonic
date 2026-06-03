@@ -12,7 +12,7 @@ temperature at every component station before any downstream drag or stability
 calculator runs. Subsequent sections consume those local conditions through a
 stable query interface. The architectural value of the pre-pass lies in local
 post-shock fidelity and in providing a single seam through which all of the
-supersonic submodels of Sections~3--5 are driven; as quantified in
+supersonic submodels of Secs.~\ref{sec:atmosphere}--\ref{sec:stability} are driven; as quantified in
 Section~\ref{subsec:prepass-ablation}, its contribution to \emph{integrated}
 apogee is small, because apogee integrates a trajectory whose drag impulse is
 dominated by lower-Mach flight.
@@ -150,7 +150,7 @@ wave-drag computation. The fin--body interference factors and the
 shock-wave/boundary-layer-interaction chord-reduction model draw from the same
 interface, and the base-drag calculator reads the post-shock local pressure for
 the base dynamic-pressure rescaling. A single seam thus supplies the local flow
-state to every supersonic submodel of Sections~3--5.
+state to every supersonic submodel of Secs.~\ref{sec:atmosphere}--\ref{sec:stability}.
 
 \subsection{Numerical guards and $C^1$ activation}
 \label{subsec:prepass-activation}
@@ -195,7 +195,7 @@ surface-Mach march for the six reference cases against the analytical envelope.
 This verification level is consistent with the AIAA Editorial Policy on Numerical
 and Experimental Accuracy~\cite{aiaa_numerical_policy}, which directs engineering
 codes to anchor against analytical or tabulated solutions where available; the
-pre-pass is reported as an externally benchmarked subsystem in the Section~6
+pre-pass is reported as an externally benchmarked subsystem in the Sec.~\ref{sec:benchmarks}
 roll-up.
 
 \begin{figure}[t]
@@ -236,6 +236,15 @@ verified to the analytical references of
 Section~\ref{subsec:prepass-verification}, where freestream evaluation would bias
 the local coefficients as shown in the motivation above---and it is the
 architectural seam through which the supersonic drag and stability models of
-Sections~3--5 are driven. The integrated-apogee accuracy reported in Section~8
+Secs.~\ref{sec:atmosphere}--\ref{sec:stability} are driven. The integrated-apogee accuracy reported in Sec.~\ref{sec:corpus}
 rests primarily on those downstream models and on the externally calibrated
-finned-base term, not on the pre-pass in isolation.
+finned-base term, not on the pre-pass in isolation. The finned-base
+augmentation is identified here only as the dominant term motivating the
+present pre-pass framing; the dominance of the finned-base augmentation in the
+apogee error budget is examined in detail---as a distinct, deferred research
+question rather than a re-slice of the present integrated result---in a
+companion base-drag intercomparison study~\cite{yu2026ast}. That dedicated
+intercomparison of the base-drag closures that govern integrated apogee---%
+Chapman--Korst, ESDU~77021, the $0.064 + 0.186/M^2$ correlation, and the
+finned-base augmentation---is deferred to that companion paper, and the present
+work does not draw any conclusion ranking those closures.

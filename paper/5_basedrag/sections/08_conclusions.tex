@@ -1,0 +1,89 @@
+% Conclusions (body only; master supplies \section{Conclusions}).
+% Distinct contribution: base-drag closure choice dominates integrated
+% supersonic-rocket apogee error (8.10 pp), benchmarked + generalization-tested.
+% Future work (prioritized): independent finned-base base-pressure dataset
+% (B->A on FINNED_BASE_K), transonic blend fix, Sahu digitization.
+% Every number per paper/_shared/CANONICAL_FACTS.md (sections B, C, D, K).
+% No Devan-Ashwood: Cd_base = 0.064 + 0.186/M^2 is an empirical correlation
+% anchored on NACA TN 3393 + ESDU 77021. \cite{yu2026jsr} is a placeholder key.
+This study set out to answer a question distinct from the integrated accuracy
+assessment of the companion flagship paper~\cite{yu2026jsr}: among the supersonic
+submodels of an open-source rocket simulator, how heavily does the base-drag term
+weigh on the integrated apogee prediction relative to the others, and can the
+closure that carries that weight be anchored to external base-pressure data? By
+re-running the flight corpus with each supersonic submodel disabled in isolation,
+we established that the base-drag term is not a second-order detail but the
+dominant driver of apogee error. Disabling the finned-base drag augmentation ---
+the base-drag component the corpus is most sensitive to --- moves predicted apogee
+by a mean of $8.10$~pp across 24 of the 25 corpus flights (MESOS~293K excluded;
+$23$ single-stage plus the AeroPac~104K two-stage closure; peaking at $39.5$~pp on
+the Mach~$2.19$ A-601 Kinsel), an order of magnitude larger than the next
+supersonic submodel --- Van~Driest~II compressible skin friction at $0.87$~pp
+\cite{hopkins1971} --- and far above the DATCOM~4.1.5.1 fin wave-drag term at
+$0.39$~pp and the structurally prominent shock-geometry pre-pass at only
+$0.15$~pp. The pre-pass
+earns its place through local-flow fidelity for fin loads and stability, not
+through any gross-apogee effect; the apogee budget is dominated instead by how
+the closure treats the finned base. This reframes where modeling effort and
+validation scrutiny should be concentrated in supersonic-rocket apogee
+prediction.
+
+Crucially, the closure branches benchmarked here are anchored on published
+base-pressure data rather than tuned in a vacuum, which is what licenses the
+central claim as physics rather than as an artifact of one calibration. The
+empirical turbulent correlation $C_{d,\text{base}} = 0.064 + 0.186/M^2$
+reproduces the NACA~TN~3393 nonlifting-body base-pressure measurements at a MAPE
+of $15.9\%$ (and $4.0\%$ against the Hart NACA~RM~L52E06 free-flight
+subset~\cite{hart1952basedrag}) and is consistent with the ESDU~77021
+methodology \cite{chapman1955,esdu77021}; the Chapman laminar branch matches
+the same data at $4.4\%$ \cite{chapman1950}. The Chapman--Korst turbulent
+shear-layer treatment \cite{chapman1958}, the Viswanath boattail relief
+\cite{viswanath1996}, and the DATCOM~4.1.5.1 fin wave-drag closure
+\cite{datcom1978} complete the set against which the finned-base augmentation
+is judged. The dominant closure is also the one carrying the most empirical
+calibration, and we confront that head-on rather than asking for trust: in the
+decontaminated prospective holdout --- in which every flight that touched a
+scale constant (Raven, Rabia, Rabia Short~Fin~Can, Kinsel, Torrent) is forced
+into the development split --- the genuinely blind holdout subset (MAE~$3.95\%$,
+$n=12$) is \emph{more} accurate than the development subset (MAE~$5.47\%$,
+$n=13$). A closure that improves out of sample is generalizing the underlying
+base-flow physics, not memorizing the calibration flights; this inversion is
+the primary evidence that neutralizes the in-sample concern attached to the
+dominant mechanism.
+
+These results carry a clear prioritization for future work. First, and most
+important, the finned-base augmentation is the dominant apogee driver yet
+remains a corpus-anchored, B-level closure: it is calibrated against the
+integrated flight corpus rather than isolated against a dedicated component
+dataset. An independent finned-base base-pressure dataset --- measuring base
+pressure on a finned afterbody across the relevant supersonic Mach range,
+ideally on a flat-base geometry comparable to the Basic Finner reference
+\cite{dupuis1997} --- would promote this constant from B-level to A-level
+external validation and is the single highest-value evidence gap for the
+apogee question this paper raises. Second, the transonic blend remains the
+disclosed weak band: it is the only regime carrying a one-sided mean signed
+apogee bias ($-3.66\%$), and there the high-supersonic empirical correlation,
+the Chapman--Korst shear-layer treatment, and the transonic peak polynomial
+must be reconciled across the Mach~$0.8$--$1.3$ window. Tightening this blend
+against a dedicated transonic base-pressure benchmark is the most direct route
+to reducing the residual apogee error. Third, the published transonic
+base-flow computation of Sahu, Nietubicz, and Steger \cite{sahu1983} on a
+secant-ogive--cylinder--boattail geometry would furnish a third-party CFD
+comparator for the boattail and transonic closures once its base-pressure
+curves are digitized; that digitization is deferred here because the geometry
+differs structurally from the finned reference body and warrants a dedicated
+model build, but closing it is the natural complement to the transonic blend
+work.
+
+In sum, this open mechanism-attribution study establishes a result that the
+integrated parity headline of the companion paper \cite{yu2026jsr} could not
+surface on its own: for supersonic-rocket apogee, the base-drag term ---
+specifically the treatment of the finned base --- is where accuracy is won or
+lost, dominating the supersonic error budget by an order of magnitude over every
+other submodel. The closure branches are benchmarked against externally measured
+base-pressure data and the corpus-frozen constants are shown to generalize out of
+sample, and the path to elevating the dominant closure from a corpus-anchored
+constant to an externally validated submodel is now explicit. All code, calibration constants, the ablation harness, and the
+underlying flight corpus are released openly (Section~9) so that the
+intercomparison can be reproduced and the identified evidence gaps closed by
+the community.

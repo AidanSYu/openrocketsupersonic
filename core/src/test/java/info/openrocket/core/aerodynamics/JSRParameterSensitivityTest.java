@@ -64,16 +64,22 @@ public class JSRParameterSensitivityTest extends BaseTestCase {
 	private static final long PER_RUN_TIMEOUT_MS = 240_000;
 	private static final String SIMVREAL_DIR = "simvreal/RasAero Sims";
 	private static final String SOUNDING_ORK_DIR = "paper/data/ork/sounding_rockets";
-	private static final String[] RASP_ENG_PATHS = {
-			"simvreal/rasp.eng",
-			"c:/Code/OpenRocket Plus/simvreal/rasp.eng",
-	};
+	private static final String RASP_ENG_PATH = "simvreal/rasp.eng";
 
 	@BeforeAll
 	static void setup() {
 		AblationConfig.reset();
-		for (String p : RASP_ENG_PATHS) {
-			loadMotorsIntoRASAeroCache(new File(p), "rasp.eng");
+		// Clear the JVM-global RASAero motor cache so this class binds only its own
+		// rasp.eng curves regardless of which test class ran before it.
+		RASAeroMotorsLoader.clearAllMotors();
+		// Resolve the RASP motor file via the same repo-root walk-up used for the
+		// CDX1/ORK dirs; a plain cwd-relative path fails under Gradle (cwd=core/)
+		// and silently leaves the motor cache empty -> every flight aborts.
+		File rasp = findDir(RASP_ENG_PATH);
+		if (rasp != null) {
+			loadMotorsIntoRASAeroCache(rasp, "rasp.eng");
+		} else {
+			System.out.println("WARNING: " + RASP_ENG_PATH + " not found; SimVReal motors will not bind.");
 		}
 	}
 

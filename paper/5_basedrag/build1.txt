@@ -1,0 +1,1189 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(basedrag.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/elsarticle\elsarticle.c
+ls
+Document Class: elsarticle 2026/01/09, 3.5: Elsevier Ltd
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+tex.def))
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xpars
+e.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/base\size12.clo))
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+))) (C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/natbib\natbib.sty))
+ (C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/lineno\lineno.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
+))) (C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty))
+ (C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+ (C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty))
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/tools\longtable.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefine
+keys.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.s
+ty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds
+.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.s
+ty)))
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettit
+lestring.sty))
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.s
+ty) (C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
+) (C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
+) (C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc
+.sty)))
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
+echeck.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquec
+ounter.sty)))
+No file basedrag.aux.
+
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.c
+fg)) (sections/01_abstract.tex
+
+Package natbib Warning: Citation `chapman1955' on page 1 undefined on input lin
+e 5.
+
+
+Package natbib Warning: Citation `esdu77021' on page 1 undefined on input line 
+5.
+
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
+
+Package natbib Warning: Citation `viswanath1996' on page 1 undefined on input l
+ine 6.
+
+
+Package natbib Warning: Citation `rogers2015' on page 1 undefined on input line
+ 10.
+
+
+Package natbib Warning: Citation `chapman1955' on page 1 undefined on input lin
+e 11.
+
+
+Package natbib Warning: Citation `hopkins1971' on page 1 undefined on input lin
+e 15.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 1 undefined on input line 
+20.
+
+) [1{C:/Users/aidan/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+(sections/02_introduction.tex
+
+Package natbib Warning: Citation `chapman1955' on page 2 undefined on input lin
+e 26.
+
+
+Package natbib Warning: Citation `esdu77021' on page 2 undefined on input line 
+28.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 2 undefined on input l
+ine 34.
+
+
+Package natbib Warning: Citation `sahu1983' on page 2 undefined on input line 4
+1.
+
+[2]
+
+Package natbib Warning: Citation `niskanen2009' on page 3 undefined on input li
+ne 59.
+
+
+Package natbib Warning: Citation `rogers2015' on page 3 undefined on input line
+ 60.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 3 undefined on input line 
+64.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 3 undefined on input line 
+84.
+
+
+Package natbib Warning: Citation `chapman1955' on page 3 undefined on input lin
+e 88.
+
+
+Package natbib Warning: Citation `esdu77021' on page 3 undefined on input line 
+89.
+
+
+Package natbib Warning: Citation `chapman1955' on page 3 undefined on input lin
+e 91.
+
+
+Package natbib Warning: Citation `esdu77021' on page 3 undefined on input line 
+92.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 3 undefined on input l
+ine 94.
+
+)
+Overfull \hbox (17.22409pt too wide) in paragraph at lines 81--51
+\T1/cmr/m/n/12 dis-tinct re-search ques-tion: \T1/cmr/m/it/12 which base-drag c
+lo-sure gov-erns in-te-grated supersonic-
+[3] (sections/03_basedrag_models.tex
+
+LaTeX Warning: Reference `tab:closures' on page 4 undefined on input line 24.
+
+[4]
+
+LaTeX Warning: Reference `eq:empirical' on page 5 undefined on input line 42.
+
+
+Package natbib Warning: Citation `chapman1955' on page 5 undefined on input lin
+e 43.
+
+
+Package natbib Warning: Citation `esdu77021' on page 5 undefined on input line 
+47.
+
+
+LaTeX Warning: Reference `eq:empirical' on page 5 undefined on input line 55.
+
+
+Package natbib Warning: Citation `chapman1950' on page 5 undefined on input lin
+e 56.
+
+
+LaTeX Warning: Reference `eq:empirical' on page 5 undefined on input line 72.
+
+
+LaTeX Warning: Reference `eq:laminar' on page 5 undefined on input line 76.
+
+[5]
+
+Package natbib Warning: Citation `chapman1955' on page 6 undefined on input lin
+e 85.
+
+
+LaTeX Warning: Reference `eq:empirical' on page 6 undefined on input line 92.
+
+
+Package natbib Warning: Citation `esdu77021' on page 6 undefined on input line 
+93.
+
+
+LaTeX Warning: Reference `eq:empirical' on page 6 undefined on input line 103.
+
+
+LaTeX Warning: Reference `eq:chapmankorst' on page 6 undefined on input line 10
+4.
+
+
+LaTeX Warning: Reference `subsec:esdu' on page 6 undefined on input line 106.
+
+
+LaTeX Warning: Reference `eq:empirical' on page 6 undefined on input line 108.
+
+
+Package natbib Warning: Citation `esdu77021' on page 6 undefined on input line 
+114.
+
+
+LaTeX Warning: Reference `eq:chapmankorst' on page 6 undefined on input line 11
+8.
+
+[6]
+
+Package natbib Warning: Citation `yu2026jsr' on page 7 undefined on input line 
+138.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 7 undefined on input l
+ine 145.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 7 undefined on input l
+ine 164.
+
+
+LaTeX Warning: Reference `subsec:ablation' on page 7 undefined on input line 17
+3.
+
+
+Package natbib Warning: Citation `dupuis1997' on page 7 undefined on input line
+ 176.
+
+
+Package natbib Warning: Citation `hoerner1965' on page 7 undefined on input lin
+e 177.
+
+[7]
+
+LaTeX Warning: Reference `eq:empirical' on page 8 undefined on input line 200.
+
+
+LaTeX Warning: Reference `eq:laminar' on page 8 undefined on input line 201.
+
+
+LaTeX Warning: Reference `subsec:ablation' on page 8 undefined on input line 20
+2.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 8 undefined on input line 
+206.
+
+
+LaTeX Warning: Reference `subsec:holdout' on page 8 undefined on input line 211
+.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 216.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `superscript' on input line 216.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 216.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 8 undefined on input line 
+237.
+
+[8]
+
+Package tabularx Warning: X Columns too narrow (table too wide)
+(tabularx)                 on input line 265.
+
+
+Overfull \hbox (40.86917pt too wide) in paragraph at lines 265--265
+[]|\T1/cmr/m/n/12 Governing
+
+Overfull \hbox (12.07344pt too wide) in paragraph at lines 265--265
+\T1/cmr/m/n/12 form| 
+
+LaTeX Warning: Reference `eq:empirical' on page 9 undefined on input line 265.
+
+
+Overfull \hbox (33.46541pt too wide) in paragraph at lines 265--265
+[]|\T1/cmr/m/n/12 Eq. [],
+
+Overfull \hbox (24.15527pt too wide) in paragraph at lines 265--265
+\OT1/cmr/m/n/12 0\OML/cmm/m/it/12 :\OT1/cmr/m/n/12 064 +
+
+Overfull \hbox (37.60947pt too wide) in paragraph at lines 265--265
+\OT1/cmr/m/n/12 0\OML/cmm/m/it/12 :\OT1/cmr/m/n/12 186\OML/cmm/m/it/12 =M[]$| 
+
+Package natbib Warning: Citation `chapman1955' on page 9 undefined on input lin
+e 265.
+
+
+Package natbib Warning: Citation `esdu77021' on page 9 undefined on input line 
+265.
+
+
+LaTeX Warning: Reference `eq:laminar' on page 9 undefined on input line 265.
+
+
+Overfull \hbox (33.46541pt too wide) in paragraph at lines 265--265
+[]|\T1/cmr/m/n/12 Eq. [],
+
+Overfull \hbox (73.38495pt too wide) in paragraph at lines 265--265
+\OML/cmm/m/it/12 C[]=\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 M[][]\OT1/cmr/m/n/12 )$|
+ 
+
+Package natbib Warning: Citation `chapman1950' on page 9 undefined on input lin
+e 265.
+
+
+Package natbib Warning: Citation `chapman1955' on page 9 undefined on input lin
+e 265.
+
+
+LaTeX Warning: Reference `eq:chapmankorst' on page 9 undefined on input line 26
+5.
+
+
+Overfull \hbox (33.46541pt too wide) in paragraph at lines 265--265
+[]|\T1/cmr/m/n/12 Eq. [],
+
+Overfull \hbox (24.15527pt too wide) in paragraph at lines 265--265
+\OT1/cmr/m/n/12 0\OML/cmm/m/it/12 :\OT1/cmr/m/n/12 060 +
+
+Overfull \hbox (46.74826pt too wide) in paragraph at lines 265--265
+\OT1/cmr/m/n/12 0\OML/cmm/m/it/12 :\OT1/cmr/m/n/12 190\OML/cmm/m/it/12 =M[] \OT
+1/cmr/m/n/12 +
+
+Overfull \hbox (37.60947pt too wide) in paragraph at lines 265--265
+\OT1/cmr/m/n/12 0\OML/cmm/m/it/12 :\OT1/cmr/m/n/12 005\OML/cmm/m/it/12 =M[]$| 
+
+Package natbib Warning: Citation `esdu77021' on page 9 undefined on input line 
+265.
+
+
+LaTeX Warning: Reference `eq:esdu-bl' on page 9 undefined on input line 265.
+
+
+Overfull \hbox (33.46541pt too wide) in paragraph at lines 265--265
+[]|\T1/cmr/m/n/12 Eq. [],
+
+Overfull \hbox (3.46117pt too wide) in paragraph at lines 265--265
+\OT1/cmr/m/n/12 1 \OMS/cmsy/m/n/12 ^^@
+
+Overfull \hbox (49.24554pt too wide) in paragraph at lines 265--265
+\OML/cmm/m/it/12 k\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 M\OT1/cmr/m/n/12 )[]$| 
+
+Package natbib Warning: Citation `esdu77021' on page 9 undefined on input line 
+265.
+
+
+LaTeX Warning: Reference `eq:viswanath' on page 9 undefined on input line 265.
+
+
+Overfull \hbox (33.46541pt too wide) in paragraph at lines 265--265
+[]|\T1/cmr/m/n/12 Eq. [],
+
+Overfull \hbox (40.96036pt too wide) in paragraph at lines 265--265
+\OML/cmm/m/it/12 ^^Q[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 ^^R[]; M\OT1/cmr/m/n/12
+ )$| 
+
+Package natbib Warning: Citation `viswanath1996' on page 9 undefined on input l
+ine 265.
+
+
+LaTeX Warning: Reference `eq:finnedbase' on page 9 undefined on input line 265.
+
+
+
+Overfull \hbox (33.46541pt too wide) in paragraph at lines 265--265
+[]|\T1/cmr/m/n/12 Eq. [],
+
+Overfull \hbox (3.2666pt too wide) in paragraph at lines 265--265
+\OT1/cmr/m/n/12 1 +
+
+Overfull \hbox (64.92636pt too wide) in paragraph at lines 265--265
+\OML/cmm/m/it/12 K[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 n=\OT1/cmr/m/n/12 4)\OML/
+cmm/m/it/12 f\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 M\OT1/cmr/m/n/12 )$| 
+
+Package natbib Warning: Citation `dupuis1997' on page 9 undefined on input line
+ 265.
+
+
+Package natbib Warning: Citation `hoerner1965' on page 9 undefined on input lin
+e 265.
+
+
+Overfull \hbox (27.24478pt too wide) in paragraph at lines 265--265
+[]|\T1/cmr/m/n/12 Degree-
+
+Underfull \hbox (badness 10000) in paragraph at lines 265--265
+\T1/cmr/m/n/12 4
+
+Overfull \hbox (14.35756pt too wide) in paragraph at lines 265--265
+\T1/cmr/m/n/12 poly-
+
+Overfull \hbox (4.56833pt too wide) in paragraph at lines 265--265
+\T1/cmr/m/n/12 no-
+
+Overfull \hbox (13.70494pt too wide) in paragraph at lines 265--265
+\T1/cmr/m/n/12 mial,
+
+Overfull \hbox (12.39973pt too wide) in paragraph at lines 265--265
+\T1/cmr/m/n/12 peak
+
+Overfull \hbox (9.14154pt too wide) in paragraph at lines 265--265
+\OT1/cmr/m/n/12 0\OML/cmm/m/it/12 :\OT1/cmr/m/n/12 25$
+
+Underfull \hbox (badness 10000) in paragraph at lines 265--265
+\T1/cmr/m/n/12 at
+
+Overfull \hbox (30.9011pt too wide) in paragraph at lines 265--265
+\OML/cmm/m/it/12 M[]\OT1/cmr/m/n/12 1\OML/cmm/m/it/12 :\OT1/cmr/m/n/12 05$| 
+
+Overfull \hbox (190.72847pt too wide) in alignment at lines 265--265
+[][][][][] 
+) (sections/04_methodology.tex
+
+LaTeX Warning: Reference `sec:method-component' on page 9 undefined on input li
+ne 14.
+
+
+LaTeX Warning: Reference `sec:method-ablation' on page 9 undefined on input lin
+e 18.
+
+
+LaTeX Warning: Reference `sec:method-holdout' on page 9 undefined on input line
+ 22.
+
+
+LaTeX Warning: Reference `sec:basedrag-models' on page 9 undefined on input lin
+e 33.
+
+
+LaTeX Warning: Reference `subsec:laminar' on page 9 undefined on input line 38.
+
+
+[9]
+
+Package natbib Warning: Citation `chapman1955' on page 10 undefined on input li
+ne 49.
+
+
+LaTeX Warning: Reference `eq:empirical' on page 10 undefined on input line 53.
+
+
+LaTeX Warning: Reference `eq:laminar' on page 10 undefined on input line 55.
+
+
+Package natbib Warning: Citation `chapman1955' on page 10 undefined on input li
+ne 55.
+
+
+LaTeX Warning: Reference `subsec:transonic' on page 10 undefined on input line 
+70.
+
+
+Overfull \hbox (0.51743pt too wide) in paragraph at lines 61--73
+\T1/cmr/m/n/12 the Hart free-flight base-pressure mea-sure-ments (NACA RM L52E0
+6),[][][] where
+[10]
+
+Package natbib Warning: Citation `chapman1955' on page 11 undefined on input li
+ne 75.
+
+
+Package natbib Warning: Citation `sahu1983' on page 11 undefined on input line 
+86.
+
+
+Package natbib Warning: Citation `sahu1983' on page 11 undefined on input line 
+94.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 11 undefined on input line
+ 108.
+
+
+LaTeX Warning: Reference `eq:finnedbase' on page 11 undefined on input line 117
+.
+
+
+Package natbib Warning: Citation `hopkins1971' on page 11 undefined on input li
+ne 118.
+
+
+Package natbib Warning: Citation `datcom1978' on page 11 undefined on input lin
+e 119.
+
+
+Package natbib Warning: Citation `ulmann1956' on page 11 undefined on input lin
+e 119.
+
+[11]
+
+LaTeX Warning: Reference `sec:results' on page 12 undefined on input line 131.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 12 undefined on input line
+ 144.
+
+
+LaTeX Warning: Reference `sec:method-ablation' on page 12 undefined on input li
+ne 158.
+
+[12]
+
+LaTeX Warning: Reference `sec:method-ablation' on page 13 undefined on input li
+ne 177.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 13 undefined on input line
+ 179.
+
+) (sections/05_results.tex
+
+LaTeX Warning: Reference `subsec:component' on page 13 undefined on input line 
+10.
+
+
+LaTeX Warning: Reference `subsec:ablation' on page 13 undefined on input line 1
+3.
+
+
+LaTeX Warning: Reference `subsec:holdout' on page 13 undefined on input line 16
+.
+
+
+LaTeX Warning: Reference `tab:component' on page 13 undefined on input line 23.
+
+
+
+Package natbib Warning: Citation `chapman1955' on page 13 undefined on input li
+ne 28.
+
+
+Package natbib Warning: Citation `chapman1955' on page 13 undefined on input li
+ne 31.
+
+
+Package natbib Warning: Citation `chapman1955' on page 13 undefined on input li
+ne 38.
+
+
+Package natbib Warning: Citation `esdu77021' on page 13 undefined on input line
+ 39.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 13 undefined on input 
+line 40.
+
+
+Package natbib Warning: Citation `sahu1983' on page 13 undefined on input line 
+48.
+
+[13]
+
+Package natbib Warning: Citation `chapman1955' on page 14 undefined on input li
+ne 62.
+
+
+Package natbib Warning: Citation `chapman1955' on page 14 undefined on input li
+ne 64.
+
+
+Package natbib Warning: Citation `chapman1955' on page 14 undefined on input li
+ne 65.
+
+
+Package natbib Warning: Citation `esdu77021' on page 14 undefined on input line
+ 65.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 14 undefined on input 
+line 66.
+
+
+Overfull \hbox (149.37271pt too wide) in paragraph at lines 58--69
+ [][] 
+
+LaTeX Warning: Reference `tab:ablation' on page 14 undefined on input line 79.
+
+
+Package natbib Warning: Citation `hopkins1971' on page 14 undefined on input li
+ne 95.
+
+
+Package natbib Warning: Citation `datcom1978' on page 14 undefined on input lin
+e 96.
+
+
+Overfull \hbox (225.42485pt too wide) in paragraph at lines 90--101
+ [][] 
+
+Package natbib Warning: Citation `hopkins1971' on page 14 undefined on input li
+ne 106.
+
+
+Package natbib Warning: Citation `datcom1978' on page 14 undefined on input lin
+e 107.
+
+
+LaTeX Warning: Reference `fig:tornado' on page 14 undefined on input line 117.
+
+[14]
+
+LaTeX Warning: Reference `tab:ablation' on page 15 undefined on input line 130.
+
+
+
+LaTeX Warning: Reference `tab:ablation' on page 15 undefined on input line 130.
+
+
+
+LaTeX Warning: Reference `subsec:ablation' on page 15 undefined on input line 1
+40.
+
+
+LaTeX Warning: Reference `fig:biasvar' on page 15 undefined on input line 150.
+
+[15 <../data/png/sensitivity_tornado_composite.png>]
+
+Package natbib Warning: Citation `chapman1955' on page 16 undefined on input li
+ne 169.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 16 undefined on input line
+ 174.
+
+) [16 <../data/analysis/corpus_bias_variance_2026_05_11/bias_variance.png>]
+(sections/06_discussion.tex
+
+LaTeX Warning: Reference `sec:results' on page 17 undefined on input line 15.
+
+
+Package natbib Warning: Citation `hopkins1971' on page 17 undefined on input li
+ne 19.
+
+
+Package natbib Warning: Citation `datcom1978' on page 17 undefined on input lin
+e 20.
+
+
+Package natbib Warning: Citation `ulmann1956' on page 17 undefined on input lin
+e 20.
+
+
+Package natbib Warning: Citation `chapman1955' on page 17 undefined on input li
+ne 35.
+
+
+Package natbib Warning: Citation `chapman1958' on page 17 undefined on input li
+ne 35.
+
+
+Package natbib Warning: Citation `chapman1950' on page 17 undefined on input li
+ne 36.
+
+
+Package natbib Warning: Citation `esdu77021' on page 17 undefined on input line
+ 37.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 17 undefined on input 
+line 39.
+
+[17]
+
+Package natbib Warning: Citation `taylormaccoll1933' on page 18 undefined on in
+put line 61.
+
+
+Package natbib Warning: Citation `sims1964' on page 18 undefined on input line 
+61.
+
+[18]
+
+LaTeX Warning: Reference `sec:results' on page 19 undefined on input line 106.
+
+
+Package natbib Warning: Citation `chapman1955' on page 19 undefined on input li
+ne 109.
+
+
+Package natbib Warning: Citation `chapman1955' on page 19 undefined on input li
+ne 110.
+
+
+Package natbib Warning: Citation `chapman1950' on page 19 undefined on input li
+ne 110.
+
+
+Package natbib Warning: Citation `dupuis1997' on page 19 undefined on input lin
+e 112.
+
+
+Package natbib Warning: Citation `hoerner1965' on page 19 undefined on input li
+ne 113.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 19 undefined on input line
+ 123.
+
+
+Package natbib Warning: Citation `rogers2015' on page 19 undefined on input lin
+e 127.
+
+[19]
+
+LaTeX Warning: Reference `tab:ablation' on page 20 undefined on input line 156.
+
+
+
+LaTeX Warning: Reference `fig:tornado' on page 20 undefined on input line 157.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 20 undefined on input 
+line 164.
+
+
+Package natbib Warning: Citation `chapman1950' on page 20 undefined on input li
+ne 170.
+
+) [20] (sections/07_limitations.tex
+
+LaTeX Warning: Reference `subsec:holdout' on page 21 undefined on input line 24
+.
+
+
+Package natbib Warning: Citation `yu2026jsr' on page 21 undefined on input line
+ 34.
+
+[21]
+
+Package natbib Warning: Citation `viswanath1996' on page 22 undefined on input 
+line 42.
+
+
+Package natbib Warning: Citation `dupuis1997' on page 22 undefined on input lin
+e 46.
+
+
+Package natbib Warning: Citation `datcom1978' on page 22 undefined on input lin
+e 47.
+
+
+Overfull \hbox (0.44917pt too wide) in paragraph at lines 37--55
+\T1/cmr/m/n/12 MAPE---a de-lib-er-ately re-tained neg-a-tive bench-mark rather 
+than a sup-pressed
+
+Package natbib Warning: Citation `chapman1955' on page 22 undefined on input li
+ne 62.
+
+
+Package natbib Warning: Citation `esdu77021' on page 22 undefined on input line
+ 62.
+
+
+Overfull \hbox (12.55801pt too wide) in paragraph at lines 57--66
+\T1/cmr/m/n/12 base cor-re-la-tion $\OML/cmm/m/it/12 C[] \OT1/cmr/m/n/12 = 0\OM
+L/cmm/m/it/12 :\OT1/cmr/m/n/12 064 + 0\OML/cmm/m/it/12 :\OT1/cmr/m/n/12 186\OML
+/cmm/m/it/12 =M[]$\T1/cmr/m/n/12 , val-i-dated against NACA TN 3393 [\T1/cmr/bx
+/n/12 ?
+[22]
+
+Package natbib Warning: Citation `sahu1983' on page 23 undefined on input line 
+69.
+
+) (sections/08_conclusions.tex
+
+Package natbib Warning: Citation `yu2026jsr' on page 23 undefined on input line
+ 10.
+
+
+Package natbib Warning: Citation `hopkins1971' on page 23 undefined on input li
+ne 19.
+
+[23]
+
+Package natbib Warning: Citation `chapman1955' on page 24 undefined on input li
+ne 34.
+
+
+Package natbib Warning: Citation `esdu77021' on page 24 undefined on input line
+ 34.
+
+
+Package natbib Warning: Citation `chapman1950' on page 24 undefined on input li
+ne 35.
+
+
+Package natbib Warning: Citation `chapman1958' on page 24 undefined on input li
+ne 36.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 24 undefined on input 
+line 37.
+
+
+Package natbib Warning: Citation `datcom1978' on page 24 undefined on input lin
+e 38.
+
+
+Package natbib Warning: Citation `dupuis1997' on page 24 undefined on input lin
+e 57.
+
+
+Package natbib Warning: Citation `sahu1983' on page 24 undefined on input line 
+66.
+
+[24]
+
+Package natbib Warning: Citation `yu2026jsr' on page 25 undefined on input line
+ 75.
+
+) (sections/09_backmatter.tex
+
+Package natbib Warning: Citation `rfd_zenodo' on page 25 undefined on input lin
+e 9.
+
+
+Package natbib Warning: Citation `niskanen2009' on page 25 undefined on input l
+ine 12.
+
+
+Package natbib Warning: Citation `chapman1955' on page 25 undefined on input li
+ne 16.
+
+
+Package natbib Warning: Citation `esdu77021' on page 25 undefined on input line
+ 17.
+
+
+Package natbib Warning: Citation `viswanath1996' on page 25 undefined on input 
+line 18.
+
+
+Overfull \hbox (15.42323pt too wide) in paragraph at lines 6--20
+\T1/cmr/m/n/12 Database (RFD), v1.2, archived on Zen-odo un-der DOI []10.5281/z
+en-odo.19976138[]
+
+Overfull \hbox (6.35735pt too wide) in paragraph at lines 6--20
+\T1/cmr/m/n/12 cense [\T1/cmr/bx/n/12 ? \T1/cmr/m/n/12 ]; a work-ing mir-ror is
+ main-tained at []$\T1/cmtt/m/n/12 https : / / github . com / AidanSYu /
+[25]
+
+Package natbib Warning: Citation `yu2026jsr' on page 26 undefined on input line
+ 25.
+
+
+Package natbib Warning: Citation `rogers2015' on page 26 undefined on input lin
+e 39.
+
+)
+No file basedrag.bbl.
+
+Package natbib Warning: There were undefined citations.
+
+[26] [27] [28] (basedrag.aux)Trying to make PK font eccc1200 at 600 DPI...
+The METAFONT mode is: ljfour
+Creating eccc1200.pk...
+Running miktex-mf.exe...
+This is METAFONT, Version 2.71828182 (MiKTeX 25.12)
+
+
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\eccc1200
+.mf
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbase.m
+f)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\eccc.mf
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\excsc.mf
+ Ok
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccess
+.mf
+ Ok)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expseudo
+.mf
+ Ok)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exruwest
+.mf
+ Ok [192] [193] [194] [195] [196] [197] [198] [199] [200] [201] [202] [203]
+[204] [205] [206] [207] [208] [209] [210] [211] [212] [213] [214] [215]
+[216] [217] [218] [219] [220] [221] [222] [223])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrueast
+.mf
+ Ok [128] [129] [130] [131] [132] [133] [134] [135] [136] [137] [138] [139]
+[140] [141] [142] [143] [144] [145] [146] [147] [148] [149] [150] [151]
+[152] [153] [154] [155] [156] [157])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrulett
+.mf
+ Ok [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78]
+[79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbraces
+.mf
+ Ok [94] [126] [23] [40] [41] [60] [124] [62] [91] [93] [92] [123] [125]
+[95] [127] [32])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expunct.
+mf
+ Ok [14] [15] [19] [20] [13] [18] [33] [39] [42] [43] [44] [46] [47] [58]
+[59] [61] [96] [189] [17] [45] [16] [21] [22])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exsign.m
+f
+ Ok [24] [34] [35] [36] [37] [64] [191] [159])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exromp.m
+f
+ Ok [38] [63] [190])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrdigit
+.mf
+ Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expseudo
+.mf
+ Ok)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\excspl.m
+f
+ Ok [25] [26] [27] [28] [29] [30] [31] [158])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrulett
+.mf
+ Ok [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]
+[109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120]
+[121] [122])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exruwest
+.mf
+ Ok [224] [225] [226] [227] [228] [229] [230] [231] [232] [233] [234] [235]
+[236] [237] [238] [239] [240] [241] [242] [243] [244] [245] [246] [247]
+[248] [249] [250] [251] [252] [253] [254] [255])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrueast
+.mf
+ Ok [160] [161] [162] [163] [164] [165] [166] [167] [168] [169] [170] [171]
+[172] [173] [174] [175] [176] [177] [178] [179] [180] [181] [182] [183]
+[184] [185] [186] [187] [188])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\txpseudo
+.mf
+ Ok)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\txaccent
+.mf
+ Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\excligtb
+.mf
+ Ok) ) ) )
+(some charht values had to be adjusted by as much as 0.1046pt)
+Font metrics written on eccc1200.tfm.
+Output written on eccc1200.600gf (256 characters, 61480 bytes).
+Transcript written on eccc1200.log.
+Running miktex-gftopk.exe...
+This is GFtoPK, Version 2.4 (MiKTeX 25.12)
+'METAFONT output 2026.06.03:0312'
+61480 bytes packed to 30576 bytes.
+Installing C:\Users\aidan\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1200.pk...
+miktex-makepk: major issue: So far, you have not checked for MiKTeX updates.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `basedrag.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+ )
+(see the transcript file for additional information) <C:\Users\aidan\AppData\Lo
+cal\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1200.pk>Trying to make PK font ecbx1000 at 600 DPI...
+The METAFONT mode is: ljfour
+Creating ecbx1000.pk...
+Running miktex-mf.exe...
+This is METAFONT, Version 2.71828182 (MiKTeX 25.12)
+
+
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecbx1000
+.mf
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbase.m
+f)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecbx.mf
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exroman.
+mf
+ Ok
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccess
+.mf
+ Ok)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expseudo
+.mf
+ Ok)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exruwest
+.mf
+ Ok [192] [193] [194] [195] [196] [197] [198] [199] [200] [201] [202] [203]
+[204] [205] [206] [207] [208] [209] [210] [211] [212] [213] [214] [215]
+[216] [217] [218] [219] [220] [221] [222] [223])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlwest
+.mf
+ Ok [224] [225] [226] [227] [228] [229] [230] [231] [232] [233] [234] [235]
+[236] [237] [238] [239] [240] [241] [242] [243] [244] [245] [246] [247]
+[248] [249] [250] [251] [252] [253] [254] [255])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrueast
+.mf
+ Ok [128] [129] [130] [131] [132] [133] [134] [135] [136] [137] [138] [139]
+[140] [141] [142] [143] [144] [145] [146] [147] [148] [149] [150] [151]
+[152] [153] [154] [155] [156] [157])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrleast
+.mf
+ Ok [158] [160] [161] [162] [163] [164] [165] [166] [167] [168] [169] [170]
+[171] [172] [173] [174] [175] [176] [177] [178] [179] [180] [181] [182]
+[183] [184] [185] [186] [187] [188])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbraces
+.mf
+ Ok [94] [126] [23] [40] [41] [60] [124] [62] [91] [93] [92] [123] [125]
+[95] [127] [32])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expunct.
+mf
+ Ok [14] [15] [19] [20] [13] [18] [33] [39] [42] [43] [44] [46] [47] [58]
+[59] [61] [96] [189] [17] [45] [16] [21] [22])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccent
+.mf
+ Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exsign.m
+f
+ Ok [24] [34] [35] [36] [37] [64] [191] [159])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlig.m
+f
+ Ok [25] [26] [28] [27] [29] [30] [31])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exromp.m
+f
+ Ok [38] [63] [190])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrulett
+.mf
+ Ok [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78]
+[79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrllett
+.mf
+ Ok [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]
+[109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120]
+[121] [122])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrdigit
+.mf
+ Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrligtb
+.mf
+ Ok) ) ) )
+Font metrics written on ecbx1000.tfm.
+Output written on ecbx1000.600gf (256 characters, 49864 bytes).
+Transcript written on ecbx1000.log.
+Running miktex-gftopk.exe...
+This is GFtoPK, Version 2.4 (MiKTeX 25.12)
+'METAFONT output 2026.06.03:0312'
+49864 bytes packed to 25420 bytes.
+Installing C:\Users\aidan\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1000.pk...
+miktex-makepk: major issue: So far, you have not checked for MiKTeX updates.
+ <C:\Users\aidan\AppD
+ata\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1000.pk> <C:\Users\aida
+n\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1200.pk> <C:\User
+s\aidan\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1000.pk>Trying to make PK font ecrm0700 at 600 DPI...
+The METAFONT mode is: ljfour
+Creating ecrm0700.pk...
+Running miktex-mf.exe...
+This is METAFONT, Version 2.71828182 (MiKTeX 25.12)
+
+
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecrm0700
+.mf
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbase.m
+f)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\ecrm.mf
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exroman.
+mf
+ Ok
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccess
+.mf
+ Ok)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expseudo
+.mf
+ Ok)
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exruwest
+.mf
+ Ok [192] [193] [194] [195] [196] [197] [198] [199] [200] [201] [202] [203]
+[204] [205] [206] [207] [208] [209] [210] [211] [212] [213] [214] [215]
+[216] [217] [218] [219] [220] [221] [222] [223])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlwest
+.mf
+ Ok [224] [225] [226] [227] [228] [229] [230] [231] [232] [233] [234] [235]
+[236] [237] [238] [239] [240] [241] [242] [243] [244] [245] [246] [247]
+[248] [249] [250] [251] [252] [253] [254] [255])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrueast
+.mf
+ Ok [128] [129] [130] [131] [132] [133] [134] [135] [136] [137] [138] [139]
+[140] [141] [142] [143] [144] [145] [146] [147] [148] [149] [150] [151]
+[152] [153] [154] [155] [156] [157])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrleast
+.mf
+ Ok [158] [160] [161] [162] [163] [164] [165] [166] [167] [168] [169] [170]
+[171] [172] [173] [174] [175] [176] [177] [178] [179] [180] [181] [182]
+[183] [184] [185] [186] [187] [188])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exbraces
+.mf
+ Ok [94] [126] [23] [40] [41] [60] [124] [62] [91] [93] [92] [123] [125]
+[95] [127] [32])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\expunct.
+mf
+ Ok [14] [15] [19] [20] [13] [18] [33] [39] [42] [43] [44] [46] [47] [58]
+[59] [61] [96] [189] [17] [45] [16] [21] [22])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exaccent
+.mf
+ Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exsign.m
+f
+ Ok [24] [34] [35] [36] [37] [64] [191] [159])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrlig.m
+f
+ Ok [25] [26] [28] [27] [29] [30] [31])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exromp.m
+f
+ Ok [38] [63] [190])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrulett
+.mf
+ Ok [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78]
+[79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrllett
+.mf
+ Ok [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]
+[109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120]
+[121] [122])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrdigit
+.mf
+ Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
+(C:\Users\aidan\AppData\Local\Programs\MiKTeX\fonts/source/jknappen/ec\exrligtb
+.mf
+ Ok) ) ) )
+Font metrics written on ecrm0700.tfm.
+Output written on ecrm0700.600gf (256 characters, 37344 bytes).
+Transcript written on ecrm0700.log.
+Running miktex-gftopk.exe...
+This is GFtoPK, Version 2.4 (MiKTeX 25.12)
+'METAFONT output 2026.06.03:0312'
+37344 bytes packed to 17000 bytes.
+Installing C:\Users\aidan\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm0700.pk...
+miktex-makepk: major issue: So far, you have not checked for MiKTeX updates.
+ <C
+:\Users\aidan\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm0700.
+pk> <C:\Users\aidan\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ect
+i1200.pk> <C:\Users\aidan\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi6
+00\ecbx1200.pk> <C:\Users\aidan\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/e
+c/dpi600\ecti1000.pk> <C:\Users\aidan\AppData\Local\MiKTeX\fonts/pk/ljfour/jkna
+ppen/ec/dpi600\ecti0700.pk> <C:\Users\aidan\AppData\Local\MiKTeX\fonts/pk/ljfou
+r/jknappen/ec/dpi600\ecrm0800.pk> <C:\Users\aidan\AppData\Local\MiKTeX\fonts/pk
+/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\aidan\AppData\Local\MiKTeX\fo
+nts/pk/ljfour/jknappen/ec/dpi600\ecrm1728.pk><C:/Users/aidan/AppData/Local/Prog
+rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/aidan/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/aidan/
+AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Use
+rs/aidan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb
+><C:/Users/aidan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
+mr10.pfb><C:/Users/aidan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmr12.pfb><C:/Users/aidan/AppData/Local/Programs/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmr7.pfb><C:/Users/aidan/AppData/Local/Programs/MiKTeX/fonts/typ
+e1/public/amsfonts/cm/cmr8.pfb><C:/Users/aidan/AppData/Local/Programs/MiKTeX/fo
+nts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/aidan/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on basedrag.pdf (28 pages, 870694 bytes).
+Transcript written on basedrag.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.

@@ -1,0 +1,47 @@
+% Data and Code Availability (body only; master provides the \section* header).
+% AI-use disclosure + Acknowledgements + competing-interest declaration follow.
+% All identifiers per CANONICAL_FACTS.md SI. Venue = ASCE Journal of Aerospace
+% Engineering -> AI disclosure kept venue-neutral (no AIAA-specific policy citation).
+
+The flight ground-truth used in this intercomparison is the Rocket Flight Database
+(RFD), v1.2, archived on Zenodo under DOI
+\href{https://doi.org/10.5281/zenodo.19976138}{10.5281/zenodo.19976138} and released
+under the Creative Commons Attribution 4.0 (CC-BY-4.0) license \cite{rfd_zenodo}; a
+working mirror is maintained at
+\url{https://github.com/AidanSYu/rocket-flight-database}. The simulation code
+(OpenRocket-Plus, an extension of OpenRocket \cite{niskanen2009}) is openly developed at
+\url{https://github.com/AidanSYu/openrocketsupersonic} under the GPL-3.0 license; an
+archival snapshot of the exact code version used in this study, together with a matching
+Zenodo DOI and a tagged release, is minted at submission. The base-drag closures
+compared here---Chapman--Korst turbulent and Chapman laminar \cite{chapman1955},
+ESDU~77021 \cite{esdu77021}, the empirical $C_{D,\text{base}} = 0.064 + 0.186/M^2$
+correlation, the Viswanath boattail treatment \cite{viswanath1996}, and the finned-base
+augmentation---are implemented in that repository.
+
+The analysis and ablation scripts that regenerate every table and figure in this paper
+(the per-mechanism isolation runs and the base-drag closure intercomparison) reside in
+the \texttt{paper/data/analysis/} tree of the code repository and operate directly on the
+published RFD comparison set, so every reported quantity is reproducible from the
+archived artifacts. The companion integrated-validation study \cite{yu2026jsr} provides
+the trajectory-level context from which the dominant-mechanism question addressed here is
+drawn.
+
+\section*{Disclosure of AI Use}
+
+Generative AI tools were used solely for language editing, formatting, and code review.
+All models, derivations, equations, numerical results, and claims were conceived,
+authored, and verified by the human author; no AI system is an author of, or a
+contributor of intellectual content to, this work.
+
+\section*{Acknowledgements}
+
+The author thanks Charles E. Rogers for the public RASAero~II altitude-comparison data
+\cite{rogers2015} that anchors the integrated corpus, and the OpenRocket and RASAero user
+communities, whose open exchange of flight cases and aerodynamic-modeling discussion made
+this intercomparison possible. The author gratefully acknowledges the support of Duke
+University.
+
+\section*{Declaration of Competing Interest}
+
+The author declares that he has no known competing financial interests or personal
+relationships that could have appeared to influence the work reported in this paper.
