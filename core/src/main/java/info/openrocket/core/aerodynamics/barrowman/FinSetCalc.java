@@ -7,6 +7,8 @@ import java.util.Arrays;
 
 import info.openrocket.core.aerodynamics.AerodynamicForces;
 import info.openrocket.core.aerodynamics.AeroelasticModel;
+import info.openrocket.core.aerodynamics.BarrowmanDragCalculator;
+import info.openrocket.core.aerodynamics.shocks.ObliqueShockSolver;
 import info.openrocket.core.aerodynamics.FlightConditions;
 import info.openrocket.core.aerodynamics.PlumeModel;
 import info.openrocket.core.aerodynamics.ShockGeometry;
@@ -54,6 +56,8 @@ public class FinSetCalc extends RocketComponentCalc {
 	private final double[] poly = new double[6];
 
 	private final double thickness;
+	/** Leading-edge bevel length (m), NaN when the geometry does not specify it. */
+	private final double leadingEdgeBevelLength;
 	private final double bodyRadius;
 	private final int finCount;
 	private final double cantAngle;
@@ -86,6 +90,7 @@ public class FinSetCalc extends RocketComponentCalc {
 		super(component);
 
 		this.thickness = component.getThickness();
+		this.leadingEdgeBevelLength = component.getLeadingEdgeBevelLength();
 		this.bodyRadius = component.getBodyRadius();
 		this.finCount = component.getFinCount();
 
@@ -885,6 +890,97 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		return cd;
 	}
+	/** Half-angle below which a double-wedge leading edge is treated as aerodynamically sharp. */
+	private static final double HEX_LE_SHARP_HALF_ANGLE = Math.toRadians(5.0);
+	/**
+	 * LE-normal Mach at which the blunt-edge term is fully active (blended in from 1.0).
+	 * <p>
+	 * Chosen for stepper stability, not to tune any result. At 1.05 the ramp spanned only
+	 * dM ~ 0.08 in freestream Mach for a 53 deg swept fin, and since the term itself is
+	 * O(0.1) in Cd that produced a visible step in Cd(M) -- caught by
+	 * {@code HexagonalFinLeadingEdgeTest.noStepAcrossTheActivationBoundary}. 1.15 spreads it
+	 * over dM ~ 0.25, comparable to the other regime blends in this code base (fin wave drag
+	 * 0.9-1.2, beta 0.95-1.05, base drag 0.85-1.3). The lower end stays pinned at M_n = 1.0,
+	 * so a subsonic leading edge still contributes exactly zero.
+	 */
+	private static final double HEX_LE_MACH_FULL = 1.15;
+	/** Detachment margin over which the term is blended in, as a multiple of theta_max. */
+	private static final double HEX_LE_DETACH_BLEND = 1.20;
+
+	/**
+	 * Leading-edge wave drag for a HEXAGONAL (double-wedge) fin whose edge is blunt enough
+	 * to run a detached bow shock.
+	 * <p>
+	 * This branch used to return zero unconditionally, on the stated assumption that a
+	 * double-wedge edge is sharp -- "the thin wedge angles typical of supersonic fin stock
+	 * (&lt; 5 deg)". That holds for machined airfoil stock but not for fins cut from plate and
+	 * chamfered: A-601 Kinsel carries 0.25 in fins with a 0.125 in bevel, a 45 deg half-angle,
+	 * nine times the assumed limit. The cross-section enum alone cannot distinguish the two,
+	 * which is why {@link FinSet#getLeadingEdgeBevelLength()} was added.
+	 * <p>
+	 * Where the bevel length is unknown the original sharp-edge assumption is kept, so this
+	 * changes nothing for rockets that do not supply it.
+	 * <p>
+	 * Model: simple-sweep theory reduces the problem to the leading-edge-normal plane
+	 * (R.T. Jones, NACA Report 863), giving M_n = M cos(Lambda) and a normal wedge half-angle
+	 * atan(tan(theta)/cos(Lambda)). If that wedge exceeds the maximum deflection for an
+	 * attached oblique shock (NACA Report 1135 theta-beta-M relation) the shock stands off and
+	 * the edge behaves as a blunt body, so modified Newtonian applies:
+	 * {@code Cp = Cp_max(M_n) sin^2(theta_n)}, with Cp_max from the Rayleigh pitot formula --
+	 * the same stagnation coefficient the SQUARE branch uses. Attached wedges return zero here
+	 * because their compression is already carried by the Ackeret/DATCOM thickness term below.
+	 * <p>
+	 * The caller applies the {@code cos^2(Lambda)} sweep factor and the span*thickness
+	 * reference-area scaling, exactly as for the ROUNDED branch, so the two blunt-edge paths
+	 * stay dimensionally consistent.
+	 *
+	 * @param mach freestream Mach number
+	 * @return leading-edge pressure coefficient, referenced as for the other branches
+	 */
+	private double hexagonalLeadingEdgeCD(double mach) {
+		if (Double.isNaN(leadingEdgeBevelLength) || leadingEdgeBevelLength <= MathUtil.EPSILON
+				|| thickness <= MathUtil.EPSILON || Double.isNaN(cosGammaLead) || cosGammaLead <= 0) {
+			return 0.0;
+		}
+
+		double halfAngle = Math.atan((thickness / 2.0) / leadingEdgeBevelLength);
+		if (halfAngle <= HEX_LE_SHARP_HALF_ANGLE) {
+			return 0.0;
+		}
+
+		// Leading-edge-normal Mach. A subsonic leading edge carries no bow shock, so the term
+		// is identically zero there - this is what keeps every subsonic flight untouched.
+		double machNormal = mach * cosGammaLead;
+		if (machNormal <= 1.0) {
+			return 0.0;
+		}
+
+		double thetaNormal = Math.atan(Math.tan(halfAngle) / cosGammaLead);
+		double thetaMax = ObliqueShockSolver.maxDeflectionAngle(machNormal);
+		if (thetaNormal <= thetaMax) {
+			return 0.0; // attached oblique shock; carried by the Ackeret/DATCOM term
+		}
+
+		double cpMax = BarrowmanDragCalculator.calculateStagnationCD(machNormal);
+		double cp = cpMax * pow2(Math.sin(thetaNormal));
+
+		// Two continuity ramps. Neither is physics: they exist so that Cd(M) has no step,
+		// which the trajectory stepper requires. Both are one-sided and vanish well before
+		// any subsonic condition.
+		double machRamp = smoothstep((machNormal - 1.0) / (HEX_LE_MACH_FULL - 1.0));
+		double detachRamp = thetaMax > MathUtil.EPSILON
+				? smoothstep((thetaNormal / thetaMax - 1.0) / (HEX_LE_DETACH_BLEND - 1.0))
+				: 1.0;
+
+		return cp * machRamp * detachRamp;
+	}
+
+	/** Clamped cubic smoothstep on [0,1]. */
+	private static double smoothstep(double t) {
+		double x = MathUtil.clamp(t, 0.0, 1.0);
+		return x * x * (3.0 - 2.0 * x);
+	}
+
 
 	@Override
 	public double calculatePressureCD(FlightConditions conditions,
@@ -897,6 +993,7 @@ public class FinSetCalc extends RocketComponentCalc {
 
 		double mach = conditions.getMach();
 		double cd = 0;
+
 
 		// ---- Leading-edge bluntness / pressure fore-drag ----
 		// For AIRFOIL/ROUNDED: empirical round-LE formula (Prandtl-Glauert subsonic,
@@ -920,7 +1017,7 @@ public class FinSetCalc extends RocketComponentCalc {
 		} else if (crossSection == FinSet.CrossSection.SQUARE) {
 			cd = stagnationCD;
 		} else if (crossSection == FinSet.CrossSection.HEXAGONAL) {
-			cd = 0; // sharp wedge LE: no bluntness drag
+			cd = hexagonalLeadingEdgeCD(mach);
 		} else {
 			throw new UnsupportedOperationException("Unsupported fin profile: " + crossSection);
 		}

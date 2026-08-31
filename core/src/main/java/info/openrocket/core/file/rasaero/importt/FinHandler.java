@@ -58,6 +58,14 @@ public class FinHandler extends AbstractElementHandler {
                 finSet.setTipChord(Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH);
             } else if (RASAeroCommonConstants.FIN_THICKNESS.equals(element)) {
                 finSet.setThickness(Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH);
+            } else if (RASAeroCommonConstants.FIN_FX1.equals(element)) {
+                // DATCOM x1: the chordwise length of the leading-edge bevel, in inches.
+                // With the fin thickness this fixes the leading-edge wedge half-angle, which
+                // decides whether the edge is aerodynamically sharp or a blunt chamfer. Without
+                // it the drag model can only assume "sharp", which is badly wrong for fins cut
+                // from plate stock -- a 0.25 in fin with a 0.125 in bevel is a 45 deg edge.
+                finSet.setLeadingEdgeBevelLength(
+                        Double.parseDouble(content) / RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH);
             } else if (RASAeroCommonConstants.AIRFOIL_SECTION.equals(element)) {
                 finSet.setCrossSection(
                         RASAeroCommonConstants.RASAERO_TO_OPENROCKET_FIN_CROSSSECTION(content, warnings));
