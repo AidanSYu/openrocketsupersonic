@@ -25,6 +25,7 @@ import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.plugin.PluginModule;
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.rocketcomponent.RocketComponent;
+import info.openrocket.core.rocketcomponent.ShockCord;
 import info.openrocket.core.startup.Application;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -102,10 +103,26 @@ public class RASAeroSaverTest {
             loader.loadFromStream(context, new BufferedInputStream(stream), null);
             Rocket importedRocket = importedDocument.getRocket();
 
-            // Test children counts
+            // Test children counts.
+            //
+            // The CDX1 format has no shock-cord concept, so the ShockCord in
+            // 01.One-stage.ork is dropped on export and cannot return on import. Every
+            // other component must survive the round trip, so compare against the
+            // original count excluding components RASAero cannot represent.
+            //
+            // (This previously compared raw counts and matched only by coincidence:
+            // BoattailHandler used to wrap the boat-tail in a phantom "Boattail pod"
+            // PodSet, and that +1 cancelled the shock cord's -1. The wrapper was removed
+            // because the pod topology hid the boat-tail from ShockGeometry and from
+            // SymmetricComponent.getNextSymmetricComponent(), causing Cm blow-up and
+            // base-drag double-counting on boat-tailed rockets.)
             List<RocketComponent> originalChildren = originalDocument.getRocket().getAllChildren();
             List<RocketComponent> importedChildren = importedRocket.getAllChildren();
-            assertEquals(originalChildren.size(), importedChildren.size(), " Number of total children doesn't match");
+            long representableChildren = originalChildren.stream()
+                    .filter(c -> !(c instanceof ShockCord))
+                    .count();
+            assertEquals(representableChildren, importedChildren.size(),
+                    " Number of total children doesn't match");
 
             // TODO: check all components
         } catch (IllegalStateException ise) {
