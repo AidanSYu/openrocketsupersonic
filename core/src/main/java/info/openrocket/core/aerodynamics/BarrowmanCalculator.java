@@ -163,10 +163,12 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 		// Phase 8d: Asymmetric vortex shedding at high AoA
 		applyAsymmetricVortexShedding(conditions, total, actualWarnings);
 
-		// Phase 4e: High-AoA warning (issued once per calculation, not per component step)
-		if (conditions.getAOA() > Math.toRadians(15)) {
-			actualWarnings.add(Warning.HIGH_AOA);
-		}
+		// Phase 4e: the high-AoA advisories (Warning.HIGH_AOA, Warning.HIGH_AOA_VORTEX)
+		// are raised by BasicEventSimulationEngine rather than here. This calculator is
+		// invoked for every RK4 sub-step, including on the pad and under a deployed
+		// parachute, and it cannot see tumbling/recovery/landed state -- so raising them
+		// here fired them on every descent. The engine already inhibits its LargeAOA
+		// warning on exactly those conditions; the advisories now share that gate.
 
 		return total;
 	}
@@ -197,12 +199,31 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 	}
 
 	/**
-	 * Maximum physically reasonable total drag coefficient.
+	 * Maximum physically reasonable total drag coefficient in near-axial flow.
 	 * A blunt body at Mach 10 has Cd ~ 2. With base + friction + wave drag,
-	 * a total Cd above 10 is unphysical for any rocket geometry and indicates
-	 * a numerical blow-up in one of the component calculations.
+	 * a total Cd above 10 is unphysical for a rocket at small angle of attack and
+	 * indicates a numerical blow-up in one of the component calculations.
 	 */
 	private static final double MAX_REASONABLE_CD = 10.0;
+
+	/**
+	 * Growth of the drag ceiling with angle of attack.
+	 * <p>
+	 * Drag coefficients are referenced to the (small) frontal area, so the flat
+	 * near-axial ceiling above is only valid while the body is aligned with the flow.
+	 * As the rocket turns broadside the body presents its planform instead, and the
+	 * crossflow contribution alone approaches Cd_c * (L/D) * sin^2(alpha) -- of order 20
+	 * to 35 for a slender airframe, entirely physical. Clamping that back to 10 silently
+	 * under-drags any rocket flying at large alpha (weathercocking, staging transients,
+	 * tumbling) and raised a HIGH-priority "numerical singularity" warning on the stock
+	 * "Parallel booster staging" example, which reaches alpha ~ 26 deg with Cd ~ 13.
+	 * <p>
+	 * The ceiling therefore scales as MAX_REASONABLE_CD * (1 + gain * sin^2(alpha)),
+	 * giving 10 at alpha = 0 (so near-axial behaviour, and the validation corpus, are
+	 * untouched) and 100 fully broadside -- still far below anything NaN propagation
+	 * produces, so the guard keeps its actual job of catching numerical blow-ups.
+	 */
+	private static final double MAX_CD_AOA_GAIN = 9.0;
 
 	/**
 	 * Maximum physically reasonable normal force coefficient.
@@ -237,21 +258,44 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 	// slots and Proteus 6's destabilizing Cm clamps fired silently.
 	private int sanitizeWarningCount = 0;
 
+	/**
+	 * Minimum Mach at which aerodynamic coefficients and angle of attack are
+	 * physically meaningful enough to warn the user about.
+	 * <p>
+	 * Coefficients are normalised by dynamic pressure, so they diverge as V approaches
+	 * zero purely by construction: skin friction alone gives Cf ~ Re^(-1/5) (turbulent)
+	 * or Re^(-1/2) (laminar), which is unbounded at V = 0, while the force it produces
+	 * (CD * q * A) still tends to zero. Angle of attack degenerates the same way -- once
+	 * the velocity vector is near zero its direction is numerical noise, so AoA swings
+	 * wildly on the pad, at apogee, and through the coast reversal.
+	 * <p>
+	 * Below this threshold the clamp is routine hygiene rather than evidence of a
+	 * modelling failure, so it is applied silently. Stock example rockets were raising
+	 * HIGH-priority "coefficient clamped" warnings at M ~ 0.006 (about 2 m/s) purely
+	 * from this effect. 0.05 is roughly 17 m/s at sea level -- below any realistic
+	 * launch-rail exit speed, so genuine low-speed warnings are still reported.
+	 */
+	private static final double AERO_WARNING_MIN_MACH = 0.05;
+
 	private void sanitizeForces(AerodynamicForces forces, FlightConditions conditions,
 			WarningSet warnings) {
 		boolean clamped = false;
 
+		// Drag ceiling grows with angle of attack; see MAX_CD_AOA_GAIN.
+		double sinAoa = Math.sin(conditions.getAOA());
+		double maxCd = MAX_REASONABLE_CD * (1.0 + MAX_CD_AOA_GAIN * sinAoa * sinAoa);
+
 		// Sanitize drag coefficients
 		double cd = forces.getCD();
-		if (!Double.isFinite(cd) || cd > MAX_REASONABLE_CD) {
-			forces.setCD(MAX_REASONABLE_CD);
-			forces.setCDaxial(MAX_REASONABLE_CD);
+		if (!Double.isFinite(cd) || cd > maxCd) {
+			forces.setCD(maxCd);
+			forces.setCDaxial(maxCd);
 			clamped = true;
 		}
 
 		double cdAxial = forces.getCDaxial();
-		if (!Double.isFinite(cdAxial) || Math.abs(cdAxial) > MAX_REASONABLE_CD) {
-			forces.setCDaxial(Math.copySign(MAX_REASONABLE_CD, cdAxial));
+		if (!Double.isFinite(cdAxial) || Math.abs(cdAxial) > maxCd) {
+			forces.setCDaxial(Math.copySign(maxCd, cdAxial));
 			clamped = true;
 		}
 
@@ -281,7 +325,10 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 			clamped = true;
 		}
 
-		if (clamped) {
+		// The clamp itself always applies -- it is what stops NaN/Infinity reaching the
+		// stepper. Only surface it to the user where the coefficient is meaningful; see
+		// AERO_WARNING_MIN_MACH.
+		if (clamped && conditions.getMach() >= AERO_WARNING_MIN_MACH) {
 			if (sanitizeWarningCount < 3) {
 				logger.warn("Clamped aero coefficients at M={} (CD={}, CN={}, Cm={}); further warnings suppressed",
 						conditions.getMach(), cd, cn, cm);
@@ -322,7 +369,9 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 			cy = VORTEX_KV * cnBody;
 		}
 
+		// The side force is always applied; the accompanying HIGH_AOA_VORTEX advisory is
+		// raised by BasicEventSimulationEngine, which can inhibit it while tumbling, under
+		// a deployed recovery device, or on the ground.
 		total.setCside(total.getCside() + cy);
-		warnings.add(Warning.HIGH_AOA_VORTEX);
 	}
 }

@@ -49,6 +49,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ExampleFilesTest extends BaseTestCase {
 
+	/** Fixed wind-model seed so example simulations are reproducible run to run. */
+	private static final int EXAMPLE_SIMULATION_SEED = 20260813;
+
 	private static volatile boolean initialized = false;
 	private static Path coreModuleRoot;
 	private static Injector previousInjector;
@@ -70,11 +73,15 @@ public class ExampleFilesTest extends BaseTestCase {
 				.simulationWarnings("Simulation 2", 1, 0, 0)
 				.build());
 
+		// Simulation 1: informative=1 is Warning.HIGH_AOA ("body lift and CP are less
+		// accurate above 15 deg AoA"), an advisory this fork adds that upstream has no
+		// equivalent of. It fires during the genuine high-AoA coast between stages, and is
+		// already inhibited while tumbling, under recovery, or landed.
 		EXPECTATIONS.put("Three stage low power rocket.ork", ExpectedWarnings.builder()
 				.openWarnings(0, 0, 0)
-				.simulationWarnings("Simulation 1", 0, 0, 0)
-				.simulationWarnings("Simulation 2", 0, 0, 0)
-				.simulationWarnings("Simulation 3", 0, 0, 0)
+				.simulationWarnings("Simulation 1", 1, 0, 0)
+				.simulationWarnings("Simulation 2", 1, 0, 0)
+				.simulationWarnings("Simulation 3", 1, 0, 0)
 				.build());
 
 		EXPECTATIONS.put("ARC payload rocket.ork", ExpectedWarnings.builder()
@@ -114,17 +121,24 @@ public class ExampleFilesTest extends BaseTestCase {
 				.simulationWarnings("Simulation 3", 1, 0, 0)
 				.build());
 
+		// Simulation 3 previously logged one "recovery device deployment at high speed"
+		// warning. This fork's drag model (Van Driest II friction, revised base drag)
+		// changes the coast trajectory enough that deployment now occurs below the
+		// high-speed threshold, so the warning no longer fires.
 		EXPECTATIONS.put("Chute release.ork", ExpectedWarnings.builder()
 				.openWarnings(0, 0, 0)
 				.simulationWarnings("Simulation 2", 0, 0, 0)
-				.simulationWarnings("Simulation 3", 0, 1, 0)
+				.simulationWarnings("Simulation 3", 0, 0, 0)
 				.build());
 
+		// Simulation 3: one of the two "deployment at high speed" warnings no longer fires,
+		// for the same reason as Chute release.ork above -- the revised drag model lowers
+		// the speed at which the second device deploys.
 		EXPECTATIONS.put("Dual parachute deployment.ork", ExpectedWarnings.builder()
 				.openWarnings(0, 0, 0)
 				.simulationWarnings("Simulation 1", 0, 1, 0)
 				.simulationWarnings("Simulation 2", 0, 1, 0)
-				.simulationWarnings("Simulation 3", 0, 2, 0)
+				.simulationWarnings("Simulation 3", 0, 1, 0)
 				.simulationWarnings("Simulation 4", 0, 1, 0)
 				.simulationWarnings("Simulation 5", 0, 1, 0)
 				.simulationWarnings("Simulation 6", 0, 1, 0)
@@ -139,9 +153,15 @@ public class ExampleFilesTest extends BaseTestCase {
 				.simulationWarnings("Simulation 5", 0, 0, 0)
 				.build());
 
+		// Simulation 1 reaches about 26 deg AoA during the booster-separation transient, so
+		// both of this fork's high-AoA advisories fire: informative=1 is Warning.HIGH_AOA
+		// and normal=1 is Warning.HIGH_AOA_VORTEX. Neither exists upstream. This case also
+		// used to raise a HIGH-priority FORCE_COEFFICIENT_CLAMPED warning, because the flat
+		// Cd ceiling of 10 clipped the (physical) crossflow drag of a slender body at that
+		// AoA; the ceiling now scales with sin^2(AoA), so no clamp occurs.
 		EXPECTATIONS.put("Parallel booster staging.ork", ExpectedWarnings.builder()
 				.openWarnings(0, 0, 0)
-				.simulationWarnings("Simulation 1", 0, 0, 0)
+				.simulationWarnings("Simulation 1", 1, 1, 0)
 				.simulationWarnings("Simulation 2", 0, 0, 0)
 				.build());
 
@@ -261,6 +281,17 @@ public class ExampleFilesTest extends BaseTestCase {
 
 		Map<String, WarningCounts> actualSimWarnings = new HashMap<>();
 		for (Simulation simulation : doc.getSimulations()) {
+			// SimulationOptions seeds itself with `new Random().nextInt()`, which drives the
+			// PinkNoiseWindModel. Without pinning it, every run flies a different gust
+			// profile, so warnings that sit near a threshold (high AoA, coefficient clamp)
+			// appear and disappear between runs and this test flickers. Pin the seed so the
+			// expectations below describe one reproducible flight.
+			//
+			// The wind model must be seeded directly: setRandomSeed() only records the value
+			// and never reaches the already-constructed model, so on its own it does not make
+			// the flight reproducible.
+			simulation.getOptions().setRandomSeed(EXAMPLE_SIMULATION_SEED);
+			simulation.getOptions().getAverageWindModel().setSeed(EXAMPLE_SIMULATION_SEED);
 			try {
 				simulation.simulate();
 			} catch (Exception e) {

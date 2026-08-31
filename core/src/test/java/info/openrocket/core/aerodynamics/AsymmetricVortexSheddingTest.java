@@ -116,8 +116,6 @@ public class AsymmetricVortexSheddingTest {
 		double expectedCY = 0.20 * cnBody * 0.5;
 		assertEquals(expectedCY, forces.getCside(), 0.01,
 				"CY at 30 deg should be ~0.10 * CN");
-		assertTrue(warnings.contains(Warning.HIGH_AOA_VORTEX),
-				"Warning should be emitted");
 	}
 
 	@Test
@@ -176,8 +174,17 @@ public class AsymmetricVortexSheddingTest {
 				"CY should scale linearly with CN");
 	}
 
+	/**
+	 * The side force must switch on above the 20 deg onset.
+	 * <p>
+	 * This used to assert that {@code applyAsymmetricVortexShedding} also populated the
+	 * warning set. The HIGH_AOA_VORTEX advisory now comes from
+	 * {@code BasicEventSimulationEngine}, which -- unlike this calculator, invoked once per
+	 * RK4 sub-step -- can tell whether a recovery device is out or the rocket has landed,
+	 * and so no longer warns on every descent. FlightEventsTest covers the advisory.
+	 */
 	@Test
-	void testWarningEmittedAboveOnset() {
+	void testSideForceAppliedAboveOnset() {
 		FlightConditions cond = new FlightConditions(null);
 		cond.setAOA(Math.toRadians(25.0));
 
@@ -187,8 +194,8 @@ public class AsymmetricVortexSheddingTest {
 
 		BarrowmanCalculator.applyAsymmetricVortexShedding(cond, forces, warnings);
 
-		assertTrue(warnings.contains(Warning.HIGH_AOA_VORTEX),
-				"HIGH_AOA_VORTEX warning should be emitted above 20 deg");
+		assertTrue(Math.abs(forces.getCside()) > 0,
+				"vortex side force should be applied above the 20 deg onset");
 	}
 
 	@Test
@@ -208,9 +215,8 @@ public class AsymmetricVortexSheddingTest {
 		// Should have non-zero side force from vortex shedding
 		double cside = forces.getCside();
 		assertFalse(Double.isNaN(cside), "Cside should not be NaN");
-		// The vortex shedding was applied; verify the warning is present
-		assertTrue(warnings.contains(Warning.HIGH_AOA_VORTEX),
-				"HIGH_AOA_VORTEX warning should be emitted at 25 deg AoA");
+		// The HIGH_AOA_VORTEX advisory is raised by BasicEventSimulationEngine, not here --
+		// see testSideForceAppliedAboveOnset for why. Only the force is checked at this level.
 		// Side force should be non-zero (positive or negative depending on CN sign)
 		assertTrue(Math.abs(cside) > 0 || forces.getCN() == 0,
 				"Cside should be non-zero when CN is non-zero");
