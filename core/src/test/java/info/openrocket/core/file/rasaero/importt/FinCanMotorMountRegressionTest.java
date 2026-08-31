@@ -44,13 +44,10 @@ public class FinCanMotorMountRegressionTest extends BaseTestCase {
 
     @BeforeAll
     static void preloadMotors() {
-        for (String path : new String[] {
-                "simvreal/rasp.eng",
-                "c:/Code/OpenRocket Plus/simvreal/rasp.eng",
-        }) {
-            File file = new File(path);
-            if (!file.exists()) {
-                continue;
+        {
+            File file = SimVRealTestFiles.find("simvreal/rasp.eng");
+            if (file == null) {
+                return;
             }
 
             try (InputStream stream = new FileInputStream(file)) {
@@ -123,17 +120,7 @@ public class FinCanMotorMountRegressionTest extends BaseTestCase {
     }
 
     private OpenRocketDocument importCdx1(String filename) throws Exception {
-        File file = null;
-        for (String path : new String[] {
-                "simvreal/RasAero Sims/" + filename,
-                "c:/Code/OpenRocket Plus/simvreal/RasAero Sims/" + filename,
-        }) {
-            File candidate = new File(path);
-            if (candidate.exists()) {
-                file = candidate;
-                break;
-            }
-        }
+        File file = SimVRealTestFiles.findCdx1(filename);
         assertNotNull(file, "CDX1 file not found: " + filename);
 
         OpenRocketDocument doc = OpenRocketDocumentFactory.createEmptyRocket();

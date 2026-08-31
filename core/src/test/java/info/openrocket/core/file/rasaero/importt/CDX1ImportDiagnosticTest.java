@@ -343,12 +343,18 @@ public class CDX1ImportDiagnosticTest extends BaseTestCase {
     @Test
     public void testMesosDragBreakdown() throws Exception {
         // Load Kip custom motors
-        SimVRealValidationTest.loadMotorsIntoRASAeroCache("simvreal/Docs/Mesos/M787_Expanded_Nozzle_Sea_Level.eng");
-        SimVRealValidationTest.loadMotorsIntoRASAeroCache("simvreal/Docs/Mesos/O4374_Sea_Level.eng");
-        SimVRealValidationTest.loadMotorsIntoRASAeroCache("c:/Code/OpenRocket Plus/simvreal/Docs/Mesos/M787_Expanded_Nozzle_Sea_Level.eng");
-        SimVRealValidationTest.loadMotorsIntoRASAeroCache("c:/Code/OpenRocket Plus/simvreal/Docs/Mesos/O4374_Sea_Level.eng");
+        for (String eng : new String[] {
+                "simvreal/Docs/Mesos/M787_Expanded_Nozzle_Sea_Level.eng",
+                "simvreal/Docs/Mesos/O4374_Sea_Level.eng",
+        }) {
+            String engPath = SimVRealTestFiles.findPath(eng);
+            if (engPath != null) {
+                SimVRealValidationTest.loadMotorsIntoRASAeroCache(engPath);
+            }
+        }
 
-        String path = "c:/Code/OpenRocket Plus/simvreal/Docs/Mesos/MESOS 293K Flight.CDX1";
+        String path = SimVRealTestFiles.findPath("simvreal/Docs/Mesos/MESOS 293K Flight.CDX1");
+        assertNotNull(path, "CDX1 file not found: MESOS 293K Flight.CDX1");
         OpenRocketDocument doc = importCDX1(path);
         Rocket rocket = doc.getRocket();
 
@@ -434,24 +440,10 @@ public class CDX1ImportDiagnosticTest extends BaseTestCase {
      * Searches relative to the project root.
      */
     private String findSimvrealPath(String filename) {
-        // Try relative to working directory (project root)
-        String[] candidates = {
-            "simvreal/RasAero Sims/" + filename,
-            "../simvreal/RasAero Sims/" + filename,
-            "../../simvreal/RasAero Sims/" + filename,
-        };
-        for (String candidate : candidates) {
-            File f = new File(candidate);
-            if (f.exists()) {
-                return f.getAbsolutePath();
-            }
+        File f = SimVRealTestFiles.findCdx1(filename);
+        if (f == null) {
+            fail("Could not find CDX1 file: " + filename);
         }
-        // Try absolute path
-        File absolute = new File("c:/Code/OpenRocket Plus/simvreal/RasAero Sims/" + filename);
-        if (absolute.exists()) {
-            return absolute.getAbsolutePath();
-        }
-        fail("Could not find CDX1 file: " + filename);
-        return null;
+        return f.getAbsolutePath();
     }
 }
