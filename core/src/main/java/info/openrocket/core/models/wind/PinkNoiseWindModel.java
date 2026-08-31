@@ -49,7 +49,7 @@ public class PinkNoiseWindModel implements WindModel {
 	private double direction = Math.PI / 2; // this is an East wind
 	private double standardDeviation = 0;
 
-	private final int seed;
+	private int seed;
 
 	private PinkNoise randomSource = null;
 	private double time1;
@@ -64,6 +64,25 @@ public class PinkNoiseWindModel implements WindModel {
 	 */
 	public PinkNoiseWindModel(int seed) {
 		this.seed = seed ^ SEED_RANDOMIZATION;
+	}
+
+	/**
+	 * Re-seed the turbulence generator.
+	 * <p>
+	 * {@link SimulationOptions#setRandomSeed(int)} used to record the new seed without
+	 * reaching the already-constructed wind model, so a caller that pinned the seed to
+	 * reproduce a flight still flew a different gust profile on every run. Discards any
+	 * generator state so the next {@code getWindVelocity} call rebuilds from the new seed.
+	 *
+	 * @param seed the seed value
+	 */
+	public void setSeed(int seed) {
+		int randomized = seed ^ SEED_RANDOMIZATION;
+		if (this.seed == randomized) {
+			return;
+		}
+		this.seed = randomized;
+		reset();
 	}
 
 	public PinkNoiseWindModel() {
