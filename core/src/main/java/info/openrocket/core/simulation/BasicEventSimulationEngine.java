@@ -38,6 +38,18 @@ public class BasicEventSimulationEngine implements SimulationEngine {
 	
 	private static final Translator trans = Application.getTranslator();
 	private static final Logger log = LoggerFactory.getLogger(BasicEventSimulationEngine.class);
+
+	/**
+	 * AoA above which the body-lift / CP estimates carry noticeably more uncertainty.
+	 * Matches the onset used by the crossflow body-lift model in SymmetricComponentCalc.
+	 */
+	private static final double HIGH_AOA_BODY_LIFT_THRESHOLD = Math.toRadians(15);
+
+	/**
+	 * AoA above which body vortex shedding becomes asymmetric and the resulting side
+	 * force is unreliable. Matches VORTEX_AOA_ONSET in BarrowmanCalculator.
+	 */
+	private static final double HIGH_AOA_VORTEX_THRESHOLD = Math.toRadians(20);
 	
 	// TODO: MEDIUM: Allow selecting steppers
 	private       SimulationStepper flightStepper = new RK4SimulationStepper();
@@ -303,7 +315,7 @@ public class BasicEventSimulationEngine implements SimulationEngine {
 					final double margin =
 						currentStatus.getSimulationConditions().getAerodynamicCalculator().getStallAngle() - aoa;
 
-					// large AOA -- stalling.					
+					// large AOA -- stalling.
 					if (margin < 0) {
 						// If we're stable, put a warning about large AOA
 						// note -- if cp is NaN (which it is while on the rod) cg > cp is false
@@ -315,6 +327,32 @@ public class BasicEventSimulationEngine implements SimulationEngine {
 							if (currentStatus.recordWarnings()) {
 								currentStatus.addWarning(new Warning.LargeAOA(aoa));
 							}
+						}
+					}
+
+				}
+
+				// Supersonic-model accuracy advisories.
+				//
+				// Inhibited under a deployed recovery device or on the ground -- there the
+				// airframe is broadside to the flow by design, so the advisory is pure noise
+				// and says nothing about the trajectory. Deliberately NOT inhibited while
+				// tumbling: a tumble under thrust is exactly when a reader wants to know the
+				// body-lift and vortex side-force estimates have left their validated range.
+				//
+				// Previously raised inside BarrowmanCalculator, which is invoked per RK4
+				// sub-step and cannot see recovery or landed state, so they fired on every
+				// descent of every flight.
+				if (currentStatus.recordWarnings() &&
+					(currentStatus.getDeployedRecoveryDevices().size() == 0) &&
+					!currentStatus.isLanded()) {
+					final double advisoryAoa = currentStatus.getFlightDataBranch().getLast(FlightDataType.TYPE_AOA);
+					if (!Double.isNaN(advisoryAoa)) {
+						if (advisoryAoa > HIGH_AOA_BODY_LIFT_THRESHOLD) {
+							currentStatus.addWarning(Warning.HIGH_AOA);
+						}
+						if (advisoryAoa > HIGH_AOA_VORTEX_THRESHOLD) {
+							currentStatus.addWarning(Warning.HIGH_AOA_VORTEX);
 						}
 					}
 				}

@@ -81,8 +81,13 @@ public class FlightEventsTest extends BaseTestCase {
 				new FlightEvent(FlightEvent.Type.SIM_WARN, 2.0, null, warn),
 				new FlightEvent(FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT, 2.001, parachute),
 				new FlightEvent(FlightEvent.Type.APOGEE, 2.48, rocket),
-				new FlightEvent(FlightEvent.Type.GROUND_HIT, 44.576, null),
-				new FlightEvent(FlightEvent.Type.SIMULATION_END, 44.576, null)
+				// Descent is ~2 s quicker than the upstream expectation of 44.576 s: this
+				// fork replaces the drag model under the parachute (Van Driest II friction,
+				// revised base drag), so the airframe contributes slightly less drag during
+				// recovery. The gap is far outside the 5*timeStep tolerance, so the value is
+				// updated rather than loosened.
+				new FlightEvent(FlightEvent.Type.GROUND_HIT, 42.562, null),
+				new FlightEvent(FlightEvent.Type.SIMULATION_END, 42.562, null)
 		};
 
 		checkEvents(expectedEvents, sim, 0);
@@ -239,9 +244,12 @@ public class FlightEventsTest extends BaseTestCase {
 						new FlightEvent(FlightEvent.Type.EJECTION_CHARGE, 2.11, centerBooster),
 						new FlightEvent(FlightEvent.Type.STAGE_SEPARATION, 2.11, centerBooster),
 						new FlightEvent(FlightEvent.Type.IGNITION, 2.11, sustainerBody),
-						// Phase 9b: gyroscopic coupling causes sustainer to reach high AoA sooner, generating warnings before tumble abort
+						// Phase 9b: gyroscopic coupling causes sustainer to reach high AoA sooner, generating warnings before tumble abort.
+						// Only HIGH_AOA is raised now. These advisories moved out of BarrowmanCalculator (which runs per RK4
+						// sub-step and cannot see recovery/landed state, so it warned on every descent) into the event loop,
+						// which samples the recorded per-step AoA. That sampled AoA crosses the 15 deg body-lift threshold but
+						// the sustainer aborts on TUMBLE_UNDER_THRUST before it crosses the 20 deg vortex threshold.
 						new FlightEvent(FlightEvent.Type.SIM_WARN, RK4SimulationStepper.RECOMMENDED_MAX_TIME, null, Warning.HIGH_AOA),
-						new FlightEvent(FlightEvent.Type.SIM_WARN, RK4SimulationStepper.RECOMMENDED_MAX_TIME, null, Warning.HIGH_AOA_VORTEX),
 						new FlightEvent(FlightEvent.Type.SIM_ABORT, RK4SimulationStepper.RECOMMENDED_MAX_TIME, null, simAbort)
 				};
 
