@@ -625,6 +625,12 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 			return;
 		}
 		this.randomSeed = randomSeed;
+		// NOTE: this deliberately does NOT push the seed into averageWindModel. The wind
+		// model keeps the seed it was constructed with, so this setter alone does not change
+		// the gust profile -- callers that need a reproducible flight must also call
+		// getAverageWindModel().setSeed(seed). Propagating it here would make the seed part
+		// of PinkNoiseWindModel.equals(), and hence a "condition" that copyConditionsFrom
+		// treats as a real change, which contradicts the intent recorded below.
 		/*
 		 * This does not fire an event since we don't want to invalidate simulation
 		 * results
@@ -763,15 +769,15 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 			isChanged = true;
 			this.forceTurbulentBL = src.forceTurbulentBL;
 		}
-		if (!MathUtil.equals(this.sustainerNozzleExitDiameter, src.sustainerNozzleExitDiameter)) {
+		if (!sameNozzleDiameter(this.sustainerNozzleExitDiameter, src.sustainerNozzleExitDiameter)) {
 			isChanged = true;
 			this.sustainerNozzleExitDiameter = src.sustainerNozzleExitDiameter;
 		}
-		if (!MathUtil.equals(this.booster1NozzleExitDiameter, src.booster1NozzleExitDiameter)) {
+		if (!sameNozzleDiameter(this.booster1NozzleExitDiameter, src.booster1NozzleExitDiameter)) {
 			isChanged = true;
 			this.booster1NozzleExitDiameter = src.booster1NozzleExitDiameter;
 		}
-		if (!MathUtil.equals(this.booster2NozzleExitDiameter, src.booster2NozzleExitDiameter)) {
+		if (!sameNozzleDiameter(this.booster2NozzleExitDiameter, src.booster2NozzleExitDiameter)) {
 			isChanged = true;
 			this.booster2NozzleExitDiameter = src.booster2NozzleExitDiameter;
 		}
@@ -797,6 +803,28 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 	}
 
 	/**
+	 * Compare two optional nozzle-geometry values, treating "unset" as equal to
+	 * "unset".
+	 * <p>
+	 * The nozzle exit diameters default to {@link Double#NaN} to mean "not
+	 * specified" (only the RASAero importer sets them). {@link MathUtil#equals}
+	 * follows IEEE-754 and reports {@code NaN != NaN}, so comparing these fields
+	 * with it makes an unset options object unequal to its own clone. That in turn
+	 * leaves every simulation permanently {@code OUTDATED} and makes
+	 * {@link #copyConditionsFrom} believe something changed on every call.
+	 *
+	 * @param a first value, possibly NaN
+	 * @param b second value, possibly NaN
+	 * @return true if both are unset, or both are set and numerically equal
+	 */
+	private static boolean sameNozzleDiameter(double a, double b) {
+		if (Double.isNaN(a) && Double.isNaN(b)) {
+			return true;
+		}
+		return MathUtil.equals(a, b);
+	}
+
+	/**
 	 * Compares whether the two simulation conditions are equal. The two are
 	 * considered
 	 * equal if the rocket, motor id and all variables are equal.
@@ -818,9 +846,9 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 				MathUtil.equals(this.maximumAngle, o.maximumAngle) &&
 				MathUtil.equals(this.timeStep, o.timeStep) &&
 				MathUtil.equals(this.maxSimulationTime, o.maxSimulationTime) &&
-				MathUtil.equals(this.sustainerNozzleExitDiameter, o.sustainerNozzleExitDiameter) &&
-				MathUtil.equals(this.booster1NozzleExitDiameter, o.booster1NozzleExitDiameter) &&
-				MathUtil.equals(this.booster2NozzleExitDiameter, o.booster2NozzleExitDiameter)) &&
+				sameNozzleDiameter(this.sustainerNozzleExitDiameter, o.sustainerNozzleExitDiameter) &&
+				sameNozzleDiameter(this.booster1NozzleExitDiameter, o.booster1NozzleExitDiameter) &&
+				sameNozzleDiameter(this.booster2NozzleExitDiameter, o.booster2NozzleExitDiameter)) &&
 				this.windModelType == o.windModelType &&
 				this.averageWindModel.equals(o.averageWindModel) &&
 				this.multiLevelPinkNoiseWindModel.equals(o.multiLevelPinkNoiseWindModel) &&

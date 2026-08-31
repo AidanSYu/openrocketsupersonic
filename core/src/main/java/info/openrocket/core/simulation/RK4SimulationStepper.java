@@ -158,14 +158,22 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 						 MathUtil.max(Math.abs(store.accelerationData.getRotationalAccelerationRC().getX()),
 									  Math.abs(store.accelerationData.getRotationalAccelerationRC().getY())));
 
-		// Cap angular step limits: don't let pitch/yaw constraints shrink the
-		// timestep below 1/4 of the user-selected step.  When the rocket is
-		// oscillating or tumbling at high pitch rates, the Barrowman small-angle
-		// model is already losing accuracy and fine angular resolution gives no
-		// benefit — it just makes the simulation extremely slow.
-		double angularFloor = dt[0] / 4.0;
-		dt[2] = Math.max(dt[2], angularFloor);
-		dt[5] = Math.max(dt[5], angularFloor);
+		/*
+		 * NOTE: there is deliberately no extra floor on the angular limits dt[2]
+		 * and dt[5] here.
+		 *
+		 * A previous local floor of dt[0]/4 meant the configured maximum angle
+		 * step was only actually honoured up to a lateral pitch rate of
+		 * maximumAngleStep/(dt[0]/4) — 4.19 rad/s with the default 3 deg and
+		 * 0.05 s step. Above that the integrator rotated further per step than
+		 * requested (14.3 deg in one step at 20 rad/s, with all four RK4 stages
+		 * still sampling from start-of-step orientations), which is exactly the
+		 * coning / apogee-turn regime where angular resolution matters most.
+		 *
+		 * The general guard below (minTimeStep = timeStep/20, applied after the
+		 * limiting-value scan) already bounds how far any criterion can shrink
+		 * the step, so the angular limits need no separate cap.
+		 */
 		if (!status.isLaunchRodCleared()) {
 			dt[0] /= 5.0;
 			dt[6] = status.getSimulationConditions().getLaunchRodLength() / k1.v.length() / 10;
