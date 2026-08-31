@@ -252,6 +252,30 @@ Blended C1-continuously from zero at M=0.9 to full DATCOM at M=1.2 using cubic H
 
 For unswept fins at supersonic speeds: `Cdw = 4 * tau^2 / sqrt(M^2 - 1)`. Used internally by the DATCOM method for the supersonic LE case.
 
+#### 7c. Blunt Leading-Edge Wave Drag for HEXAGONAL Fins
+
+`FinSetCalc.hexagonalLeadingEdgeCD()`. The HEXAGONAL (double-wedge) branch previously returned zero leading-edge drag unconditionally, on the stated assumption that such fins are sharp -- "the thin wedge angles typical of supersonic fin stock (< 5 deg)". That is true of machined airfoil stock and false of fins cut from plate and chamfered. A-601 Kinsel runs 0.25 in fins with a 0.125 in bevel: a **45 degree** half-angle, nine times the assumed limit, and the bluntest fin edge in the validation corpus.
+
+The `CrossSection` enum cannot distinguish a 2 degree wedge from a 45 degree chamfer, so `FinSet.getLeadingEdgeBevelLength()` was added to carry the bevel length (RASAero's `FX1`, DATCOM's x1). It is populated by the CDX1 importer, which previously discarded the field entirely -- `FIN_FX1`, `FIN_FX3` and `FIN_LE_RADIUS` existed as constants but appeared only in the exporter.
+
+Model, applied only when the bevel length is known:
+
+```
+M_n     = M cos(Lambda)                         simple sweep (Jones, NACA Rep. 863)
+theta_n = atan(tan(theta) / cos(Lambda))
+if M_n <= 1                        -> 0         subsonic LE: no bow shock
+if theta_n <= theta_max(M_n)       -> 0         attached; carried by the Ackeret/DATCOM term
+else Cp = Cp_max(M_n) sin^2(theta_n)            modified Newtonian, Rayleigh pitot Cp_max
+```
+
+`theta_max` is the shock-detachment limit from the theta-beta-M relation (NACA Report 1135); `Cp_max` is the same stagnation coefficient the SQUARE branch uses. The caller applies the `cos^2(Lambda)` sweep factor and the `span * thickness` reference-area scaling, so this path stays dimensionally consistent with the ROUNDED branch. Two one-sided smoothstep ramps (LE-normal Mach 1.0-1.15, and detachment over `theta_max` to `1.2 theta_max`) exist purely for `Cd(M)` continuity.
+
+**Where the bevel length is unknown the original sharp-edge assumption is retained**, so no existing rocket changes.
+
+**Validation:** `HexagonalFinLeadingEdgeTest` -- the term matches a hand-computed modified-Newtonian value to within 10%; it is identically zero for a subsonic leading edge, for a sharp (< 5 deg) wedge, and for unspecified geometry; it is monotonic in bluntness; and the sampled slope stays within the smoothstep bound.
+
+**Corpus effect (pre-registered before running):** all 16 subsonic/transonic SimVReal flights moved *exactly* 0.00, as required by the `M_n > 1` gate. A-601 Kinsel moved +8.7% to +3.7%. Vehicles with small bevels moved 0.1-1.1 pp, and those already over-dragged moved slightly further negative, as predicted.
+
 ### 8. Shock Geometry Pre-Pass (`ShockGeometry.java`)
 
 At supersonic speeds, computes local flow conditions along the entire rocket body:

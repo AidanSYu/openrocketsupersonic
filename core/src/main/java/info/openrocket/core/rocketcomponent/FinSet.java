@@ -110,6 +110,9 @@ public abstract class FinSet extends ExternalComponent
 	 * The cross-section shape of the fins.
 	 */
 	private CrossSection crossSection = CrossSection.SQUARE;
+
+	/** Leading-edge bevel length (m); NaN = unknown. See {@link #getLeadingEdgeBevelLength()}. */
+	private double leadingEdgeBevelLength = Double.NaN;
 	
 	
 	/*
@@ -271,6 +274,45 @@ public abstract class FinSet extends ExternalComponent
 			return;
 		thickness = Math.max(r, 0);
 		fireComponentChangeEvent(ComponentChangeEvent.BOTH_CHANGE);
+	}
+
+	/**
+	 * Chordwise length of the leading-edge bevel, in metres; {@link Double#NaN} when unknown.
+	 * <p>
+	 * Together with {@link #getThickness()} this fixes the leading-edge wedge half-angle,
+	 * {@code atan((t/2) / bevelLength)}, which governs how much wave drag a supersonic
+	 * leading edge produces. A {@link CrossSection#HEXAGONAL} fin can be anything from a
+	 * near-sharp 2 deg wedge to a 45 deg chamfer on plate stock, and the cross-section enum
+	 * alone cannot tell those apart -- so without this length the drag model has to assume,
+	 * and the assumption it made was "sharp".
+	 * <p>
+	 * RASAero stores this as the fin's {@code FX1} element (DATCOM's x1), in inches.
+	 * <p>
+	 * NOTE: this value is currently populated only by the RASAero CDX1 importer and is not
+	 * written to .ork files, so it does not survive a save/reload round trip. Persisting it
+	 * requires a file-format addition and is deliberately left for a separate change.
+	 *
+	 * @return leading-edge bevel length in metres, or NaN if unspecified
+	 */
+	public double getLeadingEdgeBevelLength() {
+		return leadingEdgeBevelLength;
+	}
+
+	/**
+	 * @param length leading-edge bevel length in metres; NaN or negative marks it unknown
+	 */
+	public void setLeadingEdgeBevelLength(double length) {
+		for (RocketComponent listener : configListeners) {
+			if (listener instanceof FinSet) {
+				((FinSet) listener).setLeadingEdgeBevelLength(length);
+			}
+		}
+
+		double sanitized = (Double.isNaN(length) || length < 0) ? Double.NaN : length;
+		if (Double.compare(leadingEdgeBevelLength, sanitized) == 0)
+			return;
+		leadingEdgeBevelLength = sanitized;
+		fireComponentChangeEvent(ComponentChangeEvent.AERODYNAMIC_CHANGE);
 	}
 	
 	
