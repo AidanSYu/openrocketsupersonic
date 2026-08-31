@@ -29,15 +29,7 @@ public class CDX1StabilityDiagnosticTest extends BaseTestCase {
     private OpenRocketDocument importCDX1(String filename) throws IOException, RocketLoadException {
         RASAeroLoader loader = new RASAeroLoader();
 
-        String[] candidates = {
-            "simvreal/RasAero Sims/" + filename,
-            "c:/Code/OpenRocket Plus/simvreal/RasAero Sims/" + filename,
-        };
-        File file = null;
-        for (String path : candidates) {
-            File f = new File(path);
-            if (f.exists()) { file = f; break; }
-        }
+        File file = SimVRealTestFiles.findCdx1(filename);
         assertNotNull(file, "CDX1 file not found: " + filename);
 
         OpenRocketDocument doc = OpenRocketDocumentFactory.createEmptyRocket();

@@ -14,7 +14,9 @@ import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.rocketcomponent.Transition;
 import info.openrocket.core.rocketcomponent.TrapezoidFinSet;
+import info.openrocket.core.file.rasaero.RASAeroMotorsLoader;
 import info.openrocket.core.util.BaseTestCase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,6 +33,19 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public class RASAeroLoaderTest extends BaseTestCase {
+
+    /**
+     * {@link RASAeroMotorsLoader} keeps its motor list in a static field shared by every
+     * test in the JVM. Other suites (the SimVReal diagnostics, the fin-can regression test)
+     * preload hundreds of motors from {@code simvreal/rasp.eng} into it, which makes motor
+     * lookups here succeed that would otherwise produce "motor not found" import warnings --
+     * so the warning counts asserted below depended on which tests had run first. Clear the
+     * cache so each case starts from the same state.
+     */
+    @BeforeEach
+    public void clearRASAeroMotorCache() {
+        RASAeroMotorsLoader.clearAllMotors();
+    }
     private static final double EPSILON = 0.0001;
 
     /**
