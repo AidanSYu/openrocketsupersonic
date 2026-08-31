@@ -30,9 +30,28 @@ public final class ObliqueShockSolver {
 
 	// Cache for betaAtMaxDeflection — avoids repeated golden section searches
 	// with the same (m1, gamma) within a single solve() call.
-	private static double cachedBetaMaxM1 = Double.NaN;
-	private static double cachedBetaMaxGamma = Double.NaN;
-	private static double cachedBetaMaxResult = Double.NaN;
+	//
+	// The three values MUST be published together. They were previously three
+	// separate non-volatile static doubles, written one at a time and read as a
+	// triple; simulations run concurrently (the flight-corpus harness alone runs
+	// several vehicles at once), so one thread could match another thread's
+	// half-written key and take a betaMax belonging to a different Mach. That
+	// misclassifies weak vs. strong shock solutions non-deterministically.
+	// Holding them in a single immutable object behind one volatile reference
+	// makes the read atomic without locking.
+	private static final class BetaMaxCacheEntry {
+		final double m1;
+		final double gamma;
+		final double result;
+
+		BetaMaxCacheEntry(double m1, double gamma, double result) {
+			this.m1 = m1;
+			this.gamma = gamma;
+			this.result = result;
+		}
+	}
+
+	private static volatile BetaMaxCacheEntry betaMaxCache = null;
 
 	private ObliqueShockSolver() {
 		// Utility class
@@ -137,9 +156,13 @@ public final class ObliqueShockSolver {
 	 * This divides weak solutions (beta < betaMax) from strong solutions (beta > betaMax).
 	 */
 	private static double betaAtMaxDeflection(double m1, double gamma) {
-		// Check cache — this method is called multiple times per solve() with the same args
-		if (Math.abs(m1 - cachedBetaMaxM1) < 1e-12 && Math.abs(gamma - cachedBetaMaxGamma) < 1e-12) {
-			return cachedBetaMaxResult;
+		// Check cache — this method is called multiple times per solve() with the
+		// same args. Read the reference once so the key and value cannot be torn.
+		BetaMaxCacheEntry cached = betaMaxCache;
+		if (cached != null
+				&& Math.abs(m1 - cached.m1) < 1e-12
+				&& Math.abs(gamma - cached.gamma) < 1e-12) {
+			return cached.result;
 		}
 
 		double machAngle = Math.asin(1.0 / m1);
@@ -161,10 +184,8 @@ public final class ObliqueShockSolver {
 		}
 		double result = (lo + hi) / 2.0;
 
-		// Update cache
-		cachedBetaMaxM1 = m1;
-		cachedBetaMaxGamma = gamma;
-		cachedBetaMaxResult = result;
+		// Update cache — single volatile publish of an immutable triple.
+		betaMaxCache = new BetaMaxCacheEntry(m1, gamma, result);
 
 		return result;
 	}
@@ -306,9 +327,12 @@ public final class ObliqueShockSolver {
 	 */
 	public static ObliqueShockResult solveFromBeta(double m1, double beta, double gamma) {
 		double theta = thetaFromBeta(m1, beta, gamma);
-		// Determine weak vs strong by comparing to max deflection beta
-		double thetaMax = maxDeflectionAngle(m1, gamma);
-		boolean isWeak = theta < thetaMax - 1e-8 ? beta < Math.PI / 2.0 : true;
+		// Determine weak vs strong by comparing against the shock angle at maximum
+		// deflection: beta below it is the weak branch, above it the strong one.
+		// (Testing beta < PI/2 instead, as this once did, is true for every
+		// oblique shock and so reported every solution as weak.)
+		double betaMax = betaAtMaxDeflection(m1, gamma);
+		boolean isWeak = beta <= betaMax + 1e-8;
 		return solveFromBeta(m1, beta, theta, gamma, isWeak);
 	}
 

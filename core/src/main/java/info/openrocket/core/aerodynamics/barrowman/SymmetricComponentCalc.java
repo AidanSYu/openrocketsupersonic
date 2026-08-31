@@ -1109,7 +1109,7 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 	 * where the initial shock approximation breaks down.
 	 */
 	private void extendWithShockExpansion() {
-		if (tipHalfAngle <= 1e-6 || tipHalfAngle > Math.toRadians(45)) {
+		if (tipHalfAngle <= 1e-6) {
 			return;
 		}
 
@@ -1122,10 +1122,59 @@ public class SymmetricComponentCalc extends RocketComponentCalc {
 			return;
 		}
 
+		/*
+		 * Shapes with a cusp-like mathematical tip -- Von Karman (HAACK p=0,
+		 * 52.5 deg), LV-Haack (56.1 deg), low-exponent power series (POWER p=0.5
+		 * is 84.3 deg) and ellipsoids -- violate the attached-oblique-shock
+		 * assumption the strip march is started from, so shock expansion cannot
+		 * be used to extend their curves.
+		 *
+		 * Modified Newtonian theory has no such restriction: calculateNewtonianCd
+		 * integrates the *local* surface angle strip by strip and never evaluates
+		 * the tip slope. Falling through to it keeps the curve physical.
+		 *
+		 * Returning early instead (the previous behaviour) left the interpolator
+		 * ending at the last empirical key, and LinearInterpolator constant-
+		 * extrapolates past its final point -- so nose pressure Cd froze at its
+		 * M ~ 2-3 value for the whole remaining envelope (Von Karman: flat at
+		 * 0.0830 from M 3 to M 10, where wave drag should be falling toward the
+		 * Newtonian limit).
+		 */
+		final boolean shockExpansionValid = tipHalfAngle <= Math.toRadians(45);
+
 		double existingEndValue = interpolator.getValue(maxExistingMach);
 		double blendEnd = Math.min(maxExistingMach + 0.5, MAX_SUPERSONIC_MACH);
 
+		/*
+		 * For the Newtonian-only path the empirical endpoint is still the best
+		 * anchor at its own Mach, while Modified Newtonian is only trustworthy
+		 * once the flow is genuinely hypersonic. Hand off between the two across
+		 * a wide band ending at NEWTONIAN_BLEND_HIGH rather than switching over
+		 * within 0.5 Mach of the table end.
+		 */
+		double newtonianBlendTop = Math.min(
+				Math.max(NEWTONIAN_BLEND_HIGH, maxExistingMach + 1.0), MAX_SUPERSONIC_MACH);
+
 		for (double m = maxExistingMach + 0.05; m <= MAX_SUPERSONIC_MACH; m += 0.05) {
+			if (!shockExpansionValid) {
+				double newtonian = calculateNewtonianCd(m);
+				if (Double.isNaN(newtonian) || Double.isInfinite(newtonian)) {
+					newtonian = 0;
+				}
+				newtonian = Math.max(0, newtonian);
+
+				double value;
+				if (m >= newtonianBlendTop) {
+					value = newtonian;
+				} else {
+					double t = (m - maxExistingMach) / (newtonianBlendTop - maxExistingMach);
+					double w = t * t * (3 - 2 * t);
+					value = (1 - w) * existingEndValue + w * newtonian;
+				}
+				interpolator.addPoint(m, value);
+				continue;
+			}
+
 			double analytical = calculateShockExpansionCd(m);
 			if (Double.isNaN(analytical) || Double.isInfinite(analytical)) {
 				analytical = 0;
