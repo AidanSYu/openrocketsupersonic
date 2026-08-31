@@ -2,7 +2,7 @@
 
 ## Claim supported
 
-The dynamic stability derivatives (Cmq, CmαĖ‡, Cy_pα, Cn_pα, and roll damping)
+The dynamic stability derivatives (Cmq, Cmα_dot, Cy_pα, Cn_pα, and roll damping)
 are computed correctly and match independently derived analytical reference values.
 
 Three independent validation paths are used:
@@ -43,7 +43,7 @@ anchored in published theory.
 
 ## Cmq vs Mach
 
-| Mach | Cmq | CmαĖ‡ | k_transonic |
+| Mach | Cmq | Cmα_dot | k_transonic |
 |------|-----|-------|-------------|
 | 0.3 | -2626.7599 | -1050.7040 | 1.0000 |
 | 0.4 | -2642.7483 | -1057.0993 | 1.0000 |

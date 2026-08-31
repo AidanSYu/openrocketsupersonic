@@ -60,11 +60,22 @@
                       value="CRITICAL TODOs exist in project."/>
         </module>
         <module name="Regexp">
-            <!-- Allow ASCII, Latin script, and common punctuation; flag everything else -->
-            <property name="format" value="[^\p{InBasicLatin}\p{IsLatin}\p{IsCommon}]"/>
+            <!-- Allow ASCII, Latin script, common punctuation/math symbols, and Greek;
+                 flag everything else.
+
+                 Greek is allowed because the aerodynamics code documents its physics in
+                 standard notation (alpha, beta, theta, gamma, Lambda, tau, ...) throughout
+                 Javadoc, @DisplayName strings and generated benchmark reports. Spelling
+                 those out would make the derivations markedly harder to check against the
+                 cited references (NACA 1135, DATCOM 4.1.5.1, NASA TN D-6945, ...).
+
+                 The rule's real value - catching homoglyph confusables such as Cyrillic
+                 a/e/o/p that render identically to Latin - is unaffected: those remain
+                 flagged. Verified against java.util.regex before widening. -->
+            <property name="format" value="[^\p{InBasicLatin}\p{IsLatin}\p{IsCommon}\p{IsGreek}]"/>
             <property name="illegalPattern" value="true"/>
             <property name="message"
-                      value="Unusual Unicode characters detected (non-ASCII/non-Latin/Common)."/>
+                      value="Unusual Unicode characters detected (non-ASCII/non-Latin/Common/Greek)."/>
         </module>
         <module name="IllegalTokenText">
             <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL"/>

@@ -581,7 +581,7 @@ public class DynamicStabilityBenchmarkTest {
 		sb.append("# Dynamic Stability Benchmark Report\n\n");
 
 		sb.append("## Claim supported\n\n");
-		sb.append("The dynamic stability derivatives (Cmq, CmαĖ‡, Cy_pα, Cn_pα, and roll damping)\n");
+		sb.append("The dynamic stability derivatives (Cmq, Cmα_dot, Cy_pα, Cn_pα, and roll damping)\n");
 		sb.append("are computed correctly and match independently derived analytical reference values.\n\n");
 
 		sb.append("Three independent validation paths are used:\n\n");
@@ -622,7 +622,7 @@ public class DynamicStabilityBenchmarkTest {
 
 		// Cmq vs Mach table
 		sb.append("## Cmq vs Mach\n\n");
-		sb.append("| Mach | Cmq | CmαĖ‡ | k_transonic |\n");
+		sb.append("| Mach | Cmq | Cmα_dot | k_transonic |\n");
 		sb.append("|------|-----|-------|-------------|\n");
 		for (SweepResult r : results) {
 			sb.append(String.format(Locale.US,
