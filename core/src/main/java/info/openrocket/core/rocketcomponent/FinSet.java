@@ -288,9 +288,9 @@ public abstract class FinSet extends ExternalComponent
 	 * <p>
 	 * RASAero stores this as the fin's {@code FX1} element (DATCOM's x1), in inches.
 	 * <p>
-	 * NOTE: this value is currently populated only by the RASAero CDX1 importer and is not
-	 * written to .ork files, so it does not survive a save/reload round trip. Persisting it
-	 * requires a file-format addition and is deliberately left for a separate change.
+	 * Populated by the RASAero CDX1 importer, and saved to .ork as
+	 * {@code <leadingedgebevellength>} only when it is known, so files for fins that never
+	 * specified one are unchanged.
 	 *
 	 * @return leading-edge bevel length in metres, or NaN if unspecified
 	 */
@@ -1633,6 +1633,7 @@ public abstract class FinSet extends ExternalComponent
 		this.cantRotation = src.cantRotation;
 		this.thickness = src.thickness;
 		this.crossSection = src.crossSection;
+		this.leadingEdgeBevelLength = src.leadingEdgeBevelLength;
 		this.tabHeight = src.tabHeight;
 		this.tabLength = src.tabLength;
 		this.tabOffsetMethod = src.tabOffsetMethod;

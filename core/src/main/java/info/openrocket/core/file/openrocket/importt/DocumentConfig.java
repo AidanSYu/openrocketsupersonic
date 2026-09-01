@@ -281,6 +281,8 @@ class DocumentConfig {
 				FinSet.CrossSection.class));
 		setters.put("FinSet:cant", new DoubleSetter(
 				Reflection.findMethod(FinSet.class, "setCantAngle", double.class), Math.PI / 180.0));
+		setters.put("FinSet:leadingedgebevellength", new DoubleSetter(
+				Reflection.findMethod(FinSet.class, "setLeadingEdgeBevelLength", double.class)));
 		setters.put("FinSet:tabheight", new DoubleSetter(
 				Reflection.findMethod(FinSet.class, "setTabHeight", double.class)));
 		setters.put("FinSet:tablength", new DoubleSetter(

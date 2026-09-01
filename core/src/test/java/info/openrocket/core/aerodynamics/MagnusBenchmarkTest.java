@@ -228,7 +228,7 @@ public class MagnusBenchmarkTest {
 		}
 
 		// Write CSV artifact
-		Path csvPath = Path.of("paper", "data", "csv", "magnus_benchmark.csv");
+		Path csvPath = PaperData.csv("magnus_benchmark.csv");
 		Files.createDirectories(csvPath.getParent());
 		try (BufferedWriter w = Files.newBufferedWriter(csvPath, StandardCharsets.UTF_8)) {
 			w.write("# Magnus body-fraction benchmark: CyPa, CnPa vs Mach\n");

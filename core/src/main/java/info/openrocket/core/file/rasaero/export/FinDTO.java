@@ -78,6 +78,14 @@ public class FinDTO {
                 RASAeroCommonConstants.OPENROCKET_TO_RASAERO_FIN_CROSSSECTION(fin.getCrossSection(), warnings));
         setLocation((-fin.getAxialOffset(AxialMethod.BOTTOM) + fin.getLength())
                 * RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH);
+
+        // Carry the leading-edge bevel back out if we know it, so a RASAero -> OpenRocket ->
+        // RASAero round trip preserves the edge geometry the drag model depends on. Unknown
+        // stays 0.0, which is what RASAero itself writes for "unspecified".
+        double bevel = fin.getLeadingEdgeBevelLength();
+        if (!Double.isNaN(bevel)) {
+            setFX1(bevel * RASAeroCommonConstants.OPENROCKET_TO_RASAERO_LENGTH);
+        }
     }
 
     public int getCount() {

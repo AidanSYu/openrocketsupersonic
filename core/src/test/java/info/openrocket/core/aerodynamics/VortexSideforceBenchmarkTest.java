@@ -379,7 +379,7 @@ public class VortexSideforceBenchmarkTest {
 		}
 
 		// Write CSV artifact
-		Path csvPath = Path.of("paper", "data", "csv", "vortex_sideforce_benchmark.csv");
+		Path csvPath = PaperData.csv("vortex_sideforce_benchmark.csv");
 		Files.createDirectories(csvPath.getParent());
 		try (BufferedWriter w = Files.newBufferedWriter(csvPath, StandardCharsets.UTF_8)) {
 			w.write("# Vortex sideforce benchmark: ORP model vs Paul & Wedemeyer (1982) EOARD-TR-82-7\n");

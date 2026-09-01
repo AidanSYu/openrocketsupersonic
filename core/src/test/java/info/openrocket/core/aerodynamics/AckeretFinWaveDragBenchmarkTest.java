@@ -512,7 +512,7 @@ public class AckeretFinWaveDragBenchmarkTest {
         double rootChord = 0.04;
         double finHeight = 0.05;
 
-        Path csvDir = Paths.get("paper", "data", "csv");
+        Path csvDir = PaperData.csvDir();
         if (!Files.exists(csvDir)) {
             return; // Skip export if not in project root
         }

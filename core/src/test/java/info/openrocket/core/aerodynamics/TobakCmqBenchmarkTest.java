@@ -370,7 +370,7 @@ public class TobakCmqBenchmarkTest {
 		}
 
 		// Write CSV artifact
-		Path csvPath = Path.of("paper", "data", "csv", "tobak_cmq_benchmark.csv");
+		Path csvPath = PaperData.csv("tobak_cmq_benchmark.csv");
 		Files.createDirectories(csvPath.getParent());
 		try (BufferedWriter w = Files.newBufferedWriter(csvPath, StandardCharsets.UTF_8)) {
 			w.write("# Tobak & Wehrend (1956) NACA TN 3788 - Cmq benchmark\n");

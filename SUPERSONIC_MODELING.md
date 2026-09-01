@@ -272,9 +272,17 @@ else Cp = Cp_max(M_n) sin^2(theta_n)            modified Newtonian, Rayleigh pit
 
 **Where the bevel length is unknown the original sharp-edge assumption is retained**, so no existing rocket changes.
 
+**Persistence.** The bevel is saved to `.ork` as `<leadingedgebevellength>` and written back to RASAero as `FX1`, but only when it is actually known: fins that never specified one stay `NaN` and emit no element, so existing files round-trip unchanged and older readers see nothing unfamiliar. It is also carried through `FinSet.copyFrom`, which covers undo/redo and the trapezoid-to-freeform conversion that the CDX1 importer performs for any fin mounted on a transition. `FinSetBevelPersistenceTest` pins all of these, including the consequence that actually matters: fin pressure drag at M = 2.5 is bit-identical across a save/reload cycle.
+
+The bevel is not editable in the GUI -- it is import-only, and a fin built by hand in OpenRocket keeps the sharp-edge assumption it always had.
+
 **Validation:** `HexagonalFinLeadingEdgeTest` -- the term matches a hand-computed modified-Newtonian value to within 10%; it is identically zero for a subsonic leading edge, for a sharp (< 5 deg) wedge, and for unspecified geometry; it is monotonic in bluntness; and the sampled slope stays within the smoothstep bound.
 
-**Corpus effect (pre-registered before running):** all 16 subsonic/transonic SimVReal flights moved *exactly* 0.00, as required by the `M_n > 1` gate. A-601 Kinsel moved +8.7% to +3.7%. Vehicles with small bevels moved 0.1-1.1 pp, and those already over-dragged moved slightly further negative, as predicted.
+**Corpus effect (pre-registered before running):** all 16 subsonic/transonic SimVReal flights moved *exactly* 0.00, as required by the `M_n > 1` gate. A-601 Kinsel moved +8.7% to **+4.2%**. Vehicles with small bevels moved 0.1-1.1 pp, and those already over-dragged moved slightly further negative, as predicted. Corpus mean absolute apogee error is **4.52%** against RASAero II's 5.55% over 24 flights (62.5% within +/-5%, 100% within +/-10%).
+
+The Kinsel figure is +4.2% rather than the +3.7% first measured because `HEX_LE_MACH_FULL` was widened from 1.05 to 1.15 afterwards, on stepper-stability grounds: the narrower ramp left a visible step in `Cd(M)`. The corpus number quoted here is the re-measured, slightly worse one.
+
+This is an improvement, not a demonstration of superiority: the paired difference over the supersonic subset is not statistically significant at n = 8 (p ~ 0.21).
 
 ### 8. Shock Geometry Pre-Pass (`ShockGeometry.java`)
 
