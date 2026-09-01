@@ -11,7 +11,7 @@ CSV_DIR = DATA_DIR / "csv"
 FIGURES = {
     "fig15_family": {
         "caption": "Figure 15. Variation of foredrag coefficient with Mach number for the family of L/D = 3 nose shapes defined by r = R (x/L)^n.",
-        "image": "build-tmp/pdf_inspect/a52h28_fig15_plot.png",
+        "image": "paper/data/png/a52h28_figs/a52h28_fig15_plot.png",
         "x_offset_px": -0.65,
         "x_pixels_per_mach": 202.75,
         "y_zero_px": 521.0,
@@ -20,7 +20,7 @@ FIGURES = {
     },
     "fig11b_lv_ogive": {
         "caption": "Figure 11(b). Comparison of experimental and theoretical foredrag for model no. 16, L-V ogive, L/D = 2.93.",
-        "image": "build-tmp/pdf_inspect/a52h28_fig11b_lvogive.png",
+        "image": "paper/data/png/a52h28_figs/a52h28_fig11b_lvogive.png",
         "x_offset_px": -4.5,
         "x_pixels_per_mach": 197.8,
         "y_zero_px": 335.0,
@@ -29,7 +29,7 @@ FIGURES = {
     },
     "fig11c_ld_haack": {
         "caption": "Figure 11(c). Comparison of experimental and theoretical foredrag for model no. 13, L-D Haack, L/D = 3.",
-        "image": "build-tmp/pdf_inspect/a52h28_fig11c_ldhaack.png",
+        "image": "paper/data/png/a52h28_figs/a52h28_fig11c_ldhaack.png",
         "x_offset_px": -0.3,
         "x_pixels_per_mach": 201.1,
         "y_zero_px": 334.0,
