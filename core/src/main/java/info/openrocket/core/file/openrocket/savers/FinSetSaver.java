@@ -23,6 +23,14 @@ public class FinSetSaver extends ExternalComponentSaver {
 				+ "</crosssection>");
 		elements.add("<cant>" + Math.toDegrees(fins.getCantAngle()) + "</cant>");
 
+		// Written only when the geometry actually states a leading-edge bevel (i.e. it came
+		// from a RASAero import). Fins that never specified one stay NaN and emit nothing, so
+		// existing files round-trip byte-for-byte and older readers see no new element.
+		if (!Double.isNaN(fins.getLeadingEdgeBevelLength())) {
+			elements.add("<leadingedgebevellength>" + fins.getLeadingEdgeBevelLength()
+					+ "</leadingedgebevellength>");
+		}
+
 		// Save fin tabs only if they exist (compatibility with file version < 1.1)
 		if (!MathUtil.equals(fins.getTabHeight(), 0) &&
 				!MathUtil.equals(fins.getTabLength(), 0)) {

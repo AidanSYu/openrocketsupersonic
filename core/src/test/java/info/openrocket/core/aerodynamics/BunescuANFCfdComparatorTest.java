@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,16 +136,17 @@ public class BunescuANFCfdComparatorTest {
 				mape, MAPE_INFORMATIONAL_GATE_PCT));
 		System.out.println(log);
 
-		// Write comparator CSV to paper/data/csv/. Working dir during gradle test is
-		// the core/ module, so we walk up one level to reach paper/.
-		String dateStamp = LocalDate.now().toString().replace("-", "_");
-		Path outDir = Paths.get("..", "paper", "data", "csv");
-		if (!Files.isDirectory(outDir)) {
-			// Fallback: maybe gradle ran from repo root.
-			outDir = Paths.get("paper", "data", "csv");
-		}
+		// Write the comparator CSV under paper/data/csv/, resolved from the worktree root so
+		// the destination does not depend on which directory the tests were launched from.
+		//
+		// The file name is fixed rather than date-stamped: a stamped name made every run
+		// deposit another untracked CSV in the working tree, so the repository slowly filled
+		// with near-identical copies and `git status` was never clean. One regenerated file
+		// that diffs against its predecessor is more useful than a pile of snapshots. The
+		// dated artifacts already cited by the paper stay where they are.
+		Path outDir = PaperData.csvDir();
 		Files.createDirectories(outDir);
-		Path outFile = outDir.resolve("bunescu_anf_comparator_" + dateStamp + ".csv");
+		Path outFile = outDir.resolve("bunescu_anf_comparator.csv");
 		Files.write(outFile, csvLines);
 		System.out.println("Wrote comparator CSV: " + outFile.toAbsolutePath());
 

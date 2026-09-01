@@ -187,7 +187,7 @@ public class JorgensenCrossflowCdBenchmarkTest {
 	 */
 	@Test
 	public void testExportJorgensenComparison() throws IOException {
-		Path csvPath = Path.of("paper", "data", "csv", "jorgensen_crossflow_cd_benchmark.csv");
+		Path csvPath = PaperData.csv("jorgensen_crossflow_cd_benchmark.csv");
 		Files.createDirectories(csvPath.getParent());
 
 		try (BufferedWriter w = Files.newBufferedWriter(csvPath, StandardCharsets.UTF_8)) {
